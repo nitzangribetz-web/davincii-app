@@ -8,10 +8,15 @@ const authRoutes = require('./routes/auth');
 const songRoutes = require('./routes/songs');
 const royaltyRoutes = require('./routes/royalties');
 const payoutRoutes = require('./routes/payouts');
+const stripeRoutes = require('./routes/stripe');
 
 const app = express();
 
 app.use(cors());
+
+// Stripe webhook MUST receive raw body — register before express.json()
+app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
+
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -31,6 +36,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/songs', songRoutes);
 app.use('/api/royalties', royaltyRoutes);
 app.use('/api/payouts', payoutRoutes);
+app.use('/api/stripe', stripeRoutes);
 
 // Serve frontend for all non-API routes
 app.get('*path', (req, res) => {
