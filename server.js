@@ -25,6 +25,13 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
+// Temp debug: show masked DATABASE_URL
+app.get('/api/debug-db', (req, res) => {
+  const url = process.env.DATABASE_URL || 'NOT SET';
+  const masked = url.length > 20 ? url.substring(0, 50) + '...' + url.substring(url.length - 30) : url;
+  res.json({ url_preview: masked, length: url.length });
+});
+
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/songs', songRoutes);
