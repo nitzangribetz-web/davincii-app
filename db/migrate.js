@@ -1,12 +1,12 @@
 const pool = require('./pool');
 
-const migrations = `
+const baseTables = `
   CREATE TABLE IF NOT EXISTS artists (
-    id         SERIAL PRIMARY KEY,
-    name       VARCHAR(255) NOT NULL,
-    email      VARCHAR(255) UNIQUE NOT NULL,
+    id            SERIAL PRIMARY KEY,
+    name          VARCHAR(255) NOT NULL,
+    email         VARCHAR(255) UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
-    created_at TIMESTAMPTZ DEFAULT NOW()
+    created_at    TIMESTAMPTZ DEFAULT NOW()
   );
 
   CREATE TABLE IF NOT EXISTS songs (
@@ -40,9 +40,19 @@ const migrations = `
   );
 `;
 
+// Additive column migrations (idempotent)
+const columnMigrations = [
+  `ALTER TABLE artists ADD COLUMN IF NOT EXISTS stripe_account_id VARCHAR(255)`,
+  `ALTER TABLE artists ADD COLUMN IF NOT EXISTS stripe_onboarded  BOOLEAN DEFAULT FALSE`,
+  `ALTER TABLE payouts ADD COLUMN IF NOT EXISTS stripe_transfer_id VARCHAR(255)`,
+];
+
 async function migrate() {
   try {
-    await pool.query(migrations);
+    await pool.query(baseTables);
+    for (const stmt of columnMigrations) {
+      await pool.query(stmt);
+    }
     console.log('[migrate] Schema ready');
   } catch (err) {
     console.error('[migrate] Error:', err.message);
