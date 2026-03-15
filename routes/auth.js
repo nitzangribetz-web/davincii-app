@@ -45,8 +45,9 @@ router.post('/signup', async (req, res) => {
 
     res.status(201).json({ token, artist });
   } catch (err) {
-    console.error('Signup error:', err.message);
-    res.status(500).json({ error: 'Failed to create account' });
+    console.error('Signup error full:', err);
+    console.error('SUPABASE_URL:', process.env.SUPABASE_URL);
+    res.status(500).json({ error: 'Failed to create account: ' + err.message });
   }
 });
 
