@@ -3,6 +3,7 @@ const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 
+const migrate = require('./db/migrate');
 const authRoutes = require('./routes/auth');
 const songRoutes = require('./routes/songs');
 const royaltyRoutes = require('./routes/royalties');
@@ -43,6 +44,7 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`Davincii server running on port ${PORT}`);
+  await migrate();
 });
