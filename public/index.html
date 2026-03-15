@@ -180,7 +180,38 @@
       <label class="field-lbl">Password</label>
       <input class="field" type="password" id="login-password" placeholder="••••••••">
       <button class="btn" style="width:100%" id="login-btn" onclick="doLogin()">Sign in →</button>
-      <div class="login-hint">Don't have an account? Contact Davincii.</div>
+      <div class="login-hint">Don't have an account? <a href="#" onclick="goTo('screen-signup');return false;" style="color:var(--black);text-decoration:underline;">Create one</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- SIGNUP -->
+<div class="screen" id="screen-signup">
+  <div class="login-left">
+    <div class="login-left-logo">Davincii</div>
+    <div>
+      <h2>Start<br><em>collecting</em><br>what's yours.</h2>
+      <p>Join thousands of artists recovering missing royalties. Setup takes under 2 minutes.</p>
+    </div>
+    <div class="login-stat-border">
+      <div class="login-stat-num">$2.5B</div>
+      <div class="login-stat-lbl">In uncollected royalties annually</div>
+    </div>
+  </div>
+  <div class="login-right">
+    <div class="login-form">
+      <div class="login-form-logo">Davincii</div>
+      <h1 class="login-form-title">Create your<br><em>account.</em></h1>
+      <p class="login-form-sub">Start recovering your royalties today.</p>
+      <div class="error-box" id="signup-error"></div>
+      <label class="field-lbl">Full name</label>
+      <input class="field" type="text" id="signup-name" placeholder="Your name">
+      <label class="field-lbl">Email address</label>
+      <input class="field" type="email" id="signup-email" placeholder="you@example.com">
+      <label class="field-lbl">Password</label>
+      <input class="field" type="password" id="signup-password" placeholder="Min. 8 characters">
+      <button class="btn" style="width:100%" id="signup-btn" onclick="doSignup()">Create account →</button>
+      <div class="login-hint">Already have an account? <a href="#" onclick="goTo('screen-login');return false;" style="color:var(--black);text-decoration:underline;">Sign in</a></div>
     </div>
   </div>
 </div>
@@ -422,6 +453,32 @@
     }
   }
 
+  // ── Signup ────────────────────────────────────────────────
+  async function doSignup() {
+    const name = document.getElementById('signup-name').value.trim();
+    const email = document.getElementById('signup-email').value.trim();
+    const password = document.getElementById('signup-password').value;
+    const errEl = document.getElementById('signup-error');
+    const btn = document.getElementById('signup-btn');
+    errEl.style.display = 'none';
+    if (!name) { showErr(errEl, 'Please enter your full name.'); return; }
+    if (!email) { showErr(errEl, 'Please enter your email address.'); return; }
+    if (!password || password.length < 8) { showErr(errEl, 'Password must be at least 8 characters.'); return; }
+    btn.disabled = true; btn.textContent = 'Creating account…';
+    try {
+      const data = await apiFetch('/api/auth/signup', {
+        method: 'POST',
+        body: JSON.stringify({ name, email, password })
+      });
+      setAuth(data.token, data.artist);
+      goTo('screen-dash');
+    } catch(e) {
+      showErr(errEl, e.message);
+    } finally {
+      btn.disabled = false; btn.textContent = 'Create account →';
+    }
+  }
+
   function doLogout() {
     clearAuth();
     goTo('screen-login');
@@ -649,6 +706,10 @@
     // Allow login on Enter key
     document.getElementById('login-password').addEventListener('keydown', e => {
       if (e.key === 'Enter') doLogin();
+    });
+    // Allow signup on Enter key
+    document.getElementById('signup-password').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doSignup();
     });
   })();
 </script>
