@@ -21,7 +21,7 @@ app.use('/api/royalties', royaltyRoutes);
 app.use('/api/payouts', payoutRoutes);
 
 // Serve frontend for all non-API routes
-app.get('*', (req, res) => {
+app.get('*path', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
