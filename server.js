@@ -3,14 +3,20 @@ const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 
+const migrate = require('./db/migrate');
 const authRoutes = require('./routes/auth');
 const songRoutes = require('./routes/songs');
 const royaltyRoutes = require('./routes/royalties');
 const payoutRoutes = require('./routes/payouts');
+const stripeRoutes = require('./routes/stripe');
 
 const app = express();
 
 app.use(cors());
+
+// Stripe webhook MUST receive raw body — register before express.json()
+app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
+
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -25,18 +31,12 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
-// Temp debug: show masked DATABASE_URL
-app.get('/api/debug-db', (req, res) => {
-  const url = process.env.DATABASE_URL || 'NOT SET';
-  const masked = url.length > 20 ? url.substring(0, 50) + '...' + url.substring(url.length - 30) : url;
-  res.json({ url_preview: masked, length: url.length });
-});
-
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/songs', songRoutes);
 app.use('/api/royalties', royaltyRoutes);
 app.use('/api/payouts', payoutRoutes);
+app.use('/api/stripe', stripeRoutes);
 
 // Serve frontend for all non-API routes
 app.get('*path', (req, res) => {
@@ -50,6 +50,7 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`Davincii server running on port ${PORT}`);
+  await migrate();
 });
