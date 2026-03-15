@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Davincii — Artist Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #FFFFFF; --black: #0A0A0A; --muted: #888; --border: rgba(0,0,0,0.09);
+    --green: #4a8a4a; --green-bg: rgba(74,138,74,0.08);
+    --blue: #3a6ea8; --blue-bg: rgba(58,110,168,0.08);
+    --red: #c0392b; --red-bg: rgba(192,57,43,0.08);
+    --serif: 'Cormorant Garamond', Georgia, serif; --mono: 'DM Mono', monospace;
+  }
+  html, body { width: 100%; min-height: 100vh; background: var(--bg); font-family: var(--serif); color: var(--black); }
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: flex; flex-direction: column; animation: fi 0.25s cubic-bezier(0.16,1,0.3,1); }
+  @keyframes fi { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+  /* SHARED */
+  .btn { background:var(--black); color:#fff; border:none; padding:14px 32px; font-family:var(--mono); font-size:11px; letter-spacing:0.18em; text-transform:uppercase; cursor:pointer; transition:opacity 0.2s; white-space:nowrap; }
+  .btn:hover { opacity:0.75; }
+  .btn:disabled { opacity:0.4; cursor:not-allowed; }
+  .btn-sm { padding:10px 20px; font-size:10px; }
+  .btn-outline { background:transparent; color:var(--black); border:1px solid var(--black); padding:12px 28px; font-family:var(--mono); font-size:11px; letter-spacing:0.18em; text-transform:uppercase; cursor:pointer; transition:opacity 0.2s; }
+  .btn-outline:hover { opacity:0.6; }
+  .btn-outline.sm { padding:9px 18px; font-size:10px; }
+  .field-lbl { font-family:var(--mono); font-size:9px; letter-spacing:0.18em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; display:block; }
+  .field { width:100%; border:1px solid var(--border); padding:12px 16px; font-family:var(--mono); font-size:13px; color:var(--black); background:transparent; outline:none; margin-bottom:20px; }
+  .field:focus { border-color:var(--black); }
+  .field::placeholder { color:#ccc; }
+  select.field { color:var(--black); }
+  .badge { font-family:var(--mono); font-size:9px; letter-spacing:0.1em; text-transform:uppercase; padding:3px 9px; }
+  .badge-ok { background:var(--green-bg); color:var(--green); }
+  .badge-pend { background:rgba(0,0,0,0.05); color:var(--muted); }
+  .badge-blue { background:var(--blue-bg); color:var(--blue); }
+  .back-btn { font-family:var(--mono); font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); background:none; border:none; cursor:pointer; display:flex; align-items:center; gap:8px; margin-bottom:32px; padding:0; transition:color 0.2s; }
+  .back-btn:hover { color:var(--black); }
+  .info-box { background:#fafafa; border-left:2px solid var(--black); padding:14px 18px; margin-bottom:24px; }
+  .info-box p { font-size:13px; font-weight:300; color:var(--muted); line-height:1.65; }
+  .error-box { background:var(--red-bg); border-left:2px solid var(--red); padding:14px 18px; margin-bottom:20px; font-family:var(--mono); font-size:11px; color:var(--red); display:none; }
+  .empty-state { padding:40px 0; text-align:center; font-family:var(--mono); font-size:10px; letter-spacing:0.12em; color:var(--muted); text-transform:uppercase; }
+  .loading { padding:32px 0; text-align:center; font-family:var(--mono); font-size:10px; letter-spacing:0.12em; color:var(--muted); text-transform:uppercase; }
+
+  /* LOGIN */
+  #screen-login { flex-direction:row !important; }
+  .login-left { width:48%; background:var(--black); display:flex; flex-direction:column; justify-content:space-between; padding:52px; }
+  .login-left-logo { font-family:var(--serif); font-size:14px; font-weight:300; letter-spacing:0.35em; text-transform:uppercase; color:#fff; }
+  .login-left h2 { font-size:62px; font-weight:300; line-height:1.05; letter-spacing:-0.025em; color:#fff; margin-bottom:20px; }
+  .login-left h2 em { font-style:italic; }
+  .login-left p { font-size:15px; font-weight:300; color:#555; line-height:1.75; max-width:360px; }
+  .login-stat-num { font-size:56px; font-weight:300; color:#fff; letter-spacing:-0.03em; line-height:1; }
+  .login-stat-lbl { font-family:var(--mono); font-size:10px; letter-spacing:0.15em; text-transform:uppercase; color:#444; margin-top:6px; }
+  .login-stat-border { border-top:1px solid rgba(255,255,255,0.08); padding-top:28px; }
+  .login-right { flex:1; display:flex; align-items:center; justify-content:center; padding:52px; }
+  .login-form { width:100%; max-width:400px; }
+  .login-form-logo { font-family:var(--serif); font-size:14px; font-weight:300; letter-spacing:0.32em; text-transform:uppercase; margin-bottom:52px; }
+  .login-form-title { font-size:42px; font-weight:300; letter-spacing:-0.02em; margin-bottom:8px; line-height:1.1; }
+  .login-form-title em { font-style:italic; }
+  .login-form-sub { font-size:15px; font-weight:300; color:var(--muted); margin-bottom:40px; line-height:1.6; }
+  .login-hint { font-family:var(--mono); font-size:10px; color:var(--muted); margin-top:20px; text-align:center; }
+
+  /* TOP NAV */
+  .top-nav { height:60px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; padding:0 40px; position:sticky; top:0; background:var(--bg); z-index:50; flex-shrink:0; }
+  .top-nav-logo { font-family:var(--serif); font-size:14px; font-weight:300; letter-spacing:0.3em; text-transform:uppercase; }
+  .top-nav-right { display:flex; align-items:center; gap:20px; }
+  .top-nav-artist { font-family:var(--mono); font-size:10px; letter-spacing:0.12em; color:var(--muted); }
+  .avatar { width:32px; height:32px; background:var(--black); border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:10px; color:#fff; cursor:pointer; }
+  .top-nav-out { font-family:var(--mono); font-size:9px; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); background:none; border:none; cursor:pointer; transition:color 0.2s; }
+  .top-nav-out:hover { color:var(--black); }
+
+  /* DASH LAYOUT */
+  .dash-layout { display:grid; grid-template-columns:220px 1fr; flex:1; min-height:calc(100vh - 60px); }
+  .sidebar { border-right:1px solid var(--border); padding:32px 0; position:sticky; top:60px; height:calc(100vh - 60px); overflow-y:auto; }
+  .sb-section { margin-bottom:32px; }
+  .sb-lbl { font-family:var(--mono); font-size:8px; letter-spacing:0.2em; text-transform:uppercase; color:rgba(0,0,0,0.25); padding:0 24px; margin-bottom:6px; }
+  .nav-lnk { display:flex; align-items:center; gap:10px; padding:10px 24px; font-family:var(--mono); font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); cursor:pointer; transition:color 0.2s, background 0.2s; border:none; background:none; width:100%; text-align:left; }
+  .nav-lnk:hover { color:var(--black); background:#fafafa; }
+  .nav-lnk.active { color:var(--black); font-weight:400; }
+  .nav-lnk-icon { font-size:14px; opacity:0.5; }
+  .main { padding:40px 48px; max-width:1060px; }
+  .pg-title { font-size:34px; font-weight:300; letter-spacing:-0.02em; margin-bottom:4px; }
+  .pg-title em { font-style:italic; }
+  .pg-sub { font-size:14px; font-weight:300; color:var(--muted); margin-bottom:36px; }
+
+  /* BALANCE CARD */
+  .bal-card { background:var(--black); padding:32px 36px; margin-bottom:28px; display:flex; justify-content:space-between; align-items:center; gap:40px; }
+  .bal-lbl { font-family:var(--mono); font-size:9px; letter-spacing:0.18em; text-transform:uppercase; color:#444; margin-bottom:8px; }
+  .bal-amt { font-size:52px; font-weight:300; color:#fff; letter-spacing:-0.03em; line-height:1; }
+  .bal-amt-sm { font-size:36px; font-weight:300; color:rgba(255,255,255,0.4); letter-spacing:-0.025em; line-height:1; }
+  .bal-note { font-family:var(--mono); font-size:9px; color:#333; margin-top:6px; }
+  .bal-actions { display:flex; gap:10px; flex-shrink:0; }
+  .bal-btn { padding:13px 24px; font-family:var(--mono); font-size:10px; letter-spacing:0.14em; text-transform:uppercase; border:none; cursor:pointer; transition:opacity 0.2s; white-space:nowrap; }
+  .bal-btn:hover { opacity:0.75; }
+  .bal-btn-p { background:#fff; color:var(--black); }
+  .bal-btn-g { background:rgba(255,255,255,0.07); color:rgba(255,255,255,0.5); border:1px solid rgba(255,255,255,0.1); }
+
+  /* SECTION BOX */
+  .sbox { border:1px solid var(--border); margin-bottom:28px; }
+  .sbox-hd { display:flex; justify-content:space-between; align-items:flex-start; padding:20px 24px; border-bottom:1px solid var(--border); }
+  .sbox-title { font-family:var(--mono); font-size:10px; letter-spacing:0.16em; text-transform:uppercase; color:var(--black); margin-bottom:3px; }
+  .sbox-sub { font-family:var(--mono); font-size:9px; color:var(--muted); }
+  .sbox-lnk { font-family:var(--mono); font-size:9px; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); background:none; border:none; cursor:pointer; transition:color 0.2s; flex-shrink:0; }
+  .sbox-lnk:hover { color:var(--black); }
+  .sbox-body { padding:0 24px; }
+  .sbox-foot { padding:16px 24px; }
+
+  /* TABLE */
+  .th-row { display:grid; padding:10px 0; border-bottom:1px solid var(--border); gap:12px; }
+  .th { font-family:var(--mono); font-size:9px; letter-spacing:0.12em; text-transform:uppercase; color:rgba(0,0,0,0.2); }
+  .tr { display:grid; align-items:center; padding:16px 0; border-bottom:1px solid var(--border); gap:12px; }
+  .tr:last-child { border-bottom:none; }
+  .tr-song { font-size:15px; font-weight:300; color:var(--black); margin-bottom:3px; }
+  .tr-meta { font-family:var(--mono); font-size:9px; color:var(--muted); }
+  .tr-cell { font-family:var(--mono); font-size:12px; color:var(--muted); }
+  .tr-amt { font-family:var(--mono); font-size:13px; color:var(--black); text-align:right; }
+  .col-5 { grid-template-columns: 1fr 160px 120px 100px 100px; }
+  .col-4 { grid-template-columns: 1fr 140px 120px 110px; }
+  .col-4c { grid-template-columns: 1fr 200px 100px 100px; }
+  .col-3 { grid-template-columns: 1fr 120px 120px; }
+
+  /* CLAIM */
+  .claim-layout { display:grid; grid-template-columns:1fr 360px; gap:40px; align-items:start; }
+  .claim-avail { border:1px solid var(--border); padding:24px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center; }
+  .claim-avail-lbl { font-family:var(--mono); font-size:9px; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
+  .claim-avail-amt { font-size:42px; font-weight:300; letter-spacing:-0.025em; }
+  .method-opts { display:flex; flex-direction:column; gap:10px; margin-bottom:24px; }
+  .mopt { border:1px solid var(--border); padding:14px 18px; display:flex; align-items:center; gap:14px; cursor:pointer; transition:border-color 0.2s; }
+  .mopt:hover { border-color:rgba(0,0,0,0.2); }
+  .mopt.sel { border-color:var(--black); }
+  .mopt input[type=radio] { accent-color:var(--black); width:14px; height:14px; flex-shrink:0; }
+  .mopt-lbl { font-size:15px; font-weight:300; }
+  .mopt-sub { font-family:var(--mono); font-size:9px; color:var(--muted); margin-left:auto; }
+  .summary-card { border:1px solid var(--border); padding:24px; position:sticky; top:80px; }
+  .summary-title { font-family:var(--mono); font-size:9px; letter-spacing:0.16em; text-transform:uppercase; color:var(--muted); margin-bottom:20px; }
+  .sum-row { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border); }
+  .sum-row:last-child { border-bottom:none; }
+  .sum-key { font-family:var(--mono); font-size:10px; letter-spacing:0.08em; color:var(--muted); }
+  .sum-val { font-family:var(--mono); font-size:11px; color:var(--black); }
+  .claim-note { font-family:var(--mono); font-size:9px; letter-spacing:0.06em; color:var(--muted); line-height:1.7; padding:14px 16px; border:1px solid var(--border); margin-bottom:24px; }
+
+  /* SUCCESS */
+  .success-wrap { max-width:520px; margin:60px auto; text-align:center; }
+  .success-icon { font-size:40px; margin-bottom:24px; opacity:0.1; }
+  .success-title { font-size:52px; font-weight:300; letter-spacing:-0.025em; margin-bottom:12px; line-height:1.05; }
+  .success-title em { font-style:italic; }
+  .success-sub { font-size:16px; font-weight:300; color:var(--muted); line-height:1.7; margin-bottom:40px; }
+  .success-detail { border:1px solid var(--border); padding:24px; text-align:left; margin-bottom:36px; }
+  .sd-row { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border); }
+  .sd-row:last-child { border-bottom:none; }
+  .sd-key { font-family:var(--mono); font-size:9px; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); }
+  .sd-val { font-family:var(--mono); font-size:12px; color:var(--black); }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="screen active" id="screen-login">
+  <div class="login-left">
+    <div class="login-left-logo">Davincii</div>
+    <div>
+      <h2>Your royalties,<br><em>finally</em><br>collected.</h2>
+      <p>We find your missing publishing income across every platform and pay you every quarter. Zero upfront cost.</p>
+    </div>
+    <div class="login-stat-border">
+      <div class="login-stat-num">$2.5B</div>
+      <div class="login-stat-lbl">In uncollected royalties annually</div>
+    </div>
+  </div>
+  <div class="login-right">
+    <div class="login-form">
+      <div class="login-form-logo">Davincii</div>
+      <h1 class="login-form-title">Welcome<br><em>back.</em></h1>
+      <p class="login-form-sub">Sign in to your artist portal to view your earnings and claim payments.</p>
+      <div class="error-box" id="login-error"></div>
+      <label class="field-lbl">Email address</label>
+      <input class="field" type="email" id="login-email" placeholder="you@example.com">
+      <label class="field-lbl">Password</label>
+      <input class="field" type="password" id="login-password" placeholder="••••••••">
+      <button class="btn" style="width:100%" id="login-btn" onclick="doLogin()">Sign in →</button>
+      <div class="login-hint">Don't have an account? Contact Davincii.</div>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="screen" id="screen-dash">
+  <div class="top-nav">
+    <div class="top-nav-logo">Davincii</div>
+    <div class="top-nav-right">
+      <span class="top-nav-artist" id="nav-artist-name"></span>
+      <div class="avatar" id="nav-avatar"></div>
+      <button class="top-nav-out" onclick="doLogout()">Sign out</button>
+    </div>
+  </div>
+  <div class="dash-layout">
+    <div class="sidebar">
+      <div class="sb-section">
+        <div class="sb-lbl">Main</div>
+        <button class="nav-lnk active" id="nl-overview" onclick="showPg('pg-overview',this)"><span class="nav-lnk-icon">⊞</span>Overview</button>
+        <button class="nav-lnk" id="nl-catalog" onclick="showPg('pg-catalog',this)"><span class="nav-lnk-icon">♩</span>Catalog</button>
+        <button class="nav-lnk" id="nl-royalties" onclick="showPg('pg-royalties',this)"><span class="nav-lnk-icon">◎</span>Royalties</button>
+        <button class="nav-lnk" id="nl-payouts" onclick="showPg('pg-payouts',this)"><span class="nav-lnk-icon">↑</span>Payouts</button>
+      </div>
+      <div class="sb-section">
+        <div class="sb-lbl">Account</div>
+        <button class="nav-lnk" onclick="goTo('screen-claim')"><span class="nav-lnk-icon">✦</span>Claim payment</button>
+      </div>
+    </div>
+    <div class="main">
+
+      <!-- OVERVIEW -->
+      <div id="pg-overview">
+        <div class="pg-title">Good <em id="greeting-time">morning</em>, <em id="greeting-name">—</em></div>
+        <div class="pg-sub">Here's a summary of your royalty activity.</div>
+        <div class="bal-card">
+          <div>
+            <div class="bal-lbl">Total royalties collected</div>
+            <div class="bal-amt" id="overview-total">—</div>
+            <div class="bal-note" id="overview-count">Loading…</div>
+          </div>
+          <div>
+            <div class="bal-lbl">Total paid out</div>
+            <div class="bal-amt-sm" id="overview-paid">—</div>
+            <div class="bal-note" id="overview-pending">—</div>
+          </div>
+          <div class="bal-actions">
+            <button class="bal-btn bal-btn-p" onclick="goTo('screen-claim')">Claim payment</button>
+            <button class="bal-btn bal-btn-g" onclick="showPg('pg-catalog', document.getElementById('nl-catalog'))">View catalog</button>
+          </div>
+        </div>
+
+        <div class="sbox">
+          <div class="sbox-hd">
+            <div><div class="sbox-title">Recent Royalties</div><div class="sbox-sub">Latest payments recovered</div></div>
+            <button class="sbox-lnk" onclick="showPg('pg-royalties', document.getElementById('nl-royalties'))">See all →</button>
+          </div>
+          <div class="sbox-body" id="overview-royalties-body">
+            <div class="loading">Loading royalties…</div>
+          </div>
+        </div>
+
+        <div class="sbox">
+          <div class="sbox-hd">
+            <div><div class="sbox-title">Your Catalog</div><div class="sbox-sub">Songs registered across platforms</div></div>
+            <button class="sbox-lnk" onclick="showPg('pg-catalog', document.getElementById('nl-catalog'))">See all →</button>
+          </div>
+          <div class="sbox-body" id="overview-catalog-body">
+            <div class="loading">Loading catalog…</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CATALOG -->
+      <div id="pg-catalog" style="display:none">
+        <div class="pg-title">Your <em>Catalog</em></div>
+        <div class="pg-sub" id="catalog-sub">Your registered songs.</div>
+        <div class="sbox">
+          <div class="sbox-body" id="catalog-body">
+            <div class="loading">Loading…</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ROYALTIES -->
+      <div id="pg-royalties" style="display:none">
+        <div class="pg-title">Your <em>Royalties</em></div>
+        <div class="pg-sub">All royalty payments collected on your behalf.</div>
+        <div class="sbox">
+          <div class="sbox-body" id="royalties-body">
+            <div class="loading">Loading…</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAYOUTS -->
+      <div id="pg-payouts" style="display:none">
+        <div class="pg-title">Payout <em>History</em></div>
+        <div class="pg-sub">Your payment requests and their status.</div>
+        <div class="sbox">
+          <div class="sbox-body" id="payouts-body">
+            <div class="loading">Loading…</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- CLAIM PAYMENT -->
+<div class="screen" id="screen-claim">
+  <div class="top-nav">
+    <div class="top-nav-logo">Davincii</div>
+    <div class="top-nav-right"><span class="top-nav-artist" id="claim-artist-name"></span><div class="avatar" id="claim-avatar"></div></div>
+  </div>
+  <div style="padding:40px 48px;width:100%;">
+    <button class="back-btn" onclick="goTo('screen-dash')">← Back to dashboard</button>
+    <div class="pg-title">Claim your <em>payment.</em></div>
+    <div class="pg-sub">Your earnings are ready. Choose how you'd like to receive them.</div>
+    <div class="claim-layout">
+      <div>
+        <div class="claim-avail">
+          <div>
+            <div class="claim-avail-lbl">Total royalties collected</div>
+            <div class="claim-avail-amt" id="claim-balance">—</div>
+          </div>
+        </div>
+        <div class="error-box" id="claim-error"></div>
+        <label class="field-lbl">Amount to claim</label>
+        <input class="field" type="number" id="claim-amount" placeholder="e.g. 500" min="10" step="0.01">
+        <label class="field-lbl">Payment method</label>
+        <div class="method-opts">
+          <label class="mopt sel" id="mopt-ach"><input type="radio" name="method" value="bank_transfer" checked onchange="updateSummary()"><div class="mopt-lbl">Bank transfer (ACH)</div><div class="mopt-sub">2–3 business days</div></label>
+          <label class="mopt" id="mopt-paypal"><input type="radio" name="method" value="paypal" onchange="updateSummary()"><div class="mopt-lbl">PayPal</div><div class="mopt-sub">Instant</div></label>
+          <label class="mopt" id="mopt-wire"><input type="radio" name="method" value="stripe" onchange="updateSummary()"><div class="mopt-lbl">Wire transfer</div><div class="mopt-sub">1–2 business days</div></label>
+        </div>
+        <div class="claim-note">Payments are processed within 5 business days. Minimum $10 required. Third-party fees may apply.</div>
+        <button class="btn" id="claim-btn" onclick="doClaim()">Confirm claim →</button>
+      </div>
+      <div>
+        <div class="summary-card">
+          <div class="summary-title">Payment summary</div>
+          <div class="sum-row"><div class="sum-key">Amount requested</div><div class="sum-val" id="sum-amount">—</div></div>
+          <div class="sum-row"><div class="sum-key">Method</div><div class="sum-val" id="sum-method">ACH Transfer</div></div>
+          <div class="sum-row"><div class="sum-key">Status</div><div class="sum-val">Pending approval</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAYMENT SUCCESS -->
+<div class="screen" id="screen-success">
+  <div class="top-nav"><div class="top-nav-logo">Davincii</div><div class="top-nav-right"><div class="avatar" id="success-avatar"></div></div></div>
+  <div style="padding:80px 48px;display:flex;justify-content:center;">
+    <div class="success-wrap">
+      <div class="success-icon">◎</div>
+      <h2 class="success-title">Payment<br><em>requested.</em></h2>
+      <p class="success-sub">You'll receive a confirmation within 24 hours. Funds arrive within 2–5 business days.</p>
+      <div class="success-detail">
+        <div class="sd-row"><div class="sd-key">Amount</div><div class="sd-val" id="succ-amount">—</div></div>
+        <div class="sd-row"><div class="sd-key">Method</div><div class="sd-val" id="succ-method">—</div></div>
+        <div class="sd-row"><div class="sd-key">Status</div><div class="sd-val">Pending</div></div>
+      </div>
+      <button class="btn" style="width:100%" onclick="goTo('screen-dash')">Back to dashboard →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API = '';  // same origin — backend serves this file
+
+  // ── Auth helpers ──────────────────────────────────────────
+  function getToken() { return localStorage.getItem('dvc_token'); }
+  function getArtist() { try { return JSON.parse(localStorage.getItem('dvc_artist')); } catch(e) { return null; } }
+  function setAuth(token, artist) {
+    localStorage.setItem('dvc_token', token);
+    localStorage.setItem('dvc_artist', JSON.stringify(artist));
+  }
+  function clearAuth() {
+    localStorage.removeItem('dvc_token');
+    localStorage.removeItem('dvc_artist');
+  }
+
+  async function apiFetch(path, opts = {}) {
+    const token = getToken();
+    const res = await fetch(API + path, {
+      ...opts,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: 'Bearer ' + token } : {}),
+        ...(opts.headers || {})
+      }
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Something went wrong');
+    return data;
+  }
+
+  // ── Navigation ────────────────────────────────────────────
+  function goTo(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo(0, 0);
+    if (id === 'screen-dash') loadDashboard();
+    if (id === 'screen-claim') loadClaim();
+  }
+
+  function showPg(pgId, navEl) {
+    document.querySelectorAll('[id^="pg-"]').forEach(p => p.style.display = 'none');
+    document.getElementById(pgId).style.display = 'block';
+    document.querySelectorAll('.nav-lnk').forEach(n => n.classList.remove('active'));
+    if (navEl) navEl.classList.add('active');
+    if (pgId === 'pg-catalog') loadCatalog();
+    if (pgId === 'pg-royalties') loadRoyalties();
+    if (pgId === 'pg-payouts') loadPayouts();
+  }
+
+  // ── Login ─────────────────────────────────────────────────
+  async function doLogin() {
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    const errEl = document.getElementById('login-error');
+    const btn = document.getElementById('login-btn');
+    errEl.style.display = 'none';
+    if (!email || !password) { showErr(errEl, 'Please enter your email and password.'); return; }
+    btn.disabled = true; btn.textContent = 'Signing in…';
+    try {
+      const data = await apiFetch('/api/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password })
+      });
+      setAuth(data.token, data.artist);
+      goTo('screen-dash');
+    } catch(e) {
+      showErr(errEl, e.message);
+    } finally {
+      btn.disabled = false; btn.textContent = 'Sign in →';
+    }
+  }
+
+  function doLogout() {
+    clearAuth();
+    goTo('screen-login');
+  }
+
+  function showErr(el, msg) {
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+
+  // ── Dashboard ─────────────────────────────────────────────
+  async function loadDashboard() {
+    const artist = getArtist();
+    if (!artist) { doLogout(); return; }
+
+    // Set names
+    const initials = artist.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2);
+    document.getElementById('nav-artist-name').textContent = artist.name;
+    document.getElementById('nav-avatar').textContent = initials;
+    document.getElementById('greeting-name').textContent = artist.name.split(' ')[0] + '.';
+
+    // Greeting time
+    const h = new Date().getHours();
+    document.getElementById('greeting-time').textContent = h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening';
+
+    // Load summary data
+    try {
+      const [roySum, paySum] = await Promise.all([
+        apiFetch('/api/royalties/summary'),
+        apiFetch('/api/payouts/summary')
+      ]);
+      document.getElementById('overview-total').textContent = '$' + Number(roySum.total).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+      document.getElementById('overview-count').textContent = roySum.count + ' payment' + (roySum.count !== 1 ? 's' : '') + ' collected';
+      document.getElementById('overview-paid').textContent = '$' + Number(paySum.totalPaid).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+      document.getElementById('overview-pending').textContent = '$' + Number(paySum.totalPending).toFixed(2) + ' pending';
+    } catch(e) {}
+
+    // Recent royalties
+    try {
+      const royalties = await apiFetch('/api/royalties');
+      const recent = royalties.slice(0, 4);
+      const body = document.getElementById('overview-royalties-body');
+      if (recent.length === 0) {
+        body.innerHTML = '<div class="empty-state">No royalties recorded yet</div>';
+      } else {
+        body.innerHTML = `
+          <div class="th-row col-5"><div class="th">Song</div><div class="th">Platform</div><div class="th">Period</div><div class="th">Type</div><div class="th" style="text-align:right">Amount</div></div>
+          ${recent.map(r => `
+            <div class="tr col-5">
+              <div><div class="tr-song">${r.songs ? r.songs.title : '—'}</div><div class="tr-meta">${r.platform}</div></div>
+              <div class="tr-cell">${r.platform}</div>
+              <div class="tr-cell">${r.period || '—'}</div>
+              <div><span class="badge badge-ok">${r.royalty_type || 'Royalty'}</span></div>
+              <div class="tr-amt">$${Number(r.amount).toFixed(2)}</div>
+            </div>`).join('')}`;
+      }
+    } catch(e) {
+      document.getElementById('overview-royalties-body').innerHTML = '<div class="empty-state">Could not load royalties</div>';
+    }
+
+    // Recent songs
+    try {
+      const songs = await apiFetch('/api/songs');
+      const recent = songs.slice(0, 4);
+      const body = document.getElementById('overview-catalog-body');
+      if (recent.length === 0) {
+        body.innerHTML = '<div class="empty-state">No songs in catalog yet</div>';
+      } else {
+        body.innerHTML = `
+          <div class="th-row col-3"><div class="th">Song</div><div class="th">Status</div><div class="th" style="text-align:right">Added</div></div>
+          ${recent.map(s => `
+            <div class="tr col-3">
+              <div><div class="tr-song">${s.title}</div><div class="tr-meta">${s.isrc || 'No ISRC'}</div></div>
+              <div><span class="badge ${s.status === 'active' ? 'badge-ok' : s.status === 'collecting' ? 'badge-ok' : 'badge-pend'}">${s.status || 'pending'}</span></div>
+              <div class="tr-amt" style="font-size:11px;color:var(--muted)">${new Date(s.created_at).toLocaleDateString('en-US', {month:'short', day:'numeric'})}</div>
+            </div>`).join('')}`;
+      }
+    } catch(e) {
+      document.getElementById('overview-catalog-body').innerHTML = '<div class="empty-state">Could not load catalog</div>';
+    }
+  }
+
+  // ── Catalog ───────────────────────────────────────────────
+  async function loadCatalog() {
+    const body = document.getElementById('catalog-body');
+    body.innerHTML = '<div class="loading">Loading…</div>';
+    try {
+      const songs = await apiFetch('/api/songs');
+      document.getElementById('catalog-sub').textContent = songs.length + ' song' + (songs.length !== 1 ? 's' : '') + ' in your catalog.';
+      if (songs.length === 0) {
+        body.innerHTML = '<div class="empty-state">No songs yet — contact Davincii to add your catalog</div>';
+        return;
+      }
+      body.innerHTML = `
+        <div class="th-row col-4c"><div class="th">Song</div><div class="th">ISRC</div><div class="th">Status</div><div class="th" style="text-align:right">Release Date</div></div>
+        ${songs.map(s => `
+          <div class="tr col-4c">
+            <div><div class="tr-song">${s.title}</div><div class="tr-meta">Added ${new Date(s.created_at).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'})}</div></div>
+            <div class="tr-cell">${s.isrc || '—'}</div>
+            <div><span class="badge ${s.status === 'active' || s.status === 'collecting' ? 'badge-ok' : s.status === 'registering' ? 'badge-blue' : 'badge-pend'}">${s.status || 'pending'}</span></div>
+            <div class="tr-amt" style="font-size:11px;color:var(--muted)">${s.release_date ? new Date(s.release_date).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : '—'}</div>
+          </div>`).join('')}`;
+    } catch(e) {
+      body.innerHTML = '<div class="empty-state">Could not load catalog</div>';
+    }
+  }
+
+  // ── Royalties ─────────────────────────────────────────────
+  async function loadRoyalties() {
+    const body = document.getElementById('royalties-body');
+    body.innerHTML = '<div class="loading">Loading…</div>';
+    try {
+      const royalties = await apiFetch('/api/royalties');
+      if (royalties.length === 0) {
+        body.innerHTML = '<div class="empty-state">No royalties recorded yet</div>';
+        return;
+      }
+      body.innerHTML = `
+        <div class="th-row col-5"><div class="th">Song</div><div class="th">Platform</div><div class="th">Period</div><div class="th">Type</div><div class="th" style="text-align:right">Amount</div></div>
+        ${royalties.map(r => `
+          <div class="tr col-5">
+            <div><div class="tr-song">${r.songs ? r.songs.title : '—'}</div><div class="tr-meta">${r.platform}</div></div>
+            <div class="tr-cell">${r.platform}</div>
+            <div class="tr-cell">${r.period || '—'}</div>
+            <div><span class="badge badge-ok">${r.royalty_type || 'Royalty'}</span></div>
+            <div class="tr-amt">$${Number(r.amount).toFixed(2)}</div>
+          </div>`).join('')}`;
+    } catch(e) {
+      body.innerHTML = '<div class="empty-state">Could not load royalties</div>';
+    }
+  }
+
+  // ── Payouts ───────────────────────────────────────────────
+  async function loadPayouts() {
+    const body = document.getElementById('payouts-body');
+    body.innerHTML = '<div class="loading">Loading…</div>';
+    try {
+      const payouts = await apiFetch('/api/payouts');
+      if (payouts.length === 0) {
+        body.innerHTML = '<div class="empty-state">No payouts requested yet</div>';
+        return;
+      }
+      body.innerHTML = `
+        <div class="th-row col-4"><div class="th">Date</div><div class="th">Method</div><div class="th">Status</div><div class="th" style="text-align:right">Amount</div></div>
+        ${payouts.map(p => `
+          <div class="tr col-4">
+            <div><div class="tr-song">${new Date(p.created_at).toLocaleDateString('en-US', {month:'long', day:'numeric', year:'numeric'})}</div></div>
+            <div class="tr-cell">${p.method.replace('_', ' ')}</div>
+            <div><span class="badge ${p.status === 'completed' ? 'badge-ok' : p.status === 'pending' ? 'badge-pend' : 'badge-blue'}">${p.status}</span></div>
+            <div class="tr-amt">$${Number(p.amount).toFixed(2)}</div>
+          </div>`).join('')}`;
+    } catch(e) {
+      body.innerHTML = '<div class="empty-state">Could not load payouts</div>';
+    }
+  }
+
+  // ── Claim ─────────────────────────────────────────────────
+  async function loadClaim() {
+    const artist = getArtist();
+    if (!artist) return;
+    const initials = artist.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2);
+    document.getElementById('claim-artist-name').textContent = artist.name;
+    document.getElementById('claim-avatar').textContent = initials;
+    document.getElementById('success-avatar').textContent = initials;
+    try {
+      const sum = await apiFetch('/api/royalties/summary');
+      document.getElementById('claim-balance').textContent = '$' + Number(sum.total).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+    } catch(e) {}
+  }
+
+  function updateSummary() {
+    const amount = document.getElementById('claim-amount').value;
+    const method = document.querySelector('input[name="method"]:checked');
+    document.getElementById('sum-amount').textContent = amount ? '$' + Number(amount).toFixed(2) : '—';
+    if (method) {
+      const labels = { bank_transfer: 'ACH Transfer', paypal: 'PayPal', stripe: 'Wire Transfer' };
+      document.getElementById('sum-method').textContent = labels[method.value] || method.value;
+    }
+    document.querySelectorAll('.mopt').forEach(o => o.classList.remove('sel'));
+    if (method) method.closest('.mopt').classList.add('sel');
+  }
+
+  document.getElementById('claim-amount').addEventListener('input', updateSummary);
+
+  document.querySelectorAll('.mopt').forEach(opt => {
+    opt.addEventListener('click', function() {
+      document.querySelectorAll('.mopt').forEach(o => o.classList.remove('sel'));
+      this.classList.add('sel');
+      updateSummary();
+    });
+  });
+
+  async function doClaim() {
+    const amount = document.getElementById('claim-amount').value;
+    const method = document.querySelector('input[name="method"]:checked');
+    const errEl = document.getElementById('claim-error');
+    const btn = document.getElementById('claim-btn');
+    errEl.style.display = 'none';
+    if (!amount || parseFloat(amount) < 10) { showErr(errEl, 'Minimum payout amount is $10.'); return; }
+    if (!method) { showErr(errEl, 'Please select a payment method.'); return; }
+    btn.disabled = true; btn.textContent = 'Processing…';
+    try {
+      const data = await apiFetch('/api/payouts/request', {
+        method: 'POST',
+        body: JSON.stringify({ amount: parseFloat(amount), method: method.value })
+      });
+      const labels = { bank_transfer: 'ACH Transfer', paypal: 'PayPal', stripe: 'Wire Transfer' };
+      document.getElementById('succ-amount').textContent = '$' + Number(data.amount).toFixed(2);
+      document.getElementById('succ-method').textContent = labels[data.method] || data.method;
+      goTo('screen-success');
+    } catch(e) {
+      showErr(errEl, e.message);
+    } finally {
+      btn.disabled = false; btn.textContent = 'Confirm claim →';
+    }
+  }
+
+  // ── Init ──────────────────────────────────────────────────
+  (function init() {
+    const token = getToken();
+    const artist = getArtist();
+    if (token && artist) {
+      goTo('screen-dash');
+    }
+    // Allow login on Enter key
+    document.getElementById('login-password').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doLogin();
+    });
+  })();
+</script>
+</body>
+</html>
