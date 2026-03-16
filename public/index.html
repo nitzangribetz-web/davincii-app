@@ -939,7 +939,13 @@
       return;
     }
 
-    // ACH / PayPal path
+    // ACH / PayPal path — also check client-side balance
+    const balText2 = document.getElementById('claim-balance').textContent.replace(/[$,]/g, '');
+    const avail2 = parseFloat(balText2);
+    if (!isNaN(avail2) && parseFloat(amount) > avail2 + 0.001) {
+      showErr(errEl, `Amount exceeds your available balance of $${avail2.toFixed(2)}.`);
+      return;
+    }
     btn.disabled = true; btn.textContent = 'Processing…';
     try {
       const data = await apiFetch('/api/payouts/request', {
