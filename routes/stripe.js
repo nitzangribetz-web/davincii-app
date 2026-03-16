@@ -6,7 +6,9 @@ const auth = require('../middleware/auth');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const APP_URL = process.env.APP_URL || 'https://davincii-app-production-89cc.up.railway.app';
 
-// ── POST /api/stripe/connect ──────────────────────────────────────────────────
+// ââ POST /api/stripe/connect ââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Creates (or re-fetches) a Stripe Connect Express account and returns the
+// hosted onboarding URL. The artist is redirected to Stripe to add their bank.
 router.post('/connect', auth, async (req, res) => {
   try {
     const { rows } = await pool.query('SELECT * FROM artists WHERE id = $1', [req.artist.id]);
@@ -44,7 +46,8 @@ router.post('/connect', auth, async (req, res) => {
   }
 });
 
-// ── GET /api/stripe/connect/refresh ──────────────────────────────────────────
+// ââ GET /api/stripe/connect/refresh ââââââââââââââââââââââââââââââââââââââââââ
+// Stripe calls this if the onboarding link expires. Re-generate and redirect.
 router.get('/connect/refresh', auth, async (req, res) => {
   try {
     const { rows } = await pool.query(
@@ -67,7 +70,8 @@ router.get('/connect/refresh', auth, async (req, res) => {
   }
 });
 
-// ── GET /api/stripe/connect/status ───────────────────────────────────────────
+// ââ GET /api/stripe/connect/status âââââââââââââââââââââââââââââââââââââââââââ
+// Returns current Stripe Connect state for the authenticated artist.
 router.get('/connect/status', auth, async (req, res) => {
   try {
     const { rows } = await pool.query(
@@ -80,6 +84,7 @@ router.get('/connect/status', auth, async (req, res) => {
       return res.json({ connected: false, onboarded: false });
     }
 
+    // Always refresh from Stripe for accuracy
     const account = await stripe.accounts.retrieve(artist.stripe_account_id);
     const onboarded = !!(account.details_submitted && account.charges_enabled);
 
@@ -104,7 +109,36 @@ router.get('/connect/status', auth, async (req, res) => {
   }
 });
 
-// ── POST /api/stripe/payout ───────────────────────────────────────────────────
+// ââ GET /api/stripe/balance âââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Returns the artist's available balance: total royalties minus completed payouts.
+router.get('/balance', auth, async (req, res) => {
+  try {
+    const [royResult, payResult] = await Promise.all([
+      pool.query(
+        'SELECT COALESCE(SUM(amount), 0) AS total FROM royalties WHERE artist_id = $1',
+        [req.artist.id]
+      ),
+      pool.query(
+        "SELECT COALESCE(SUM(amount), 0) AS total FROM payouts WHERE artist_id = $1 AND status = 'completed'",
+        [req.artist.id]
+      ),
+    ]);
+    const totalRoyalties = parseFloat(royResult.rows[0].total);
+    const totalPaid = parseFloat(payResult.rows[0].total);
+    const available = Math.max(0, totalRoyalties - totalPaid);
+    res.json({
+      total_royalties: totalRoyalties.toFixed(2),
+      total_paid: totalPaid.toFixed(2),
+      available: available.toFixed(2),
+    });
+  } catch (err) {
+    console.error('[stripe/balance]', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ââ POST /api/stripe/payout âââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Initiates an immediate Stripe transfer to the artist's connected account.
 router.post('/payout', auth, async (req, res) => {
   const { amount } = req.body;
   const amountFloat = parseFloat(amount);
@@ -116,7 +150,7 @@ router.post('/payout', auth, async (req, res) => {
     const { rows } = await pool.query(
       'SELECT stripe_account_id, stripe_onboarded FROM artists WHERE id = $1',
       [req.artist.id]
-    );
+  2 );
     const artist = rows[0];
 
     if (!artist?.stripe_account_id) {
@@ -126,15 +160,40 @@ router.post('/payout', auth, async (req, res) => {
       return res.status(400).json({ error: 'Stripe onboarding not complete. Please finish connecting your account.' });
     }
 
+    // ââ Balance check ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+    const [royResult, payResult] = await Promise.all([
+      pool.query(
+        'SELECT COALESCE(SUM(amount), 0) AS total FROM royalties WHERE artist_id = $1',
+        [req.artist.id]
+      ),
+      pool.query(
+        "SELECT COALESCE(SUM(amount), 0) AS total FROM payouts WHERE artist_id = $1 AND status = 'completed'",
+        [req.artist.id]
+      ),
+    ]);
+    const available = parseFloat(royResult.rows[0].total) - parseFloat(payResult.rows[0].total);
+    if (amountFloat > available) {
+      return res.status(400).json({
+        error: `Insufficient balance. Available: $${Math.max(0, available).toFixed(2)}`,
+      });
+    }
+
     const amountCents = Math.round(amountFloat * 100);
 
-    const transfer = await stripe.transfers.create({
-      amount: amountCents,
-      currency: 'usd',
-      destination: artist.stripe_account_id,
-      description: 'Davincii royalty payout',
-      metadata: { artist_id: String(req.artist.id) },
-    });
+    // Idempotency key: artist + amount + date (UTC day) ensures one payout
+    // per artist per amount per day; prevents duplicate transfers on retry
+    const idempotencyKey = `payout-${req.artist.id}-${amountCents}-${new Date().toISOString().slice(0, 10)}`;
+
+    const transfer = await stripe.transfers.create(
+      {
+        amount: amountCents,
+        currency: 'usd',
+        destination: artist.stripe_account_id,
+        description: `Davincii royalty payout`,
+        metadata: { artist_id: String(req.artist.id) },
+      },
+      { idempotencyKey }
+    );
 
     const { rows: payoutRows } = await pool.query(
       `INSERT INTO payouts (artist_id, amount, method, status, stripe_transfer_id)
@@ -149,7 +208,8 @@ router.post('/payout', auth, async (req, res) => {
   }
 });
 
-// ── POST /api/stripe/webhook ──────────────────────────────────────────────────
+// ââ POST /api/stripe/webhook ââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Body is raw Buffer (registered before express.json() in server.js).
 router.post('/webhook', async (req, res) => {
   const sig = req.headers['stripe-signature'];
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -164,6 +224,7 @@ router.post('/webhook', async (req, res) => {
 
   try {
     switch (event.type) {
+
       case 'account.updated': {
         const account = event.data.object;
         const artistId = account.metadata?.artist_id;
@@ -173,25 +234,54 @@ router.post('/webhook', async (req, res) => {
             'UPDATE artists SET stripe_onboarded = $1 WHERE id = $2',
             [onboarded, artistId]
           );
+          console.log(`[stripe/webhook] account.updated artist=${artistId} onboarded=${onboarded}`);
         }
         break;
       }
+
       case 'transfer.created': {
         const transfer = event.data.object;
         await pool.query(
           `UPDATE payouts SET status = 'completed' WHERE stripe_transfer_id = $1`,
           [transfer.id]
         );
+        console.log(`[stripe/webhook] transfer.created id=${transfer.id} amount=${transfer.amount}`);
         break;
       }
+
       case 'transfer.failed': {
         const transfer = event.data.object;
         await pool.query(
           `UPDATE payouts SET status = 'failed' WHERE stripe_transfer_id = $1`,
           [transfer.id]
         );
+        console.log(`[stripe/webhook] transfer.failed id=${transfer.id}`);
         break;
       }
+
+      case 'transfer.reversed': {
+        const transfer = event.data.object;
+        await pool.query(
+          `UPDATE payouts SET status = 'reversed' WHERE stripe_transfer_id = $1`,
+          [transfer.id]
+        );
+        console.log(`[stripe/webhook] transfer.reversed id=${transfer.id}`);
+        break;
+      }
+
+      case 'account.application.deauthorized': {
+        // Artist revoked Stripe access â clear their account link in our DB
+        const account = event.data.object;
+        await pool.query(
+          'UPDATE artists SET stripe_account_id = NULL, stripe_onboarded = FALSE WHERE stripe_account_id = $1',
+          [account.id]
+        );
+        console.log(`[stripe/webhook] account.application.deauthorized account=${account.id}`);
+        break;
+      }
+
+      default:
+        console.log(`[stripe/webhook] unhandled event: ${event.type}`);
     }
   } catch (err) {
     console.error('[stripe/webhook] handler error:', err.message);
@@ -200,24 +290,18 @@ router.post('/webhook', async (req, res) => {
   res.json({ received: true });
 });
 
-// ── GET /api/stripe/setup-webhook ────────────────────────────────────────────
-// ONE-TIME: registers the webhook endpoint in Stripe and returns the secret.
-router.get('/setup-webhook', async (req, res) => {
+// ââ DELETE /api/stripe/connect ââââââââââââââââââââââââââââââââââââââââââââââââ
+// Removes the artist's Stripe account link from Davincii (does not delete the
+// Stripe account itself â the artist retains their Stripe Express account).
+router.delete('/connect', auth, async (req, res) => {
   try {
-    const webhookUrl = `${APP_URL}/api/stripe/webhook`;
-    const existing = await stripe.webhookEndpoints.list({ limit: 20 });
-    const found = existing.data.find(e => e.url === webhookUrl);
-    if (found) {
-      return res.json({ status: 'already_exists', id: found.id, url: found.url,
-        note: 'Signing secret only shown on creation. Delete and recreate to get a new one.' });
-    }
-    const endpoint = await stripe.webhookEndpoints.create({
-      url: webhookUrl,
-      enabled_events: ['account.updated', 'transfer.created', 'transfer.failed'],
-    });
-    res.json({ status: 'created', id: endpoint.id, url: endpoint.url,
-      secret: endpoint.secret });
+    await pool.query(
+      'UPDATE artists SET stripe_account_id = NULL, stripe_onboarded = FALSE WHERE id = $1',
+      [req.artist.id]
+    );
+    res.json({ disconnected: true });
   } catch (err) {
+    console.error('[stripe/disconnect]', err.message);
     res.status(500).json({ error: err.message });
   }
 });
