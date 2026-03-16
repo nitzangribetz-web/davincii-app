@@ -141,6 +141,24 @@
   .sum-val { font-family:var(--mono); font-size:11px; color:var(--black); }
   .claim-note { font-family:var(--mono); font-size:9px; letter-spacing:0.06em; color:var(--muted); line-height:1.7; padding:14px 16px; border:1px solid var(--border); margin-bottom:24px; }
 
+  /* STRIPE CONNECT */
+  .stripe-box { border:1px solid var(--border); padding:20px 22px; margin-bottom:24px; display:none; }
+  .stripe-box.visible { display:block; }
+  .stripe-box-title { font-family:var(--mono); font-size:9px; letter-spacing:0.16em; text-transform:uppercase; color:var(--muted); margin-bottom:14px; }
+  .stripe-status { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+  .stripe-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+  .stripe-dot.connected { background:#4a8a4a; }
+  .stripe-dot.disconnected { background:#ccc; }
+  .stripe-dot.loading { background:#ccc; animation:pulse 1.2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .stripe-status-text { font-family:var(--mono); font-size:11px; color:var(--black); }
+  .stripe-status-sub { font-family:var(--mono); font-size:9px; color:var(--muted); margin-top:2px; }
+  .btn-stripe { background:#635bff; color:#fff; border:none; padding:12px 24px; font-family:var(--mono); font-size:10px; letter-spacing:0.14em; text-transform:uppercase; cursor:pointer; transition:opacity 0.2s; display:inline-flex; align-items:center; gap:8px; }
+  .btn-stripe:hover { opacity:0.85; }
+  .btn-stripe:disabled { opacity:0.5; cursor:not-allowed; }
+  .stripe-connected-detail { font-family:var(--mono); font-size:10px; color:var(--green); background:var(--green-bg); padding:10px 14px; display:none; }
+  .stripe-connected-detail.visible { display:block; }
+
   /* SUCCESS */
   .success-wrap { max-width:520px; margin:60px auto; text-align:center; }
   .success-icon { font-size:40px; margin-bottom:24px; opacity:0.1; }
@@ -344,11 +362,29 @@
         <input class="field" type="number" id="claim-amount" placeholder="e.g. 500" min="10" step="0.01">
         <label class="field-lbl">Payment method</label>
         <div class="method-opts">
-          <label class="mopt sel" id="mopt-ach"><input type="radio" name="method" value="bank_transfer" checked onchange="updateSummary()"><div class="mopt-lbl">Bank transfer (ACH)</div><div class="mopt-sub">2–3 business days</div></label>
+          <label class="mopt sel" id="mopt-stripe-connect"><input type="radio" name="method" value="stripe" checked onchange="updateSummary()"><div class="mopt-lbl">Stripe — bank or debit card</div><div class="mopt-sub">Instant · Recommended</div></label>
+          <label class="mopt" id="mopt-ach"><input type="radio" name="method" value="bank_transfer" onchange="updateSummary()"><div class="mopt-lbl">Bank transfer (ACH)</div><div class="mopt-sub">2–3 business days</div></label>
           <label class="mopt" id="mopt-paypal"><input type="radio" name="method" value="paypal" onchange="updateSummary()"><div class="mopt-lbl">PayPal</div><div class="mopt-sub">Instant</div></label>
-          <label class="mopt" id="mopt-wire"><input type="radio" name="method" value="stripe" onchange="updateSummary()"><div class="mopt-lbl">Wire transfer</div><div class="mopt-sub">1–2 business days</div></label>
         </div>
-        <div class="claim-note">Payments are processed within 5 business days. Minimum $10 required. Third-party fees may apply.</div>
+
+        <!-- Stripe Connect panel -->
+        <div class="stripe-box visible" id="stripe-connect-box">
+          <div class="stripe-box-title">Stripe account</div>
+          <div class="stripe-status">
+            <div class="stripe-dot loading" id="stripe-dot"></div>
+            <div>
+              <div class="stripe-status-text" id="stripe-status-text">Checking…</div>
+              <div class="stripe-status-sub" id="stripe-status-sub"></div>
+            </div>
+          </div>
+          <div class="stripe-connected-detail" id="stripe-connected-detail">✓ Bank account connected — payout will be sent immediately</div>
+          <button class="btn-stripe" id="stripe-connect-btn" onclick="doStripeConnect()" style="display:none">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Connect bank account
+          </button>
+        </div>
+
+        <div class="claim-note">Stripe payouts are sent immediately to your connected bank. ACH/PayPal requests are processed within 5 business days. Minimum $10 required.</div>
         <button class="btn" id="claim-btn" onclick="doClaim()">Confirm claim →</button>
       </div>
       <div>
@@ -369,12 +405,13 @@
   <div style="padding:80px 48px;display:flex;justify-content:center;">
     <div class="success-wrap">
       <div class="success-icon">◎</div>
-      <h2 class="success-title">Payment<br><em>requested.</em></h2>
-      <p class="success-sub">You'll receive a confirmation within 24 hours. Funds arrive within 2–5 business days.</p>
+      <h2 class="success-title" id="succ-title">Payment<br><em>requested.</em></h2>
+      <p class="success-sub" id="succ-sub">You'll receive a confirmation within 24 hours. Funds arrive within 2–5 business days.</p>
       <div class="success-detail">
         <div class="sd-row"><div class="sd-key">Amount</div><div class="sd-val" id="succ-amount">—</div></div>
         <div class="sd-row"><div class="sd-key">Method</div><div class="sd-val" id="succ-method">—</div></div>
-        <div class="sd-row"><div class="sd-key">Status</div><div class="sd-val">Pending</div></div>
+        <div class="sd-row"><div class="sd-key">Status</div><div class="sd-val" id="succ-status">Pending</div></div>
+        <div class="sd-row" id="succ-transfer-row" style="display:none"><div class="sd-key">Transfer ID</div><div class="sd-val" id="succ-transfer-id">—</div></div>
       </div>
       <button class="btn" style="width:100%" onclick="goTo('screen-dash')">Back to dashboard →</button>
     </div>
@@ -643,10 +680,690 @@
     document.getElementById('claim-artist-name').textContent = artist.name;
     document.getElementById('claim-avatar').textContent = initials;
     document.getElementById('success-avatar').textContent = initials;
+    const sr = document.querySelector('input[name="method"][value="stripe"]');
+    if (sr) { sr.checked = true; document.querySelectorAll('.mopt').forEach(o=>o.classList.remove('sel')); sr.closest('.mopt').classList.add('sel'); }
+    document.getElementById('stripe-connect-box').classList.add('visible');
+    document.getElementById('claim-error').style.display='none';
     try {
       const sum = await apiFetch('/api/royalties/summary');
-      document.getElementById('claim-balance').textContent = '$' + Number(sum.total).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+      document.getElementById('claim-balance').textContent = '
+
+  function updateSummary() {
+    const amount = document.getElementById('claim-amount').value;
+    const method = document.querySelector('input[name="method"]:checked');
+    document.getElementById('sum-amount').textContent = amount ? '$' + Number(amount).toFixed(2) : '—';
+    if (method) {
+      const labels = { bank_transfer: 'ACH Transfer', paypal: 'PayPal', stripe: 'Wire Transfer' };
+      document.getElementById('sum-method').textContent = labels[method.value] || method.value;
+    }
+    document.querySelectorAll('.mopt').forEach(o => o.classList.remove('sel'));
+    if (method) method.closest('.mopt').classList.add('sel');
+  }
+
+  document.getElementById('claim-amount').addEventListener('input', updateSummary);
+
+  document.querySelectorAll('.mopt').forEach(opt => {
+    opt.addEventListener('click', function() {
+      document.querySelectorAll('.mopt').forEach(o => o.classList.remove('sel'));
+      this.classList.add('sel');
+      updateSummary();
+    });
+  });
+
+  let _stripeStatus = null;
+
+  async function checkStripeStatus() {
+    const dot=document.getElementById('stripe-dot'),txt=document.getElementById('stripe-status-text'),sub=document.getElementById('stripe-status-sub'),btn=document.getElementById('stripe-connect-btn'),det=document.getElementById('stripe-connected-detail');
+    dot.className='stripe-dot loading'; txt.textContent='Checking…'; sub.textContent=''; btn.style.display='none'; det.classList.remove('visible');
+    try {
+      const st=await apiFetch('/api/stripe/connect/status'); _stripeStatus=st;
+      if(st.onboarded&&st.payouts_enabled){dot.className='stripe-dot connected';txt.textContent='Account connected';sub.textContent=st.email||'';det.classList.add('visible');btn.style.display='none';}
+      else if(st.connected&&!st.onboarded){dot.className='stripe-dot disconnected';txt.textContent='Onboarding incomplete';sub.textContent='Finish connecting to enable instant payouts';btn.textContent='Continue setup →';btn.style.display='inline-flex';}
+      else{dot.className='stripe-dot disconnected';txt.textContent='Not connected';sub.textContent='Connect your bank to receive instant payouts';btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Connect bank account';btn.style.display='inline-flex';}
+    }catch(e){dot.className='stripe-dot disconnected';txt.textContent='Could not load status';}
+  }
+
+  function updateMethodUI(){
+    const m=document.querySelector('input[name="method"]:checked'),box=document.getElementById('stripe-connect-box');
+    if(m&&m.value==='stripe')box.classList.add('visible'); else box.classList.remove('visible');
+  }
+
+  function updateSummary(){
+    const amt=document.getElementById('claim-amount').value,m=document.querySelector('input[name="method"]:checked');
+    document.getElementById('sum-amount').textContent=amt?'
+    const amount = document.getElementById('claim-amount').value;
+    const method = document.querySelector('input[name="method"]:checked');
+    const errEl = document.getElementById('claim-error');
+    const btn = document.getElementById('claim-btn');
+    errEl.style.display='none';
+    if(!amount||parseFloat(amount)<10){showErr(errEl,'Minimum payout amount is $10.');return;}
+    if(!method){showErr(errEl,'Please select a payment method.');return;}
+    if(method.value==='stripe'){
+      if(!_stripeStatus||!_stripeStatus.onboarded){showErr(errEl,'Please connect your Stripe account first.');return;}
+      btn.disabled=true;btn.textContent='Sending transfer…';
+      try{
+        const d=await apiFetch('/api/stripe/payout',{method:'POST',body:JSON.stringify({amount:parseFloat(amount)})});
+        document.getElementById('succ-amount').textContent='
+
+  // ── Init ──────────────────────────────────────────────────
+  (function init() {
+    const token=getToken(),artist=getArtist();
+    const params=new URLSearchParams(window.location.search);
+    if(params.get('stripe_connected')==='true'){
+      window.history.replaceState({},'','/');
+      if(token&&artist)goTo('screen-claim');
+    }else if(token&&artist){goTo('screen-dash');}
+    document.getElementById('login-password').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+    document.getElementById('signup-password').addEventListener('keydown',e=>{if(e.key==='Enter')doSignup();});
+  })();
+</script>
+</body>
+</html>
+ + Number(sum.total).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
     } catch(e) {}
+    checkStripeStatus().catch(()=>{});
+  }
+
+  function updateSummary() {
+    const amount = document.getElementById('claim-amount').value;
+    const method = document.querySelector('input[name="method"]:checked');
+    document.getElementById('sum-amount').textContent = amount ? '$' + Number(amount).toFixed(2) : '—';
+    if (method) {
+      const labels = { bank_transfer: 'ACH Transfer', paypal: 'PayPal', stripe: 'Wire Transfer' };
+      document.getElementById('sum-method').textContent = labels[method.value] || method.value;
+    }
+    document.querySelectorAll('.mopt').forEach(o => o.classList.remove('sel'));
+    if (method) method.closest('.mopt').classList.add('sel');
+  }
+
+  document.getElementById('claim-amount').addEventListener('input', updateSummary);
+
+  document.querySelectorAll('.mopt').forEach(opt => {
+    opt.addEventListener('click', function() {
+      document.querySelectorAll('.mopt').forEach(o => o.classList.remove('sel'));
+      this.classList.add('sel');
+      updateSummary();
+    });
+  });
+
+  async function doClaim() {
+    const amount = document.getElementById('claim-amount').value;
+    const method = document.querySelector('input[name="method"]:checked');
+    const errEl = document.getElementById('claim-error');
+    const btn = document.getElementById('claim-btn');
+    errEl.style.display = 'none';
+    if (!amount || parseFloat(amount) < 10) { showErr(errEl, 'Minimum payout amount is $10.'); return; }
+    if (!method) { showErr(errEl, 'Please select a payment method.'); return; }
+    btn.disabled = true; btn.textContent = 'Processing…';
+    try {
+      const data = await apiFetch('/api/payouts/request', {
+        method: 'POST',
+        body: JSON.stringify({ amount: parseFloat(amount), method: method.value })
+      });
+      const labels = { bank_transfer: 'ACH Transfer', paypal: 'PayPal', stripe: 'Wire Transfer' };
+      document.getElementById('succ-amount').textContent = '$' + Number(data.amount).toFixed(2);
+      document.getElementById('succ-method').textContent = labels[data.method] || data.method;
+      goTo('screen-success');
+    } catch(e) {
+      showErr(errEl, e.message);
+    } finally {
+      btn.disabled = false; btn.textContent = 'Confirm claim →';
+    }
+  }
+
+  // ── Init ──────────────────────────────────────────────────
+  (function init() {
+    const token = getToken();
+    const artist = getArtist();
+    if (token && artist) {
+      goTo('screen-dash');
+    }
+    // Allow login on Enter key
+    document.getElementById('login-password').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doLogin();
+    });
+    // Allow signup on Enter key
+    document.getElementById('signup-password').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doSignup();
+    });
+  })();
+</script>
+</body>
+</html>
++Number(amt).toFixed(2):'—';
+    if(m){const L={bank_transfer:'ACH Transfer',paypal:'PayPal',stripe:'Stripe (Instant)'};document.getElementById('sum-method').textContent=L[m.value]||m.value;}
+    document.querySelectorAll('.mopt').forEach(o=>o.classList.remove('sel'));
+    if(m)m.closest('.mopt').classList.add('sel');
+    updateMethodUI();
+  }
+
+  async function doStripeConnect(){
+    const btn=document.getElementById('stripe-connect-btn');
+    btn.disabled=true;const orig=btn.innerHTML;btn.innerHTML='Redirecting…';
+    try{
+      const d=await apiFetch('/api/stripe/connect',{method:'POST'});
+      if(d.url)window.location.href=d.url; else throw new Error('No URL');
+    }catch(e){showErr(document.getElementById('claim-error'),'Stripe error: '+e.message);btn.disabled=false;btn.innerHTML=orig;}
+  }
+
+  async function doClaim() {
+    const amount = document.getElementById('claim-amount').value;
+    const method = document.querySelector('input[name="method"]:checked');
+    const errEl = document.getElementById('claim-error');
+    const btn = document.getElementById('claim-btn');
+    errEl.style.display = 'none';
+    if (!amount || parseFloat(amount) < 10) { showErr(errEl, 'Minimum payout amount is $10.'); return; }
+    if (!method) { showErr(errEl, 'Please select a payment method.'); return; }
+    btn.disabled = true; btn.textContent = 'Processing…';
+    try {
+      const data = await apiFetch('/api/payouts/request', {
+        method: 'POST',
+        body: JSON.stringify({ amount: parseFloat(amount), method: method.value })
+      });
+      const labels = { bank_transfer: 'ACH Transfer', paypal: 'PayPal', stripe: 'Wire Transfer' };
+      document.getElementById('succ-amount').textContent = '$' + Number(data.amount).toFixed(2);
+      document.getElementById('succ-method').textContent = labels[data.method] || data.method;
+      goTo('screen-success');
+    } catch(e) {
+      showErr(errEl, e.message);
+    } finally {
+      btn.disabled = false; btn.textContent = 'Confirm claim →';
+    }
+  }
+
+  // ── Init ──────────────────────────────────────────────────
+  (function init() {
+    const token = getToken();
+    const artist = getArtist();
+    if (token && artist) {
+      goTo('screen-dash');
+    }
+    // Allow login on Enter key
+    document.getElementById('login-password').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doLogin();
+    });
+    // Allow signup on Enter key
+    document.getElementById('signup-password').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doSignup();
+    });
+  })();
+</script>
+</body>
+</html>
+ + Number(sum.total).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+    } catch(e) {}
+    checkStripeStatus().catch(()=>{});
+  }
+
+  function updateSummary() {
+    const amount = document.getElementById('claim-amount').value;
+    const method = document.querySelector('input[name="method"]:checked');
+    document.getElementById('sum-amount').textContent = amount ? '$' + Number(amount).toFixed(2) : '—';
+    if (method) {
+      const labels = { bank_transfer: 'ACH Transfer', paypal: 'PayPal', stripe: 'Wire Transfer' };
+      document.getElementById('sum-method').textContent = labels[method.value] || method.value;
+    }
+    document.querySelectorAll('.mopt').forEach(o => o.classList.remove('sel'));
+    if (method) method.closest('.mopt').classList.add('sel');
+  }
+
+  document.getElementById('claim-amount').addEventListener('input', updateSummary);
+
+  document.querySelectorAll('.mopt').forEach(opt => {
+    opt.addEventListener('click', function() {
+      document.querySelectorAll('.mopt').forEach(o => o.classList.remove('sel'));
+      this.classList.add('sel');
+      updateSummary();
+    });
+  });
+
+  async function doClaim() {
+    const amount = document.getElementById('claim-amount').value;
+    const method = document.querySelector('input[name="method"]:checked');
+    const errEl = document.getElementById('claim-error');
+    const btn = document.getElementById('claim-btn');
+    errEl.style.display = 'none';
+    if (!amount || parseFloat(amount) < 10) { showErr(errEl, 'Minimum payout amount is $10.'); return; }
+    if (!method) { showErr(errEl, 'Please select a payment method.'); return; }
+    btn.disabled = true; btn.textContent = 'Processing…';
+    try {
+      const data = await apiFetch('/api/payouts/request', {
+        method: 'POST',
+        body: JSON.stringify({ amount: parseFloat(amount), method: method.value })
+      });
+      const labels = { bank_transfer: 'ACH Transfer', paypal: 'PayPal', stripe: 'Wire Transfer' };
+      document.getElementById('succ-amount').textContent = '$' + Number(data.amount).toFixed(2);
+      document.getElementById('succ-method').textContent = labels[data.method] || data.method;
+      goTo('screen-success');
+    } catch(e) {
+      showErr(errEl, e.message);
+    } finally {
+      btn.disabled = false; btn.textContent = 'Confirm claim →';
+    }
+  }
+
+  // ── Init ──────────────────────────────────────────────────
+  (function init() {
+    const token = getToken();
+    const artist = getArtist();
+    if (token && artist) {
+      goTo('screen-dash');
+    }
+    // Allow login on Enter key
+    document.getElementById('login-password').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doLogin();
+    });
+    // Allow signup on Enter key
+    document.getElementById('signup-password').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doSignup();
+    });
+  })();
+</script>
+</body>
+</html>
++Number(d.payout.amount).toFixed(2);
+        document.getElementById('succ-method').textContent='Stripe (Instant)';
+        document.getElementById('succ-status').textContent='Completed';
+        document.getElementById('succ-title').innerHTML='Payment<br><em>sent.</em>';
+        document.getElementById('succ-sub').textContent='Funds transferred to your connected bank account.';
+        document.getElementById('succ-transfer-row').style.display='flex';
+        document.getElementById('succ-transfer-id').textContent=d.transfer_id;
+        goTo('screen-success');
+      }catch(e){showErr(errEl,e.message);}
+      finally{btn.disabled=false;btn.textContent='Confirm claim →';}
+      return;
+    }
+    btn.disabled=true;btn.textContent='Processing…';
+    try{
+      const data=await apiFetch('/api/payouts/request',{method:'POST',body:JSON.stringify({amount:parseFloat(amount),method:method.value})});
+      const L={bank_transfer:'ACH Transfer',paypal:'PayPal'};
+      document.getElementById('succ-amount').textContent='
+
+  // ── Init ──────────────────────────────────────────────────
+  (function init() {
+    const token = getToken();
+    const artist = getArtist();
+    if (token && artist) {
+      goTo('screen-dash');
+    }
+    // Allow login on Enter key
+    document.getElementById('login-password').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doLogin();
+    });
+    // Allow signup on Enter key
+    document.getElementById('signup-password').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doSignup();
+    });
+  })();
+</script>
+</body>
+</html>
+ + Number(sum.total).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+    } catch(e) {}
+    checkStripeStatus().catch(()=>{});
+  }
+
+  function updateSummary() {
+    const amount = document.getElementById('claim-amount').value;
+    const method = document.querySelector('input[name="method"]:checked');
+    document.getElementById('sum-amount').textContent = amount ? '$' + Number(amount).toFixed(2) : '—';
+    if (method) {
+      const labels = { bank_transfer: 'ACH Transfer', paypal: 'PayPal', stripe: 'Wire Transfer' };
+      document.getElementById('sum-method').textContent = labels[method.value] || method.value;
+    }
+    document.querySelectorAll('.mopt').forEach(o => o.classList.remove('sel'));
+    if (method) method.closest('.mopt').classList.add('sel');
+  }
+
+  document.getElementById('claim-amount').addEventListener('input', updateSummary);
+
+  document.querySelectorAll('.mopt').forEach(opt => {
+    opt.addEventListener('click', function() {
+      document.querySelectorAll('.mopt').forEach(o => o.classList.remove('sel'));
+      this.classList.add('sel');
+      updateSummary();
+    });
+  });
+
+  async function doClaim() {
+    const amount = document.getElementById('claim-amount').value;
+    const method = document.querySelector('input[name="method"]:checked');
+    const errEl = document.getElementById('claim-error');
+    const btn = document.getElementById('claim-btn');
+    errEl.style.display = 'none';
+    if (!amount || parseFloat(amount) < 10) { showErr(errEl, 'Minimum payout amount is $10.'); return; }
+    if (!method) { showErr(errEl, 'Please select a payment method.'); return; }
+    btn.disabled = true; btn.textContent = 'Processing…';
+    try {
+      const data = await apiFetch('/api/payouts/request', {
+        method: 'POST',
+        body: JSON.stringify({ amount: parseFloat(amount), method: method.value })
+      });
+      const labels = { bank_transfer: 'ACH Transfer', paypal: 'PayPal', stripe: 'Wire Transfer' };
+      document.getElementById('succ-amount').textContent = '$' + Number(data.amount).toFixed(2);
+      document.getElementById('succ-method').textContent = labels[data.method] || data.method;
+      goTo('screen-success');
+    } catch(e) {
+      showErr(errEl, e.message);
+    } finally {
+      btn.disabled = false; btn.textContent = 'Confirm claim →';
+    }
+  }
+
+  // ── Init ──────────────────────────────────────────────────
+  (function init() {
+    const token = getToken();
+    const artist = getArtist();
+    if (token && artist) {
+      goTo('screen-dash');
+    }
+    // Allow login on Enter key
+    document.getElementById('login-password').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doLogin();
+    });
+    // Allow signup on Enter key
+    document.getElementById('signup-password').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doSignup();
+    });
+  })();
+</script>
+</body>
+</html>
++Number(amt).toFixed(2):'—';
+    if(m){const L={bank_transfer:'ACH Transfer',paypal:'PayPal',stripe:'Stripe (Instant)'};document.getElementById('sum-method').textContent=L[m.value]||m.value;}
+    document.querySelectorAll('.mopt').forEach(o=>o.classList.remove('sel'));
+    if(m)m.closest('.mopt').classList.add('sel');
+    updateMethodUI();
+  }
+
+  async function doStripeConnect(){
+    const btn=document.getElementById('stripe-connect-btn');
+    btn.disabled=true;const orig=btn.innerHTML;btn.innerHTML='Redirecting…';
+    try{
+      const d=await apiFetch('/api/stripe/connect',{method:'POST'});
+      if(d.url)window.location.href=d.url; else throw new Error('No URL');
+    }catch(e){showErr(document.getElementById('claim-error'),'Stripe error: '+e.message);btn.disabled=false;btn.innerHTML=orig;}
+  }
+
+  async function doClaim() {
+    const amount = document.getElementById('claim-amount').value;
+    const method = document.querySelector('input[name="method"]:checked');
+    const errEl = document.getElementById('claim-error');
+    const btn = document.getElementById('claim-btn');
+    errEl.style.display = 'none';
+    if (!amount || parseFloat(amount) < 10) { showErr(errEl, 'Minimum payout amount is $10.'); return; }
+    if (!method) { showErr(errEl, 'Please select a payment method.'); return; }
+    btn.disabled = true; btn.textContent = 'Processing…';
+    try {
+      const data = await apiFetch('/api/payouts/request', {
+        method: 'POST',
+        body: JSON.stringify({ amount: parseFloat(amount), method: method.value })
+      });
+      const labels = { bank_transfer: 'ACH Transfer', paypal: 'PayPal', stripe: 'Wire Transfer' };
+      document.getElementById('succ-amount').textContent = '$' + Number(data.amount).toFixed(2);
+      document.getElementById('succ-method').textContent = labels[data.method] || data.method;
+      goTo('screen-success');
+    } catch(e) {
+      showErr(errEl, e.message);
+    } finally {
+      btn.disabled = false; btn.textContent = 'Confirm claim →';
+    }
+  }
+
+  // ── Init ──────────────────────────────────────────────────
+  (function init() {
+    const token = getToken();
+    const artist = getArtist();
+    if (token && artist) {
+      goTo('screen-dash');
+    }
+    // Allow login on Enter key
+    document.getElementById('login-password').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doLogin();
+    });
+    // Allow signup on Enter key
+    document.getElementById('signup-password').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doSignup();
+    });
+  })();
+</script>
+</body>
+</html>
+ + Number(sum.total).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+    } catch(e) {}
+    checkStripeStatus().catch(()=>{});
+  }
+
+  function updateSummary() {
+    const amount = document.getElementById('claim-amount').value;
+    const method = document.querySelector('input[name="method"]:checked');
+    document.getElementById('sum-amount').textContent = amount ? '$' + Number(amount).toFixed(2) : '—';
+    if (method) {
+      const labels = { bank_transfer: 'ACH Transfer', paypal: 'PayPal', stripe: 'Wire Transfer' };
+      document.getElementById('sum-method').textContent = labels[method.value] || method.value;
+    }
+    document.querySelectorAll('.mopt').forEach(o => o.classList.remove('sel'));
+    if (method) method.closest('.mopt').classList.add('sel');
+  }
+
+  document.getElementById('claim-amount').addEventListener('input', updateSummary);
+
+  document.querySelectorAll('.mopt').forEach(opt => {
+    opt.addEventListener('click', function() {
+      document.querySelectorAll('.mopt').forEach(o => o.classList.remove('sel'));
+      this.classList.add('sel');
+      updateSummary();
+    });
+  });
+
+  async function doClaim() {
+    const amount = document.getElementById('claim-amount').value;
+    const method = document.querySelector('input[name="method"]:checked');
+    const errEl = document.getElementById('claim-error');
+    const btn = document.getElementById('claim-btn');
+    errEl.style.display = 'none';
+    if (!amount || parseFloat(amount) < 10) { showErr(errEl, 'Minimum payout amount is $10.'); return; }
+    if (!method) { showErr(errEl, 'Please select a payment method.'); return; }
+    btn.disabled = true; btn.textContent = 'Processing…';
+    try {
+      const data = await apiFetch('/api/payouts/request', {
+        method: 'POST',
+        body: JSON.stringify({ amount: parseFloat(amount), method: method.value })
+      });
+      const labels = { bank_transfer: 'ACH Transfer', paypal: 'PayPal', stripe: 'Wire Transfer' };
+      document.getElementById('succ-amount').textContent = '$' + Number(data.amount).toFixed(2);
+      document.getElementById('succ-method').textContent = labels[data.method] || data.method;
+      goTo('screen-success');
+    } catch(e) {
+      showErr(errEl, e.message);
+    } finally {
+      btn.disabled = false; btn.textContent = 'Confirm claim →';
+    }
+  }
+
+  // ── Init ──────────────────────────────────────────────────
+  (function init() {
+    const token = getToken();
+    const artist = getArtist();
+    if (token && artist) {
+      goTo('screen-dash');
+    }
+    // Allow login on Enter key
+    document.getElementById('login-password').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doLogin();
+    });
+    // Allow signup on Enter key
+    document.getElementById('signup-password').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doSignup();
+    });
+  })();
+</script>
+</body>
+</html>
++Number(data.amount).toFixed(2);
+      document.getElementById('succ-method').textContent=L[data.method]||data.method;
+      document.getElementById('succ-status').textContent='Pending';
+      document.getElementById('succ-title').innerHTML='Payment<br><em>requested.</em>';
+      document.getElementById('succ-sub').textContent='You\'ll receive a confirmation within 24 hours. Funds arrive within 2–5 business days.';
+      document.getElementById('succ-transfer-row').style.display='none';
+      goTo('screen-success');
+    }catch(e){showErr(errEl,e.message);}
+    finally{btn.disabled=false;btn.textContent='Confirm claim →';}
+  }
+
+  // ── Init ──────────────────────────────────────────────────
+  (function init() {
+    const token = getToken();
+    const artist = getArtist();
+    if (token && artist) {
+      goTo('screen-dash');
+    }
+    // Allow login on Enter key
+    document.getElementById('login-password').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doLogin();
+    });
+    // Allow signup on Enter key
+    document.getElementById('signup-password').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doSignup();
+    });
+  })();
+</script>
+</body>
+</html>
+ + Number(sum.total).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+    } catch(e) {}
+    checkStripeStatus().catch(()=>{});
+  }
+
+  function updateSummary() {
+    const amount = document.getElementById('claim-amount').value;
+    const method = document.querySelector('input[name="method"]:checked');
+    document.getElementById('sum-amount').textContent = amount ? '$' + Number(amount).toFixed(2) : '—';
+    if (method) {
+      const labels = { bank_transfer: 'ACH Transfer', paypal: 'PayPal', stripe: 'Wire Transfer' };
+      document.getElementById('sum-method').textContent = labels[method.value] || method.value;
+    }
+    document.querySelectorAll('.mopt').forEach(o => o.classList.remove('sel'));
+    if (method) method.closest('.mopt').classList.add('sel');
+  }
+
+  document.getElementById('claim-amount').addEventListener('input', updateSummary);
+
+  document.querySelectorAll('.mopt').forEach(opt => {
+    opt.addEventListener('click', function() {
+      document.querySelectorAll('.mopt').forEach(o => o.classList.remove('sel'));
+      this.classList.add('sel');
+      updateSummary();
+    });
+  });
+
+  async function doClaim() {
+    const amount = document.getElementById('claim-amount').value;
+    const method = document.querySelector('input[name="method"]:checked');
+    const errEl = document.getElementById('claim-error');
+    const btn = document.getElementById('claim-btn');
+    errEl.style.display = 'none';
+    if (!amount || parseFloat(amount) < 10) { showErr(errEl, 'Minimum payout amount is $10.'); return; }
+    if (!method) { showErr(errEl, 'Please select a payment method.'); return; }
+    btn.disabled = true; btn.textContent = 'Processing…';
+    try {
+      const data = await apiFetch('/api/payouts/request', {
+        method: 'POST',
+        body: JSON.stringify({ amount: parseFloat(amount), method: method.value })
+      });
+      const labels = { bank_transfer: 'ACH Transfer', paypal: 'PayPal', stripe: 'Wire Transfer' };
+      document.getElementById('succ-amount').textContent = '$' + Number(data.amount).toFixed(2);
+      document.getElementById('succ-method').textContent = labels[data.method] || data.method;
+      goTo('screen-success');
+    } catch(e) {
+      showErr(errEl, e.message);
+    } finally {
+      btn.disabled = false; btn.textContent = 'Confirm claim →';
+    }
+  }
+
+  // ── Init ──────────────────────────────────────────────────
+  (function init() {
+    const token = getToken();
+    const artist = getArtist();
+    if (token && artist) {
+      goTo('screen-dash');
+    }
+    // Allow login on Enter key
+    document.getElementById('login-password').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doLogin();
+    });
+    // Allow signup on Enter key
+    document.getElementById('signup-password').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doSignup();
+    });
+  })();
+</script>
+</body>
+</html>
++Number(amt).toFixed(2):'—';
+    if(m){const L={bank_transfer:'ACH Transfer',paypal:'PayPal',stripe:'Stripe (Instant)'};document.getElementById('sum-method').textContent=L[m.value]||m.value;}
+    document.querySelectorAll('.mopt').forEach(o=>o.classList.remove('sel'));
+    if(m)m.closest('.mopt').classList.add('sel');
+    updateMethodUI();
+  }
+
+  async function doStripeConnect(){
+    const btn=document.getElementById('stripe-connect-btn');
+    btn.disabled=true;const orig=btn.innerHTML;btn.innerHTML='Redirecting…';
+    try{
+      const d=await apiFetch('/api/stripe/connect',{method:'POST'});
+      if(d.url)window.location.href=d.url; else throw new Error('No URL');
+    }catch(e){showErr(document.getElementById('claim-error'),'Stripe error: '+e.message);btn.disabled=false;btn.innerHTML=orig;}
+  }
+
+  async function doClaim() {
+    const amount = document.getElementById('claim-amount').value;
+    const method = document.querySelector('input[name="method"]:checked');
+    const errEl = document.getElementById('claim-error');
+    const btn = document.getElementById('claim-btn');
+    errEl.style.display = 'none';
+    if (!amount || parseFloat(amount) < 10) { showErr(errEl, 'Minimum payout amount is $10.'); return; }
+    if (!method) { showErr(errEl, 'Please select a payment method.'); return; }
+    btn.disabled = true; btn.textContent = 'Processing…';
+    try {
+      const data = await apiFetch('/api/payouts/request', {
+        method: 'POST',
+        body: JSON.stringify({ amount: parseFloat(amount), method: method.value })
+      });
+      const labels = { bank_transfer: 'ACH Transfer', paypal: 'PayPal', stripe: 'Wire Transfer' };
+      document.getElementById('succ-amount').textContent = '$' + Number(data.amount).toFixed(2);
+      document.getElementById('succ-method').textContent = labels[data.method] || data.method;
+      goTo('screen-success');
+    } catch(e) {
+      showErr(errEl, e.message);
+    } finally {
+      btn.disabled = false; btn.textContent = 'Confirm claim →';
+    }
+  }
+
+  // ── Init ──────────────────────────────────────────────────
+  (function init() {
+    const token = getToken();
+    const artist = getArtist();
+    if (token && artist) {
+      goTo('screen-dash');
+    }
+    // Allow login on Enter key
+    document.getElementById('login-password').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doLogin();
+    });
+    // Allow signup on Enter key
+    document.getElementById('signup-password').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doSignup();
+    });
+  })();
+</script>
+</body>
+</html>
+ + Number(sum.total).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+    } catch(e) {}
+    checkStripeStatus().catch(()=>{});
   }
 
   function updateSummary() {
