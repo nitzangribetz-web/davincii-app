@@ -200,4 +200,26 @@ router.post('/webhook', async (req, res) => {
   res.json({ received: true });
 });
 
+// ── GET /api/stripe/setup-webhook ────────────────────────────────────────────
+// ONE-TIME: registers the webhook endpoint in Stripe and returns the secret.
+router.get('/setup-webhook', async (req, res) => {
+  try {
+    const webhookUrl = `${APP_URL}/api/stripe/webhook`;
+    const existing = await stripe.webhookEndpoints.list({ limit: 20 });
+    const found = existing.data.find(e => e.url === webhookUrl);
+    if (found) {
+      return res.json({ status: 'already_exists', id: found.id, url: found.url,
+        note: 'Signing secret only shown on creation. Delete and recreate to get a new one.' });
+    }
+    const endpoint = await stripe.webhookEndpoints.create({
+      url: webhookUrl,
+      enabled_events: ['account.updated', 'transfer.created', 'transfer.failed'],
+    });
+    res.json({ status: 'created', id: endpoint.id, url: endpoint.url,
+      secret: endpoint.secret });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;
