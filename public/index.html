@@ -438,9 +438,9 @@
 </div>
 
 <script>
-  const API = '';  // same origin â backend serves this file
+  const API = '';  // same origin -- backend serves this file
 
-  // ââ Auth helpers ââââââââââââââââââââââââââââââââââââââââââ
+  // -- Auth helpers ------------------------------------------
   function getToken() { return localStorage.getItem('dvc_token'); }
   function getArtist() { try { return JSON.parse(localStorage.getItem('dvc_artist')); } catch(e) { return null; } }
   function setAuth(token, artist) {
@@ -467,7 +467,7 @@
     return data;
   }
 
-  // ââ Navigation ââââââââââââââââââââââââââââââââââââââââââââ
+  // -- Navigation --------------------------------------------
   function goTo(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
@@ -486,7 +486,7 @@
     if (pgId === 'pg-payouts') loadPayouts();
   }
 
-  // ââ Login âââââââââââââââââââââââââââââââââââââââââââââââââ
+  // -- Login -------------------------------------------------
   async function doLogin() {
     const email = document.getElementById('login-email').value.trim();
     const password = document.getElementById('login-password').value;
@@ -494,7 +494,7 @@
     const btn = document.getElementById('login-btn');
     errEl.style.display = 'none';
     if (!email || !password) { showErr(errEl, 'Please enter your email and password.'); return; }
-    btn.disabled = true; btn.textContent = 'Signing inâ¦';
+    btn.disabled = true; btn.textContent = 'Signing in...';
     try {
       const data = await apiFetch('/api/auth/login', {
         method: 'POST',
@@ -505,11 +505,11 @@
     } catch(e) {
       showErr(errEl, e.message);
     } finally {
-      btn.disabled = false; btn.textContent = 'Sign in â';
+      btn.disabled = false; btn.textContent = 'Sign in ->';
     }
   }
 
-  // ââ Signup ââââââââââââââââââââââââââââââââââââââââââââââââ
+  // -- Signup ------------------------------------------------
   async function doSignup() {
     const name = document.getElementById('signup-name').value.trim();
     const email = document.getElementById('signup-email').value.trim();
@@ -520,7 +520,7 @@
     if (!name) { showErr(errEl, 'Please enter your full name.'); return; }
     if (!email) { showErr(errEl, 'Please enter your email address.'); return; }
     if (!password || password.length < 8) { showErr(errEl, 'Password must be at least 8 characters.'); return; }
-    btn.disabled = true; btn.textContent = 'Creating accountâ¦';
+    btn.disabled = true; btn.textContent = 'Creating account...';
     try {
       const data = await apiFetch('/api/auth/signup', {
         method: 'POST',
@@ -531,7 +531,7 @@
     } catch(e) {
       showErr(errEl, e.message);
     } finally {
-      btn.disabled = false; btn.textContent = 'Create account â+;
+      btn.disabled = false; btn.textContent = 'Create account ->';
     }
   }
 
@@ -545,7 +545,7 @@
     el.style.display = 'block';
   }
 
-  // ââ Dashboard âââââââââââââââââââââââââââââââââââââââââââââ
+  // -- Dashboard ---------------------------------------------
   async function loadDashboard() {
     const artist = getArtist();
     if (!artist) { doLogout(); return; }
@@ -567,9 +567,9 @@
         apiFetch('/api/royalties/summary'),
         apiFetch('/api/payouts/summary')
       ]);
-      document.getElementById('overview-total').textContent = '$' + Number(roySum.total).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:(¹ôõ);
+      document.getElementById('overview-total').textContent = '$' + Number(roySum.total).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
       document.getElementById('overview-count').textContent = roySum.count + ' payment' + (roySum.count !== 1 ? 's' : '') + ' collected';
-      document.getElementById('overview-paid').textContent = '$' + Number(paySum.totalPaid).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:(¹ôõ);
+      document.getElementById('overview-paid').textContent = '$' + Number(paySum.totalPaid).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
       document.getElementById('overview-pending').textContent = '$' + Number(paySum.totalPending).toFixed(2) + ' pending';
     } catch(e) {}
 
@@ -585,9 +585,9 @@
           <div class="th-row col-5"><div class="th">Song</div><div class="th">Platform</div><div class="th">Period</div><div class="th">Type</div><div class="th" style="text-align:right">Amount</div></div>
           ${recent.map(r => `
             <div class="tr col-5">
-              <div><div class="tr-song">${r.songs ? r.songs.title : 'â'}</div><div class="tr-meta">${r.platform}</div></div>
+              <div><div class="tr-song">${r.songs ? r.songs.title : '--'}</div><div class="tr-meta">${r.platform}</div></div>
               <div class="tr-cell">${r.platform}</div>
-              <div class="tr-cell">${r.period || 'â'}</div>
+              <div class="tr-cell">${r.period || '--'}</div>
               <div><span class="badge badge-ok">${r.royalty_type || 'Royalty'}</span></div>
               <div class="tr-amt">$${Number(r.amount).toFixed(2)}</div>
             </div>`).join('')}`;
@@ -618,15 +618,15 @@
     }
   }
 
-  // ââ Catalog âââââââââââââââââââââââââââââââââââââââââââââââ
+  // -- Catalog -----------------------------------------------
   async function loadCatalog() {
     const body = document.getElementById('catalog-body');
-    body.innerHTML = '<div class="loading">Loadingâ¦</div>';
+    body.innerHTML = '<div class="loading">Loading...</div>';
     try {
       const songs = await apiFetch('/api/songs');
       document.getElementById('catalog-sub').textContent = songs.length + ' song' + (songs.length !== 1 ? 's' : '') + ' in your catalog.';
       if (songs.length === 0) {
-        body.innerHTML = '<div class="empty-state">No songs yet â contact Davincii to add your catalog</div>';
+        body.innerHTML = '<div class="empty-state">No songs yet -- contact Davincii to add your catalog</div>';
         return;
       }
       body.innerHTML = `
@@ -634,19 +634,19 @@
         ${songs.map(s => `
           <div class="tr col-4c">
             <div><div class="tr-song">${s.title}</div><div class="tr-meta">Added ${new Date(s.created_at).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'})}</div></div>
-            <div class="tr-cell">${s.isrc || 'â'}</div>
+            <div class="tr-cell">${s.isrc || '--'}</div>
             <div><span class="badge ${s.status === 'active' || s.status === 'collecting' ? 'badge-ok' : s.status === 'registering' ? 'badge-blue' : 'badge-pend'}">${s.status || 'pending'}</span></div>
-            <div class="tr-amt" style="font-size:11px;color:var(--muted)">${s.release_date ? new Date(s.release_date).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : 'â'}</div>
+            <div class="tr-amt" style="font-size:11px;color:var(--muted)">${s.release_date ? new Date(s.release_date).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : '--'}</div>
           </div>`).join('')}`;
     } catch(e) {
       body.innerHTML = '<div class="empty-state">Could not load catalog</div>';
     }
   }
 
-  // ââ Royalties âââââââââââââââââââââââââââââââââââââââââââââ
+  // -- Royalties ---------------------------------------------
   async function loadRoyalties() {
     const body = document.getElementById('royalties-body');
-    body.innerHTML = '<div class="loading">Loadingâ¦</div>';
+    body.innerHTML = '<div class="loading">Loading...</div>';
     try {
       const royalties = await apiFetch('/api/royalties');
       if (royalties.length === 0) {
@@ -657,9 +657,9 @@
         <div class="th-row col-5"><div class="th">Song</div><div class="th">Platform</div><div class="th">Period</div><div class="th">Type</div><div class="th" style="text-align:right">Amount</div></div>
         ${royalties.map(r => `
           <div class="tr col-5">
-            <div><div class="tr-song">${r.songs ? r.songs.title : 'â'}</div><div class="tr-meta">${r.platform}</div></div>
+            <div><div class="tr-song">${r.songs ? r.songs.title : '--'}</div><div class="tr-meta">${r.platform}</div></div>
             <div class="tr-cell">${r.platform}</div>
-            <div class="tr-cell">${r.period || 'â'}</div>
+            <div class="tr-cell">${r.period || '--'}</div>
             <div><span class="badge badge-ok">${r.royalty_type || 'Royalty'}</span></div>
             <div class="tr-amt">$${Number(r.amount).toFixed(2)}</div>
           </div>`).join('')}`;
@@ -668,10 +668,10 @@
     }
   }
 
-  // ââ Payouts âââââââââââââââââââââââââââââââââââââââââââââââ
+  // -- Payouts -----------------------------------------------
   async function loadPayouts() {
     const body = document.getElementById('payouts-body');
-    body.innerHTML = '<div class="loading">Loadingâ¦</div>';
+    body.innerHTML = '<div class="loading">Loading...</div>';
     try {
       const payouts = await apiFetch('/api/payouts');
       if (payouts.length === 0) {
@@ -696,7 +696,7 @@
     }
   }
 
-  // ââ Claim âââââââââââââââââââââââââââââââââââââââââââââââââ
+  // -- Claim -------------------------------------------------
   async function loadClaim() {
     const artist = getArtist();
     if (!artist) return;
@@ -716,7 +716,7 @@
     try {
       const bal = await apiFetch('/api/stripe/balance');
       document.getElementById('claim-balance').textContent = '$' + Number(bal.available).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-      document.getElementById('claim-total').textContent = '$' + Number(bal.total_royalties).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:)¹ôõ);
+      document.getElementById('claim-total').textContent = '$' + Number(bal.total_royalties).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
       // Pre-fill amount with available balance (if >= $10)
       const avail = parseFloat(bal.available);
       const amtField = document.getElementById('claim-amount');
@@ -725,7 +725,7 @@
         updateSummary();
       }
     } catch(e) {}
-    // Load Stripe status in parallel â non-blocking
+    // Load Stripe status in parallel -- non-blocking
     checkStripeStatus().catch(() => {});
   }
 
@@ -741,7 +741,7 @@
   function updateSummary() {
     const amount = document.getElementById('claim-amount').value;
     const method = document.querySelector('input[name="method"]:checked');
-    document.getElementById('sum-amount').textContent = amount ? '$' + Number(amount).toFixed(2) : 'â';
+    document.getElementById('sum-amount').textContent = amount ? '$' + Number(amount).toFixed(2) : '--';
     if (method) {
       const labels = { bank_transfer: 'ACH Transfer', paypal: 'PayPal', stripe: 'Stripe (Instant)' };
       document.getElementById('sum-method').textContent = labels[method.value] || method.value;
@@ -761,7 +761,7 @@
     });
   });
 
-  // ââ Stripe Connect â Dashboard strip ââââââââââââââââââââââ
+  // -- Stripe Connect -- Dashboard strip ----------------------
   async function checkDashStripeStatus() {
     const dot = document.getElementById('dash-stripe-dot');
     const title = document.getElementById('dash-stripe-title');
@@ -773,19 +773,19 @@
       if (status.onboarded && status.payouts_enabled) {
         dot.className = 'stripe-dot connected';
         title.textContent = 'Stripe connected';
-        sub.textContent = (status.email || 'Bank account linked') + ' Â· Instant payouts enabled';
+        sub.textContent = (status.email || 'Bank account linked') + ' . Instant payouts enabled';
         btn.style.display = 'none';
       } else if (status.connected && !status.onboarded) {
         dot.className = 'stripe-dot disconnected';
         title.textContent = 'Stripe setup incomplete';
         sub.textContent = 'Finish connecting to enable instant payouts';
-        btn.textContent = 'Continue â';
+        btn.textContent = 'Continue ->';
         btn.style.display = 'inline-block';
       } else {
         dot.className = 'stripe-dot disconnected';
         title.textContent = 'Bank account not connected';
         sub.textContent = 'Connect your bank for instant payouts';
-        btn.textContent = 'Set up â';
+        btn.textContent = 'Set up ->';
         btn.style.display = 'inline-block';
       }
     } catch(e) {
@@ -796,7 +796,7 @@
     }
   }
 
-  // ââ Stripe Connect ââââââââââââââââââââââââââââââââââââââââ
+  // -- Stripe Connect ----------------------------------------
   let _stripeStatus = null; // cached: { connected, onboarded, email, payouts_enabled }
 
   async function checkStripeStatus() {
@@ -808,7 +808,7 @@
     const detail = document.getElementById('stripe-connected-detail');
 
     dot.className = 'stripe-dot loading';
-    text.textContent = 'Checking accountâ¦';
+    text.textContent = 'Checking account...';
     sub.textContent = '';
     connectBtn.style.display = 'none';
     disconnectBtn.style.display = 'none';
@@ -829,7 +829,7 @@
         dot.className = 'stripe-dot disconnected';
         text.textContent = 'Onboarding incomplete';
         sub.textContent = 'Finish connecting to enable instant payouts';
-        connectBtn.textContent = 'Continue setup â";
+        connectBtn.textContent = 'Continue setup ->';
         connectBtn.style.display = 'inline-flex';
         disconnectBtn.style.display = 'inline-block';
       } else {
@@ -853,7 +853,7 @@
     if (!confirm('Disconnect your Stripe account? You can reconnect at any time.')) return;
     const disconnectBtn = document.getElementById('stripe-disconnect-btn');
     disconnectBtn.disabled = true;
-    disconnectBtn.textContent = 'Disconnectingâ¦';
+    disconnectBtn.textContent = 'Disconnecting...';
     try {
       await apiFetch('/api/stripe/connect', { method: 'DELETE' });
       _stripeStatus = null;
@@ -870,7 +870,7 @@
     const btn = document.getElementById('stripe-connect-btn');
     btn.disabled = true;
     const origHTML = btn.innerHTML;
-    btn.innerHTML = 'Redirecting to Stripeâ¦';
+    btn.innerHTML = 'Redirecting to Stripe...';
     try {
       const data = await apiFetch('/api/stripe/connect', { method: 'POST' });
       if (data.url) {
@@ -885,7 +885,7 @@
     }
   }
 
-  // ââ Claim âââââââââââââââââââââââââââââââââââââââââââââââââ
+  // -- Claim -------------------------------------------------
   async function doClaim() {
     const amount = document.getElementById('claim-amount').value;
     const method = document.querySelector('input[name="method"]:checked');
@@ -908,7 +908,7 @@
         showErr(errEl, `Amount exceeds your available balance of $${avail.toFixed(2)}.`);
         return;
       }
-      btn.disabled = true; btn.textContent = 'Sending transferâ¦';
+      btn.disabled = true; btn.textContent = 'Sending transfer...';
       try {
         const data = await apiFetch('/api/stripe/payout', {
           method: 'POST',
@@ -925,19 +925,19 @@
       } catch(e) {
         showErr(errEl, e.message);
       } finally {
-        btn.disabled = false; btn.textContent = 'Confirm claim â';
+        btn.disabled = false; btn.textContent = 'Confirm claim ->';
       }
       return;
     }
 
-    // ACH / PayPal path â also check client-side balance
+    // ACH / PayPal path -- also check client-side balance
     const balText2 = document.getElementById('claim-balance').textContent.replace(/[$,]/g, '');
     const avail2 = parseFloat(balText2);
     if (!isNaN(avail2) && parseFloat(amount) > avail2 + 0.001) {
       showErr(errEl, `Amount exceeds your available balance of $${avail2.toFixed(2)}.`);
       return;
     }
-    btn.disabled = true; btn.textContent = 'Processingâ¦';
+    btn.disabled = true; btn.textContent = 'Processing...';
     try {
       const data = await apiFetch('/api/payouts/request', {
         method: 'POST',
@@ -948,17 +948,17 @@
       document.getElementById('succ-method').textContent = labels[data.method] || data.method;
       document.getElementById('succ-status').textContent = 'Pending';
       document.getElementById('succ-title').innerHTML = 'Payment<br><em>requested.</em>';
-      document.getElementById('succ-sub').textContent = 'You\'ll receive a confirmation within 24 hours. Funds arrive within 2â5 business days.';
+      document.getElementById('succ-sub').textContent = 'You\'ll receive a confirmation within 24 hours. Funds arrive within 2-5 business days.';
       document.getElementById('succ-transfer-row').style.display = 'none';
       goTo('screen-success');
     } catch(e) {
       showErr(errEl, e.message);
     } finally {
-      btn.disabled = false; btn.textContent = 'Confirm claim â';
+      btn.disabled = false; btn.textContent = 'Confirm claim ->';
     }
   }
 
-  // ââ Init ââââââââââââââââââââââââââââââââââââââââââââââââââ
+  // -- Init --------------------------------------------------
   (function init() {
     const token = getToken();
     const artist = getArtist();
