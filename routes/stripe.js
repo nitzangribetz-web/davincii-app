@@ -150,7 +150,7 @@ router.post('/payout', auth, async (req, res) => {
     const { rows } = await pool.query(
       'SELECT stripe_account_id, stripe_onboarded FROM artists WHERE id = $1',
       [req.artist.id]
-  2 );
+    );
     const artist = rows[0];
 
     if (!artist?.stripe_account_id) {
