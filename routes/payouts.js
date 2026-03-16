@@ -27,13 +27,32 @@ router.get('/', auth, async (req, res) => {
 router.post('/request', auth, async (req, res) => {
   const { amount, method } = req.body;
   if (!amount || !method) return res.status(400).json({ error: 'Amount and payment method are required' });
-  if (parseFloat(amount) < 10) return res.status(400).json({ error: 'Minimum payout amount is $10.00' });
+  const amountFloat = parseFloat(amount);
+  if (amountFloat < 10) return res.status(400).json({ error: 'Minimum payout amount is $10.00' });
   const validMethods = ['bank_transfer', 'paypal', 'stripe', 'check'];
   if (!validMethods.includes(method)) return res.status(400).json({ error: 'Invalid payment method' });
   try {
+    // Balance check â prevent requesting more than available
+    const [royResult, payResult] = await Promise.all([
+      pool.query(
+        'SELECT COALESCE(SUM(amount), 0) AS total FROM royalties WHERE artist_id = $1',
+        [req.artist.id]
+      ),
+      pool.query(
+        "SELECT COALESCE(SUM(amount), 0) AS total FROM payouts WHERE artist_id = $1 AND status IN ('completed', 'pending')",
+        [req.artist.id]
+      ),
+    ]);
+    const available = parseFloat(royResult.rows[0].total) - parseFloat(payResult.rows[0].total);
+    if (amountFloat > available) {
+      return res.status(400).json({
+        error: `Insufficient balance. Available: $${Math.max(0, available).toFixed(2)}`,
+      });
+    }
+
     const result = await pool.query(
       'INSERT INTO payouts (artist_id, amount, method, status) VALUES ($1, $2, $3, $4) RETURNING *',
-      [req.artist.id, amount, method, 'pending']
+      [req.artist.id, amountFloat, method, 'pending']
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
