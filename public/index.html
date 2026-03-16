@@ -828,6 +828,13 @@
         showErr(errEl, 'Please connect your Stripe account before requesting a payout.');
         return;
       }
+      // Client-side balance guard
+      const balText = document.getElementById('claim-balance').textContent.replace(/[$,]/g, '');
+      const avail = parseFloat(balText);
+      if (!isNaN(avail) && parseFloat(amount) > avail + 0.001) {
+        showErr(errEl, `Amount exceeds your available balance of $${avail.toFixed(2)}.`);
+        return;
+      }
       btn.disabled = true; btn.textContent = 'Sending transfer…';
       try {
         const data = await apiFetch('/api/stripe/payout', {

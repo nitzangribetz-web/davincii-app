@@ -252,6 +252,27 @@ router.post('/webhook', async (req, res) => {
         break;
       }
 
+      case 'transfer.reversed': {
+        const transfer = event.data.object;
+        await pool.query(
+          `UPDATE payouts SET status = 'reversed' WHERE stripe_transfer_id = $1`,
+          [transfer.id]
+        );
+        console.log(`[stripe/webhook] transfer.reversed id=${transfer.id}`);
+        break;
+      }
+
+      case 'account.application.deauthorized': {
+        // Artist revoked Stripe access — clear their account link in our DB
+        const account = event.data.object;
+        await pool.query(
+          'UPDATE artists SET stripe_account_id = NULL, stripe_onboarded = FALSE WHERE stripe_account_id = $1',
+          [account.id]
+        );
+        console.log(`[stripe/webhook] account.application.deauthorized account=${account.id}`);
+        break;
+      }
+
       default:
         console.log(`[stripe/webhook] unhandled event: ${event.type}`);
     }
@@ -260,6 +281,22 @@ router.post('/webhook', async (req, res) => {
   }
 
   res.json({ received: true });
+});
+
+// ── DELETE /api/stripe/connect ────────────────────────────────────────────────
+// Removes the artist's Stripe account link from Davincii (does not delete the
+// Stripe account itself — the artist retains their Stripe Express account).
+router.delete('/connect', auth, async (req, res) => {
+  try {
+    await pool.query(
+      'UPDATE artists SET stripe_account_id = NULL, stripe_onboarded = FALSE WHERE id = $1',
+      [req.artist.id]
+    );
+    res.json({ disconnected: true });
+  } catch (err) {
+    console.error('[stripe/disconnect]', err.message);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 module.exports = router;
