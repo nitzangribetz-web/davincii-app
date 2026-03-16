@@ -4,10 +4,12 @@ const path = require('path');
 require('dotenv').config();
 
 const migrate = require('./db/migrate');
+const migrate = require('./db/migrate');
 const authRoutes = require('./routes/auth');
 const songRoutes = require('./routes/songs');
 const royaltyRoutes = require('./routes/royalties');
 const payoutRoutes = require('./routes/payouts');
+const stripeRoutes = require('./routes/stripe');
 const stripeRoutes = require('./routes/stripe');
 
 const app = express();
@@ -36,6 +38,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/songs', songRoutes);
 app.use('/api/royalties', royaltyRoutes);
 app.use('/api/payouts', payoutRoutes);
+app.use('/api/stripe', stripeRoutes);
 app.use('/api/stripe', stripeRoutes);
 
 // Serve frontend for all non-API routes
