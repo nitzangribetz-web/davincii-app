@@ -165,6 +165,8 @@
   .btn-stripe:disabled { opacity:0.5; cursor:not-allowed; }
   .stripe-connected-detail { font-family:var(--mono); font-size:10px; color:var(--green); background:var(--green-bg); padding:10px 14px; display:none; }
   .stripe-connected-detail.visible { display:block; }
+  .stripe-disconnect-btn { font-family:var(--mono); font-size:9px; letter-spacing:0.1em; text-transform:uppercase; background:none; border:1px solid var(--border); padding:8px 14px; cursor:pointer; color:var(--muted); }
+  .stripe-disconnect-btn:hover { border-color:#c0392b; color:#c0392b; }
 
   /* SUCCESS */
   .success-wrap { max-width:520px; margin:60px auto; text-align:center; }
@@ -401,10 +403,13 @@
             </div>
           </div>
           <div class="stripe-connected-detail" id="stripe-connected-detail">✓ Bank account connected — payout will be sent immediately</div>
-          <button class="btn-stripe" id="stripe-connect-btn" onclick="doStripeConnect()" style="display:none">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            Connect bank account
-          </button>
+          <div style="display:flex;align-items:center;gap:10px">
+            <button class="btn-stripe" id="stripe-connect-btn" onclick="doStripeConnect()" style="display:none">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              Connect bank account
+            </button>
+            <button class="stripe-disconnect-btn" id="stripe-disconnect-btn" onclick="doStripeDisconnect()" style="display:none">Disconnect</button>
+          </div>
         </div>
 
         <div class="claim-note">Stripe payouts are sent immediately to your connected bank. ACH/PayPal requests are processed within 5 business days. Minimum $10 required.</div>
@@ -808,12 +813,14 @@
     const text = document.getElementById('stripe-status-text');
     const sub = document.getElementById('stripe-status-sub');
     const connectBtn = document.getElementById('stripe-connect-btn');
+    const disconnectBtn = document.getElementById('stripe-disconnect-btn');
     const detail = document.getElementById('stripe-connected-detail');
 
     dot.className = 'stripe-dot loading';
     text.textContent = 'Checking account…';
     sub.textContent = '';
     connectBtn.style.display = 'none';
+    disconnectBtn.style.display = 'none';
     detail.classList.remove('visible');
 
     try {
@@ -826,24 +833,45 @@
         sub.textContent = status.email || '';
         detail.classList.add('visible');
         connectBtn.style.display = 'none';
+        disconnectBtn.style.display = 'inline-block';
       } else if (status.connected && !status.onboarded) {
         dot.className = 'stripe-dot disconnected';
         text.textContent = 'Onboarding incomplete';
         sub.textContent = 'Finish connecting to enable instant payouts';
         connectBtn.textContent = 'Continue setup →';
         connectBtn.style.display = 'inline-flex';
+        disconnectBtn.style.display = 'inline-block';
       } else {
         dot.className = 'stripe-dot disconnected';
         text.textContent = 'Not connected';
         sub.textContent = 'Connect your bank account to receive instant payouts';
         connectBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Connect bank account';
         connectBtn.style.display = 'inline-flex';
+        disconnectBtn.style.display = 'none';
       }
     } catch(e) {
       dot.className = 'stripe-dot disconnected';
       text.textContent = 'Could not load account status';
       sub.textContent = '';
       connectBtn.style.display = 'none';
+      disconnectBtn.style.display = 'none';
+    }
+  }
+
+  async function doStripeDisconnect() {
+    if (!confirm('Disconnect your Stripe account? You can reconnect at any time.')) return;
+    const disconnectBtn = document.getElementById('stripe-disconnect-btn');
+    disconnectBtn.disabled = true;
+    disconnectBtn.textContent = 'Disconnecting…';
+    try {
+      await apiFetch('/api/stripe/connect', { method: 'DELETE' });
+      _stripeStatus = null;
+      await checkStripeStatus();
+      await checkDashStripeStatus().catch(() => {});
+    } catch(e) {
+      showErr(document.getElementById('claim-error'), 'Could not disconnect: ' + e.message);
+      disconnectBtn.disabled = false;
+      disconnectBtn.textContent = 'Disconnect';
     }
   }
 
