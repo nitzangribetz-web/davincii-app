@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Davincii — Artist Portal</title>
+<title>Davincii â Artist Portal</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -36,6 +36,7 @@
   .badge-ok { background:var(--green-bg); color:var(--green); }
   .badge-pend { background:rgba(0,0,0,0.05); color:var(--muted); }
   .badge-blue { background:var(--blue-bg); color:var(--blue); }
+  .badge-red { background:#fff0f0; color:#c0392b; }
   .back-btn { font-family:var(--mono); font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); background:none; border:none; cursor:pointer; display:flex; align-items:center; gap:8px; margin-bottom:32px; padding:0; transition:color 0.2s; }
   .back-btn:hover { color:var(--black); }
   .info-box { background:#fafafa; border-left:2px solid var(--black); padding:14px 18px; margin-bottom:24px; }
@@ -142,6 +143,12 @@
   .claim-note { font-family:var(--mono); font-size:9px; letter-spacing:0.06em; color:var(--muted); line-height:1.7; padding:14px 16px; border:1px solid var(--border); margin-bottom:24px; }
 
   /* STRIPE CONNECT */
+  .stripe-strip { display:flex; align-items:center; justify-content:space-between; border:1px solid var(--border); padding:14px 18px; margin-bottom:20px; }
+  .stripe-strip-left { display:flex; align-items:center; gap:12px; }
+  .stripe-strip-title { font-family:var(--mono); font-size:11px; color:var(--black); }
+  .stripe-strip-sub { font-family:var(--mono); font-size:9px; color:var(--muted); margin-top:2px; }
+  .stripe-strip-btn { font-family:var(--mono); font-size:9px; letter-spacing:0.12em; text-transform:uppercase; background:none; border:1px solid var(--border); padding:6px 12px; cursor:pointer; color:var(--black); }
+  .stripe-strip-btn:hover { background:var(--black); color:#fff; }
   .stripe-box { border:1px solid var(--border); padding:20px 22px; margin-bottom:24px; display:none; }
   .stripe-box.visible { display:block; }
   .stripe-box-title { font-family:var(--mono); font-size:9px; letter-spacing:0.16em; text-transform:uppercase; color:var(--muted); margin-bottom:14px; }
@@ -158,6 +165,8 @@
   .btn-stripe:disabled { opacity:0.5; cursor:not-allowed; }
   .stripe-connected-detail { font-family:var(--mono); font-size:10px; color:var(--green); background:var(--green-bg); padding:10px 14px; display:none; }
   .stripe-connected-detail.visible { display:block; }
+  .stripe-disconnect-btn { font-family:var(--mono); font-size:9px; letter-spacing:0.1em; text-transform:uppercase; background:none; border:1px solid var(--border); padding:8px 14px; cursor:pointer; color:var(--muted); }
+  .stripe-disconnect-btn:hover { border-color:#c0392b; color:#c0392b; }
 
   /* SUCCESS */
   .success-wrap { max-width:520px; margin:60px auto; text-align:center; }
@@ -196,8 +205,8 @@
       <label class="field-lbl">Email address</label>
       <input class="field" type="email" id="login-email" placeholder="you@example.com">
       <label class="field-lbl">Password</label>
-      <input class="field" type="password" id="login-password" placeholder="••••••••">
-      <button class="btn" style="width:100%" id="login-btn" onclick="doLogin()">Sign in →</button>
+      <input class="field" type="password" id="login-password" placeholder="â¢â¢â¢â¢â¢â¢â¢â¢">
+      <button class="btn" style="width:100%" id="login-btn" onclick="doLogin()">Sign in â</button>
       <div class="login-hint">Don't have an account? <a href="#" onclick="goTo('screen-signup');return false;" style="color:var(--black);text-decoration:underline;">Create one</a></div>
     </div>
   </div>
@@ -228,7 +237,7 @@
       <input class="field" type="email" id="signup-email" placeholder="you@example.com">
       <label class="field-lbl">Password</label>
       <input class="field" type="password" id="signup-password" placeholder="Min. 8 characters">
-      <button class="btn" style="width:100%" id="signup-btn" onclick="doSignup()">Create account →</button>
+      <button class="btn" style="width:100%" id="signup-btn" onclick="doSignup()">Create account â</button>
       <div class="login-hint">Already have an account? <a href="#" onclick="goTo('screen-login');return false;" style="color:var(--black);text-decoration:underline;">Sign in</a></div>
     </div>
   </div>
@@ -248,32 +257,32 @@
     <div class="sidebar">
       <div class="sb-section">
         <div class="sb-lbl">Main</div>
-        <button class="nav-lnk active" id="nl-overview" onclick="showPg('pg-overview',this)"><span class="nav-lnk-icon">⊞</span>Overview</button>
-        <button class="nav-lnk" id="nl-catalog" onclick="showPg('pg-catalog',this)"><span class="nav-lnk-icon">♩</span>Catalog</button>
-        <button class="nav-lnk" id="nl-royalties" onclick="showPg('pg-royalties',this)"><span class="nav-lnk-icon">◎</span>Royalties</button>
-        <button class="nav-lnk" id="nl-payouts" onclick="showPg('pg-payouts',this)"><span class="nav-lnk-icon">↑</span>Payouts</button>
+        <button class="nav-lnk active" id="nl-overview" onclick="showPg('pg-overview',this)"><span class="nav-lnk-icon">â</span>Overview</button>
+        <button class="nav-lnk" id="nl-catalog" onclick="showPg('pg-catalog',this)"><span class="nav-lnk-icon">â©</span>Catalog</button>
+        <button class="nav-lnk" id="nl-royalties" onclick="showPg('pg-royalties',this)"><span class="nav-lnk-icon">â</span>Royalties</button>
+        <button class="nav-lnk" id="nl-payouts" onclick="showPg('pg-payouts',this)"><span class="nav-lnk-icon">â</span>Payouts</button>
       </div>
       <div class="sb-section">
         <div class="sb-lbl">Account</div>
-        <button class="nav-lnk" onclick="goTo('screen-claim')"><span class="nav-lnk-icon">✦</span>Claim payment</button>
+        <button class="nav-lnk" onclick="goTo('screen-claim')"><span class="nav-lnk-icon">â¦</span>Claim payment</button>
       </div>
     </div>
     <div class="main">
 
       <!-- OVERVIEW -->
       <div id="pg-overview">
-        <div class="pg-title">Good <em id="greeting-time">morning</em>, <em id="greeting-name">—</em></div>
+        <div class="pg-title">Good <em id="greeting-time">morning</em>, <em id="greeting-name">â</em></div>
         <div class="pg-sub">Here's a summary of your royalty activity.</div>
         <div class="bal-card">
           <div>
             <div class="bal-lbl">Total royalties collected</div>
-            <div class="bal-amt" id="overview-total">—</div>
-            <div class="bal-note" id="overview-count">Loading…</div>
+            <div class="bal-amt" id="overview-total">â</div>
+            <div class="bal-note" id="overview-count">Loadingâ¦</div>
           </div>
           <div>
             <div class="bal-lbl">Total paid out</div>
-            <div class="bal-amt-sm" id="overview-paid">—</div>
-            <div class="bal-note" id="overview-pending">—</div>
+            <div class="bal-amt-sm" id="overview-paid">â</div>
+            <div class="bal-note" id="overview-pending">â</div>
           </div>
           <div class="bal-actions">
             <button class="bal-btn bal-btn-p" onclick="goTo('screen-claim')">Claim payment</button>
@@ -281,23 +290,35 @@
           </div>
         </div>
 
+        <!-- Stripe Connect status strip -->
+        <div class="stripe-strip" id="dash-stripe-strip">
+          <div class="stripe-strip-left">
+            <div class="stripe-dot loading" id="dash-stripe-dot"></div>
+            <div>
+              <div class="stripe-strip-title" id="dash-stripe-title">Checking Stripeâ¦</div>
+              <div class="stripe-strip-sub" id="dash-stripe-sub"></div>
+            </div>
+          </div>
+          <button class="stripe-strip-btn" id="dash-stripe-btn" onclick="goTo('screen-claim')" style="display:none">Set up â</button>
+        </div>
+
         <div class="sbox">
           <div class="sbox-hd">
             <div><div class="sbox-title">Recent Royalties</div><div class="sbox-sub">Latest payments recovered</div></div>
-            <button class="sbox-lnk" onclick="showPg('pg-royalties', document.getElementById('nl-royalties'))">See all →</button>
+            <button class="sbox-lnk" onclick="showPg('pg-royalties', document.getElementById('nl-royalties'))">See all â</button>
           </div>
           <div class="sbox-body" id="overview-royalties-body">
-            <div class="loading">Loading royalties…</div>
+            <div class="loading">Loading royaltiesâ¦</div>
           </div>
         </div>
 
         <div class="sbox">
           <div class="sbox-hd">
             <div><div class="sbox-title">Your Catalog</div><div class="sbox-sub">Songs registered across platforms</div></div>
-            <button class="sbox-lnk" onclick="showPg('pg-catalog', document.getElementById('nl-catalog'))">See all →</button>
+            <button class="sbox-lnk" onclick="showPg('pg-catalog', document.getElementById('nl-catalog'))">See all â</button>
           </div>
           <div class="sbox-body" id="overview-catalog-body">
-            <div class="loading">Loading catalog…</div>
+            <div class="loading">Loading catalogâ¦</div>
           </div>
         </div>
       </div>
@@ -308,7 +329,7 @@
         <div class="pg-sub" id="catalog-sub">Your registered songs.</div>
         <div class="sbox">
           <div class="sbox-body" id="catalog-body">
-            <div class="loading">Loading…</div>
+            <div class="loading">Loadingâ¦</div>
           </div>
         </div>
       </div>
@@ -319,7 +340,7 @@
         <div class="pg-sub">All royalty payments collected on your behalf.</div>
         <div class="sbox">
           <div class="sbox-body" id="royalties-body">
-            <div class="loading">Loading…</div>
+            <div class="loading">Loadingâ¦</div>
           </div>
         </div>
       </div>
@@ -330,7 +351,7 @@
         <div class="pg-sub">Your payment requests and their status.</div>
         <div class="sbox">
           <div class="sbox-body" id="payouts-body">
-            <div class="loading">Loading…</div>
+            <div class="loading">Loadingâ¦</div>
           </div>
         </div>
       </div>
@@ -346,15 +367,19 @@
     <div class="top-nav-right"><span class="top-nav-artist" id="claim-artist-name"></span><div class="avatar" id="claim-avatar"></div></div>
   </div>
   <div style="padding:40px 48px;width:100%;">
-    <button class="back-btn" onclick="goTo('screen-dash')">← Back to dashboard</button>
+    <button class="back-btn" onclick="goTo('screen-dash')">â Back to dashboard</button>
     <div class="pg-title">Claim your <em>payment.</em></div>
     <div class="pg-sub">Your earnings are ready. Choose how you'd like to receive them.</div>
     <div class="claim-layout">
       <div>
         <div class="claim-avail">
           <div>
-            <div class="claim-avail-lbl">Total royalties collected</div>
-            <div class="claim-avail-amt" id="claim-balance">—</div>
+            <div class="claim-avail-lbl">Available to claim</div>
+            <div class="claim-avail-amt" id="claim-balance">â</div>
+          </div>
+          <div style="text-align:right">
+            <div class="claim-avail-lbl">Total earned</div>
+            <div class="claim-avail-amt" id="claim-total" style="font-size:14px;color:var(--muted)">â</div>
           </div>
         </div>
         <div class="error-box" id="claim-error"></div>
@@ -362,35 +387,38 @@
         <input class="field" type="number" id="claim-amount" placeholder="e.g. 500" min="10" step="0.01">
         <label class="field-lbl">Payment method</label>
         <div class="method-opts">
-          <label class="mopt sel" id="mopt-stripe-connect"><input type="radio" name="method" value="stripe" checked onchange="updateSummary()"><div class="mopt-lbl">Stripe — bank or debit card</div><div class="mopt-sub">Instant · Recommended</div></label>
-          <label class="mopt" id="mopt-ach"><input type="radio" name="method" value="bank_transfer" onchange="updateSummary()"><div class="mopt-lbl">Bank transfer (ACH)</div><div class="mopt-sub">2–3 business days</div></label>
+          <label class="mopt sel" id="mopt-stripe-connect"><input type="radio" name="method" value="stripe" checked onchange="updateSummary()"><div class="mopt-lbl">Stripe â bank or debit card</div><div class="mopt-sub">Instant Â· Recommended</div></label>
+          <label class="mopt" id="mopt-ach"><input type="radio" name="method" value="bank_transfer" onchange="updateSummary()"><div class="mopt-lbl">Bank transfer (ACH)</div><div class="mopt-sub">2â3 business days</div></label>
           <label class="mopt" id="mopt-paypal"><input type="radio" name="method" value="paypal" onchange="updateSummary()"><div class="mopt-lbl">PayPal</div><div class="mopt-sub">Instant</div></label>
         </div>
 
-        <!-- Stripe Connect panel -->
+        <!-- Stripe Connect panel â shown only when Stripe method is selected -->
         <div class="stripe-box visible" id="stripe-connect-box">
           <div class="stripe-box-title">Stripe account</div>
           <div class="stripe-status">
             <div class="stripe-dot loading" id="stripe-dot"></div>
             <div>
-              <div class="stripe-status-text" id="stripe-status-text">Checking…</div>
+              <div class="stripe-status-text" id="stripe-status-text">Checkingâ¦</div>
               <div class="stripe-status-sub" id="stripe-status-sub"></div>
             </div>
           </div>
-          <div class="stripe-connected-detail" id="stripe-connected-detail">✓ Bank account connected — payout will be sent immediately</div>
-          <button class="btn-stripe" id="stripe-connect-btn" onclick="doStripeConnect()" style="display:none">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            Connect bank account
-          </button>
+          <div class="stripe-connected-detail" id="stripe-connected-detail">â Bank account connected â payout will be sent immediately</div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <button class="btn-stripe" id="stripe-connect-btn" onclick="doStripeConnect()" style="display:none">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              Connect bank account
+            </button>
+            <button class="stripe-disconnect-btn" id="stripe-disconnect-btn" onclick="doStripeDisconnect()" style="display:none">Disconnect</button>
+          </div>
         </div>
 
         <div class="claim-note">Stripe payouts are sent immediately to your connected bank. ACH/PayPal requests are processed within 5 business days. Minimum $10 required.</div>
-        <button class="btn" id="claim-btn" onclick="doClaim()">Confirm claim →</button>
+        <button class="btn" id="claim-btn" onclick="doClaim()">Confirm claim â</button>
       </div>
       <div>
         <div class="summary-card">
           <div class="summary-title">Payment summary</div>
-          <div class="sum-row"><div class="sum-key">Amount requested</div><div class="sum-val" id="sum-amount">—</div></div>
+          <div class="sum-row"><div class="sum-key">Amount requested</div><div class="sum-val" id="sum-amount">â</div></div>
           <div class="sum-row"><div class="sum-key">Method</div><div class="sum-val" id="sum-method">ACH Transfer</div></div>
           <div class="sum-row"><div class="sum-key">Status</div><div class="sum-val">Pending approval</div></div>
         </div>
@@ -404,24 +432,24 @@
   <div class="top-nav"><div class="top-nav-logo">Davincii</div><div class="top-nav-right"><div class="avatar" id="success-avatar"></div></div></div>
   <div style="padding:80px 48px;display:flex;justify-content:center;">
     <div class="success-wrap">
-      <div class="success-icon">◎</div>
+      <div class="success-icon">â</div>
       <h2 class="success-title" id="succ-title">Payment<br><em>requested.</em></h2>
-      <p class="success-sub" id="succ-sub">You'll receive a confirmation within 24 hours. Funds arrive within 2–5 business days.</p>
+      <p class="success-sub" id="succ-sub">You'll receive a confirmation within 24 hours. Funds arrive within 2â5 business days.</p>
       <div class="success-detail">
-        <div class="sd-row"><div class="sd-key">Amount</div><div class="sd-val" id="succ-amount">—</div></div>
-        <div class="sd-row"><div class="sd-key">Method</div><div class="sd-val" id="succ-method">—</div></div>
+        <div class="sd-row"><div class="sd-key">Amount</div><div class="sd-val" id="succ-amount">â</div></div>
+        <div class="sd-row"><div class="sd-key">Method</div><div class="sd-val" id="succ-method">â</div></div>
         <div class="sd-row"><div class="sd-key">Status</div><div class="sd-val" id="succ-status">Pending</div></div>
-        <div class="sd-row" id="succ-transfer-row" style="display:none"><div class="sd-key">Transfer ID</div><div class="sd-val" id="succ-transfer-id">—</div></div>
+        <div class="sd-row" id="succ-transfer-row" style="display:none"><div class="sd-key">Transfer ID</div><div class="sd-val" id="succ-transfer-id">â</div></div>
       </div>
-      <button class="btn" style="width:100%" onclick="goTo('screen-dash')">Back to dashboard →</button>
+      <button class="btn" style="width:100%" onclick="goTo('screen-dash')">Back to dashboard â</button>
     </div>
   </div>
 </div>
 
 <script>
-  const API = '';  // same origin — backend serves this file
+  const API = '';  // same origin â backend serves this file
 
-  // ── Auth helpers ──────────────────────────────────────────
+  // ââ Auth helpers ââââââââââââââââââââââââââââââââââââââââââ
   function getToken() { return localStorage.getItem('dvc_token'); }
   function getArtist() { try { return JSON.parse(localStorage.getItem('dvc_artist')); } catch(e) { return null; } }
   function setAuth(token, artist) {
@@ -448,7 +476,7 @@
     return data;
   }
 
-  // ── Navigation ────────────────────────────────────────────
+  // ââ Navigation ââââââââââââââââââââââââââââââââââââââââââââ
   function goTo(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
@@ -467,7 +495,7 @@
     if (pgId === 'pg-payouts') loadPayouts();
   }
 
-  // ── Login ─────────────────────────────────────────────────
+  // ââ Login âââââââââââââââââââââââââââââââââââââââââââââââââ
   async function doLogin() {
     const email = document.getElementById('login-email').value.trim();
     const password = document.getElementById('login-password').value;
@@ -475,7 +503,7 @@
     const btn = document.getElementById('login-btn');
     errEl.style.display = 'none';
     if (!email || !password) { showErr(errEl, 'Please enter your email and password.'); return; }
-    btn.disabled = true; btn.textContent = 'Signing in…';
+    btn.disabled = true; btn.textContent = 'Signing inâ¦';
     try {
       const data = await apiFetch('/api/auth/login', {
         method: 'POST',
@@ -486,11 +514,11 @@
     } catch(e) {
       showErr(errEl, e.message);
     } finally {
-      btn.disabled = false; btn.textContent = 'Sign in →';
+      btn.disabled = false; btn.textContent = 'Sign in â';
     }
   }
 
-  // ── Signup ────────────────────────────────────────────────
+  // ââ Signup ââââââââââââââââââââââââââââââââââââââââââââââââ
   async function doSignup() {
     const name = document.getElementById('signup-name').value.trim();
     const email = document.getElementById('signup-email').value.trim();
@@ -501,7 +529,7 @@
     if (!name) { showErr(errEl, 'Please enter your full name.'); return; }
     if (!email) { showErr(errEl, 'Please enter your email address.'); return; }
     if (!password || password.length < 8) { showErr(errEl, 'Password must be at least 8 characters.'); return; }
-    btn.disabled = true; btn.textContent = 'Creating account…';
+    btn.disabled = true; btn.textContent = 'Creating accountâ¦';
     try {
       const data = await apiFetch('/api/auth/signup', {
         method: 'POST',
@@ -512,7 +540,7 @@
     } catch(e) {
       showErr(errEl, e.message);
     } finally {
-      btn.disabled = false; btn.textContent = 'Create account →';
+      btn.disabled = false; btn.textContent = 'Create account â';
     }
   }
 
@@ -526,7 +554,7 @@
     el.style.display = 'block';
   }
 
-  // ── Dashboard ─────────────────────────────────────────────
+  // ââ Dashboard âââââââââââââââââââââââââââââââââââââââââââââ
   async function loadDashboard() {
     const artist = getArtist();
     if (!artist) { doLogout(); return; }
@@ -541,7 +569,8 @@
     const h = new Date().getHours();
     document.getElementById('greeting-time').textContent = h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening';
 
-    // Load summary data
+    // Load summary data + Stripe status in parallel
+    checkDashStripeStatus().catch(() => {});
     try {
       const [roySum, paySum] = await Promise.all([
         apiFetch('/api/royalties/summary'),
@@ -565,9 +594,9 @@
           <div class="th-row col-5"><div class="th">Song</div><div class="th">Platform</div><div class="th">Period</div><div class="th">Type</div><div class="th" style="text-align:right">Amount</div></div>
           ${recent.map(r => `
             <div class="tr col-5">
-              <div><div class="tr-song">${r.songs ? r.songs.title : '—'}</div><div class="tr-meta">${r.platform}</div></div>
+              <div><div class="tr-song">${r.songs ? r.songs.title : 'â'}</div><div class="tr-meta">${r.platform}</div></div>
               <div class="tr-cell">${r.platform}</div>
-              <div class="tr-cell">${r.period || '—'}</div>
+              <div class="tr-cell">${r.period || 'â'}</div>
               <div><span class="badge badge-ok">${r.royalty_type || 'Royalty'}</span></div>
               <div class="tr-amt">$${Number(r.amount).toFixed(2)}</div>
             </div>`).join('')}`;
@@ -598,15 +627,15 @@
     }
   }
 
-  // ── Catalog ───────────────────────────────────────────────
+  // ââ Catalog âââââââââââââââââââââââââââââââââââââââââââââââ
   async function loadCatalog() {
     const body = document.getElementById('catalog-body');
-    body.innerHTML = '<div class="loading">Loading…</div>';
+    body.innerHTML = '<div class="loading">Loadingâ¦</div>';
     try {
       const songs = await apiFetch('/api/songs');
       document.getElementById('catalog-sub').textContent = songs.length + ' song' + (songs.length !== 1 ? 's' : '') + ' in your catalog.';
       if (songs.length === 0) {
-        body.innerHTML = '<div class="empty-state">No songs yet — contact Davincii to add your catalog</div>';
+        body.innerHTML = '<div class="empty-state">No songs yet â contact Davincii to add your catalog</div>';
         return;
       }
       body.innerHTML = `
@@ -614,19 +643,19 @@
         ${songs.map(s => `
           <div class="tr col-4c">
             <div><div class="tr-song">${s.title}</div><div class="tr-meta">Added ${new Date(s.created_at).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'})}</div></div>
-            <div class="tr-cell">${s.isrc || '—'}</div>
+            <div class="tr-cell">${s.isrc || 'â'}</div>
             <div><span class="badge ${s.status === 'active' || s.status === 'collecting' ? 'badge-ok' : s.status === 'registering' ? 'badge-blue' : 'badge-pend'}">${s.status || 'pending'}</span></div>
-            <div class="tr-amt" style="font-size:11px;color:var(--muted)">${s.release_date ? new Date(s.release_date).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : '—'}</div>
+            <div class="tr-amt" style="font-size:11px;color:var(--muted)">${s.release_date ? new Date(s.release_date).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : 'â'}</div>
           </div>`).join('')}`;
     } catch(e) {
       body.innerHTML = '<div class="empty-state">Could not load catalog</div>';
     }
   }
 
-  // ── Royalties ─────────────────────────────────────────────
+  // ââ Royalties âââââââââââââââââââââââââââââââââââââââââââââ
   async function loadRoyalties() {
     const body = document.getElementById('royalties-body');
-    body.innerHTML = '<div class="loading">Loading…</div>';
+    body.innerHTML = '<div class="loading">Loadingâ¦</div>';
     try {
       const royalties = await apiFetch('/api/royalties');
       if (royalties.length === 0) {
@@ -637,9 +666,9 @@
         <div class="th-row col-5"><div class="th">Song</div><div class="th">Platform</div><div class="th">Period</div><div class="th">Type</div><div class="th" style="text-align:right">Amount</div></div>
         ${royalties.map(r => `
           <div class="tr col-5">
-            <div><div class="tr-song">${r.songs ? r.songs.title : '—'}</div><div class="tr-meta">${r.platform}</div></div>
+            <div><div class="tr-song">${r.songs ? r.songs.title : 'â'}</div><div class="tr-meta">${r.platform}</div></div>
             <div class="tr-cell">${r.platform}</div>
-            <div class="tr-cell">${r.period || '—'}</div>
+            <div class="tr-cell">${r.period || 'â'}</div>
             <div><span class="badge badge-ok">${r.royalty_type || 'Royalty'}</span></div>
             <div class="tr-amt">$${Number(r.amount).toFixed(2)}</div>
           </div>`).join('')}`;
@@ -648,23 +677,27 @@
     }
   }
 
-  // ── Payouts ───────────────────────────────────────────────
+  // ââ Payouts âââââââââââââââââââââââââââââââââââââââââââââââ
   async function loadPayouts() {
     const body = document.getElementById('payouts-body');
-    body.innerHTML = '<div class="loading">Loading…</div>';
+    body.innerHTML = '<div class="loading">Loadingâ¦</div>';
     try {
       const payouts = await apiFetch('/api/payouts');
       if (payouts.length === 0) {
         body.innerHTML = '<div class="empty-state">No payouts requested yet</div>';
         return;
       }
+      const methodLabel = { bank_transfer: 'ACH Transfer', paypal: 'PayPal', stripe: 'Stripe (Instant)', check: 'Check' };
       body.innerHTML = `
         <div class="th-row col-4"><div class="th">Date</div><div class="th">Method</div><div class="th">Status</div><div class="th" style="text-align:right">Amount</div></div>
         ${payouts.map(p => `
           <div class="tr col-4">
-            <div><div class="tr-song">${new Date(p.created_at).toLocaleDateString('en-US', {month:'long', day:'numeric', year:'numeric'})}</div></div>
-            <div class="tr-cell">${p.method.replace('_', ' ')}</div>
-            <div><span class="badge ${p.status === 'completed' ? 'badge-ok' : p.status === 'pending' ? 'badge-pend' : 'badge-blue'}">${p.status}</span></div>
+            <div>
+              <div class="tr-song">${new Date(p.created_at).toLocaleDateString('en-US', {month:'long', day:'numeric', year:'numeric'})}</div>
+              ${p.stripe_transfer_id ? `<div class="tr-meta" style="font-size:9px;letter-spacing:0.04em">${p.stripe_transfer_id}</div>` : ''}
+            </div>
+            <div class="tr-cell">${methodLabel[p.method] || p.method.replace(/_/g, ' ')}</div>
+            <div><span class="badge ${p.status === 'completed' ? 'badge-ok' : p.status === 'failed' ? 'badge-red' : 'badge-pend'}">${p.status}</span></div>
             <div class="tr-amt">$${Number(p.amount).toFixed(2)}</div>
           </div>`).join('')}`;
     } catch(e) {
@@ -672,7 +705,7 @@
     }
   }
 
-  // ── Claim ─────────────────────────────────────────────────
+  // ââ Claim âââââââââââââââââââââââââââââââââââââââââââââââââ
   async function loadClaim() {
     const artist = getArtist();
     if (!artist) return;
@@ -680,24 +713,51 @@
     document.getElementById('claim-artist-name').textContent = artist.name;
     document.getElementById('claim-avatar').textContent = initials;
     document.getElementById('success-avatar').textContent = initials;
-    const sr = document.querySelector('input[name="method"][value="stripe"]');
-    if (sr) { sr.checked = true; document.querySelectorAll('.mopt').forEach(o=>o.classList.remove('sel')); sr.closest('.mopt').classList.add('sel'); }
+    // Reset to Stripe method selected by default and show the Stripe panel
+    const stripeRadio = document.querySelector('input[name="method"][value="stripe"]');
+    if (stripeRadio) {
+      stripeRadio.checked = true;
+      document.querySelectorAll('.mopt').forEach(o => o.classList.remove('sel'));
+      stripeRadio.closest('.mopt').classList.add('sel');
+    }
     document.getElementById('stripe-connect-box').classList.add('visible');
-    document.getElementById('claim-error').style.display='none';
+    document.getElementById('claim-error').style.display = 'none';
     try {
-      const sum = await apiFetch('/api/royalties/summary');
-      document.getElementById('claim-balance').textContent = '
+      const bal = await apiFetch('/api/stripe/balance');
+      document.getElementById('claim-balance').textContent = '$' + Number(bal.available).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+      document.getElementById('claim-total').textContent = '$' + Number(bal.total_royalties).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+      // Pre-fill amount with available balance (if >= $10)
+      const avail = parseFloat(bal.available);
+      const amtField = document.getElementById('claim-amount');
+      if (avail >= 10 && !amtField.value) {
+        amtField.value = avail.toFixed(2);
+        updateSummary();
+      }
+    } catch(e) {}
+    // Load Stripe status in parallel â non-blocking
+    checkStripeStatus().catch(() => {});
+  }
+
+  function updateMethodUI() {
+    const method = document.querySelector('input[name="method"]:checked');
+    const box = document.getElementById('stripe-connect-box');
+    if (box) {
+      if (method && method.value === 'stripe') box.classList.add('visible');
+      else box.classList.remove('visible');
+    }
+  }
 
   function updateSummary() {
     const amount = document.getElementById('claim-amount').value;
     const method = document.querySelector('input[name="method"]:checked');
-    document.getElementById('sum-amount').textContent = amount ? '$' + Number(amount).toFixed(2) : '—';
+    document.getElementById('sum-amount').textContent = amount ? '$' + Number(amount).toFixed(2) : 'â';
     if (method) {
-      const labels = { bank_transfer: 'ACH Transfer', paypal: 'PayPal', stripe: 'Wire Transfer' };
+      const labels = { bank_transfer: 'ACH Transfer', paypal: 'PayPal', stripe: 'Stripe (Instant)' };
       document.getElementById('sum-method').textContent = labels[method.value] || method.value;
     }
     document.querySelectorAll('.mopt').forEach(o => o.classList.remove('sel'));
     if (method) method.closest('.mopt').classList.add('sel');
+    updateMethodUI();
   }
 
   document.getElementById('claim-amount').addEventListener('input', updateSummary);
@@ -710,82 +770,131 @@
     });
   });
 
-  let _stripeStatus = null;
+  // ââ Stripe Connect â Dashboard strip ââââââââââââââââââââââ
+  async function checkDashStripeStatus() {
+    const dot = document.getElementById('dash-stripe-dot');
+    const title = document.getElementById('dash-stripe-title');
+    const sub = document.getElementById('dash-stripe-sub');
+    const btn = document.getElementById('dash-stripe-btn');
+    if (!dot) return;
+    try {
+      const status = await apiFetch('/api/stripe/connect/status');
+      if (status.onboarded && status.payouts_enabled) {
+        dot.className = 'stripe-dot connected';
+        title.textContent = 'Stripe connected';
+        sub.textContent = (status.email || 'Bank account linked') + ' Â· Instant payouts enabled';
+        btn.style.display = 'none';
+      } else if (status.connected && !status.onboarded) {
+        dot.className = 'stripe-dot disconnected';
+        title.textContent = 'Stripe setup incomplete';
+        sub.textContent = 'Finish connecting to enable instant payouts';
+        btn.textContent = 'Continue â';
+        btn.style.display = 'inline-block';
+      } else {
+        dot.className = 'stripe-dot disconnected';
+        title.textContent = 'Bank account not connected';
+        sub.textContent = 'Connect your bank for instant payouts';
+        btn.textContent = 'Set up â+;
+        btn.style.display = 'inline-block';
+      }
+    } catch(e) {
+      dot.className = 'stripe-dot disconnected';
+      title.textContent = 'Stripe status unavailable';
+      sub.textContent = '';
+      btn.style.display = 'none';
+    }
+  }
+
+  // ââ Stripe Connect ââââââââââââââââââââââââââââââââââââââââ
+  let _stripeStatus = null; // cached: { connected, onboarded, email, payouts_enabled }
 
   async function checkStripeStatus() {
-    const dot=document.getElementById('stripe-dot'),txt=document.getElementById('stripe-status-text'),sub=document.getElementById('stripe-status-sub'),btn=document.getElementById('stripe-connect-btn'),det=document.getElementById('stripe-connected-detail');
-    dot.className='stripe-dot loading'; txt.textContent='Checking…'; sub.textContent=''; btn.style.display='none'; det.classList.remove('visible');
+    const dot = document.getElementById('stripe-dot');
+    const text = document.getElementById('stripe-status-text');
+    const sub = document.getElementById('stripe-status-sub');
+    const connectBtn = document.getElementById('stripe-connect-btn');
+    const disconnectBtn = document.getElementById('stripe-disconnect-btn');
+    const detail = document.getElementById('stripe-connected-detail');
+
+    dot.className = 'stripe-dot loading';
+    text.textContent = 'Checking accountâ¦';
+    sub.textContent = '';
+    connectBtn.style.display = 'none';
+    disconnectBtn.style.display = 'none';
+    detail.classList.remove('visible');
+
     try {
-      const st=await apiFetch('/api/stripe/connect/status'); _stripeStatus=st;
-      if(st.onboarded&&st.payouts_enabled){dot.className='stripe-dot connected';txt.textContent='Account connected';sub.textContent=st.email||'';det.classList.add('visible');btn.style.display='none';}
-      else if(st.connected&&!st.onboarded){dot.className='stripe-dot disconnected';txt.textContent='Onboarding incomplete';sub.textContent='Finish connecting to enable instant payouts';btn.textContent='Continue setup →';btn.style.display='inline-flex';}
-      else{dot.className='stripe-dot disconnected';txt.textContent='Not connected';sub.textContent='Connect your bank to receive instant payouts';btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Connect bank account';btn.style.display='inline-flex';}
-    }catch(e){dot.className='stripe-dot disconnected';txt.textContent='Could not load status';}
-  }
+      const status = await apiFetch('/api/stripe/connect/status');
+      _stripeStatus = status;
 
-  function updateMethodUI(){
-    const m=document.querySelector('input[name="method"]:checked'),box=document.getElementById('stripe-connect-box');
-    if(m&&m.value==='stripe')box.classList.add('visible'); else box.classList.remove('visible');
-  }
-
-  function updateSummary(){
-    const amt=document.getElementById('claim-amount').value,m=document.querySelector('input[name="method"]:checked');
-    document.getElementById('sum-amount').textContent=amt?'
-    const amount = document.getElementById('claim-amount').value;
-    const method = document.querySelector('input[name="method"]:checked');
-    const errEl = document.getElementById('claim-error');
-    const btn = document.getElementById('claim-btn');
-    errEl.style.display='none';
-    if(!amount||parseFloat(amount)<10){showErr(errEl,'Minimum payout amount is $10.');return;}
-    if(!method){showErr(errEl,'Please select a payment method.');return;}
-    if(method.value==='stripe'){
-      if(!_stripeStatus||!_stripeStatus.onboarded){showErr(errEl,'Please connect your Stripe account first.');return;}
-      btn.disabled=true;btn.textContent='Sending transfer…';
-      try{
-        const d=await apiFetch('/api/stripe/payout',{method:'POST',body:JSON.stringify({amount:parseFloat(amount)})});
-        document.getElementById('succ-amount').textContent='
-
-  // ── Init ──────────────────────────────────────────────────
-  (function init() {
-    const token=getToken(),artist=getArtist();
-    const params=new URLSearchParams(window.location.search);
-    if(params.get('stripe_connected')==='true'){
-      window.history.replaceState({},'','/');
-      if(token&&artist)goTo('screen-claim');
-    }else if(token&&artist){goTo('screen-dash');}
-    document.getElementById('login-password').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
-    document.getElementById('signup-password').addEventListener('keydown',e=>{if(e.key==='Enter')doSignup();});
-  })();
-</script>
-</body>
-</html>
- + Number(sum.total).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-    } catch(e) {}
-    checkStripeStatus().catch(()=>{});
-  }
-
-  function updateSummary() {
-    const amount = document.getElementById('claim-amount').value;
-    const method = document.querySelector('input[name="method"]:checked');
-    document.getElementById('sum-amount').textContent = amount ? '$' + Number(amount).toFixed(2) : '—';
-    if (method) {
-      const labels = { bank_transfer: 'ACH Transfer', paypal: 'PayPal', stripe: 'Wire Transfer' };
-      document.getElementById('sum-method').textContent = labels[method.value] || method.value;
+      if (status.onboarded && status.payouts_enabled) {
+        dot.className = 'stripe-dot connected';
+        text.textContent = 'Account connected';
+        sub.textContent = status.email || '';
+        detail.classList.add('visible');
+        connectBtn.style.display = 'none';
+        disconnectBtn.style.display = 'inline-block';
+      } else if (status.connected && !status.onboarded) {
+        dot.className = 'stripe-dot disconnected';
+        text.textContent = 'Onboarding incomplete';
+        sub.textContent = 'Finish connecting to enable instant payouts';
+        connectBtn.textContent = 'Continue setup â+;
+        connectBtn.style.display = 'inline-flex';
+        disconnectBtn.style.display = 'inline-block';
+      } else {
+        dot.className = 'stripe-dot disconnected';
+        text.textContent = 'Not connected';
+        sub.textContent = 'Connect your bank account to receive instant payouts';
+        connectBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Connect bank account';
+        connectBtn.style.display = 'inline-flex';
+        disconnectBtn.style.display = 'none';
+      }
+    } catch(e) {
+      dot.className = 'stripe-dot disconnected';
+      text.textContent = 'Could not load account status';
+      sub.textContent = '';
+      connectBtn.style.display = 'none';
+      disconnectBtn.style.display = 'none';
     }
-    document.querySelectorAll('.mopt').forEach(o => o.classList.remove('sel'));
-    if (method) method.closest('.mopt').classList.add('sel');
   }
 
-  document.getElementById('claim-amount').addEventListener('input', updateSummary);
+  async function doStripeDisconnect() {
+    if (!confirm('Disconnect your Stripe account? You can reconnect at any time.')) return;
+    const disconnectBtn = document.getElementById('stripe-disconnect-btn');
+    disconnectBtn.disabled = true;
+    disconnectBtn.textContent = 'Disconnectingâ¦';
+    try {
+      await apiFetch('/api/stripe/connect', { method: 'DELETE' });
+      _stripeStatus = null;
+      await checkStripeStatus();
+      await checkDashStripeStatus().catch(() => {});
+    } catch(e) {
+      showErr(document.getElementById('claim-error'), 'Could not disconnect: ' + e.message);
+      disconnectBtn.disabled = false;
+      disconnectBtn.textContent = 'Disconnect';
+    }
+  }
 
-  document.querySelectorAll('.mopt').forEach(opt => {
-    opt.addEventListener('click', function() {
-      document.querySelectorAll('.mopt').forEach(o => o.classList.remove('sel'));
-      this.classList.add('sel');
-      updateSummary();
-    });
-  });
+  async function doStripeConnect() {
+    const btn = document.getElementById('stripe-connect-btn');
+    btn.disabled = true;
+    const origHTML = btn.innerHTML;
+    btn.innerHTML = 'Redirecting to Stripeâ¦';
+    try {
+      const data = await apiFetch('/api/stripe/connect', { method: 'POST' });
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error('No onboarding URL returned');
+      }
+    } catch(e) {
+      showErr(document.getElementById('claim-error'), 'Could not start Stripe onboarding: ' + e.message);
+      btn.disabled = false;
+      btn.innerHTML = origHTML;
+    }
+  }
 
+  // ââ Claim âââââââââââââââââââââââââââââââââââââââââââââââââ
   async function doClaim() {
     const amount = document.getElementById('claim-amount').value;
     const method = document.querySelector('input[name="method"]:checked');
@@ -794,637 +903,91 @@
     errEl.style.display = 'none';
     if (!amount || parseFloat(amount) < 10) { showErr(errEl, 'Minimum payout amount is $10.'); return; }
     if (!method) { showErr(errEl, 'Please select a payment method.'); return; }
-    btn.disabled = true; btn.textContent = 'Processing…';
-    try {
-      const data = await apiFetch('/api/payouts/request', {
-        method: 'POST',
-        body: JSON.stringify({ amount: parseFloat(amount), method: method.value })
-      });
-      const labels = { bank_transfer: 'ACH Transfer', paypal: 'PayPal', stripe: 'Wire Transfer' };
-      document.getElementById('succ-amount').textContent = '$' + Number(data.amount).toFixed(2);
-      document.getElementById('succ-method').textContent = labels[data.method] || data.method;
-      goTo('screen-success');
-    } catch(e) {
-      showErr(errEl, e.message);
-    } finally {
-      btn.disabled = false; btn.textContent = 'Confirm claim →';
-    }
-  }
 
-  // ── Init ──────────────────────────────────────────────────
-  (function init() {
-    const token = getToken();
-    const artist = getArtist();
-    if (token && artist) {
-      goTo('screen-dash');
-    }
-    // Allow login on Enter key
-    document.getElementById('login-password').addEventListener('keydown', e => {
-      if (e.key === 'Enter') doLogin();
-    });
-    // Allow signup on Enter key
-    document.getElementById('signup-password').addEventListener('keydown', e => {
-      if (e.key === 'Enter') doSignup();
-    });
-  })();
-</script>
-</body>
-</html>
-+Number(amt).toFixed(2):'—';
-    if(m){const L={bank_transfer:'ACH Transfer',paypal:'PayPal',stripe:'Stripe (Instant)'};document.getElementById('sum-method').textContent=L[m.value]||m.value;}
-    document.querySelectorAll('.mopt').forEach(o=>o.classList.remove('sel'));
-    if(m)m.closest('.mopt').classList.add('sel');
-    updateMethodUI();
-  }
-
-  async function doStripeConnect(){
-    const btn=document.getElementById('stripe-connect-btn');
-    btn.disabled=true;const orig=btn.innerHTML;btn.innerHTML='Redirecting…';
-    try{
-      const d=await apiFetch('/api/stripe/connect',{method:'POST'});
-      if(d.url)window.location.href=d.url; else throw new Error('No URL');
-    }catch(e){showErr(document.getElementById('claim-error'),'Stripe error: '+e.message);btn.disabled=false;btn.innerHTML=orig;}
-  }
-
-  async function doClaim() {
-    const amount = document.getElementById('claim-amount').value;
-    const method = document.querySelector('input[name="method"]:checked');
-    const errEl = document.getElementById('claim-error');
-    const btn = document.getElementById('claim-btn');
-    errEl.style.display = 'none';
-    if (!amount || parseFloat(amount) < 10) { showErr(errEl, 'Minimum payout amount is $10.'); return; }
-    if (!method) { showErr(errEl, 'Please select a payment method.'); return; }
-    btn.disabled = true; btn.textContent = 'Processing…';
-    try {
-      const data = await apiFetch('/api/payouts/request', {
-        method: 'POST',
-        body: JSON.stringify({ amount: parseFloat(amount), method: method.value })
-      });
-      const labels = { bank_transfer: 'ACH Transfer', paypal: 'PayPal', stripe: 'Wire Transfer' };
-      document.getElementById('succ-amount').textContent = '$' + Number(data.amount).toFixed(2);
-      document.getElementById('succ-method').textContent = labels[data.method] || data.method;
-      goTo('screen-success');
-    } catch(e) {
-      showErr(errEl, e.message);
-    } finally {
-      btn.disabled = false; btn.textContent = 'Confirm claim →';
-    }
-  }
-
-  // ── Init ──────────────────────────────────────────────────
-  (function init() {
-    const token = getToken();
-    const artist = getArtist();
-    if (token && artist) {
-      goTo('screen-dash');
-    }
-    // Allow login on Enter key
-    document.getElementById('login-password').addEventListener('keydown', e => {
-      if (e.key === 'Enter') doLogin();
-    });
-    // Allow signup on Enter key
-    document.getElementById('signup-password').addEventListener('keydown', e => {
-      if (e.key === 'Enter') doSignup();
-    });
-  })();
-</script>
-</body>
-</html>
- + Number(sum.total).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-    } catch(e) {}
-    checkStripeStatus().catch(()=>{});
-  }
-
-  function updateSummary() {
-    const amount = document.getElementById('claim-amount').value;
-    const method = document.querySelector('input[name="method"]:checked');
-    document.getElementById('sum-amount').textContent = amount ? '$' + Number(amount).toFixed(2) : '—';
-    if (method) {
-      const labels = { bank_transfer: 'ACH Transfer', paypal: 'PayPal', stripe: 'Wire Transfer' };
-      document.getElementById('sum-method').textContent = labels[method.value] || method.value;
-    }
-    document.querySelectorAll('.mopt').forEach(o => o.classList.remove('sel'));
-    if (method) method.closest('.mopt').classList.add('sel');
-  }
-
-  document.getElementById('claim-amount').addEventListener('input', updateSummary);
-
-  document.querySelectorAll('.mopt').forEach(opt => {
-    opt.addEventListener('click', function() {
-      document.querySelectorAll('.mopt').forEach(o => o.classList.remove('sel'));
-      this.classList.add('sel');
-      updateSummary();
-    });
-  });
-
-  async function doClaim() {
-    const amount = document.getElementById('claim-amount').value;
-    const method = document.querySelector('input[name="method"]:checked');
-    const errEl = document.getElementById('claim-error');
-    const btn = document.getElementById('claim-btn');
-    errEl.style.display = 'none';
-    if (!amount || parseFloat(amount) < 10) { showErr(errEl, 'Minimum payout amount is $10.'); return; }
-    if (!method) { showErr(errEl, 'Please select a payment method.'); return; }
-    btn.disabled = true; btn.textContent = 'Processing…';
-    try {
-      const data = await apiFetch('/api/payouts/request', {
-        method: 'POST',
-        body: JSON.stringify({ amount: parseFloat(amount), method: method.value })
-      });
-      const labels = { bank_transfer: 'ACH Transfer', paypal: 'PayPal', stripe: 'Wire Transfer' };
-      document.getElementById('succ-amount').textContent = '$' + Number(data.amount).toFixed(2);
-      document.getElementById('succ-method').textContent = labels[data.method] || data.method;
-      goTo('screen-success');
-    } catch(e) {
-      showErr(errEl, e.message);
-    } finally {
-      btn.disabled = false; btn.textContent = 'Confirm claim →';
-    }
-  }
-
-  // ── Init ──────────────────────────────────────────────────
-  (function init() {
-    const token = getToken();
-    const artist = getArtist();
-    if (token && artist) {
-      goTo('screen-dash');
-    }
-    // Allow login on Enter key
-    document.getElementById('login-password').addEventListener('keydown', e => {
-      if (e.key === 'Enter') doLogin();
-    });
-    // Allow signup on Enter key
-    document.getElementById('signup-password').addEventListener('keydown', e => {
-      if (e.key === 'Enter') doSignup();
-    });
-  })();
-</script>
-</body>
-</html>
-+Number(d.payout.amount).toFixed(2);
-        document.getElementById('succ-method').textContent='Stripe (Instant)';
-        document.getElementById('succ-status').textContent='Completed';
-        document.getElementById('succ-title').innerHTML='Payment<br><em>sent.</em>';
-        document.getElementById('succ-sub').textContent='Funds transferred to your connected bank account.';
-        document.getElementById('succ-transfer-row').style.display='flex';
-        document.getElementById('succ-transfer-id').textContent=d.transfer_id;
+    // Stripe path
+    if (method.value === 'stripe') {
+      if (!_stripeStatus || !_stripeStatus.onboarded) {
+        showErr(errEl, 'Please connect your Stripe account before requesting a payout.');
+        return;
+      }
+      // Client-side balance guard
+      const balText = document.getElementById('claim-balance').textContent.replace(/[$,]/g, '');
+      const avail = parseFloat(balText);
+      if (!isNaN(avail) && parseFloat(amount) > avail + 0.001) {
+        showErr(errEl, `Amount exceeds your available balance of $${avail.toFixed(2)}.`);
+        return;
+      }
+      btn.disabled = true; btn.textContent = 'Sending transferâ¦';
+      try {
+        const data = await apiFetch('/api/stripe/payout', {
+          method: 'POST',
+          body: JSON.stringify({ amount: parseFloat(amount) })
+        });
+        document.getElementById('succ-amount').textContent = '$' + Number(data.payout.amount).toFixed(2);
+        document.getElementById('succ-method').textContent = 'Stripe (Instant)';
+        document.getElementById('succ-status').textContent = 'Completed';
+        document.getElementById('succ-title').innerHTML = 'Payment<br><em>sent.</em>';
+        document.getElementById('succ-sub').textContent = 'Your funds have been transferred to your connected bank account.';
+        document.getElementById('succ-transfer-row').style.display = 'flex';
+        document.getElementById('succ-transfer-id').textContent = data.transfer_id;
         goTo('screen-success');
-      }catch(e){showErr(errEl,e.message);}
-      finally{btn.disabled=false;btn.textContent='Confirm claim →';}
+      } catch(e) {
+        showErr(errEl, e.message);
+      } finally {
+        btn.disabled = false; btn.textContent = 'Confirm claim â';
+      }
       return;
     }
-    btn.disabled=true;btn.textContent='Processing…';
-    try{
-      const data=await apiFetch('/api/payouts/request',{method:'POST',body:JSON.stringify({amount:parseFloat(amount),method:method.value})});
-      const L={bank_transfer:'ACH Transfer',paypal:'PayPal'};
-      document.getElementById('succ-amount').textContent='
 
-  // ── Init ──────────────────────────────────────────────────
-  (function init() {
-    const token = getToken();
-    const artist = getArtist();
-    if (token && artist) {
-      goTo('screen-dash');
+    // ACH / PayPal path â also check client-side balance
+    const balText2 = document.getElementById('claim-balance').textContent.replace(/[$,]/g, '');
+    const avail2 = parseFloat(balText2);
+    if (!isNaN(avail2) && parseFloat(amount) > avail2 + 0.001) {
+      showErr(errEl, `Amount exceeds your available balance of $${avail2.toFixed(2)}.`);
+      return;
     }
-    // Allow login on Enter key
-    document.getElementById('login-password').addEventListener('keydown', e => {
-      if (e.key === 'Enter') doLogin();
-    });
-    // Allow signup on Enter key
-    document.getElementById('signup-password').addEventListener('keydown', e => {
-      if (e.key === 'Enter') doSignup();
-    });
-  })();
-</script>
-</body>
-</html>
- + Number(sum.total).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-    } catch(e) {}
-    checkStripeStatus().catch(()=>{});
-  }
-
-  function updateSummary() {
-    const amount = document.getElementById('claim-amount').value;
-    const method = document.querySelector('input[name="method"]:checked');
-    document.getElementById('sum-amount').textContent = amount ? '$' + Number(amount).toFixed(2) : '—';
-    if (method) {
-      const labels = { bank_transfer: 'ACH Transfer', paypal: 'PayPal', stripe: 'Wire Transfer' };
-      document.getElementById('sum-method').textContent = labels[method.value] || method.value;
-    }
-    document.querySelectorAll('.mopt').forEach(o => o.classList.remove('sel'));
-    if (method) method.closest('.mopt').classList.add('sel');
-  }
-
-  document.getElementById('claim-amount').addEventListener('input', updateSummary);
-
-  document.querySelectorAll('.mopt').forEach(opt => {
-    opt.addEventListener('click', function() {
-      document.querySelectorAll('.mopt').forEach(o => o.classList.remove('sel'));
-      this.classList.add('sel');
-      updateSummary();
-    });
-  });
-
-  async function doClaim() {
-    const amount = document.getElementById('claim-amount').value;
-    const method = document.querySelector('input[name="method"]:checked');
-    const errEl = document.getElementById('claim-error');
-    const btn = document.getElementById('claim-btn');
-    errEl.style.display = 'none';
-    if (!amount || parseFloat(amount) < 10) { showErr(errEl, 'Minimum payout amount is $10.'); return; }
-    if (!method) { showErr(errEl, 'Please select a payment method.'); return; }
-    btn.disabled = true; btn.textContent = 'Processing…';
+    btn.disabled = true; btn.textContent = 'Processingâ¦';
     try {
       const data = await apiFetch('/api/payouts/request', {
         method: 'POST',
         body: JSON.stringify({ amount: parseFloat(amount), method: method.value })
       });
-      const labels = { bank_transfer: 'ACH Transfer', paypal: 'PayPal', stripe: 'Wire Transfer' };
+      const labels = { bank_transfer: 'ACH Transfer', paypal: 'PayPal' };
       document.getElementById('succ-amount').textContent = '$' + Number(data.amount).toFixed(2);
       document.getElementById('succ-method').textContent = labels[data.method] || data.method;
+      document.getElementById('succ-status').textContent = 'Pending';
+      document.getElementById('succ-title').innerHTML = 'Payment<br><em>requested.</em>';
+      document.getElementById('succ-sub').textContent = 'You\'ll receive a confirmation within 24 hours. Funds arrive within 2â5 business days.';
+      document.getElementById('succ-transfer-row').style.display = 'none';
       goTo('screen-success');
     } catch(e) {
       showErr(errEl, e.message);
     } finally {
-      btn.disabled = false; btn.textContent = 'Confirm claim →';
+      btn.disabled = false; btn.textContent = 'Confirm claim â';
     }
   }
 
-  // ── Init ──────────────────────────────────────────────────
+  // ââ Init ââââââââââââââââââââââââââââââââââââââââââââââââââ
   (function init() {
     const token = getToken();
     const artist = getArtist();
-    if (token && artist) {
+
+    // Handle return from Stripe Connect onboarding
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('stripe_connected') === 'true') {
+      // Clear param from URL without reload
+      window.history.replaceState({}, '', '/');
+      if (token && artist) {
+        goTo('screen-claim');
+        // Status will be refreshed by loadClaim()
+      }
+    } else if (token && artist) {
       goTo('screen-dash');
     }
-    // Allow login on Enter key
+
     document.getElementById('login-password').addEventListener('keydown', e => {
       if (e.key === 'Enter') doLogin();
     });
-    // Allow signup on Enter key
-    document.getElementById('signup-password').addEventListener('keydown', e => {
-      if (e.key === 'Enter') doSignup();
-    });
-  })();
-</script>
-</body>
-</html>
-+Number(amt).toFixed(2):'—';
-    if(m){const L={bank_transfer:'ACH Transfer',paypal:'PayPal',stripe:'Stripe (Instant)'};document.getElementById('sum-method').textContent=L[m.value]||m.value;}
-    document.querySelectorAll('.mopt').forEach(o=>o.classList.remove('sel'));
-    if(m)m.closest('.mopt').classList.add('sel');
-    updateMethodUI();
-  }
-
-  async function doStripeConnect(){
-    const btn=document.getElementById('stripe-connect-btn');
-    btn.disabled=true;const orig=btn.innerHTML;btn.innerHTML='Redirecting…';
-    try{
-      const d=await apiFetch('/api/stripe/connect',{method:'POST'});
-      if(d.url)window.location.href=d.url; else throw new Error('No URL');
-    }catch(e){showErr(document.getElementById('claim-error'),'Stripe error: '+e.message);btn.disabled=false;btn.innerHTML=orig;}
-  }
-
-  async function doClaim() {
-    const amount = document.getElementById('claim-amount').value;
-    const method = document.querySelector('input[name="method"]:checked');
-    const errEl = document.getElementById('claim-error');
-    const btn = document.getElementById('claim-btn');
-    errEl.style.display = 'none';
-    if (!amount || parseFloat(amount) < 10) { showErr(errEl, 'Minimum payout amount is $10.'); return; }
-    if (!method) { showErr(errEl, 'Please select a payment method.'); return; }
-    btn.disabled = true; btn.textContent = 'Processing…';
-    try {
-      const data = await apiFetch('/api/payouts/request', {
-        method: 'POST',
-        body: JSON.stringify({ amount: parseFloat(amount), method: method.value })
-      });
-      const labels = { bank_transfer: 'ACH Transfer', paypal: 'PayPal', stripe: 'Wire Transfer' };
-      document.getElementById('succ-amount').textContent = '$' + Number(data.amount).toFixed(2);
-      document.getElementById('succ-method').textContent = labels[data.method] || data.method;
-      goTo('screen-success');
-    } catch(e) {
-      showErr(errEl, e.message);
-    } finally {
-      btn.disabled = false; btn.textContent = 'Confirm claim →';
-    }
-  }
-
-  // ── Init ──────────────────────────────────────────────────
-  (function init() {
-    const token = getToken();
-    const artist = getArtist();
-    if (token && artist) {
-      goTo('screen-dash');
-    }
-    // Allow login on Enter key
-    document.getElementById('login-password').addEventListener('keydown', e => {
-      if (e.key === 'Enter') doLogin();
-    });
-    // Allow signup on Enter key
-    document.getElementById('signup-password').addEventListener('keydown', e => {
-      if (e.key === 'Enter') doSignup();
-    });
-  })();
-</script>
-</body>
-</html>
- + Number(sum.total).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-    } catch(e) {}
-    checkStripeStatus().catch(()=>{});
-  }
-
-  function updateSummary() {
-    const amount = document.getElementById('claim-amount').value;
-    const method = document.querySelector('input[name="method"]:checked');
-    document.getElementById('sum-amount').textContent = amount ? '$' + Number(amount).toFixed(2) : '—';
-    if (method) {
-      const labels = { bank_transfer: 'ACH Transfer', paypal: 'PayPal', stripe: 'Wire Transfer' };
-      document.getElementById('sum-method').textContent = labels[method.value] || method.value;
-    }
-    document.querySelectorAll('.mopt').forEach(o => o.classList.remove('sel'));
-    if (method) method.closest('.mopt').classList.add('sel');
-  }
-
-  document.getElementById('claim-amount').addEventListener('input', updateSummary);
-
-  document.querySelectorAll('.mopt').forEach(opt => {
-    opt.addEventListener('click', function() {
-      document.querySelectorAll('.mopt').forEach(o => o.classList.remove('sel'));
-      this.classList.add('sel');
-      updateSummary();
-    });
-  });
-
-  async function doClaim() {
-    const amount = document.getElementById('claim-amount').value;
-    const method = document.querySelector('input[name="method"]:checked');
-    const errEl = document.getElementById('claim-error');
-    const btn = document.getElementById('claim-btn');
-    errEl.style.display = 'none';
-    if (!amount || parseFloat(amount) < 10) { showErr(errEl, 'Minimum payout amount is $10.'); return; }
-    if (!method) { showErr(errEl, 'Please select a payment method.'); return; }
-    btn.disabled = true; btn.textContent = 'Processing…';
-    try {
-      const data = await apiFetch('/api/payouts/request', {
-        method: 'POST',
-        body: JSON.stringify({ amount: parseFloat(amount), method: method.value })
-      });
-      const labels = { bank_transfer: 'ACH Transfer', paypal: 'PayPal', stripe: 'Wire Transfer' };
-      document.getElementById('succ-amount').textContent = '$' + Number(data.amount).toFixed(2);
-      document.getElementById('succ-method').textContent = labels[data.method] || data.method;
-      goTo('screen-success');
-    } catch(e) {
-      showErr(errEl, e.message);
-    } finally {
-      btn.disabled = false; btn.textContent = 'Confirm claim →';
-    }
-  }
-
-  // ── Init ──────────────────────────────────────────────────
-  (function init() {
-    const token = getToken();
-    const artist = getArtist();
-    if (token && artist) {
-      goTo('screen-dash');
-    }
-    // Allow login on Enter key
-    document.getElementById('login-password').addEventListener('keydown', e => {
-      if (e.key === 'Enter') doLogin();
-    });
-    // Allow signup on Enter key
-    document.getElementById('signup-password').addEventListener('keydown', e => {
-      if (e.key === 'Enter') doSignup();
-    });
-  })();
-</script>
-</body>
-</html>
-+Number(data.amount).toFixed(2);
-      document.getElementById('succ-method').textContent=L[data.method]||data.method;
-      document.getElementById('succ-status').textContent='Pending';
-      document.getElementById('succ-title').innerHTML='Payment<br><em>requested.</em>';
-      document.getElementById('succ-sub').textContent='You\'ll receive a confirmation within 24 hours. Funds arrive within 2–5 business days.';
-      document.getElementById('succ-transfer-row').style.display='none';
-      goTo('screen-success');
-    }catch(e){showErr(errEl,e.message);}
-    finally{btn.disabled=false;btn.textContent='Confirm claim →';}
-  }
-
-  // ── Init ──────────────────────────────────────────────────
-  (function init() {
-    const token = getToken();
-    const artist = getArtist();
-    if (token && artist) {
-      goTo('screen-dash');
-    }
-    // Allow login on Enter key
-    document.getElementById('login-password').addEventListener('keydown', e => {
-      if (e.key === 'Enter') doLogin();
-    });
-    // Allow signup on Enter key
-    document.getElementById('signup-password').addEventListener('keydown', e => {
-      if (e.key === 'Enter') doSignup();
-    });
-  })();
-</script>
-</body>
-</html>
- + Number(sum.total).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-    } catch(e) {}
-    checkStripeStatus().catch(()=>{});
-  }
-
-  function updateSummary() {
-    const amount = document.getElementById('claim-amount').value;
-    const method = document.querySelector('input[name="method"]:checked');
-    document.getElementById('sum-amount').textContent = amount ? '$' + Number(amount).toFixed(2) : '—';
-    if (method) {
-      const labels = { bank_transfer: 'ACH Transfer', paypal: 'PayPal', stripe: 'Wire Transfer' };
-      document.getElementById('sum-method').textContent = labels[method.value] || method.value;
-    }
-    document.querySelectorAll('.mopt').forEach(o => o.classList.remove('sel'));
-    if (method) method.closest('.mopt').classList.add('sel');
-  }
-
-  document.getElementById('claim-amount').addEventListener('input', updateSummary);
-
-  document.querySelectorAll('.mopt').forEach(opt => {
-    opt.addEventListener('click', function() {
-      document.querySelectorAll('.mopt').forEach(o => o.classList.remove('sel'));
-      this.classList.add('sel');
-      updateSummary();
-    });
-  });
-
-  async function doClaim() {
-    const amount = document.getElementById('claim-amount').value;
-    const method = document.querySelector('input[name="method"]:checked');
-    const errEl = document.getElementById('claim-error');
-    const btn = document.getElementById('claim-btn');
-    errEl.style.display = 'none';
-    if (!amount || parseFloat(amount) < 10) { showErr(errEl, 'Minimum payout amount is $10.'); return; }
-    if (!method) { showErr(errEl, 'Please select a payment method.'); return; }
-    btn.disabled = true; btn.textContent = 'Processing…';
-    try {
-      const data = await apiFetch('/api/payouts/request', {
-        method: 'POST',
-        body: JSON.stringify({ amount: parseFloat(amount), method: method.value })
-      });
-      const labels = { bank_transfer: 'ACH Transfer', paypal: 'PayPal', stripe: 'Wire Transfer' };
-      document.getElementById('succ-amount').textContent = '$' + Number(data.amount).toFixed(2);
-      document.getElementById('succ-method').textContent = labels[data.method] || data.method;
-      goTo('screen-success');
-    } catch(e) {
-      showErr(errEl, e.message);
-    } finally {
-      btn.disabled = false; btn.textContent = 'Confirm claim →';
-    }
-  }
-
-  // ── Init ──────────────────────────────────────────────────
-  (function init() {
-    const token = getToken();
-    const artist = getArtist();
-    if (token && artist) {
-      goTo('screen-dash');
-    }
-    // Allow login on Enter key
-    document.getElementById('login-password').addEventListener('keydown', e => {
-      if (e.key === 'Enter') doLogin();
-    });
-    // Allow signup on Enter key
-    document.getElementById('signup-password').addEventListener('keydown', e => {
-      if (e.key === 'Enter') doSignup();
-    });
-  })();
-</script>
-</body>
-</html>
-+Number(amt).toFixed(2):'—';
-    if(m){const L={bank_transfer:'ACH Transfer',paypal:'PayPal',stripe:'Stripe (Instant)'};document.getElementById('sum-method').textContent=L[m.value]||m.value;}
-    document.querySelectorAll('.mopt').forEach(o=>o.classList.remove('sel'));
-    if(m)m.closest('.mopt').classList.add('sel');
-    updateMethodUI();
-  }
-
-  async function doStripeConnect(){
-    const btn=document.getElementById('stripe-connect-btn');
-    btn.disabled=true;const orig=btn.innerHTML;btn.innerHTML='Redirecting…';
-    try{
-      const d=await apiFetch('/api/stripe/connect',{method:'POST'});
-      if(d.url)window.location.href=d.url; else throw new Error('No URL');
-    }catch(e){showErr(document.getElementById('claim-error'),'Stripe error: '+e.message);btn.disabled=false;btn.innerHTML=orig;}
-  }
-
-  async function doClaim() {
-    const amount = document.getElementById('claim-amount').value;
-    const method = document.querySelector('input[name="method"]:checked');
-    const errEl = document.getElementById('claim-error');
-    const btn = document.getElementById('claim-btn');
-    errEl.style.display = 'none';
-    if (!amount || parseFloat(amount) < 10) { showErr(errEl, 'Minimum payout amount is $10.'); return; }
-    if (!method) { showErr(errEl, 'Please select a payment method.'); return; }
-    btn.disabled = true; btn.textContent = 'Processing…';
-    try {
-      const data = await apiFetch('/api/payouts/request', {
-        method: 'POST',
-        body: JSON.stringify({ amount: parseFloat(amount), method: method.value })
-      });
-      const labels = { bank_transfer: 'ACH Transfer', paypal: 'PayPal', stripe: 'Wire Transfer' };
-      document.getElementById('succ-amount').textContent = '$' + Number(data.amount).toFixed(2);
-      document.getElementById('succ-method').textContent = labels[data.method] || data.method;
-      goTo('screen-success');
-    } catch(e) {
-      showErr(errEl, e.message);
-    } finally {
-      btn.disabled = false; btn.textContent = 'Confirm claim →';
-    }
-  }
-
-  // ── Init ──────────────────────────────────────────────────
-  (function init() {
-    const token = getToken();
-    const artist = getArtist();
-    if (token && artist) {
-      goTo('screen-dash');
-    }
-    // Allow login on Enter key
-    document.getElementById('login-password').addEventListener('keydown', e => {
-      if (e.key === 'Enter') doLogin();
-    });
-    // Allow signup on Enter key
-    document.getElementById('signup-password').addEventListener('keydown', e => {
-      if (e.key === 'Enter') doSignup();
-    });
-  })();
-</script>
-</body>
-</html>
- + Number(sum.total).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-    } catch(e) {}
-    checkStripeStatus().catch(()=>{});
-  }
-
-  function updateSummary() {
-    const amount = document.getElementById('claim-amount').value;
-    const method = document.querySelector('input[name="method"]:checked');
-    document.getElementById('sum-amount').textContent = amount ? '$' + Number(amount).toFixed(2) : '—';
-    if (method) {
-      const labels = { bank_transfer: 'ACH Transfer', paypal: 'PayPal', stripe: 'Wire Transfer' };
-      document.getElementById('sum-method').textContent = labels[method.value] || method.value;
-    }
-    document.querySelectorAll('.mopt').forEach(o => o.classList.remove('sel'));
-    if (method) method.closest('.mopt').classList.add('sel');
-  }
-
-  document.getElementById('claim-amount').addEventListener('input', updateSummary);
-
-  document.querySelectorAll('.mopt').forEach(opt => {
-    opt.addEventListener('click', function() {
-      document.querySelectorAll('.mopt').forEach(o => o.classList.remove('sel'));
-      this.classList.add('sel');
-      updateSummary();
-    });
-  });
-
-  async function doClaim() {
-    const amount = document.getElementById('claim-amount').value;
-    const method = document.querySelector('input[name="method"]:checked');
-    const errEl = document.getElementById('claim-error');
-    const btn = document.getElementById('claim-btn');
-    errEl.style.display = 'none';
-    if (!amount || parseFloat(amount) < 10) { showErr(errEl, 'Minimum payout amount is $10.'); return; }
-    if (!method) { showErr(errEl, 'Please select a payment method.'); return; }
-    btn.disabled = true; btn.textContent = 'Processing…';
-    try {
-      const data = await apiFetch('/api/payouts/request', {
-        method: 'POST',
-        body: JSON.stringify({ amount: parseFloat(amount), method: method.value })
-      });
-      const labels = { bank_transfer: 'ACH Transfer', paypal: 'PayPal', stripe: 'Wire Transfer' };
-      document.getElementById('succ-amount').textContent = '$' + Number(data.amount).toFixed(2);
-      document.getElementById('succ-method').textContent = labels[data.method] || data.method;
-      goTo('screen-success');
-    } catch(e) {
-      showErr(errEl, e.message);
-    } finally {
-      btn.disabled = false; btn.textContent = 'Confirm claim →';
-    }
-  }
-
-  // ── Init ──────────────────────────────────────────────────
-  (function init() {
-    const token = getToken();
-    const artist = getArtist();
-    if (token && artist) {
-      goTo('screen-dash');
-    }
-    // Allow login on Enter key
-    document.getElementById('login-password').addEventListener('keydown', e => {
-      if (e.key === 'Enter') doLogin();
-    });
-    // Allow signup on Enter key
     document.getElementById('signup-password').addEventListener('keydown', e => {
       if (e.key === 'Enter') doSignup();
     });
