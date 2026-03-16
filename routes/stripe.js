@@ -180,13 +180,20 @@ router.post('/payout', auth, async (req, res) => {
 
     const amountCents = Math.round(amountFloat * 100);
 
-    const transfer = await stripe.transfers.create({
-      amount: amountCents,
-      currency: 'usd',
-      destination: artist.stripe_account_id,
-      description: `Davincii royalty payout`,
-      metadata: { artist_id: String(req.artist.id) },
-    });
+    // Idempotency key: artist + amount + date (UTC day) ensures one payout
+    // per artist per amount per day; prevents duplicate transfers on retry
+    const idempotencyKey = `payout-${req.artist.id}-${amountCents}-${new Date().toISOString().slice(0, 10)}`;
+
+    const transfer = await stripe.transfers.create(
+      {
+        amount: amountCents,
+        currency: 'usd',
+        destination: artist.stripe_account_id,
+        description: `Davincii royalty payout`,
+        metadata: { artist_id: String(req.artist.id) },
+      },
+      { idempotencyKey }
+    );
 
     const { rows: payoutRows } = await pool.query(
       `INSERT INTO payouts (artist_id, amount, method, status, stripe_transfer_id)
