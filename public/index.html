@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Davincii — Artist Portal</title>
+<title>Davincii &mdash; Artist Portal</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&family=Pinyon+Script&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -47,7 +47,7 @@
 
   /* LOGIN */
   #screen-login { flex-direction:row !important; }
-  .login-left { width:44%; background:var(--black); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:52px; }
+  .login-left { width:38%; background:var(--black); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:52px; }
   .login-left-logo { font-family:var(--serif); font-size:14px; font-weight:300; letter-spacing:0.35em; text-transform:uppercase; color:#fff; }
   .login-left h2 { font-size:62px; font-weight:300; line-height:1.05; letter-spacing:-0.025em; color:#fff; margin-bottom:20px; }
   .login-left h2 em { font-style:italic; }
@@ -193,7 +193,15 @@
 <!-- LOGIN -->
 <div class="screen active" id="screen-login">
   <div class="login-left">
-    <div class="dv-logo"><div class="dv-logo-box"><span>DaVincii</span></div></div>
+    <div class="login-left-logo">Davincii</div>
+    <div>
+      <h2>Your royalties,<br><em>finally</em><br>collected.</h2>
+      <p>We find your missing publishing income across every platform and pay you every quarter. Zero upfront cost.</p>
+    </div>
+    <div class="login-stat-border">
+      <div class="login-stat-num">$2.5B</div>
+      <div class="login-stat-lbl">In uncollected royalties annually</div>
+    </div>
   </div>
   <div class="login-right">
     <div class="login-form">
@@ -212,13 +220,12 @@
 </div>
 
 <!-- SIGNUP -->
-<div class="screen" id="screen-signup">
-  <div class="login-left">
+<div class="screen" id="screen-signup" style="flex-direction:column !important;">
+  <div style="background:var(--black);width:100%;display:flex;align-items:center;justify-content:center;padding:28px 52px;">
     <div class="dv-logo"><div class="dv-logo-box"><span>DaVincii</span></div></div>
   </div>
-  <div class="login-right">
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:52px;">
     <div class="login-form">
-      <div class="dv-logo dv-logo-form" style="margin-bottom:52px"><div class="dv-logo-box"><span>DaVincii</span></div></div>
       <h1 class="login-form-title">Create your<br><em>account.</em></h1>
       <p class="login-form-sub">Start recovering your royalties today.</p>
       <div class="error-box" id="signup-error"></div>
@@ -237,7 +244,7 @@
 <!-- DASHBOARD -->
 <div class="screen" id="screen-dash">
   <div class="top-nav">
-    <div class="dv-logo dv-logo-nav"><div class="dv-logo-box"><span>DaVincii</span></div></div>
+    <div class="dv-logo dv-logo-nav" onclick="goTo('screen-login')" style="cursor:pointer"><div class="dv-logo-box"><span>DaVincii</span></div></div>
     <div class="top-nav-right">
       <span class="top-nav-artist" id="nav-artist-name"></span>
       <div class="avatar" id="nav-avatar"></div>
@@ -248,32 +255,32 @@
     <div class="sidebar">
       <div class="sb-section">
         <div class="sb-lbl">Main</div>
-        <button class="nav-lnk active" id="nl-overview" onclick="showPg('pg-overview',this)"><span class="nav-lnk-icon">⊞</span>Overview</button>
-        <button class="nav-lnk" id="nl-catalog" onclick="showPg('pg-catalog',this)"><span class="nav-lnk-icon">♩</span>Catalog</button>
-        <button class="nav-lnk" id="nl-royalties" onclick="showPg('pg-royalties',this)"><span class="nav-lnk-icon">◎</span>Royalties</button>
-        <button class="nav-lnk" id="nl-payouts" onclick="showPg('pg-payouts',this)"><span class="nav-lnk-icon">↑</span>Payouts</button>
+        <button class="nav-lnk active" id="nl-overview" onclick="showPg('pg-overview',this)"><span class="nav-lnk-icon">&#8862;</span>Overview</button>
+        <button class="nav-lnk" id="nl-catalog" onclick="showPg('pg-catalog',this)"><span class="nav-lnk-icon">&#9833;</span>Catalog</button>
+        <button class="nav-lnk" id="nl-royalties" onclick="showPg('pg-royalties',this)"><span class="nav-lnk-icon">&#9678;</span>Royalties</button>
+        <button class="nav-lnk" id="nl-payouts" onclick="showPg('pg-payouts',this)"><span class="nav-lnk-icon">&#8593;</span>Payouts</button>
       </div>
       <div class="sb-section">
         <div class="sb-lbl">Account</div>
-        <button class="nav-lnk" onclick="goTo('screen-claim')"><span class="nav-lnk-icon">✦</span>Claim payment</button>
+        <button class="nav-lnk" onclick="goTo('screen-claim')"><span class="nav-lnk-icon">&#10022;</span>Claim payment</button>
       </div>
     </div>
     <div class="main">
 
       <!-- OVERVIEW -->
       <div id="pg-overview">
-        <div class="pg-title">Good <em id="greeting-time">morning</em>, <em id="greeting-name">—</em></div>
+        <div class="pg-title">Good <em id="greeting-time">morning</em>, <em id="greeting-name">&mdash;</em></div>
         <div class="pg-sub">Here's a summary of your royalty activity.</div>
         <div class="bal-card">
           <div>
             <div class="bal-lbl">Total royalties collected</div>
-            <div class="bal-amt" id="overview-total">—</div>
-            <div class="bal-note" id="overview-count">Loading…</div>
+            <div class="bal-amt" id="overview-total">&mdash;</div>
+            <div class="bal-note" id="overview-count">Loading...</div>
           </div>
           <div>
             <div class="bal-lbl">Total paid out</div>
-            <div class="bal-amt-sm" id="overview-paid">—</div>
-            <div class="bal-note" id="overview-pending">—</div>
+            <div class="bal-amt-sm" id="overview-paid">&mdash;</div>
+            <div class="bal-note" id="overview-pending">&mdash;</div>
           </div>
           <div class="bal-actions">
             <button class="bal-btn bal-btn-p" onclick="goTo('screen-claim')">Claim payment</button>
@@ -286,7 +293,7 @@
           <div class="stripe-strip-left">
             <div class="stripe-dot loading" id="dash-stripe-dot"></div>
             <div>
-              <div class="stripe-strip-title" id="dash-stripe-title">Checking Stripe…</div>
+              <div class="stripe-strip-title" id="dash-stripe-title">Checking Stripe...</div>
               <div class="stripe-strip-sub" id="dash-stripe-sub"></div>
             </div>
           </div>
@@ -299,7 +306,7 @@
             <button class="sbox-lnk" onclick="showPg('pg-royalties', document.getElementById('nl-royalties'))">See all &rarr;</button>
           </div>
           <div class="sbox-body" id="overview-royalties-body">
-            <div class="loading">Loading royalties…</div>
+            <div class="loading">Loading royalties...</div>
           </div>
         </div>
 
@@ -309,7 +316,7 @@
             <button class="sbox-lnk" onclick="showPg('pg-catalog', document.getElementById('nl-catalog'))">See all &rarr;</button>
           </div>
           <div class="sbox-body" id="overview-catalog-body">
-            <div class="loading">Loading catalog…</div>
+            <div class="loading">Loading catalog...</div>
           </div>
         </div>
       </div>
@@ -320,7 +327,7 @@
         <div class="pg-sub" id="catalog-sub">Your registered songs.</div>
         <div class="sbox">
           <div class="sbox-body" id="catalog-body">
-            <div class="loading">Loading…</div>
+            <div class="loading">Loading...</div>
           </div>
         </div>
       </div>
@@ -331,7 +338,7 @@
         <div class="pg-sub">All royalty payments collected on your behalf.</div>
         <div class="sbox">
           <div class="sbox-body" id="royalties-body">
-            <div class="loading">Loading…</div>
+            <div class="loading">Loading...</div>
           </div>
         </div>
       </div>
@@ -342,7 +349,7 @@
         <div class="pg-sub">Your payment requests and their status.</div>
         <div class="sbox">
           <div class="sbox-body" id="payouts-body">
-            <div class="loading">Loading…</div>
+            <div class="loading">Loading...</div>
           </div>
         </div>
       </div>
@@ -354,7 +361,7 @@
 <!-- CLAIM PAYMENT -->
 <div class="screen" id="screen-claim">
   <div class="top-nav">
-    <div class="dv-logo dv-logo-nav"><div class="dv-logo-box"><span>DaVincii</span></div></div>
+    <div class="dv-logo dv-logo-nav" onclick="goTo('screen-login')" style="cursor:pointer"><div class="dv-logo-box"><span>DaVincii</span></div></div>
     <div class="top-nav-right"><span class="top-nav-artist" id="claim-artist-name"></span><div class="avatar" id="claim-avatar"></div></div>
   </div>
   <div style="padding:40px 48px;width:100%;">
@@ -366,11 +373,11 @@
         <div class="claim-avail">
           <div>
             <div class="claim-avail-lbl">Available to claim</div>
-            <div class="claim-avail-amt" id="claim-balance">—</div>
+            <div class="claim-avail-amt" id="claim-balance">&mdash;</div>
           </div>
           <div style="text-align:right">
             <div class="claim-avail-lbl">Total earned</div>
-            <div class="claim-avail-amt" id="claim-total" style="font-size:14px;color:var(--muted)">—</div>
+            <div class="claim-avail-amt" id="claim-total" style="font-size:14px;color:var(--muted)">&mdash;</div>
           </div>
         </div>
         <div class="error-box" id="claim-error"></div>
@@ -378,22 +385,22 @@
         <input class="field" type="number" id="claim-amount" placeholder="e.g. 500" min="10" step="0.01">
         <label class="field-lbl">Payment method</label>
         <div class="method-opts">
-          <label class="mopt sel" id="mopt-stripe-connect"><input type="radio" name="method" value="stripe" checked onchange="updateSummary()"><div class="mopt-lbl">Stripe — bank or debit card</div><div class="mopt-sub">Instant · Recommended</div></label>
-          <label class="mopt" id="mopt-ach"><input type="radio" name="method" value="bank_transfer" onchange="updateSummary()"><div class="mopt-lbl">Bank transfer (ACH)</div><div class="mopt-sub">2–3 business days</div></label>
+          <label class="mopt sel" id="mopt-stripe-connect"><input type="radio" name="method" value="stripe" checked onchange="updateSummary()"><div class="mopt-lbl">Stripe &mdash; bank or debit card</div><div class="mopt-sub">Instant &middot; Recommended</div></label>
+          <label class="mopt" id="mopt-ach"><input type="radio" name="method" value="bank_transfer" onchange="updateSummary()"><div class="mopt-lbl">Bank transfer (ACH)</div><div class="mopt-sub">2&ndash;3 business days</div></label>
           <label class="mopt" id="mopt-paypal"><input type="radio" name="method" value="paypal" onchange="updateSummary()"><div class="mopt-lbl">PayPal</div><div class="mopt-sub">Instant</div></label>
         </div>
 
-        <!-- Stripe Connect panel — shown only when Stripe method is selected -->
+        <!-- Stripe Connect panel &mdash; shown only when Stripe method is selected -->
         <div class="stripe-box visible" id="stripe-connect-box">
           <div class="stripe-box-title">Stripe account</div>
           <div class="stripe-status">
             <div class="stripe-dot loading" id="stripe-dot"></div>
             <div>
-              <div class="stripe-status-text" id="stripe-status-text">Checking…</div>
+              <div class="stripe-status-text" id="stripe-status-text">Checking...</div>
               <div class="stripe-status-sub" id="stripe-status-sub"></div>
             </div>
           </div>
-          <div class="stripe-connected-detail" id="stripe-connected-detail">✓ Bank account connected — payout will be sent immediately</div>
+          <div class="stripe-connected-detail" id="stripe-connected-detail">&#10003; Bank account connected &mdash; payout will be sent immediately</div>
           <div style="display:flex;align-items:center;gap:10px">
             <button class="btn-stripe" id="stripe-connect-btn" onclick="doStripeConnect()" style="display:none">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -409,7 +416,7 @@
       <div>
         <div class="summary-card">
           <div class="summary-title">Payment summary</div>
-          <div class="sum-row"><div class="sum-key">Amount requested</div><div class="sum-val" id="sum-amount">—</div></div>
+          <div class="sum-row"><div class="sum-key">Amount requested</div><div class="sum-val" id="sum-amount">&mdash;</div></div>
           <div class="sum-row"><div class="sum-key">Method</div><div class="sum-val" id="sum-method">ACH Transfer</div></div>
           <div class="sum-row"><div class="sum-key">Status</div><div class="sum-val">Pending approval</div></div>
         </div>
@@ -420,17 +427,17 @@
 
 <!-- PAYMENT SUCCESS -->
 <div class="screen" id="screen-success">
-  <div class="top-nav"><div class="dv-logo dv-logo-nav"><div class="dv-logo-box"><span>DaVincii</span></div></div><div class="top-nav-right"><div class="avatar" id="success-avatar"></div></div></div>
+  <div class="top-nav"><div class="dv-logo dv-logo-nav" onclick="goTo('screen-login')" style="cursor:pointer"><div class="dv-logo-box"><span>DaVincii</span></div></div><div class="top-nav-right"><div class="avatar" id="success-avatar"></div></div></div>
   <div style="padding:80px 48px;display:flex;justify-content:center;">
     <div class="success-wrap">
-      <div class="success-icon">◎</div>
+      <div class="success-icon">&#9678;</div>
       <h2 class="success-title" id="succ-title">Payment<br><em>requested.</em></h2>
-      <p class="success-sub" id="succ-sub">You'll receive a confirmation within 24 hours. Funds arrive within 2–5 business days.</p>
+      <p class="success-sub" id="succ-sub">You'll receive a confirmation within 24 hours. Funds arrive within 2&ndash;5 business days.</p>
       <div class="success-detail">
-        <div class="sd-row"><div class="sd-key">Amount</div><div class="sd-val" id="succ-amount">—</div></div>
-        <div class="sd-row"><div class="sd-key">Method</div><div class="sd-val" id="succ-method">—</div></div>
+        <div class="sd-row"><div class="sd-key">Amount</div><div class="sd-val" id="succ-amount">&mdash;</div></div>
+        <div class="sd-row"><div class="sd-key">Method</div><div class="sd-val" id="succ-method">&mdash;</div></div>
         <div class="sd-row"><div class="sd-key">Status</div><div class="sd-val" id="succ-status">Pending</div></div>
-        <div class="sd-row" id="succ-transfer-row" style="display:none"><div class="sd-key">Transfer ID</div><div class="sd-val" id="succ-transfer-id">—</div></div>
+        <div class="sd-row" id="succ-transfer-row" style="display:none"><div class="sd-key">Transfer ID</div><div class="sd-val" id="succ-transfer-id">&mdash;</div></div>
       </div>
       <button class="btn" style="width:100%" onclick="goTo('screen-dash')">Back to dashboard &rarr;</button>
     </div>
@@ -438,9 +445,9 @@
 </div>
 
 <script>
-  const API = '';  // same origin — backend serves this file
+  const API = '';  // same origin -- backend serves this file
 
-  // ── Auth helpers ──────────────────────────────────────────
+  // -- Auth helpers ------------------------------------------
   function getToken() { return localStorage.getItem('dvc_token'); }
   function getArtist() { try { return JSON.parse(localStorage.getItem('dvc_artist')); } catch(e) { return null; } }
   function setAuth(token, artist) {
@@ -467,7 +474,7 @@
     return data;
   }
 
-  // ── Navigation ────────────────────────────────────────────
+  // -- Navigation --------------------------------------------
   function goTo(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
@@ -486,7 +493,7 @@
     if (pgId === 'pg-payouts') loadPayouts();
   }
 
-  // ── Login ─────────────────────────────────────────────────
+  // -- Login -------------------------------------------------
   async function doLogin() {
     const email = document.getElementById('login-email').value.trim();
     const password = document.getElementById('login-password').value;
@@ -494,7 +501,7 @@
     const btn = document.getElementById('login-btn');
     errEl.style.display = 'none';
     if (!email || !password) { showErr(errEl, 'Please enter your email and password.'); return; }
-    btn.disabled = true; btn.textContent = 'Signing in…';
+    btn.disabled = true; btn.textContent = 'Signing in...';
     try {
       const data = await apiFetch('/api/auth/login', {
         method: 'POST',
@@ -505,11 +512,11 @@
     } catch(e) {
       showErr(errEl, e.message);
     } finally {
-      btn.disabled = false; btn.textContent = 'Sign in →';
+      btn.disabled = false; btn.textContent = 'Sign in ->';
     }
   }
 
-  // ── Signup ────────────────────────────────────────────────
+  // -- Signup ------------------------------------------------
   async function doSignup() {
     const name = document.getElementById('signup-name').value.trim();
     const email = document.getElementById('signup-email').value.trim();
@@ -520,7 +527,7 @@
     if (!name) { showErr(errEl, 'Please enter your full name.'); return; }
     if (!email) { showErr(errEl, 'Please enter your email address.'); return; }
     if (!password || password.length < 8) { showErr(errEl, 'Password must be at least 8 characters.'); return; }
-    btn.disabled = true; btn.textContent = 'Creating account…';
+    btn.disabled = true; btn.textContent = 'Creating account...';
     try {
       const data = await apiFetch('/api/auth/signup', {
         method: 'POST',
@@ -531,7 +538,7 @@
     } catch(e) {
       showErr(errEl, e.message);
     } finally {
-      btn.disabled = false; btn.textContent = 'Create account →';
+      btn.disabled = false; btn.textContent = 'Create account ->';
     }
   }
 
@@ -545,7 +552,7 @@
     el.style.display = 'block';
   }
 
-  // ── Dashboard ─────────────────────────────────────────────
+  // -- Dashboard ---------------------------------------------
   async function loadDashboard() {
     const artist = getArtist();
     if (!artist) { doLogout(); return; }
@@ -585,9 +592,9 @@
           <div class="th-row col-5"><div class="th">Song</div><div class="th">Platform</div><div class="th">Period</div><div class="th">Type</div><div class="th" style="text-align:right">Amount</div></div>
           ${recent.map(r => `
             <div class="tr col-5">
-              <div><div class="tr-song">${r.songs ? r.songs.title : '—'}</div><div class="tr-meta">${r.platform}</div></div>
+              <div><div class="tr-song">${r.songs ? r.songs.title : '--'}</div><div class="tr-meta">${r.platform}</div></div>
               <div class="tr-cell">${r.platform}</div>
-              <div class="tr-cell">${r.period || '—'}</div>
+              <div class="tr-cell">${r.period || '--'}</div>
               <div><span class="badge badge-ok">${r.royalty_type || 'Royalty'}</span></div>
               <div class="tr-amt">$${Number(r.amount).toFixed(2)}</div>
             </div>`).join('')}`;
@@ -618,15 +625,15 @@
     }
   }
 
-  // ── Catalog ───────────────────────────────────────────────
+  // -- Catalog -----------------------------------------------
   async function loadCatalog() {
     const body = document.getElementById('catalog-body');
-    body.innerHTML = '<div class="loading">Loading…</div>';
+    body.innerHTML = '<div class="loading">Loading...</div>';
     try {
       const songs = await apiFetch('/api/songs');
       document.getElementById('catalog-sub').textContent = songs.length + ' song' + (songs.length !== 1 ? 's' : '') + ' in your catalog.';
       if (songs.length === 0) {
-        body.innerHTML = '<div class="empty-state">No songs yet — contact Davincii to add your catalog</div>';
+        body.innerHTML = '<div class="empty-state">No songs yet -- contact Davincii to add your catalog</div>';
         return;
       }
       body.innerHTML = `
@@ -634,19 +641,19 @@
         ${songs.map(s => `
           <div class="tr col-4c">
             <div><div class="tr-song">${s.title}</div><div class="tr-meta">Added ${new Date(s.created_at).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'})}</div></div>
-            <div class="tr-cell">${s.isrc || '—'}</div>
+            <div class="tr-cell">${s.isrc || '--'}</div>
             <div><span class="badge ${s.status === 'active' || s.status === 'collecting' ? 'badge-ok' : s.status === 'registering' ? 'badge-blue' : 'badge-pend'}">${s.status || 'pending'}</span></div>
-            <div class="tr-amt" style="font-size:11px;color:var(--muted)">${s.release_date ? new Date(s.release_date).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : '—'}</div>
+            <div class="tr-amt" style="font-size:11px;color:var(--muted)">${s.release_date ? new Date(s.release_date).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : '--'}</div>
           </div>`).join('')}`;
     } catch(e) {
       body.innerHTML = '<div class="empty-state">Could not load catalog</div>';
     }
   }
 
-  // ── Royalties ─────────────────────────────────────────────
+  // -- Royalties ---------------------------------------------
   async function loadRoyalties() {
     const body = document.getElementById('royalties-body');
-    body.innerHTML = '<div class="loading">Loading…</div>';
+    body.innerHTML = '<div class="loading">Loading...</div>';
     try {
       const royalties = await apiFetch('/api/royalties');
       if (royalties.length === 0) {
@@ -657,9 +664,9 @@
         <div class="th-row col-5"><div class="th">Song</div><div class="th">Platform</div><div class="th">Period</div><div class="th">Type</div><div class="th" style="text-align:right">Amount</div></div>
         ${royalties.map(r => `
           <div class="tr col-5">
-            <div><div class="tr-song">${r.songs ? r.songs.title : '—'}</div><div class="tr-meta">${r.platform}</div></div>
+            <div><div class="tr-song">${r.songs ? r.songs.title : '--'}</div><div class="tr-meta">${r.platform}</div></div>
             <div class="tr-cell">${r.platform}</div>
-            <div class="tr-cell">${r.period || '—'}</div>
+            <div class="tr-cell">${r.period || '--'}</div>
             <div><span class="badge badge-ok">${r.royalty_type || 'Royalty'}</span></div>
             <div class="tr-amt">$${Number(r.amount).toFixed(2)}</div>
           </div>`).join('')}`;
@@ -668,10 +675,10 @@
     }
   }
 
-  // ── Payouts ───────────────────────────────────────────────
+  // -- Payouts -----------------------------------------------
   async function loadPayouts() {
     const body = document.getElementById('payouts-body');
-    body.innerHTML = '<div class="loading">Loading…</div>';
+    body.innerHTML = '<div class="loading">Loading...</div>';
     try {
       const payouts = await apiFetch('/api/payouts');
       if (payouts.length === 0) {
@@ -696,7 +703,7 @@
     }
   }
 
-  // ── Claim ─────────────────────────────────────────────────
+  // -- Claim -------------------------------------------------
   async function loadClaim() {
     const artist = getArtist();
     if (!artist) return;
@@ -725,7 +732,7 @@
         updateSummary();
       }
     } catch(e) {}
-    // Load Stripe status in parallel — non-blocking
+    // Load Stripe status in parallel -- non-blocking
     checkStripeStatus().catch(() => {});
   }
 
@@ -741,7 +748,7 @@
   function updateSummary() {
     const amount = document.getElementById('claim-amount').value;
     const method = document.querySelector('input[name="method"]:checked');
-    document.getElementById('sum-amount').textContent = amount ? '$' + Number(amount).toFixed(2) : '—';
+    document.getElementById('sum-amount').textContent = amount ? '$' + Number(amount).toFixed(2) : '--';
     if (method) {
       const labels = { bank_transfer: 'ACH Transfer', paypal: 'PayPal', stripe: 'Stripe (Instant)' };
       document.getElementById('sum-method').textContent = labels[method.value] || method.value;
@@ -761,7 +768,7 @@
     });
   });
 
-  // ── Stripe Connect — Dashboard strip ──────────────────────
+  // -- Stripe Connect -- Dashboard strip ----------------------
   async function checkDashStripeStatus() {
     const dot = document.getElementById('dash-stripe-dot');
     const title = document.getElementById('dash-stripe-title');
@@ -773,19 +780,19 @@
       if (status.onboarded && status.payouts_enabled) {
         dot.className = 'stripe-dot connected';
         title.textContent = 'Stripe connected';
-        sub.textContent = (status.email || 'Bank account linked') + ' · Instant payouts enabled';
+        sub.textContent = (status.email || 'Bank account linked') + ' . Instant payouts enabled';
         btn.style.display = 'none';
       } else if (status.connected && !status.onboarded) {
         dot.className = 'stripe-dot disconnected';
         title.textContent = 'Stripe setup incomplete';
         sub.textContent = 'Finish connecting to enable instant payouts';
-        btn.textContent = 'Continue →';
+        btn.textContent = 'Continue ->';
         btn.style.display = 'inline-block';
       } else {
         dot.className = 'stripe-dot disconnected';
         title.textContent = 'Bank account not connected';
         sub.textContent = 'Connect your bank for instant payouts';
-        btn.textContent = 'Set up →';
+        btn.textContent = 'Set up ->';
         btn.style.display = 'inline-block';
       }
     } catch(e) {
@@ -796,7 +803,7 @@
     }
   }
 
-  // ── Stripe Connect ────────────────────────────────────────
+  // -- Stripe Connect ----------------------------------------
   let _stripeStatus = null; // cached: { connected, onboarded, email, payouts_enabled }
 
   async function checkStripeStatus() {
@@ -808,7 +815,7 @@
     const detail = document.getElementById('stripe-connected-detail');
 
     dot.className = 'stripe-dot loading';
-    text.textContent = 'Checking account…';
+    text.textContent = 'Checking account...';
     sub.textContent = '';
     connectBtn.style.display = 'none';
     disconnectBtn.style.display = 'none';
@@ -829,7 +836,7 @@
         dot.className = 'stripe-dot disconnected';
         text.textContent = 'Onboarding incomplete';
         sub.textContent = 'Finish connecting to enable instant payouts';
-        connectBtn.textContent = 'Continue setup →';
+        connectBtn.textContent = 'Continue setup ->';
         connectBtn.style.display = 'inline-flex';
         disconnectBtn.style.display = 'inline-block';
       } else {
@@ -853,7 +860,7 @@
     if (!confirm('Disconnect your Stripe account? You can reconnect at any time.')) return;
     const disconnectBtn = document.getElementById('stripe-disconnect-btn');
     disconnectBtn.disabled = true;
-    disconnectBtn.textContent = 'Disconnecting…';
+    disconnectBtn.textContent = 'Disconnecting...';
     try {
       await apiFetch('/api/stripe/connect', { method: 'DELETE' });
       _stripeStatus = null;
@@ -870,7 +877,7 @@
     const btn = document.getElementById('stripe-connect-btn');
     btn.disabled = true;
     const origHTML = btn.innerHTML;
-    btn.innerHTML = 'Redirecting to Stripe…';
+    btn.innerHTML = 'Redirecting to Stripe...';
     try {
       const data = await apiFetch('/api/stripe/connect', { method: 'POST' });
       if (data.url) {
@@ -885,7 +892,7 @@
     }
   }
 
-  // ── Claim ─────────────────────────────────────────────────
+  // -- Claim -------------------------------------------------
   async function doClaim() {
     const amount = document.getElementById('claim-amount').value;
     const method = document.querySelector('input[name="method"]:checked');
@@ -908,7 +915,7 @@
         showErr(errEl, `Amount exceeds your available balance of $${avail.toFixed(2)}.`);
         return;
       }
-      btn.disabled = true; btn.textContent = 'Sending transfer…';
+      btn.disabled = true; btn.textContent = 'Sending transfer...';
       try {
         const data = await apiFetch('/api/stripe/payout', {
           method: 'POST',
@@ -925,19 +932,19 @@
       } catch(e) {
         showErr(errEl, e.message);
       } finally {
-        btn.disabled = false; btn.textContent = 'Confirm claim →';
+        btn.disabled = false; btn.textContent = 'Confirm claim ->';
       }
       return;
     }
 
-    // ACH / PayPal path — also check client-side balance
+    // ACH / PayPal path -- also check client-side balance
     const balText2 = document.getElementById('claim-balance').textContent.replace(/[$,]/g, '');
     const avail2 = parseFloat(balText2);
     if (!isNaN(avail2) && parseFloat(amount) > avail2 + 0.001) {
       showErr(errEl, `Amount exceeds your available balance of $${avail2.toFixed(2)}.`);
       return;
     }
-    btn.disabled = true; btn.textContent = 'Processing…';
+    btn.disabled = true; btn.textContent = 'Processing...';
     try {
       const data = await apiFetch('/api/payouts/request', {
         method: 'POST',
@@ -948,17 +955,17 @@
       document.getElementById('succ-method').textContent = labels[data.method] || data.method;
       document.getElementById('succ-status').textContent = 'Pending';
       document.getElementById('succ-title').innerHTML = 'Payment<br><em>requested.</em>';
-      document.getElementById('succ-sub').textContent = 'You\'ll receive a confirmation within 24 hours. Funds arrive within 2–5 business days.';
+      document.getElementById('succ-sub').textContent = 'You\'ll receive a confirmation within 24 hours. Funds arrive within 2-5 business days.';
       document.getElementById('succ-transfer-row').style.display = 'none';
       goTo('screen-success');
     } catch(e) {
       showErr(errEl, e.message);
     } finally {
-      btn.disabled = false; btn.textContent = 'Confirm claim →';
+      btn.disabled = false; btn.textContent = 'Confirm claim ->';
     }
   }
 
-  // ── Init ──────────────────────────────────────────────────
+  // -- Init --------------------------------------------------
   (function init() {
     const token = getToken();
     const artist = getArtist();
