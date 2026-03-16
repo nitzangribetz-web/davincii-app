@@ -143,6 +143,12 @@
   .claim-note { font-family:var(--mono); font-size:9px; letter-spacing:0.06em; color:var(--muted); line-height:1.7; padding:14px 16px; border:1px solid var(--border); margin-bottom:24px; }
 
   /* STRIPE CONNECT */
+  .stripe-strip { display:flex; align-items:center; justify-content:space-between; border:1px solid var(--border); padding:14px 18px; margin-bottom:20px; }
+  .stripe-strip-left { display:flex; align-items:center; gap:12px; }
+  .stripe-strip-title { font-family:var(--mono); font-size:11px; color:var(--black); }
+  .stripe-strip-sub { font-family:var(--mono); font-size:9px; color:var(--muted); margin-top:2px; }
+  .stripe-strip-btn { font-family:var(--mono); font-size:9px; letter-spacing:0.12em; text-transform:uppercase; background:none; border:1px solid var(--border); padding:6px 12px; cursor:pointer; color:var(--black); }
+  .stripe-strip-btn:hover { background:var(--black); color:#fff; }
   .stripe-box { border:1px solid var(--border); padding:20px 22px; margin-bottom:24px; display:none; }
   .stripe-box.visible { display:block; }
   .stripe-box-title { font-family:var(--mono); font-size:9px; letter-spacing:0.16em; text-transform:uppercase; color:var(--muted); margin-bottom:14px; }
@@ -280,6 +286,18 @@
             <button class="bal-btn bal-btn-p" onclick="goTo('screen-claim')">Claim payment</button>
             <button class="bal-btn bal-btn-g" onclick="showPg('pg-catalog', document.getElementById('nl-catalog'))">View catalog</button>
           </div>
+        </div>
+
+        <!-- Stripe Connect status strip -->
+        <div class="stripe-strip" id="dash-stripe-strip">
+          <div class="stripe-strip-left">
+            <div class="stripe-dot loading" id="dash-stripe-dot"></div>
+            <div>
+              <div class="stripe-strip-title" id="dash-stripe-title">Checking Stripe…</div>
+              <div class="stripe-strip-sub" id="dash-stripe-sub"></div>
+            </div>
+          </div>
+          <button class="stripe-strip-btn" id="dash-stripe-btn" onclick="goTo('screen-claim')" style="display:none">Set up →</button>
         </div>
 
         <div class="sbox">
@@ -546,7 +564,8 @@
     const h = new Date().getHours();
     document.getElementById('greeting-time').textContent = h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening';
 
-    // Load summary data
+    // Load summary data + Stripe status in parallel
+    checkDashStripeStatus().catch(() => {});
     try {
       const [roySum, paySum] = await Promise.all([
         apiFetch('/api/royalties/summary'),
@@ -745,6 +764,41 @@
       updateSummary();
     });
   });
+
+  // ── Stripe Connect — Dashboard strip ──────────────────────
+  async function checkDashStripeStatus() {
+    const dot = document.getElementById('dash-stripe-dot');
+    const title = document.getElementById('dash-stripe-title');
+    const sub = document.getElementById('dash-stripe-sub');
+    const btn = document.getElementById('dash-stripe-btn');
+    if (!dot) return;
+    try {
+      const status = await apiFetch('/api/stripe/connect/status');
+      if (status.onboarded && status.payouts_enabled) {
+        dot.className = 'stripe-dot connected';
+        title.textContent = 'Stripe connected';
+        sub.textContent = (status.email || 'Bank account linked') + ' · Instant payouts enabled';
+        btn.style.display = 'none';
+      } else if (status.connected && !status.onboarded) {
+        dot.className = 'stripe-dot disconnected';
+        title.textContent = 'Stripe setup incomplete';
+        sub.textContent = 'Finish connecting to enable instant payouts';
+        btn.textContent = 'Continue →';
+        btn.style.display = 'inline-block';
+      } else {
+        dot.className = 'stripe-dot disconnected';
+        title.textContent = 'Bank account not connected';
+        sub.textContent = 'Connect your bank for instant payouts';
+        btn.textContent = 'Set up →';
+        btn.style.display = 'inline-block';
+      }
+    } catch(e) {
+      dot.className = 'stripe-dot disconnected';
+      title.textContent = 'Stripe status unavailable';
+      sub.textContent = '';
+      btn.style.display = 'none';
+    }
+  }
 
   // ── Stripe Connect ────────────────────────────────────────
   let _stripeStatus = null; // cached: { connected, onboarded, email, payouts_enabled }
