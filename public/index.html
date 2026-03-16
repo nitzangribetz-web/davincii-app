@@ -47,7 +47,7 @@
 
   /* LOGIN */
   #screen-login { flex-direction:row !important; }
-  .login-left { width:44%; background:var(--black); display:flex; flex-direction:column; justify-content:space-between; padding:52px 52px 52px 36px; }
+  .login-left { width:44%; background:var(--black); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:52px; }
   .login-left-logo { font-family:var(--serif); font-size:14px; font-weight:300; letter-spacing:0.35em; text-transform:uppercase; color:#fff; }
   .login-left h2 { font-size:62px; font-weight:300; line-height:1.05; letter-spacing:-0.025em; color:#fff; margin-bottom:20px; }
   .login-left h2 em { font-style:italic; }
@@ -182,12 +182,10 @@
 
   /* DAVINCII LOGO */
   .dv-logo { display:inline-block; }
-  .dv-logo-box { position:relative; display:inline-block; padding:5px 14px 5px 14px; border:1.5px solid currentColor; }
-  .dv-logo-box span { font-family:'Pinyon Script', cursive; font-size:32px; line-height:1.1; color:#c0392b; display:block; position:relative; top:-3px; }
-  .dv-logo-light .dv-logo-box { border-color:rgba(255,255,255,0.45); }
-  .dv-logo-dark .dv-logo-box { border-color:#333; }
-  .dv-logo-nav .dv-logo-box { padding:3px 10px 3px 10px; }
-  .dv-logo-nav .dv-logo-box span { font-size:24px; top:-2px; }
+  .dv-logo-box { position:relative; display:inline-block; }
+  .dv-logo-box span { font-family:'Pinyon Script', cursive; font-size:72px; line-height:1.1; color:#c0392b; display:block; }
+  .dv-logo-nav .dv-logo-box span { font-size:28px; }
+  .dv-logo-form .dv-logo-box span { font-size:44px; }
 </style>
 </head>
 <body>
@@ -195,26 +193,18 @@
 <!-- LOGIN -->
 <div class="screen active" id="screen-login">
   <div class="login-left">
-    <div class="dv-logo dv-logo-light"><div class="dv-logo-box"><span>Da Vincii..</span></div></div>
-    <div>
-      <h2>Your royalties,<br><em>finally</em><br>collected.</h2>
-      <p>We find your missing publishing income across every platform and pay you every quarter. Zero upfront cost.</p>
-    </div>
-    <div class="login-stat-border">
-      <div class="login-stat-num">$2.5B</div>
-      <div class="login-stat-lbl">In uncollected royalties annually</div>
-    </div>
+    <div class="dv-logo"><div class="dv-logo-box"><span>DaVincii</span></div></div>
   </div>
   <div class="login-right">
     <div class="login-form">
-      <div class="dv-logo dv-logo-dark" style="margin-bottom:52px"><div class="dv-logo-box"><span>Da Vincii..</span></div></div>
+      <div class="dv-logo dv-logo-form" style="margin-bottom:52px"><div class="dv-logo-box"><span>DaVincii</span></div></div>
       <h1 class="login-form-title">Welcome<br><em>back.</em></h1>
       <p class="login-form-sub">Sign in to your artist portal to view your earnings and claim payments.</p>
       <div class="error-box" id="login-error"></div>
       <label class="field-lbl">Email address</label>
       <input class="field" type="email" id="login-email" placeholder="you@example.com">
       <label class="field-lbl">Password</label>
-      <input class="field" type="password" id="login-password" placeholder="â¢â¢â¢â¢â¢â¢â¢â¢">
+      <input class="field" type="password" id="login-password" placeholder="Enter your password">
       <button class="btn" style="width:100%" id="login-btn" onclick="doLogin()">Sign in &rarr;</button>
       <div class="login-hint">Don't have an account? <a href="javascript:void(0)" onclick="goTo('screen-signup')" style="color:var(--black);text-decoration:underline;">Create one</a></div>
     </div>
@@ -224,19 +214,11 @@
 <!-- SIGNUP -->
 <div class="screen" id="screen-signup">
   <div class="login-left">
-    <div class="dv-logo dv-logo-light"><div class="dv-logo-box"><span>Da Vincii..</span></div></div>
-    <div>
-      <h2>Start<br><em>collecting</em><br>what's yours.</h2>
-      <p>Join thousands of artists recovering missing royalties. Setup takes under 2 minutes.</p>
-    </div>
-    <div class="login-stat-border">
-      <div class="login-stat-num">$2.5B</div>
-      <div class="login-stat-lbl">In uncollected royalties annually</div>
-    </div>
+    <div class="dv-logo"><div class="dv-logo-box"><span>DaVincii</span></div></div>
   </div>
   <div class="login-right">
     <div class="login-form">
-      <div class="dv-logo dv-logo-dark" style="margin-bottom:52px"><div class="dv-logo-box"><span>Da Vincii..</span></div></div>
+      <div class="dv-logo dv-logo-form" style="margin-bottom:52px"><div class="dv-logo-box"><span>DaVincii</span></div></div>
       <h1 class="login-form-title">Create your<br><em>account.</em></h1>
       <p class="login-form-sub">Start recovering your royalties today.</p>
       <div class="error-box" id="signup-error"></div>
@@ -255,7 +237,7 @@
 <!-- DASHBOARD -->
 <div class="screen" id="screen-dash">
   <div class="top-nav">
-    <div class="dv-logo dv-logo-dark dv-logo-nav"><div class="dv-logo-box"><span>Da Vincii..</span></div></div>
+    <div class="dv-logo dv-logo-nav"><div class="dv-logo-box"><span>DaVincii</span></div></div>
     <div class="top-nav-right">
       <span class="top-nav-artist" id="nav-artist-name"></span>
       <div class="avatar" id="nav-avatar"></div>
@@ -372,7 +354,7 @@
 <!-- CLAIM PAYMENT -->
 <div class="screen" id="screen-claim">
   <div class="top-nav">
-    <div class="dv-logo dv-logo-dark dv-logo-nav"><div class="dv-logo-box"><span>Da Vincii..</span></div></div>
+    <div class="dv-logo dv-logo-nav"><div class="dv-logo-box"><span>DaVincii</span></div></div>
     <div class="top-nav-right"><span class="top-nav-artist" id="claim-artist-name"></span><div class="avatar" id="claim-avatar"></div></div>
   </div>
   <div style="padding:40px 48px;width:100%;">
@@ -438,7 +420,7 @@
 
 <!-- PAYMENT SUCCESS -->
 <div class="screen" id="screen-success">
-  <div class="top-nav"><div class="dv-logo dv-logo-dark dv-logo-nav"><div class="dv-logo-box"><span>Da Vincii..</span></div></div><div class="top-nav-right"><div class="avatar" id="success-avatar"></div></div></div>
+  <div class="top-nav"><div class="dv-logo dv-logo-nav"><div class="dv-logo-box"><span>DaVincii</span></div></div><div class="top-nav-right"><div class="avatar" id="success-avatar"></div></div></div>
   <div style="padding:80px 48px;display:flex;justify-content:center;">
     <div class="success-wrap">
       <div class="success-icon">â</div>
@@ -549,7 +531,7 @@
     } catch(e) {
       showErr(errEl, e.message);
     } finally {
-      btn.disabled = false; btn.textContent = 'Create account â';
+      btn.disabled = false; btn.textContent = 'Create account â+;
     }
   }
 
@@ -585,9 +567,9 @@
         apiFetch('/api/royalties/summary'),
         apiFetch('/api/payouts/summary')
       ]);
-      document.getElementById('overview-total').textContent = '$' + Number(roySum.total).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+      document.getElementById('overview-total').textContent = '$' + Number(roySum.total).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:(¹ôõ);
       document.getElementById('overview-count').textContent = roySum.count + ' payment' + (roySum.count !== 1 ? 's' : '') + ' collected';
-      document.getElementById('overview-paid').textContent = '$' + Number(paySum.totalPaid).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+      document.getElementById('overview-paid').textContent = '$' + Number(paySum.totalPaid).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:(¹ôõ);
       document.getElementById('overview-pending').textContent = '$' + Number(paySum.totalPending).toFixed(2) + ' pending';
     } catch(e) {}
 
@@ -734,7 +716,7 @@
     try {
       const bal = await apiFetch('/api/stripe/balance');
       document.getElementById('claim-balance').textContent = '$' + Number(bal.available).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-      document.getElementById('claim-total').textContent = '$' + Number(bal.total_royalties).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+      document.getElementById('claim-total').textContent = '$' + Number(bal.total_royalties).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:)¹ôõ);
       // Pre-fill amount with available balance (if >= $10)
       const avail = parseFloat(bal.available);
       const amtField = document.getElementById('claim-amount');
@@ -847,7 +829,7 @@
         dot.className = 'stripe-dot disconnected';
         text.textContent = 'Onboarding incomplete';
         sub.textContent = 'Finish connecting to enable instant payouts';
-        connectBtn.textContent = 'Continue setup â';
+        connectBtn.textContent = 'Continue setup â";
         connectBtn.style.display = 'inline-flex';
         disconnectBtn.style.display = 'inline-block';
       } else {
