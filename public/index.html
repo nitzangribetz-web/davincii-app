@@ -36,6 +36,7 @@
   .badge-ok { background:var(--green-bg); color:var(--green); }
   .badge-pend { background:rgba(0,0,0,0.05); color:var(--muted); }
   .badge-blue { background:var(--blue-bg); color:var(--blue); }
+  .badge-red { background:#fff0f0; color:#c0392b; }
   .back-btn { font-family:var(--mono); font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); background:none; border:none; cursor:pointer; display:flex; align-items:center; gap:8px; margin-bottom:32px; padding:0; transition:color 0.2s; }
   .back-btn:hover { color:var(--black); }
   .info-box { background:#fafafa; border-left:2px solid var(--black); padding:14px 18px; margin-bottom:24px; }
@@ -353,8 +354,12 @@
       <div>
         <div class="claim-avail">
           <div>
-            <div class="claim-avail-lbl">Total royalties collected</div>
+            <div class="claim-avail-lbl">Available to claim</div>
             <div class="claim-avail-amt" id="claim-balance">—</div>
+          </div>
+          <div style="text-align:right">
+            <div class="claim-avail-lbl">Total earned</div>
+            <div class="claim-avail-amt" id="claim-total" style="font-size:14px;color:var(--muted)">—</div>
           </div>
         </div>
         <div class="error-box" id="claim-error"></div>
@@ -658,13 +663,17 @@
         body.innerHTML = '<div class="empty-state">No payouts requested yet</div>';
         return;
       }
+      const methodLabel = { bank_transfer: 'ACH Transfer', paypal: 'PayPal', stripe: 'Stripe (Instant)', check: 'Check' };
       body.innerHTML = `
         <div class="th-row col-4"><div class="th">Date</div><div class="th">Method</div><div class="th">Status</div><div class="th" style="text-align:right">Amount</div></div>
         ${payouts.map(p => `
           <div class="tr col-4">
-            <div><div class="tr-song">${new Date(p.created_at).toLocaleDateString('en-US', {month:'long', day:'numeric', year:'numeric'})}</div></div>
-            <div class="tr-cell">${p.method.replace('_', ' ')}</div>
-            <div><span class="badge ${p.status === 'completed' ? 'badge-ok' : p.status === 'pending' ? 'badge-pend' : 'badge-blue'}">${p.status}</span></div>
+            <div>
+              <div class="tr-song">${new Date(p.created_at).toLocaleDateString('en-US', {month:'long', day:'numeric', year:'numeric'})}</div>
+              ${p.stripe_transfer_id ? `<div class="tr-meta" style="font-size:9px;letter-spacing:0.04em">${p.stripe_transfer_id}</div>` : ''}
+            </div>
+            <div class="tr-cell">${methodLabel[p.method] || p.method.replace(/_/g, ' ')}</div>
+            <div><span class="badge ${p.status === 'completed' ? 'badge-ok' : p.status === 'failed' ? 'badge-red' : 'badge-pend'}">${p.status}</span></div>
             <div class="tr-amt">$${Number(p.amount).toFixed(2)}</div>
           </div>`).join('')}`;
     } catch(e) {
@@ -690,11 +699,28 @@
     document.getElementById('stripe-connect-box').classList.add('visible');
     document.getElementById('claim-error').style.display = 'none';
     try {
-      const sum = await apiFetch('/api/royalties/summary');
-      document.getElementById('claim-balance').textContent = '$' + Number(sum.total).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+      const bal = await apiFetch('/api/stripe/balance');
+      document.getElementById('claim-balance').textContent = '$' + Number(bal.available).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+      document.getElementById('claim-total').textContent = '$' + Number(bal.total_royalties).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+      // Pre-fill amount with available balance (if >= $10)
+      const avail = parseFloat(bal.available);
+      const amtField = document.getElementById('claim-amount');
+      if (avail >= 10 && !amtField.value) {
+        amtField.value = avail.toFixed(2);
+        updateSummary();
+      }
     } catch(e) {}
     // Load Stripe status in parallel — non-blocking
     checkStripeStatus().catch(() => {});
+  }
+
+  function updateMethodUI() {
+    const method = document.querySelector('input[name="method"]:checked');
+    const box = document.getElementById('stripe-connect-box');
+    if (box) {
+      if (method && method.value === 'stripe') box.classList.add('visible');
+      else box.classList.remove('visible');
+    }
   }
 
   function updateSummary() {
@@ -702,11 +728,12 @@
     const method = document.querySelector('input[name="method"]:checked');
     document.getElementById('sum-amount').textContent = amount ? '$' + Number(amount).toFixed(2) : '—';
     if (method) {
-      const labels = { bank_transfer: 'ACH Transfer', paypal: 'PayPal', stripe: 'Wire Transfer' };
+      const labels = { bank_transfer: 'ACH Transfer', paypal: 'PayPal', stripe: 'Stripe (Instant)' };
       document.getElementById('sum-method').textContent = labels[method.value] || method.value;
     }
     document.querySelectorAll('.mopt').forEach(o => o.classList.remove('sel'));
     if (method) method.closest('.mopt').classList.add('sel');
+    updateMethodUI();
   }
 
   document.getElementById('claim-amount').addEventListener('input', updateSummary);
@@ -764,31 +791,6 @@
       sub.textContent = '';
       connectBtn.style.display = 'none';
     }
-  }
-
-  function updateMethodUI() {
-    const method = document.querySelector('input[name="method"]:checked');
-    const box = document.getElementById('stripe-connect-box');
-    if (method && method.value === 'stripe') {
-      box.classList.add('visible');
-    } else {
-      box.classList.remove('visible');
-    }
-  }
-
-  // Patch updateSummary to also toggle Stripe panel
-  const _origUpdateSummary = updateSummary;
-  function updateSummary() {
-    const amount = document.getElementById('claim-amount').value;
-    const method = document.querySelector('input[name="method"]:checked');
-    document.getElementById('sum-amount').textContent = amount ? '$' + Number(amount).toFixed(2) : '—';
-    if (method) {
-      const labels = { bank_transfer: 'ACH Transfer', paypal: 'PayPal', stripe: 'Stripe (Instant)' };
-      document.getElementById('sum-method').textContent = labels[method.value] || method.value;
-    }
-    document.querySelectorAll('.mopt').forEach(o => o.classList.remove('sel'));
-    if (method) method.closest('.mopt').classList.add('sel');
-    updateMethodUI();
   }
 
   async function doStripeConnect() {

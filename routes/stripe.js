@@ -109,6 +109,34 @@ router.get('/connect/status', auth, async (req, res) => {
   }
 });
 
+// ── GET /api/stripe/balance ───────────────────────────────────────────────────
+// Returns the artist's available balance: total royalties minus completed payouts.
+router.get('/balance', auth, async (req, res) => {
+  try {
+    const [royResult, payResult] = await Promise.all([
+      pool.query(
+        'SELECT COALESCE(SUM(amount), 0) AS total FROM royalties WHERE artist_id = $1',
+        [req.artist.id]
+      ),
+      pool.query(
+        "SELECT COALESCE(SUM(amount), 0) AS total FROM payouts WHERE artist_id = $1 AND status = 'completed'",
+        [req.artist.id]
+      ),
+    ]);
+    const totalRoyalties = parseFloat(royResult.rows[0].total);
+    const totalPaid = parseFloat(payResult.rows[0].total);
+    const available = Math.max(0, totalRoyalties - totalPaid);
+    res.json({
+      total_royalties: totalRoyalties.toFixed(2),
+      total_paid: totalPaid.toFixed(2),
+      available: available.toFixed(2),
+    });
+  } catch (err) {
+    console.error('[stripe/balance]', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ── POST /api/stripe/payout ───────────────────────────────────────────────────
 // Initiates an immediate Stripe transfer to the artist's connected account.
 router.post('/payout', auth, async (req, res) => {
@@ -130,6 +158,24 @@ router.post('/payout', auth, async (req, res) => {
     }
     if (!artist.stripe_onboarded) {
       return res.status(400).json({ error: 'Stripe onboarding not complete. Please finish connecting your account.' });
+    }
+
+    // ── Balance check ──────────────────────────────────────────────────────────
+    const [royResult, payResult] = await Promise.all([
+      pool.query(
+        'SELECT COALESCE(SUM(amount), 0) AS total FROM royalties WHERE artist_id = $1',
+        [req.artist.id]
+      ),
+      pool.query(
+        "SELECT COALESCE(SUM(amount), 0) AS total FROM payouts WHERE artist_id = $1 AND status = 'completed'",
+        [req.artist.id]
+      ),
+    ]);
+    const available = parseFloat(royResult.rows[0].total) - parseFloat(payResult.rows[0].total);
+    if (amountFloat > available) {
+      return res.status(400).json({
+        error: `Insufficient balance. Available: $${Math.max(0, available).toFixed(2)}`,
+      });
     }
 
     const amountCents = Math.round(amountFloat * 100);
