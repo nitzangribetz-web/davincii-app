@@ -4,11 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Davincii &mdash; Artist Portal</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&family=Pinyon+Script&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
   :root {
-    --bg: #FFFFFF; --black: #0A0A0A; --muted: #888; --border: rgba(0,0,0,0.09);
+    --bg: #FFFFFF; --black: #0A0A0A; --muted: #555; --border: rgba(0,0,0,0.09);
     --green: #4a8a4a; --green-bg: rgba(74,138,74,0.08);
     --blue: #3a6ea8; --blue-bg: rgba(58,110,168,0.08);
     --red: #c0392b; --red-bg: rgba(192,57,43,0.08);
@@ -27,7 +27,7 @@
   .btn-outline { background:transparent; color:var(--black); border:1px solid var(--black); padding:12px 28px; font-family:var(--mono); font-size:11px; letter-spacing:0.18em; text-transform:uppercase; cursor:pointer; transition:opacity 0.2s; }
   .btn-outline:hover { opacity:0.6; }
   .btn-outline.sm { padding:9px 18px; font-size:10px; }
-  .field-lbl { font-family:var(--mono); font-size:9px; letter-spacing:0.18em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; display:block; }
+  .field-lbl { font-family:var(--mono); font-size:10px; letter-spacing:0.18em; text-transform:uppercase; color:var(--black); margin-bottom:8px; display:block; }
   .field { width:100%; border:1px solid var(--border); padding:12px 16px; font-family:var(--mono); font-size:13px; color:var(--black); background:transparent; outline:none; margin-bottom:20px; }
   .field:focus { border-color:var(--black); }
   .field::placeholder { color:#ccc; }
@@ -50,13 +50,14 @@
   .login-left { width:22%; min-width:200px; background:var(--black); display:flex; flex-direction:column; align-items:flex-start; justify-content:center; padding:48px 40px; }
   .login-left h2 { font-size:40px; font-weight:300; line-height:1.1; letter-spacing:-0.02em; color:#fff; }
   .login-left h2 em { font-style:italic; }
-  .login-right { flex:1; display:flex; align-items:center; justify-content:center; padding:52px; }
-  .login-form { width:100%; max-width:400px; }
-  .login-form-logo { font-family:var(--serif); font-size:14px; font-weight:300; letter-spacing:0.32em; text-transform:uppercase; margin-bottom:0; }
+  .login-right { flex:1; display:flex; align-items:flex-start; justify-content:flex-start; padding:52px; }
+  .login-form { width:100%; max-width:560px; }
+  .login-form-logo { font-family:var(--serif); font-size:14px; font-weight:300; letter-spacing:0.32em; text-transform:uppercase; margin-bottom:52px; display:block; }
   .login-form-title { font-size:42px; font-weight:300; letter-spacing:-0.02em; margin-bottom:8px; line-height:1.1; }
   .login-form-title em { font-style:italic; }
   .login-form-sub { font-size:15px; font-weight:300; color:var(--muted); margin-bottom:40px; line-height:1.6; }
-  .login-hint { font-family:var(--mono); font-size:10px; color:var(--muted); margin-top:20px; text-align:center; }
+  .login-hint { font-family:var(--mono); font-size:11px; color:var(--muted); margin-top:20px; text-align:center; }
+  .login-recover-lnk { font-family:var(--mono); font-size:11px; color:var(--black); text-decoration:underline; cursor:pointer; background:none; border:none; padding:0; }
 
   /* TOP NAV */
   .top-nav { height:60px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; padding:0 40px; position:sticky; top:0; background:var(--bg); z-index:50; flex-shrink:0; }
@@ -96,7 +97,7 @@
   /* SECTION BOX */
   .sbox { border:1px solid var(--border); margin-bottom:28px; }
   .sbox-hd { display:flex; justify-content:space-between; align-items:flex-start; padding:20px 24px; border-bottom:1px solid var(--border); }
-  .sbox-title { font-family:var(--mono); font-size:10px; letter-spacing:0.16em; text-transform:uppercase; color:var(--black); margin-bottom:3px; }
+  .sbox-title { font-family:var(--mono); font-size:10px; letter-spacing:0.16em; text-transform:uppercase; color:var(--black); margin-bottom3px; }
   .sbox-sub { font-family:var(--mono); font-size:9px; color:var(--muted); }
   .sbox-lnk { font-family:var(--mono); font-size:9px; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); background:none; border:none; cursor:pointer; transition:color 0.2s; flex-shrink:0; }
   .sbox-lnk:hover { color:var(--black); }
@@ -176,11 +177,7 @@
   .sd-val { font-family:var(--mono); font-size:12px; color:var(--black); }
 
   /* DAVINCII LOGO */
-  .dv-logo { display:inline-block; }
-  .dv-logo-box { position:relative; display:inline-block; }
-  .dv-logo-box span { font-family:'Pinyon Script', cursive; font-size:72px; line-height:1.1; color:#c0392b; display:block; }
-  .dv-logo-nav .dv-logo-box span { font-size:28px; }
-  .dv-logo-form .dv-logo-box span { font-size:44px; }
+  .dv-logo-nav { font-family:var(--serif); font-size:14px; font-weight:300; letter-spacing:0.3em; text-transform:uppercase; cursor:pointer; }
 </style>
 </head>
 <body>
@@ -192,8 +189,8 @@
   </div>
   <div class="login-right">
     <div class="login-form">
-      <div class="dv-logo dv-logo-form" style="margin-bottom:52px"><div class="dv-logo-box"><span>DaVincii</span></div></div>
-      <h1 class="login-form-title">Welcome<br><em>back.</em></h1>
+      <div class="login-form-logo">Davincii</div>
+      <h1 class="login-form-title">Welcome <em>back.</em></h1>
       <p class="login-form-sub">Sign in to your artist portal to view your earnings and claim payments.</p>
       <div class="error-box" id="login-error"></div>
       <label class="field-lbl">Email address</label>
@@ -202,7 +199,7 @@
       <input class="field" type="password" id="login-password" placeholder="Enter your password">
       <button class="btn" style="width:100%" id="login-btn" onclick="doLogin()">Sign in &rarr;</button>
       <div class="login-hint" style="margin-top:16px">Don't have an account? <a href="javascript:void(0)" onclick="navigate('/signup')" style="color:var(--black);text-decoration:underline;">Create one</a></div>
-      <div class="login-hint" style="margin-top:10px"><a href="javascript:void(0)" onclick="navigate('/recover')" style="color:var(--muted);text-decoration:underline;">Forgot password? Recover your account</a></div>
+      <div class="login-hint" style="margin-top:14px"><button class="login-recover-lnk" onclick="navigate('/recover')">Forgot password? Recover your account</button></div>
     </div>
   </div>
 </div>
@@ -210,9 +207,9 @@
 <!-- SIGNUP -->
 <div class="screen" id="screen-signup" style="flex-direction:column !important;">
   <div style="background:var(--black);width:100%;display:flex;align-items:center;justify-content:center;padding:28px 52px;">
-    <div class="dv-logo"><div class="dv-logo-box"><span>DaVincii</span></div></div>
+    <div style="font-family:var(--serif);font-size:14px;font-weight:300;letter-spacing:0.3em;text-transform:uppercase;color:#fff;">Davincii</div>
   </div>
-  <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:52px;">
+  <div style="flex:1;display:flex;align-items:flex-start;justify-content:flex-start;padding:52px;">
     <div class="login-form">
       <h1 class="login-form-title">Create your<br><em>account.</em></h1>
       <p class="login-form-sub">Start recovering your royalties today.</p>
@@ -233,8 +230,8 @@
 <div class="screen" id="screen-recover">
   <div class="login-right" style="min-height:100vh">
     <div class="login-form">
-      <div class="dv-logo dv-logo-form" style="margin-bottom:52px"><div class="dv-logo-box"><span>DaVincii</span></div></div>
-      <h1 class="login-form-title">Recover your<br><em>account.</em></h1>
+      <div class="login-form-logo">Davincii</div>
+      <h1 class="login-form-title">Recover your <em>account.</em></h1>
       <p class="login-form-sub">Enter your email and we&rsquo;ll send you a link to reset your password.</p>
       <div class="error-box" id="recover-error"></div>
       <div id="recover-success" style="display:none;background:var(--green-bg);border-left:2px solid var(--green);padding:14px 18px;margin-bottom:20px;font-family:var(--mono);font-size:11px;color:var(--green);">Check your inbox &mdash; a recovery link is on its way.</div>
@@ -249,7 +246,7 @@
 <!-- DASHBOARD -->
 <div class="screen" id="screen-dash">
   <div class="top-nav">
-    <div class="dv-logo dv-logo-nav" onclick="navigate('/dashboard/overview')" style="cursor:pointer"><div class="dv-logo-box"><span>DaVincii</span></div></div>
+    <div class="dv-logo-nav" onclick="navigate('/dashboard/overview')">Davincii</div>
     <div class="top-nav-right">
       <span class="top-nav-artist" id="nav-artist-name"></span>
       <div class="avatar" id="nav-avatar"></div>
@@ -278,75 +275,61 @@
         <div class="pg-sub">Here's a summary of your royalty activity.</div>
         <div class="bal-card">
           <div>
-            <div class="bal-lbl">Total royalties collected</div>
-            <div class="bal-amt" id="overview-total">&mdash;</div>
-            <div class="bal-note" id="overview-count">Loading...</div>
-          </div>
+        ="navigate('/')" style="color:var(--black);text-decoration:underline;">Sign in</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- RECOVER ACCOUNT -->
+<div class="screen" id="screen-recover">
+  <div class="login-right" style="min-height:100vh">
+    <div class="login-form">
+      <div class="login-form-logo">Davincii</div>
+      <h1 class="login-form-title">Recover your <em>account.</em></h1>
+      <p class="login-form-sub">Enter your email and we&rsquo;ll send you a link to reset your password.</p>
+      <div class="error-box" id="recover-error"></div>
+      <div id="recover-success" style="display:none;background:var(--green-bg);border-left:2px solid var(--green);padding:14px 18px;margin-bottom:20px;font-family:var(--mono);font-size:11px;color:var(--green);">Check your inbox &mdash; a recovery link is on its way.</div>
+      <label class="field-lbl">Email address</label>
+      <input class="field" type="email" id="recover-email" placeholder="you@example.com">
+      <button class="btn" style="width:100%" id="recover-btn" onclick="doRecover()">Send recovery email &rarr;</button>
+      <div class="login-hint" style="margin-top:16px"><a href="javascript:void(0)" onclick="navigate('/')" style="color:var(--muted);text-decoration:underline;">&larr; Back to sign in</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="screen" id="screen-dash">
+  <div class="top-nav">
+    <div class="dv-logo-nav" onclick="navigate('/dashboard/overview')">Davincii</div>
+    <div class="top-nav-right">
+      <span class="top-nav-artist" id="nav-artist-name"></span>
+      <div class="avatar" id="nav-avatar"></div>
+      <button class="top-nav-out" onclick="doLogout()">Sign out</button>
+    </div>
+  </div>
+  <div class="dash-layout">
+    <div class="sidebar">
+      <div class="sb-section">
+        <div class="sb-lbl">Main</div>
+        <button class="nav-lnk active" id="nl-overview" onclick="navigate('/dashboard/overview')"><span class="nav-lnk-icon">&#8862;</span>Overview</button>
+        <button class="nav-lnk" id="nl-catalog" onclick="navigate('/dashboard/catalog')"><span class="nav-lnk-icon">&#9833;</span>Catalog</button>
+        <button class="nav-lnk" id="nl-royalties" onclick="navigate('/dashboard/royalties')"><span class="nav-lnk-icon">&#9678;</span>Royalties</button>
+        <button class="nav-lnk" id="nl-payouts" onclick="navigate('/dashboard/payouts')"><span class="nav-lnk-icon">&#8593;</span>Payouts</button>
+      </div>
+      <div class="sb-section">
+        <div class="sb-lbl">Account</div>
+        <button class="nav-lnk" onclick="navigate('/claim')"><span class="nav-lnk-icon">&#10022;</span>Claim payment</button>
+      </div>
+    </div>
+    <div class="main">
+
+      <!-- OVERVIEW -->
+      <div id="pg-overview">
+        <div class="pg-title">Good <em id="greeting-time">morning</em>, <em id="greeting-name">&mdash;</em></div>
+        <div class="pg-sub">Here's a summary of your royalty activity.</div>
+        <div class="bal-card">
           <div>
-            <div class="bal-lbl">Total paid out</div>
-            <div class="bal-amt-sm" id="overview-paid">&mdash;</div>
-            <div class="bal-note" id="overview-pending">&mdash;</div>
-          </div>
-          <div class="bal-actions">
-            <button class="bal-btn bal-btn-p" onclick="navigate('/claim')">Claim payment</button>
-            <button class="bal-btn bal-btn-g" onclick="navigate('/dashboard/catalog')">View catalog</button>
-          </div>
-        </div>
-
-        <!-- Stripe Connect status strip -->
-        <div class="stripe-strip" id="dash-stripe-strip">
-          <div class="stripe-strip-left">
-            <div class="stripe-dot loading" id="dash-stripe-dot"></div>
-            <div>
-              <div class="stripe-strip-title" id="dash-stripe-title">Checking Stripe...</div>
-              <div class="stripe-strip-sub" id="dash-stripe-sub"></div>
-            </div>
-          </div>
-          <button class="stripe-strip-btn" id="dash-stripe-btn" onclick="navigate('/claim')" style="display:none">Set up &rarr;</button>
-        </div>
-
-        <div class="sbox">
-          <div class="sbox-hd">
-            <div><div class="sbox-title">Recent Royalties</div><div class="sbox-sub">Latest payments recovered</div></div>
-            <button class="sbox-lnk" onclick="navigate('/dashboard/royalties')">See all &rarr;</button>
-          </div>
-          <div class="sbox-body" id="overview-royalties-body">
-            <div class="loading">Loading royalties...</div>
-          </div>
-        </div>
-
-        <div class="sbox">
-          <div class="sbox-hd">
-            <div><div class="sbox-title">Your Catalog</div><div class="sbox-sub">Songs registered across platforms</div></div>
-            <button class="sbox-lnk" onclick="navigate('/dashboard/catalog')">See all &rarr;</button>
-          </div>
-          <div class="sbox-body" id="overview-catalog-body">
-            <div class="loading">Loading catalog...</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- CATALOG -->
-      <div id="pg-catalog" style="display:none">
-        <div class="pg-title">Your <em>Catalog</em></div>
-        <div class="pg-sub" id="catalog-sub">Your registered songs.</div>
-        <div class="sbox">
-          <div class="sbox-body" id="catalog-body">
-            <div class="loading">Loading...</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ROYALTIES -->
-      <div id="pg-royalties" style="display:none">
-        <div class="pg-title">Your <em>Royalties</em></div>
-        <div class="pg-sub">All royalty payments collected on your behalf.</div>
-        <div class="sbox">
-          <div class="sbox-body" id="royalties-body">
-            <div class="loading">Loading...</div>
-          </div>
-        </div>
-      </div>
+        div>
 
       <!-- PAYOUTS -->
       <div id="pg-payouts" style="display:none">
@@ -366,7 +349,7 @@
 <!-- CLAIM PAYMENT -->
 <div class="screen" id="screen-claim">
   <div class="top-nav">
-    <div class="dv-logo dv-logo-nav" onclick="navigate('/dashboard/overview')" style="cursor:pointer"><div class="dv-logo-box"><span>DaVincii</span></div></div>
+    <div class="dv-logo-nav" onclick="navigate('/dashboard/overview')">Davincii</div>
     <div class="top-nav-right"><span class="top-nav-artist" id="claim-artist-name"></span><div class="avatar" id="claim-avatar"></div></div>
   </div>
   <div style="padding:40px 48px;width:100%;">
@@ -432,7 +415,7 @@
 
 <!-- PAYMENT SUCCESS -->
 <div class="screen" id="screen-success">
-  <div class="top-nav"><div class="dv-logo dv-logo-nav" onclick="navigate('/dashboard/overview')" style="cursor:pointer"><div class="dv-logo-box"><span>DaVincii</span></div></div><div class="top-nav-right"><div class="avatar" id="success-avatar"></div></div></div>
+  <div class="top-nav"><div class="dv-logo-nav" onclick="navigate('/dashboard/overview')">Davincii</div><div class="top-nav-right"><div class="avatar" id="success-avatar"></div></div></div>
   <div style="padding:80px 48px;display:flex;justify-content:center;">
     <div class="success-wrap">
       <div class="success-icon">&#9678;</div>
