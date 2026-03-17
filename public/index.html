@@ -275,61 +275,75 @@
         <div class="pg-sub">Here's a summary of your royalty activity.</div>
         <div class="bal-card">
           <div>
-        ="navigate('/')" style="color:var(--black);text-decoration:underline;">Sign in</a></div>
-    </div>
-  </div>
-</div>
-
-<!-- RECOVER ACCOUNT -->
-<div class="screen" id="screen-recover">
-  <div class="login-right" style="min-height:100vh">
-    <div class="login-form">
-      <div class="login-form-logo">Davincii</div>
-      <h1 class="login-form-title">Recover your <em>account.</em></h1>
-      <p class="login-form-sub">Enter your email and we&rsquo;ll send you a link to reset your password.</p>
-      <div class="error-box" id="recover-error"></div>
-      <div id="recover-success" style="display:none;background:var(--green-bg);border-left:2px solid var(--green);padding:14px 18px;margin-bottom:20px;font-family:var(--mono);font-size:11px;color:var(--green);">Check your inbox &mdash; a recovery link is on its way.</div>
-      <label class="field-lbl">Email address</label>
-      <input class="field" type="email" id="recover-email" placeholder="you@example.com">
-      <button class="btn" style="width:100%" id="recover-btn" onclick="doRecover()">Send recovery email &rarr;</button>
-      <div class="login-hint" style="margin-top:16px"><a href="javascript:void(0)" onclick="navigate('/')" style="color:var(--muted);text-decoration:underline;">&larr; Back to sign in</a></div>
-    </div>
-  </div>
-</div>
-
-<!-- DASHBOARD -->
-<div class="screen" id="screen-dash">
-  <div class="top-nav">
-    <div class="dv-logo-nav" onclick="navigate('/dashboard/overview')">Davincii</div>
-    <div class="top-nav-right">
-      <span class="top-nav-artist" id="nav-artist-name"></span>
-      <div class="avatar" id="nav-avatar"></div>
-      <button class="top-nav-out" onclick="doLogout()">Sign out</button>
-    </div>
-  </div>
-  <div class="dash-layout">
-    <div class="sidebar">
-      <div class="sb-section">
-        <div class="sb-lbl">Main</div>
-        <button class="nav-lnk active" id="nl-overview" onclick="navigate('/dashboard/overview')"><span class="nav-lnk-icon">&#8862;</span>Overview</button>
-        <button class="nav-lnk" id="nl-catalog" onclick="navigate('/dashboard/catalog')"><span class="nav-lnk-icon">&#9833;</span>Catalog</button>
-        <button class="nav-lnk" id="nl-royalties" onclick="navigate('/dashboard/royalties')"><span class="nav-lnk-icon">&#9678;</span>Royalties</button>
-        <button class="nav-lnk" id="nl-payouts" onclick="navigate('/dashboard/payouts')"><span class="nav-lnk-icon">&#8593;</span>Payouts</button>
-      </div>
-      <div class="sb-section">
-        <div class="sb-lbl">Account</div>
-        <button class="nav-lnk" onclick="navigate('/claim')"><span class="nav-lnk-icon">&#10022;</span>Claim payment</button>
-      </div>
-    </div>
-    <div class="main">
-
-      <!-- OVERVIEW -->
-      <div id="pg-overview">
-        <div class="pg-title">Good <em id="greeting-time">morning</em>, <em id="greeting-name">&mdash;</em></div>
-        <div class="pg-sub">Here's a summary of your royalty activity.</div>
-        <div class="bal-card">
+            <div class="bal-lbl">Total royalties collected</div>
+            <div class="bal-amt" id="overview-total">&mdash;</div>
+            <div class="bal-note" id="overview-count">Loading...</div>
+          </div>
           <div>
-        div>
+            <div class="bal-lbl">Total paid out</div>
+            <div class="bal-amt-sm" id="overview-paid">&mdash;</div>
+            <div class="bal-note" id="overview-pending">&mdash;</div>
+          </div>
+          <div class="bal-actions">
+            <button class="bal-btn bal-btn-p" onclick="navigate('/claim')">Claim payment</button>
+            <button class="bal-btn bal-btn-g" onclick="navigate('/dashboard/catalog')">View catalog</button>
+          </div>
+        </div>
+
+        <!-- Stripe Connect status strip -->
+        <div class="stripe-strip" id="dash-stripe-strip">
+          <div class="stripe-strip-left">
+            <div class="stripe-dot loading" id="dash-stripe-dot"></div>
+            <div>
+              <div class="stripe-strip-title" id="dash-stripe-title">Checking Stripe...</div>
+              <div class="stripe-strip-sub" id="dash-stripe-sub"></div>
+            </div>
+          </div>
+          <button class="stripe-strip-btn" id="dash-stripe-btn" onclick="navigate('/claim')" style="display:none">Set up &rarr;</button>
+        </div>
+
+        <div class="sbox">
+          <div class="sbox-hd">
+            <div><div class="sbox-title">Recent Royalties</div><div class="sbox-sub">Latest payments recovered</div></div>
+            <button class="sbox-lnk" onclick="navigate('/dashboard/royalties')">See all &rarr;</button>
+          </div>
+          <div class="sbox-body" id="overview-royalties-body">
+            <div class="loading">Loading royalties...</div>
+          </div>
+        </div>
+
+        <div class="sbox">
+          <div class="sbox-hd">
+            <div><div class="sbox-title">Your Catalog</div><div class="sbox-sub">Songs registered across platforms</div></div>
+            <button class="sbox-lnk" onclick="navigate('/dashboard/catalog')">See all &rarr;</button>
+          </div>
+          <div class="sbox-body" id="overview-catalog-body">
+            <div class="loading">Loading catalog...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CATALOG -->
+      <div id="pg-catalog" style="display:none">
+        <div class="pg-title">Your <em>Catalog</em></div>
+        <div class="pg-sub" id="catalog-sub">Your registered songs.</div>
+        <div class="sbox">
+          <div class="sbox-body" id="catalog-body">
+            <div class="loading">Loading...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ROYALTIES -->
+      <div id="pg-royalties" style="display:none">
+        <div class="pg-title">Your <em>Royalties</em></div>
+        <div class="pg-sub">All royalty payments collected on your behalf.</div>
+        <div class="sbox">
+          <div class="sbox-body" id="royalties-body">
+            <div class="loading">Loading...</div>
+          </div>
+        </div>
+      </div>
 
       <!-- PAYOUTS -->
       <div id="pg-payouts" style="display:none">
