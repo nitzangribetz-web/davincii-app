@@ -3,6 +3,90 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const pool = require('../db/pool');
+const supabase = require('../db/supabase');
+
+// GET /api/auth/google - Initiate Google OAuth via Supabase
+router.get('/google', async (req, res) => {
+  try {
+    const appUrl = process.env.APP_URL || 'https://davincii.co';
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${appUrl}/api/auth/callback`,
+      }
+    });
+    if (error) throw error;
+    res.redirect(data.url);
+  } catch (err) {
+    console.error('Google OAuth error:', err.message);
+    res.redirect('/?error=oauth_failed');
+  }
+});
+
+// GET /api/auth/apple - Initiate Apple OAuth via Supabase
+router.get('/apple', async (req, res) => {
+  try {
+    const appUrl = process.env.APP_URL || 'https://davincii.co';
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'apple',
+      options: {
+        redirectTo: `${appUrl}/api/auth/callback`,
+      }
+    });
+    if (error) throw error;
+    res.redirect(data.url);
+  } catch (err) {
+    console.error('Apple OAuth error:', err.message);
+    res.redirect('/?error=oauth_failed');
+  }
+});
+
+// GET /api/auth/callback - Handle OAuth callback from Supabase
+router.get('/callback', async (req, res) => {
+  try {
+    const code = req.query.code;
+    if (!code) {
+      return res.redirect('/?error=no_code');
+    }
+
+    // Exchange the code for a session
+    const { data: sessionData, error: sessionError } = await supabase.auth.exchangeCodeForSession(code);
+    if (sessionError) throw sessionError;
+
+    const supaUser = sessionData.user;
+    const email = supaUser.email;
+    const name = supaUser.user_metadata?.full_name || supaUser.user_metadata?.name || email.split('@')[0];
+
+    // Find or create the artist in our database
+    let artist;
+    const existing = await pool.query('SELECT * FROM artists WHERE email = $1', [email]);
+    if (existing.rows.length > 0) {
+      artist = existing.rows[0];
+    } else {
+      // Create new artist (no password needed for OAuth users)
+      const randomHash = await bcrypt.hash(Math.random().toString(36), 10);
+      const result = await pool.query(
+        'INSERT INTO artists (name, email, password_hash) VALUES ($1, $2, $3) RETURNING id, name, email, created_at',
+        [name, email, randomHash]
+      );
+      artist = result.rows[0];
+    }
+
+    // Generate JWT
+    const token = jwt.sign(
+      { id: artist.id, email: artist.email, name: artist.name },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    // Redirect to frontend with token
+    const artistPayload = encodeURIComponent(JSON.stringify({ id: artist.id, name: artist.name, email: artist.email }));
+    res.redirect(`/auth-success?token=${token}&artist=${artistPayload}`);
+  } catch (err) {
+    console.error('OAuth callback error:', err.message);
+    res.redirect('/?error=callback_failed');
+  }
+});
 
 // POST /api/auth/signup
 router.post('/signup', async (req, res) => {

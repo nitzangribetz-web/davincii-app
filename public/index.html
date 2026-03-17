@@ -1121,6 +1121,23 @@ select.field { color: var(--black); }
       _showScreen('screen-pricing');
     } else if (path === '/about') {
       _showScreen('screen-about');
+    } else if (path === '/auth-success') {
+      // Handle OAuth callback - extract token and artist from URL params
+      var params = new URLSearchParams(window.location.search);
+      var token = params.get('token');
+      var artistStr = params.get('artist');
+      if (token && artistStr) {
+        try {
+          var artist = JSON.parse(decodeURIComponent(artistStr));
+          setAuth(token, artist);
+          navigate('/dashboard/overview');
+          return;
+        } catch(e) {
+          console.error('OAuth callback parse error:', e);
+        }
+      }
+      navigate('/login', false);
+      return;
     } else if (path === '/claim/success') {
       _showScreen('screen-success');
     } else if (path === '/claim' || path.startsWith('/claim/')) {
@@ -1157,12 +1174,12 @@ select.field { color: var(--black); }
 
   window.addEventListener('popstate', function(){ _applyRoute(window.location.pathname); });
 
-  // -- Social Auth stubs ------------------------------------
+  // -- Social Auth (OAuth via Supabase) ----------------------
   function doGoogleLogin() {
-    alert('Google login coming soon. Please use email & password for now.');
+    window.location.href = '/api/auth/google';
   }
   function doAppleLogin() {
-    alert('Apple login coming soon. Please use email & password for now.');
+    window.location.href = '/api/auth/apple';
   }
 
   // -- Login -------------------------------------------------
