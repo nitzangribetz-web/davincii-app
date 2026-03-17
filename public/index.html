@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Davincii &mdash; Artist Portal</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Pinyon+Script&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
   :root {
@@ -12,9 +12,11 @@
     --green: #4a8a4a; --green-bg: rgba(74,138,74,0.08);
     --blue: #3a6ea8; --blue-bg: rgba(58,110,168,0.08);
     --red: #c0392b; --red-bg: rgba(192,57,43,0.08);
-    --serif: 'Cormorant Garamond', Georgia, serif; --mono: 'DM Mono', monospace;
+    --serif: 'Playfair Display', Georgia, serif;
+    --sans: 'Outfit', system-ui, sans-serif;
+    --mono: 'DM Mono', monospace;
   }
-  html, body { width: 100%; min-height: 100vh; background: var(--bg); font-family: var(--serif); color: var(--black); }
+  html, body { width: 100%; min-height: 100vh; background: var(--bg); font-family: var(--sans); color: var(--black); }
   .screen { display: none; min-height: 100vh; }
   .screen.active { display: flex; flex-direction: column; animation: fi 0.25s cubic-bezier(0.16,1,0.3,1); }
   @keyframes fi { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
@@ -45,23 +47,40 @@
   .empty-state { padding:40px 0; text-align:center; font-family:var(--mono); font-size:10px; letter-spacing:0.12em; color:var(--muted); text-transform:uppercase; }
   .loading { padding:32px 0; text-align:center; font-family:var(--mono); font-size:10px; letter-spacing:0.12em; color:var(--muted); text-transform:uppercase; }
 
+  /* LANDING */
+  #screen-landing { background:var(--black); min-height:100vh; }
+  .landing-hero { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:60px 40px; }
+  .landing-logo { font-family:'Pinyon Script', cursive; font-size:88px; color:#fff; margin-bottom:28px; line-height:1; display:block; }
+  .landing-tagline { font-family:var(--serif); font-size:26px; font-weight:400; color:rgba(255,255,255,0.65); line-height:1.45; margin-bottom:56px; letter-spacing:-0.01em; }
+  .landing-tagline em { font-style:italic; color:#fff; }
+  .landing-btns { display:flex; gap:16px; align-items:center; flex-wrap:wrap; justify-content:center; }
+  .btn-landing-primary { background:#fff; color:var(--black); border:none; padding:16px 44px; font-family:var(--mono); font-size:11px; letter-spacing:0.18em; text-transform:uppercase; cursor:pointer; transition:opacity 0.2s; }
+  .btn-landing-primary:hover { opacity:0.85; }
+  .btn-landing-outline { background:transparent; color:rgba(255,255,255,0.6); border:1px solid rgba(255,255,255,0.2); padding:16px 44px; font-family:var(--mono); font-size:11px; letter-spacing:0.18em; text-transform:uppercase; cursor:pointer; transition:all 0.2s; }
+  .btn-landing-outline:hover { color:#fff; border-color:rgba(255,255,255,0.55); }
+
   /* LOGIN */
-  #screen-login { flex-direction:row !important; }
-  .login-left { width:22%; min-width:200px; background:var(--black); display:flex; flex-direction:column; align-items:flex-start; justify-content:center; padding:48px 40px; }
-  .login-left h2 { font-size:40px; font-weight:300; line-height:1.1; letter-spacing:-0.02em; color:#fff; }
-  .login-left h2 em { font-style:italic; }
-  .login-right { flex:1; display:flex; align-items:flex-start; justify-content:flex-start; padding:52px; }
-  .login-form { width:100%; max-width:560px; }
-  .login-form-logo { font-family:var(--serif); font-size:14px; font-weight:300; letter-spacing:0.32em; text-transform:uppercase; margin-bottom:52px; display:block; }
-  .login-form-title { font-size:42px; font-weight:300; letter-spacing:-0.02em; margin-bottom:8px; line-height:1.1; }
+  #screen-login { align-items:center; justify-content:center; min-height:100vh; }
+  #screen-signup { align-items:center; justify-content:center; min-height:100vh; }
+  #screen-recover { align-items:center; justify-content:center; min-height:100vh; }
+  .login-center { width:100%; max-width:480px; padding:52px 40px; }
+  .login-logo { font-family:'Pinyon Script', cursive; font-size:52px; color:var(--black); display:block; text-align:center; margin-bottom:36px; line-height:1; }
+  .login-form { width:100%; }
+  .login-form-title { font-family:var(--serif); font-size:38px; font-weight:400; letter-spacing:-0.02em; margin-bottom:8px; line-height:1.1; }
   .login-form-title em { font-style:italic; }
-  .login-form-sub { font-size:15px; font-weight:300; color:var(--muted); margin-bottom:40px; line-height:1.6; }
+  .login-form-sub { font-family:var(--sans); font-size:15px; font-weight:300; color:var(--muted); margin-bottom:32px; line-height:1.6; }
   .login-hint { font-family:var(--mono); font-size:11px; color:var(--muted); margin-top:20px; text-align:center; }
   .login-recover-lnk { font-family:var(--mono); font-size:11px; color:var(--black); text-decoration:underline; cursor:pointer; background:none; border:none; padding:0; }
+  .social-divider { display:flex; align-items:center; gap:14px; margin:28px 0; }
+  .social-divider-line { flex:1; height:1px; background:var(--border); }
+  .social-divider-text { font-family:var(--mono); font-size:9px; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted); white-space:nowrap; }
+  .social-btn { width:100%; border:1px solid var(--border); background:#fff; padding:14px 20px; font-family:var(--mono); font-size:11px; letter-spacing:0.08em; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:12px; color:var(--black); margin-bottom:10px; transition:border-color 0.2s,background 0.2s; }
+  .social-btn:hover { border-color:rgba(0,0,0,0.28); background:#f9f9f9; }
+  .social-btn-icon { width:18px; height:18px; flex-shrink:0; }
 
   /* TOP NAV */
   .top-nav { height:60px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; padding:0 40px; position:sticky; top:0; background:var(--bg); z-index:50; flex-shrink:0; }
-  .top-nav-logo { font-family:var(--serif); font-size:14px; font-weight:300; letter-spacing:0.3em; text-transform:uppercase; }
+  .top-nav-logo { font-family:'Pinyon Script', cursive; font-size:28px; }
   .top-nav-right { display:flex; align-items:center; gap:20px; }
   .top-nav-artist { font-family:var(--mono); font-size:10px; letter-spacing:0.12em; color:var(--muted); }
   .avatar { width:32px; height:32px; background:var(--black); border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:10px; color:#fff; cursor:pointer; }
@@ -78,9 +97,6 @@
   .nav-lnk.active { color:var(--black); font-weight:400; background:#f5f5f5; }
   .nav-lnk-icon { font-size:15px; opacity:0.7; }
   .main { padding:40px 48px; max-width:1060px; }
-  .pg-title { font-size:34px; font-weight:300; letter-spacing:-0.02em; margin-bottom:4px; }
-  .pg-title em { font-style:italic; }
-  .pg-sub { font-size:14px; font-weight:300; color:var(--muted); margin-bottom:36px; }
 
   /* BALANCE CARD */
   .bal-card { background:var(--black); padding:32px 36px; margin-bottom:28px; display:flex; justify-content:space-between; align-items:center; gap:40px; }
@@ -177,21 +193,49 @@
   .sd-val { font-family:var(--mono); font-size:12px; color:var(--black); }
 
   /* DAVINCII LOGO */
-  .dv-logo-nav { font-family:var(--serif); font-size:14px; font-weight:300; letter-spacing:0.3em; text-transform:uppercase; cursor:pointer; }
+  .dv-logo-nav { font-family:'Pinyon Script', cursive; font-size:28px; cursor:pointer; line-height:1; }
+  .dv-logo-script { font-family:'Pinyon Script', cursive; color:inherit; font-weight:400; line-height:1; }
+
+  /* PAGE TITLE / HEADINGS */
+  .pg-title { font-family:var(--serif); font-size:34px; font-weight:400; letter-spacing:-0.02em; margin-bottom:4px; }
+  .pg-title em { font-style:italic; }
+  .pg-sub { font-family:var(--sans); font-size:14px; font-weight:300; color:var(--muted); margin-bottom:36px; }
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
-<div class="screen active" id="screen-login">
-  <div class="login-left">
-    <h2>Your royalties,<br><em>finally</em><br>collected.</h2>
+<!-- LANDING -->
+<div class="screen active" id="screen-landing">
+  <div class="landing-hero">
+    <div class="landing-logo">Davincii</div>
+    <div class="landing-tagline">Your royalties,<br><em>finally</em> collected.</div>
+    <div class="landing-btns">
+      <button class="btn-landing-primary" onclick="navigate('/signup')">Get started &rarr;</button>
+      <button class="btn-landing-outline" onclick="navigate('/login')">Sign in</button>
+    </div>
   </div>
-  <div class="login-right">
+</div>
+
+<!-- LOGIN -->
+<div class="screen" id="screen-login">
+  <div class="login-center">
     <div class="login-form">
-      <div class="login-form-logo">Davincii</div>
+      <span class="login-logo">Davincii</span>
       <h1 class="login-form-title">Welcome <em>back.</em></h1>
       <p class="login-form-sub">Sign in to your artist portal to view your earnings and claim payments.</p>
+      <button class="social-btn" onclick="doGoogleLogin()">
+        <svg class="social-btn-icon" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
+        Continue with Google
+      </button>
+      <button class="social-btn" onclick="doAppleLogin()">
+        <svg class="social-btn-icon" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path d="M12.27.52c.14 1.08-.3 2.15-1.01 2.93-.72.78-1.83 1.37-2.92 1.3-.16-1.07.34-2.17 1.01-2.88C10.07 1.1 11.24.52 12.27.52zM15.98 12.44c-.26.59-.57 1.14-.94 1.65-.49.69-.9 1.17-1.22 1.43-.49.44-1.01.67-1.58.68-.4 0-.89-.12-1.45-.35-.57-.23-1.09-.35-1.57-.35-.5 0-1.04.12-1.61.35-.58.23-1.04.36-1.4.37-.55.02-1.08-.22-1.6-.68-.35-.29-.78-.8-1.29-1.51C3.69 13.14 3.1 12 2.65 10.68c-.49-1.41-.74-2.77-.74-4.09 0-1.51.33-2.81.99-3.89.52-.87 1.21-1.56 2.08-2.07.87-.51 1.81-.77 2.82-.79.44 0 1.02.14 1.74.4.72.27 1.18.4 1.38.4.15 0 .67-.16 1.54-.47.82-.29 1.52-.41 2.1-.37 1.55.12 2.72.73 3.49 1.83-1.39.84-2.07 2.01-2.06 3.52.01 1.17.44 2.15 1.27 2.92.38.36.8.63 1.27.83-.1.29-.21.58-.35.86z" fill="#000"/></svg>
+        Continue with Apple
+      </button>
+      <div class="social-divider">
+        <div class="social-divider-line"></div>
+        <span class="social-divider-text">or sign in with email</span>
+        <div class="social-divider-line"></div>
+      </div>
       <div class="error-box" id="login-error"></div>
       <label class="field-lbl">Email address</label>
       <input class="field" type="email" id="login-email" placeholder="you@example.com">
@@ -205,14 +249,25 @@
 </div>
 
 <!-- SIGNUP -->
-<div class="screen" id="screen-signup" style="flex-direction:column !important;">
-  <div style="background:var(--black);width:100%;display:flex;align-items:center;justify-content:center;padding:28px 52px;">
-    <div style="font-family:var(--serif);font-size:14px;font-weight:300;letter-spacing:0.3em;text-transform:uppercase;color:#fff;">Davincii</div>
-  </div>
-  <div style="flex:1;display:flex;align-items:flex-start;justify-content:flex-start;padding:52px;">
+<div class="screen" id="screen-signup">
+  <div class="login-center">
     <div class="login-form">
+      <span class="login-logo">Davincii</span>
       <h1 class="login-form-title">Create your<br><em>account.</em></h1>
       <p class="login-form-sub">Start recovering your royalties today.</p>
+      <button class="social-btn" onclick="doGoogleLogin()">
+        <svg class="social-btn-icon" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
+        Continue with Google
+      </button>
+      <button class="social-btn" onclick="doAppleLogin()">
+        <svg class="social-btn-icon" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path d="M12.27.52c.14 1.08-.3 2.15-1.01 2.93-.72.78-1.83 1.37-2.92 1.3-.16-1.07.34-2.17 1.01-2.88C10.07 1.1 11.24.52 12.27.52zM15.98 12.44c-.26.59-.57 1.14-.94 1.65-.49.69-.9 1.17-1.22 1.43-.49.44-1.01.67-1.58.68-.4 0-.89-.12-1.45-.35-.57-.23-1.09-.35-1.57-.35-.5 0-1.04.12-1.61.35-.58.23-1.04.36-1.4.37-.55.02-1.08-.22-1.6-.68-.35-.29-.78-.8-1.29-1.51C3.69 13.14 3.1 12 2.65 10.68c-.49-1.41-.74-2.77-.74-4.09 0-1.51.33-2.81.99-3.89.52-.87 1.21-1.56 2.08-2.07.87-.51 1.81-.77 2.82-.79.44 0 1.02.14 1.74.4.72.27 1.18.4 1.38.4.15 0 .67-.16 1.54-.47.82-.29 1.52-.41 2.1-.37 1.55.12 2.72.73 3.49 1.83-1.39.84-2.07 2.01-2.06 3.52.01 1.17.44 2.15 1.27 2.92.38.36.8.63 1.27.83-.1.29-.21.58-.35.86z" fill="#000"/></svg>
+        Continue with Apple
+      </button>
+      <div class="social-divider">
+        <div class="social-divider-line"></div>
+        <span class="social-divider-text">or sign up with email</span>
+        <div class="social-divider-line"></div>
+      </div>
       <div class="error-box" id="signup-error"></div>
       <label class="field-lbl">Full name</label>
       <input class="field" type="text" id="signup-name" placeholder="Your name">
@@ -221,16 +276,16 @@
       <label class="field-lbl">Password</label>
       <input class="field" type="password" id="signup-password" placeholder="Min. 8 characters">
       <button class="btn" style="width:100%" id="signup-btn" onclick="doSignup()">Create account &rarr;</button>
-      <div class="login-hint">Already have an account? <a href="javascript:void(0)" onclick="navigate('/')" style="color:var(--black);text-decoration:underline;">Sign in</a></div>
+      <div class="login-hint" style="margin-top:16px">Already have an account? <a href="javascript:void(0)" onclick="navigate('/login')" style="color:var(--black);text-decoration:underline;">Sign in</a></div>
     </div>
   </div>
 </div>
 
 <!-- RECOVER ACCOUNT -->
 <div class="screen" id="screen-recover">
-  <div class="login-right" style="min-height:100vh">
+  <div class="login-center">
     <div class="login-form">
-      <div class="login-form-logo">Davincii</div>
+      <span class="login-logo">Davincii</span>
       <h1 class="login-form-title">Recover your <em>account.</em></h1>
       <p class="login-form-sub">Enter your email and we&rsquo;ll send you a link to reset your password.</p>
       <div class="error-box" id="recover-error"></div>
@@ -238,7 +293,7 @@
       <label class="field-lbl">Email address</label>
       <input class="field" type="email" id="recover-email" placeholder="you@example.com">
       <button class="btn" style="width:100%" id="recover-btn" onclick="doRecover()">Send recovery email &rarr;</button>
-      <div class="login-hint" style="margin-top:16px"><a href="javascript:void(0)" onclick="navigate('/')" style="color:var(--muted);text-decoration:underline;">&larr; Back to sign in</a></div>
+      <div class="login-hint" style="margin-top:16px"><a href="javascript:void(0)" onclick="navigate('/login')" style="color:var(--muted);text-decoration:underline;">&larr; Back to sign in</a></div>
     </div>
   </div>
 </div>
@@ -271,6 +326,7 @@
 
       <!-- OVERVIEW -->
       <div id="pg-overview">
+        <div style="font-family:'Pinyon Script',cursive;font-size:42px;color:var(--black);line-height:1;margin-bottom:20px;">Davincii</div>
         <div class="pg-title">Good <em id="greeting-time">morning</em>, <em id="greeting-name">&mdash;</em></div>
         <div class="pg-sub">Here's a summary of your royalty activity.</div>
         <div class="bal-card">
@@ -485,9 +541,11 @@
   function _applyRoute(path) {
     var prot = ['/dashboard', '/claim'];
     if (prot.some(function(p){ return path.startsWith(p); }) && !getToken()) {
-      navigate('/', false); return;
+      navigate('/login', false); return;
     }
-    if (path === '/' || path === '/login' || path === '') {
+    if (path === '/' || path === '') {
+      _showScreen('screen-landing');
+    } else if (path === '/login') {
       _showScreen('screen-login');
     } else if (path === '/signup') {
       _showScreen('screen-signup');
@@ -529,11 +587,19 @@
 
   // Compat shims kept for any inline callers
   function goTo(id) {
-    var m = { 'screen-login':'/', 'screen-signup':'/signup', 'screen-recover':'/recover', 'screen-dash':'/dashboard/overview', 'screen-claim':'/claim' };
+    var m = { 'screen-landing':'/', 'screen-login':'/login', 'screen-signup':'/signup', 'screen-recover':'/recover', 'screen-dash':'/dashboard/overview', 'screen-claim':'/claim' };
     navigate(m[id] || '/');
   }
 
   window.addEventListener('popstate', function(){ _applyRoute(window.location.pathname); });
+
+  // -- Social Auth stubs ------------------------------------
+  function doGoogleLogin() {
+    alert('Google login coming soon. Please use email & password for now.');
+  }
+  function doAppleLogin() {
+    alert('Apple login coming soon. Please use email & password for now.');
+  }
 
   // -- Login -------------------------------------------------
   async function doLogin() {
