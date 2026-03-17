@@ -578,9 +578,9 @@ select.field { color: var(--black); }
 
         <div class="error-box" id="login-error"></div>
 
-        <form id="login-form" autocomplete="on" onsubmit="event.preventDefault(); doLogin();">
+        <form id="login-form" action="/api/auth/login" method="POST" autocomplete="on" onsubmit="event.preventDefault(); doLogin();">
         <label class="field-lbl">Email address</label>
-        <input class="field" type="email" id="login-email" name="email" autocomplete="email" placeholder="you@example.com">
+        <input class="field" type="email" id="login-email" name="email" autocomplete="username" placeholder="you@example.com">
 
         <label class="field-lbl">Password</label>
         <input class="field" type="password" id="login-password" name="password" autocomplete="current-password" placeholder="Enter your password">
@@ -644,7 +644,7 @@ select.field { color: var(--black); }
 
         <div class="error-box" id="signup-error"></div>
 
-        <form id="signup-form" autocomplete="on" onsubmit="event.preventDefault(); doSignup();">
+        <form id="signup-form" action="/api/auth/signup" method="POST" autocomplete="on" onsubmit="event.preventDefault(); doSignup();">
         <label class="field-lbl">Full name</label>
         <input class="field" type="text" id="signup-name" name="name" autocomplete="name" placeholder="Your name">
 
@@ -1328,6 +1328,13 @@ select.field { color: var(--black); }
         method: 'POST',
         body: JSON.stringify({ email, password })
       });
+      // Ask browser to save credentials for autocomplete
+      if (window.PasswordCredential) {
+        try {
+          var cred = new PasswordCredential({ id: email, password: password, name: data.artist.name || email });
+          navigator.credentials.store(cred);
+        } catch(ce) {}
+      }
       setAuth(data.token, data.artist);
       navigate('/dashboard/overview');
     } catch(e) {
@@ -1354,6 +1361,13 @@ select.field { color: var(--black); }
         method: 'POST',
         body: JSON.stringify({ name, email, password })
       });
+      // Ask browser to save credentials for autocomplete
+      if (window.PasswordCredential) {
+        try {
+          var cred = new PasswordCredential({ id: email, password: password, name: name || email });
+          navigator.credentials.store(cred);
+        } catch(ce) {}
+      }
       setAuth(data.token, data.artist);
       navigate('/dashboard/overview');
     } catch(e) {
