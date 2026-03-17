@@ -4,11 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Davincii &mdash; Artist Portal</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&family=Pinyon+Script&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
   :root {
-    --bg: #FFFFFF; --black: #0A0A0A; --muted: #888; --border: rgba(0,0,0,0.09);
+    --bg: #FFFFFF; --black: #0A0A0A; --muted: #555; --border: rgba(0,0,0,0.09);
     --green: #4a8a4a; --green-bg: rgba(74,138,74,0.08);
     --blue: #3a6ea8; --blue-bg: rgba(58,110,168,0.08);
     --red: #c0392b; --red-bg: rgba(192,57,43,0.08);
@@ -27,7 +27,7 @@
   .btn-outline { background:transparent; color:var(--black); border:1px solid var(--black); padding:12px 28px; font-family:var(--mono); font-size:11px; letter-spacing:0.18em; text-transform:uppercase; cursor:pointer; transition:opacity 0.2s; }
   .btn-outline:hover { opacity:0.6; }
   .btn-outline.sm { padding:9px 18px; font-size:10px; }
-  .field-lbl { font-family:var(--mono); font-size:9px; letter-spacing:0.18em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; display:block; }
+  .field-lbl { font-family:var(--mono); font-size:10px; letter-spacing:0.18em; text-transform:uppercase; color:var(--black); margin-bottom:8px; display:block; }
   .field { width:100%; border:1px solid var(--border); padding:12px 16px; font-family:var(--mono); font-size:13px; color:var(--black); background:transparent; outline:none; margin-bottom:20px; }
   .field:focus { border-color:var(--black); }
   .field::placeholder { color:#ccc; }
@@ -47,21 +47,17 @@
 
   /* LOGIN */
   #screen-login { flex-direction:row !important; }
-  .login-left { width:38%; background:var(--black); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:52px; }
-  .login-left-logo { font-family:var(--serif); font-size:14px; font-weight:300; letter-spacing:0.35em; text-transform:uppercase; color:#fff; }
-  .login-left h2 { font-size:62px; font-weight:300; line-height:1.05; letter-spacing:-0.025em; color:#fff; margin-bottom:20px; }
+  .login-left { width:22%; min-width:200px; background:var(--black); display:flex; flex-direction:column; align-items:flex-start; justify-content:center; padding:48px 40px; }
+  .login-left h2 { font-size:40px; font-weight:300; line-height:1.1; letter-spacing:-0.02em; color:#fff; }
   .login-left h2 em { font-style:italic; }
-  .login-left p { font-size:15px; font-weight:300; color:#555; line-height:1.75; max-width:360px; }
-  .login-stat-num { font-size:56px; font-weight:300; color:#fff; letter-spacing:-0.03em; line-height:1; }
-  .login-stat-lbl { font-family:var(--mono); font-size:10px; letter-spacing:0.15em; text-transform:uppercase; color:#444; margin-top:6px; }
-  .login-stat-border { border-top:1px solid rgba(255,255,255,0.08); padding-top:28px; }
-  .login-right { flex:1; display:flex; align-items:center; justify-content:center; padding:52px; }
-  .login-form { width:100%; max-width:400px; }
-  .login-form-logo { font-family:var(--serif); font-size:14px; font-weight:300; letter-spacing:0.32em; text-transform:uppercase; margin-bottom:0; }
+  .login-right { flex:1; display:flex; align-items:flex-start; justify-content:flex-start; padding:52px; }
+  .login-form { width:100%; max-width:560px; }
+  .login-form-logo { font-family:var(--serif); font-size:14px; font-weight:300; letter-spacing:0.32em; text-transform:uppercase; margin-bottom:52px; display:block; }
   .login-form-title { font-size:42px; font-weight:300; letter-spacing:-0.02em; margin-bottom:8px; line-height:1.1; }
   .login-form-title em { font-style:italic; }
   .login-form-sub { font-size:15px; font-weight:300; color:var(--muted); margin-bottom:40px; line-height:1.6; }
-  .login-hint { font-family:var(--mono); font-size:10px; color:var(--muted); margin-top:20px; text-align:center; }
+  .login-hint { font-family:var(--mono); font-size:11px; color:var(--muted); margin-top:20px; text-align:center; }
+  .login-recover-lnk { font-family:var(--mono); font-size:11px; color:var(--black); text-decoration:underline; cursor:pointer; background:none; border:none; padding:0; }
 
   /* TOP NAV */
   .top-nav { height:60px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; padding:0 40px; position:sticky; top:0; background:var(--bg); z-index:50; flex-shrink:0; }
@@ -76,11 +72,11 @@
   .dash-layout { display:grid; grid-template-columns:220px 1fr; flex:1; min-height:calc(100vh - 60px); }
   .sidebar { border-right:1px solid var(--border); padding:32px 0; position:sticky; top:60px; height:calc(100vh - 60px); overflow-y:auto; }
   .sb-section { margin-bottom:32px; }
-  .sb-lbl { font-family:var(--mono); font-size:8px; letter-spacing:0.2em; text-transform:uppercase; color:rgba(0,0,0,0.25); padding:0 24px; margin-bottom:6px; }
-  .nav-lnk { display:flex; align-items:center; gap:10px; padding:10px 24px; font-family:var(--mono); font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); cursor:pointer; transition:color 0.2s, background 0.2s; border:none; background:none; width:100%; text-align:left; }
-  .nav-lnk:hover { color:var(--black); background:#fafafa; }
-  .nav-lnk.active { color:var(--black); font-weight:400; }
-  .nav-lnk-icon { font-size:14px; opacity:0.5; }
+  .sb-lbl { font-family:var(--mono); font-size:8px; letter-spacing:0.2em; text-transform:uppercase; color:rgba(0,0,0,0.4); padding:0 24px; margin-bottom:6px; }
+  .nav-lnk { display:flex; align-items:center; gap:10px; padding:10px 24px; font-family:var(--mono); font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:#555; cursor:pointer; transition:color 0.2s, background 0.2s; border:none; background:none; width:100%; text-align:left; }
+  .nav-lnk:hover { color:var(--black); background:#f5f5f5; }
+  .nav-lnk.active { color:var(--black); font-weight:400; background:#f5f5f5; }
+  .nav-lnk-icon { font-size:15px; opacity:0.7; }
   .main { padding:40px 48px; max-width:1060px; }
   .pg-title { font-size:34px; font-weight:300; letter-spacing:-0.02em; margin-bottom:4px; }
   .pg-title em { font-style:italic; }
@@ -181,11 +177,7 @@
   .sd-val { font-family:var(--mono); font-size:12px; color:var(--black); }
 
   /* DAVINCII LOGO */
-  .dv-logo { display:inline-block; }
-  .dv-logo-box { position:relative; display:inline-block; }
-  .dv-logo-box span { font-family:'Pinyon Script', cursive; font-size:72px; line-height:1.1; color:#c0392b; display:block; }
-  .dv-logo-nav .dv-logo-box span { font-size:28px; }
-  .dv-logo-form .dv-logo-box span { font-size:44px; }
+  .dv-logo-nav { font-family:var(--serif); font-size:14px; font-weight:300; letter-spacing:0.3em; text-transform:uppercase; cursor:pointer; }
 </style>
 </head>
 <body>
@@ -193,20 +185,12 @@
 <!-- LOGIN -->
 <div class="screen active" id="screen-login">
   <div class="login-left">
-    <div class="login-left-logo">Davincii</div>
-    <div>
-      <h2>Your royalties,<br><em>finally</em><br>collected.</h2>
-      <p>We find your missing publishing income across every platform and pay you every quarter. Zero upfront cost.</p>
-    </div>
-    <div class="login-stat-border">
-      <div class="login-stat-num">$2.5B</div>
-      <div class="login-stat-lbl">In uncollected royalties annually</div>
-    </div>
+    <h2>Your royalties,<br><em>finally</em><br>collected.</h2>
   </div>
   <div class="login-right">
     <div class="login-form">
-      <div class="dv-logo dv-logo-form" style="margin-bottom:52px"><div class="dv-logo-box"><span>DaVincii</span></div></div>
-      <h1 class="login-form-title">Welcome<br><em>back.</em></h1>
+      <div class="login-form-logo">Davincii</div>
+      <h1 class="login-form-title">Welcome <em>back.</em></h1>
       <p class="login-form-sub">Sign in to your artist portal to view your earnings and claim payments.</p>
       <div class="error-box" id="login-error"></div>
       <label class="field-lbl">Email address</label>
@@ -214,7 +198,8 @@
       <label class="field-lbl">Password</label>
       <input class="field" type="password" id="login-password" placeholder="Enter your password">
       <button class="btn" style="width:100%" id="login-btn" onclick="doLogin()">Sign in &rarr;</button>
-      <div class="login-hint">Don't have an account? <a href="javascript:void(0)" onclick="goTo('screen-signup')" style="color:var(--black);text-decoration:underline;">Create one</a></div>
+      <div class="login-hint" style="margin-top:16px">Don't have an account? <a href="javascript:void(0)" onclick="navigate('/signup')" style="color:var(--black);text-decoration:underline;">Create one</a></div>
+      <div class="login-hint" style="margin-top:14px"><button class="login-recover-lnk" onclick="navigate('/recover')">Forgot password? Recover your account</button></div>
     </div>
   </div>
 </div>
@@ -222,9 +207,9 @@
 <!-- SIGNUP -->
 <div class="screen" id="screen-signup" style="flex-direction:column !important;">
   <div style="background:var(--black);width:100%;display:flex;align-items:center;justify-content:center;padding:28px 52px;">
-    <div class="dv-logo"><div class="dv-logo-box"><span>DaVincii</span></div></div>
+    <div style="font-family:var(--serif);font-size:14px;font-weight:300;letter-spacing:0.3em;text-transform:uppercase;color:#fff;">Davincii</div>
   </div>
-  <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:52px;">
+  <div style="flex:1;display:flex;align-items:flex-start;justify-content:flex-start;padding:52px;">
     <div class="login-form">
       <h1 class="login-form-title">Create your<br><em>account.</em></h1>
       <p class="login-form-sub">Start recovering your royalties today.</p>
@@ -236,7 +221,24 @@
       <label class="field-lbl">Password</label>
       <input class="field" type="password" id="signup-password" placeholder="Min. 8 characters">
       <button class="btn" style="width:100%" id="signup-btn" onclick="doSignup()">Create account &rarr;</button>
-      <div class="login-hint">Already have an account? <a href="javascript:void(0)" onclick="goTo('screen-login')" style="color:var(--black);text-decoration:underline;">Sign in</a></div>
+      <div class="login-hint">Already have an account? <a href="javascript:void(0)" onclick="navigate('/')" style="color:var(--black);text-decoration:underline;">Sign in</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- RECOVER ACCOUNT -->
+<div class="screen" id="screen-recover">
+  <div class="login-right" style="min-height:100vh">
+    <div class="login-form">
+      <div class="login-form-logo">Davincii</div>
+      <h1 class="login-form-title">Recover your <em>account.</em></h1>
+      <p class="login-form-sub">Enter your email and we&rsquo;ll send you a link to reset your password.</p>
+      <div class="error-box" id="recover-error"></div>
+      <div id="recover-success" style="display:none;background:var(--green-bg);border-left:2px solid var(--green);padding:14px 18px;margin-bottom:20px;font-family:var(--mono);font-size:11px;color:var(--green);">Check your inbox &mdash; a recovery link is on its way.</div>
+      <label class="field-lbl">Email address</label>
+      <input class="field" type="email" id="recover-email" placeholder="you@example.com">
+      <button class="btn" style="width:100%" id="recover-btn" onclick="doRecover()">Send recovery email &rarr;</button>
+      <div class="login-hint" style="margin-top:16px"><a href="javascript:void(0)" onclick="navigate('/')" style="color:var(--muted);text-decoration:underline;">&larr; Back to sign in</a></div>
     </div>
   </div>
 </div>
@@ -244,7 +246,7 @@
 <!-- DASHBOARD -->
 <div class="screen" id="screen-dash">
   <div class="top-nav">
-    <div class="dv-logo dv-logo-nav" onclick="goTo('screen-login')" style="cursor:pointer"><div class="dv-logo-box"><span>DaVincii</span></div></div>
+    <div class="dv-logo-nav" onclick="navigate('/dashboard/overview')">Davincii</div>
     <div class="top-nav-right">
       <span class="top-nav-artist" id="nav-artist-name"></span>
       <div class="avatar" id="nav-avatar"></div>
@@ -255,14 +257,14 @@
     <div class="sidebar">
       <div class="sb-section">
         <div class="sb-lbl">Main</div>
-        <button class="nav-lnk active" id="nl-overview" onclick="showPg('pg-overview',this)"><span class="nav-lnk-icon">&#8862;</span>Overview</button>
-        <button class="nav-lnk" id="nl-catalog" onclick="showPg('pg-catalog',this)"><span class="nav-lnk-icon">&#9833;</span>Catalog</button>
-        <button class="nav-lnk" id="nl-royalties" onclick="showPg('pg-royalties',this)"><span class="nav-lnk-icon">&#9678;</span>Royalties</button>
-        <button class="nav-lnk" id="nl-payouts" onclick="showPg('pg-payouts',this)"><span class="nav-lnk-icon">&#8593;</span>Payouts</button>
+        <button class="nav-lnk active" id="nl-overview" onclick="navigate('/dashboard/overview')"><span class="nav-lnk-icon">&#8862;</span>Overview</button>
+        <button class="nav-lnk" id="nl-catalog" onclick="navigate('/dashboard/catalog')"><span class="nav-lnk-icon">&#9833;</span>Catalog</button>
+        <button class="nav-lnk" id="nl-royalties" onclick="navigate('/dashboard/royalties')"><span class="nav-lnk-icon">&#9678;</span>Royalties</button>
+        <button class="nav-lnk" id="nl-payouts" onclick="navigate('/dashboard/payouts')"><span class="nav-lnk-icon">&#8593;</span>Payouts</button>
       </div>
       <div class="sb-section">
         <div class="sb-lbl">Account</div>
-        <button class="nav-lnk" onclick="goTo('screen-claim')"><span class="nav-lnk-icon">&#10022;</span>Claim payment</button>
+        <button class="nav-lnk" onclick="navigate('/claim')"><span class="nav-lnk-icon">&#10022;</span>Claim payment</button>
       </div>
     </div>
     <div class="main">
@@ -283,8 +285,8 @@
             <div class="bal-note" id="overview-pending">&mdash;</div>
           </div>
           <div class="bal-actions">
-            <button class="bal-btn bal-btn-p" onclick="goTo('screen-claim')">Claim payment</button>
-            <button class="bal-btn bal-btn-g" onclick="showPg('pg-catalog', document.getElementById('nl-catalog'))">View catalog</button>
+            <button class="bal-btn bal-btn-p" onclick="navigate('/claim')">Claim payment</button>
+            <button class="bal-btn bal-btn-g" onclick="navigate('/dashboard/catalog')">View catalog</button>
           </div>
         </div>
 
@@ -297,13 +299,13 @@
               <div class="stripe-strip-sub" id="dash-stripe-sub"></div>
             </div>
           </div>
-          <button class="stripe-strip-btn" id="dash-stripe-btn" onclick="goTo('screen-claim')" style="display:none">Set up &rarr;</button>
+          <button class="stripe-strip-btn" id="dash-stripe-btn" onclick="navigate('/claim')" style="display:none">Set up &rarr;</button>
         </div>
 
         <div class="sbox">
           <div class="sbox-hd">
             <div><div class="sbox-title">Recent Royalties</div><div class="sbox-sub">Latest payments recovered</div></div>
-            <button class="sbox-lnk" onclick="showPg('pg-royalties', document.getElementById('nl-royalties'))">See all &rarr;</button>
+            <button class="sbox-lnk" onclick="navigate('/dashboard/royalties')">See all &rarr;</button>
           </div>
           <div class="sbox-body" id="overview-royalties-body">
             <div class="loading">Loading royalties...</div>
@@ -313,7 +315,7 @@
         <div class="sbox">
           <div class="sbox-hd">
             <div><div class="sbox-title">Your Catalog</div><div class="sbox-sub">Songs registered across platforms</div></div>
-            <button class="sbox-lnk" onclick="showPg('pg-catalog', document.getElementById('nl-catalog'))">See all &rarr;</button>
+            <button class="sbox-lnk" onclick="navigate('/dashboard/catalog')">See all &rarr;</button>
           </div>
           <div class="sbox-body" id="overview-catalog-body">
             <div class="loading">Loading catalog...</div>
@@ -361,11 +363,11 @@
 <!-- CLAIM PAYMENT -->
 <div class="screen" id="screen-claim">
   <div class="top-nav">
-    <div class="dv-logo dv-logo-nav" onclick="goTo('screen-login')" style="cursor:pointer"><div class="dv-logo-box"><span>DaVincii</span></div></div>
+    <div class="dv-logo-nav" onclick="navigate('/dashboard/overview')">Davincii</div>
     <div class="top-nav-right"><span class="top-nav-artist" id="claim-artist-name"></span><div class="avatar" id="claim-avatar"></div></div>
   </div>
   <div style="padding:40px 48px;width:100%;">
-    <button class="back-btn" onclick="goTo('screen-dash')">&larr; Back to dashboard</button>
+    <button class="back-btn" onclick="navigate('/dashboard/overview')">&larr; Back to dashboard</button>
     <div class="pg-title">Claim your <em>payment.</em></div>
     <div class="pg-sub">Your earnings are ready. Choose how you'd like to receive them.</div>
     <div class="claim-layout">
@@ -427,7 +429,7 @@
 
 <!-- PAYMENT SUCCESS -->
 <div class="screen" id="screen-success">
-  <div class="top-nav"><div class="dv-logo dv-logo-nav" onclick="goTo('screen-login')" style="cursor:pointer"><div class="dv-logo-box"><span>DaVincii</span></div></div><div class="top-nav-right"><div class="avatar" id="success-avatar"></div></div></div>
+  <div class="top-nav"><div class="dv-logo-nav" onclick="navigate('/dashboard/overview')">Davincii</div><div class="top-nav-right"><div class="avatar" id="success-avatar"></div></div></div>
   <div style="padding:80px 48px;display:flex;justify-content:center;">
     <div class="success-wrap">
       <div class="success-icon">&#9678;</div>
@@ -439,7 +441,7 @@
         <div class="sd-row"><div class="sd-key">Status</div><div class="sd-val" id="succ-status">Pending</div></div>
         <div class="sd-row" id="succ-transfer-row" style="display:none"><div class="sd-key">Transfer ID</div><div class="sd-val" id="succ-transfer-id">&mdash;</div></div>
       </div>
-      <button class="btn" style="width:100%" onclick="goTo('screen-dash')">Back to dashboard &rarr;</button>
+      <button class="btn" style="width:100%" onclick="navigate('/dashboard/overview')">Back to dashboard &rarr;</button>
     </div>
   </div>
 </div>
@@ -474,24 +476,64 @@
     return data;
   }
 
-  // -- Navigation --------------------------------------------
-  function goTo(id) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-    window.scrollTo(0, 0);
-    if (id === 'screen-dash') loadDashboard();
-    if (id === 'screen-claim') loadClaim();
+  // -- Router ------------------------------------------------
+  function navigate(path, pushState) {
+    if (pushState !== false) window.history.pushState({path: path}, '', path);
+    _applyRoute(path);
   }
 
-  function showPg(pgId, navEl) {
-    document.querySelectorAll('[id^="pg-"]').forEach(p => p.style.display = 'none');
-    document.getElementById(pgId).style.display = 'block';
-    document.querySelectorAll('.nav-lnk').forEach(n => n.classList.remove('active'));
-    if (navEl) navEl.classList.add('active');
-    if (pgId === 'pg-catalog') loadCatalog();
-    if (pgId === 'pg-royalties') loadRoyalties();
-    if (pgId === 'pg-payouts') loadPayouts();
+  function _applyRoute(path) {
+    var prot = ['/dashboard', '/claim'];
+    if (prot.some(function(p){ return path.startsWith(p); }) && !getToken()) {
+      navigate('/', false); return;
+    }
+    if (path === '/' || path === '/login' || path === '') {
+      _showScreen('screen-login');
+    } else if (path === '/signup') {
+      _showScreen('screen-signup');
+    } else if (path === '/recover') {
+      _showScreen('screen-recover');
+    } else if (path === '/claim/success') {
+      _showScreen('screen-success');
+    } else if (path === '/claim' || path.startsWith('/claim/')) {
+      _showScreen('screen-claim'); loadClaim();
+    } else if (path.startsWith('/dashboard')) {
+      _showScreen('screen-dash');
+      var sub = (path.split('/')[2] || 'overview');
+      _showDashSub(sub);
+      loadDashboard();
+    } else {
+      navigate('/', false);
+    }
   }
+
+  function _showScreen(id) {
+    document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+    document.getElementById(id).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  function _showDashSub(sub) {
+    var pgMap = { overview:'pg-overview', catalog:'pg-catalog', royalties:'pg-royalties', payouts:'pg-payouts' };
+    var nlMap = { overview:'nl-overview', catalog:'nl-catalog', royalties:'nl-royalties', payouts:'nl-payouts' };
+    var pgId = pgMap[sub] || 'pg-overview';
+    var nlId = nlMap[sub] || 'nl-overview';
+    document.querySelectorAll('[id^="pg-"]').forEach(function(p){ p.style.display = 'none'; });
+    document.getElementById(pgId).style.display = 'block';
+    document.querySelectorAll('.nav-lnk').forEach(function(n){ n.classList.remove('active'); });
+    document.getElementById(nlId).classList.add('active');
+    if (sub === 'catalog') loadCatalog();
+    if (sub === 'royalties') loadRoyalties();
+    if (sub === 'payouts') loadPayouts();
+  }
+
+  // Compat shims kept for any inline callers
+  function goTo(id) {
+    var m = { 'screen-login':'/', 'screen-signup':'/signup', 'screen-recover':'/recover', 'screen-dash':'/dashboard/overview', 'screen-claim':'/claim' };
+    navigate(m[id] || '/');
+  }
+
+  window.addEventListener('popstate', function(){ _applyRoute(window.location.pathname); });
 
   // -- Login -------------------------------------------------
   async function doLogin() {
@@ -508,7 +550,7 @@
         body: JSON.stringify({ email, password })
       });
       setAuth(data.token, data.artist);
-      goTo('screen-dash');
+      navigate('/dashboard/overview');
     } catch(e) {
       showErr(errEl, e.message);
     } finally {
@@ -534,7 +576,7 @@
         body: JSON.stringify({ name, email, password })
       });
       setAuth(data.token, data.artist);
-      goTo('screen-dash');
+      navigate('/dashboard/overview');
     } catch(e) {
       showErr(errEl, e.message);
     } finally {
@@ -544,7 +586,20 @@
 
   function doLogout() {
     clearAuth();
-    goTo('screen-login');
+    navigate('/');
+  }
+
+  // -- Recover -----------------------------------------------
+  async function doRecover() {
+    var email = document.getElementById('recover-email').value.trim();
+    var errEl = document.getElementById('recover-error');
+    var btn = document.getElementById('recover-btn');
+    errEl.style.display = 'none';
+    if (!email) { showErr(errEl, 'Please enter your email address.'); return; }
+    btn.disabled = true; btn.textContent = 'Sending...';
+    try { await apiFetch('/api/auth/recover', { method: 'POST', body: JSON.stringify({ email: email }) }); } catch(e) {}
+    document.getElementById('recover-success').style.display = 'block';
+    btn.disabled = false; btn.textContent = 'Send recovery email ->';
   }
 
   function showErr(el, msg) {
@@ -928,7 +983,7 @@
         document.getElementById('succ-sub').textContent = 'Your funds have been transferred to your connected bank account.';
         document.getElementById('succ-transfer-row').style.display = 'flex';
         document.getElementById('succ-transfer-id').textContent = data.transfer_id;
-        goTo('screen-success');
+        navigate('/claim/success');
       } catch(e) {
         showErr(errEl, e.message);
       } finally {
@@ -957,7 +1012,7 @@
       document.getElementById('succ-title').innerHTML = 'Payment<br><em>requested.</em>';
       document.getElementById('succ-sub').textContent = 'You\'ll receive a confirmation within 24 hours. Funds arrive within 2-5 business days.';
       document.getElementById('succ-transfer-row').style.display = 'none';
-      goTo('screen-success');
+      navigate('/claim/success');
     } catch(e) {
       showErr(errEl, e.message);
     } finally {
@@ -967,21 +1022,15 @@
 
   // -- Init --------------------------------------------------
   (function init() {
-    const token = getToken();
-    const artist = getArtist();
-
     // Handle return from Stripe Connect onboarding
     const params = new URLSearchParams(window.location.search);
     if (params.get('stripe_connected') === 'true') {
-      // Clear param from URL without reload
-      window.history.replaceState({}, '', '/');
-      if (token && artist) {
-        goTo('screen-claim');
-        // Status will be refreshed by loadClaim()
-      }
-    } else if (token && artist) {
-      goTo('screen-dash');
+      window.history.replaceState({}, '', '/claim');
+      if (getToken() && getArtist()) { navigate('/claim', false); return; }
     }
+
+    // Route to current URL path
+    _applyRoute(window.location.pathname);
 
     document.getElementById('login-password').addEventListener('keydown', e => {
       if (e.key === 'Enter') doLogin();
