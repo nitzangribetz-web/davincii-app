@@ -9,6 +9,7 @@ const songRoutes = require('./routes/songs');
 const royaltyRoutes = require('./routes/royalties');
 const payoutRoutes = require('./routes/payouts');
 const stripeRoutes = require('./routes/stripe');
+const passkeyRoutes = require('./routes/passkeys');
 
 const app = express();
 
@@ -37,6 +38,7 @@ app.use('/api/songs', songRoutes);
 app.use('/api/royalties', royaltyRoutes);
 app.use('/api/payouts', payoutRoutes);
 app.use('/api/stripe', stripeRoutes);
+app.use('/api/passkeys', passkeyRoutes);
 
 // Serve frontend for all non-API routes
 app.get('*path', (req, res) => {

@@ -40,6 +40,19 @@ const baseTables = `
   );
 `;
 
+const passkeyTable = `
+  CREATE TABLE IF NOT EXISTS passkeys (
+    id              TEXT PRIMARY KEY,
+    artist_id       INTEGER NOT NULL REFERENCES artists(id) ON DELETE CASCADE,
+    public_key      BYTEA NOT NULL,
+    counter         BIGINT NOT NULL DEFAULT 0,
+    device_type     VARCHAR(32),
+    backed_up       BOOLEAN DEFAULT FALSE,
+    transports      TEXT[],
+    created_at      TIMESTAMPTZ DEFAULT NOW()
+  );
+`;
+
 // Additive column migrations (idempotent)
 const columnMigrations = [
   `ALTER TABLE artists ADD COLUMN IF NOT EXISTS stripe_account_id VARCHAR(255)`,
@@ -50,6 +63,7 @@ const columnMigrations = [
 async function migrate() {
   try {
     await pool.query(baseTables);
+    await pool.query(passkeyTable);
     for (const stmt of columnMigrations) {
       await pool.query(stmt);
     }

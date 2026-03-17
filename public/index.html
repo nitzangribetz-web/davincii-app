@@ -578,15 +578,17 @@ select.field { color: var(--black); }
 
         <div class="error-box" id="login-error"></div>
 
+        <form id="login-form" autocomplete="on" onsubmit="event.preventDefault(); doLogin();">
         <label class="field-lbl">Email address</label>
-        <input class="field" type="email" id="login-email" placeholder="you@example.com">
+        <input class="field" type="email" id="login-email" name="email" autocomplete="email" placeholder="you@example.com">
 
         <label class="field-lbl">Password</label>
-        <input class="field" type="password" id="login-password" placeholder="Enter your password">
+        <input class="field" type="password" id="login-password" name="password" autocomplete="current-password" placeholder="Enter your password">
 
-        <button class="auth-forgot" onclick="navigate('/recover')">Forgot your password?</button>
+        <button class="auth-forgot" type="button" onclick="navigate('/recover')">Forgot your password?</button>
 
-        <button class="btn-primary" id="login-btn" onclick="doLogin()" style="margin-bottom:22px">Sign in &rarr;</button>
+        <button class="btn-primary" id="login-btn" type="submit" style="margin-bottom:22px">Sign in &rarr;</button>
+        </form>
 
         <div class="divider">
           <div class="divider-line"></div>
@@ -601,6 +603,10 @@ select.field { color: var(--black); }
         <button class="btn-social" onclick="doAppleLogin()">
           <svg class="btn-social-icon" viewBox="0 0 18 18"><path d="M12.27.52c.14 1.08-.3 2.15-1.01 2.93-.72.78-1.83 1.37-2.92 1.3-.16-1.07.34-2.17 1.01-2.88C10.07 1.1 11.24.52 12.27.52zM15.98 12.44c-.26.59-.57 1.14-.94 1.65-.49.69-.9 1.17-1.22 1.43-.49.44-1.01.67-1.58.68-.4 0-.89-.12-1.45-.35-.57-.23-1.09-.35-1.57-.35-.5 0-1.04.12-1.61.35-.58.23-1.04.36-1.4.37-.55.02-1.08-.22-1.6-.68-.35-.29-.78-.8-1.29-1.51C3.69 13.14 3.1 12 2.65 10.68c-.49-1.41-.74-2.77-.74-4.09 0-1.51.33-2.81.99-3.89.52-.87 1.21-1.56 2.08-2.07.87-.51 1.81-.77 2.82-.79.44 0 1.02.14 1.74.4.72.27 1.18.4 1.38.4.15 0 .67-.16 1.54-.47.82-.29 1.52-.41 2.1-.37 1.55.12 2.72.73 3.49 1.83-1.39.84-2.07 2.01-2.06 3.52.01 1.17.44 2.15 1.27 2.92.38.36.8.63 1.27.83-.1.29-.21.58-.35.86z" fill="#000"/></svg>
           Continue with Apple
+        </button>
+        <button class="btn-social" id="passkey-login-btn" onclick="doPasskeyLogin()" style="display:none">
+          <svg class="btn-social-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><circle cx="12" cy="16" r="1"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Sign in with Passkey
         </button>
 
         <div class="auth-link">
@@ -638,16 +644,18 @@ select.field { color: var(--black); }
 
         <div class="error-box" id="signup-error"></div>
 
+        <form id="signup-form" autocomplete="on" onsubmit="event.preventDefault(); doSignup();">
         <label class="field-lbl">Full name</label>
-        <input class="field" type="text" id="signup-name" placeholder="Your name">
+        <input class="field" type="text" id="signup-name" name="name" autocomplete="name" placeholder="Your name">
 
         <label class="field-lbl">Email address</label>
-        <input class="field" type="email" id="signup-email" placeholder="you@example.com">
+        <input class="field" type="email" id="signup-email" name="email" autocomplete="email" placeholder="you@example.com">
 
         <label class="field-lbl">Password</label>
-        <input class="field" type="password" id="signup-password" placeholder="Minimum 8 characters">
+        <input class="field" type="password" id="signup-password" name="password" autocomplete="new-password" placeholder="Minimum 8 characters">
 
-        <button class="btn-primary" id="signup-btn" onclick="doSignup()" style="margin-bottom:22px">Create account &rarr;</button>
+        <button class="btn-primary" id="signup-btn" type="submit" style="margin-bottom:22px">Create account &rarr;</button>
+        </form>
 
         <div class="divider">
           <div class="divider-line"></div>
@@ -885,6 +893,7 @@ select.field { color: var(--black); }
       <div class="sb-section">
         <span class="sb-lbl">Account</span>
         <button class="nav-lnk" onclick="navigate('/claim')"><span class="nav-lnk-icon">&#10022;</span>Claim payment</button>
+        <button class="nav-lnk" id="passkey-setup-btn" onclick="doPasskeyRegister()" style="display:none"><span class="nav-lnk-icon">&#128274;</span>Set up Passkey</button>
       </div>
     </div>
     <div class="main">
@@ -1184,6 +1193,125 @@ select.field { color: var(--black); }
   }
   function doAppleLogin() {
     alert('Sign in with Apple is coming soon!');
+  }
+
+  // -- Passkey (WebAuthn) ------------------------------------
+  function _bufToBase64url(buf) {
+    return btoa(String.fromCharCode(...new Uint8Array(buf)))
+      .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+  function _base64urlToBuf(str) {
+    str = str.replace(/-/g, '+').replace(/_/g, '/');
+    while (str.length % 4) str += '=';
+    var bin = atob(str);
+    var arr = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+    return arr.buffer;
+  }
+
+  // Show passkey buttons only if WebAuthn is supported
+  (function() {
+    if (window.PublicKeyCredential) {
+      var btn = document.getElementById('passkey-login-btn');
+      if (btn) btn.style.display = '';
+      var setupBtn = document.getElementById('passkey-setup-btn');
+      if (setupBtn) setupBtn.style.display = '';
+    }
+  })();
+
+  async function doPasskeyLogin() {
+    var errEl = document.getElementById('login-error');
+    try {
+      // 1. Get options from server
+      var optRes = await fetch('/api/passkeys/login/options', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+      var options = await optRes.json();
+      if (!optRes.ok) throw new Error(options.error || 'Failed to get options');
+
+      // 2. Convert challenge
+      options.challenge = _base64urlToBuf(options.challenge);
+      if (options.allowCredentials) {
+        options.allowCredentials = options.allowCredentials.map(function(c) {
+          return Object.assign({}, c, { id: _base64urlToBuf(c.id) });
+        });
+      }
+
+      // 3. Prompt user for passkey
+      var credential = await navigator.credentials.get({ publicKey: options });
+
+      // 4. Encode response
+      var body = {
+        id: credential.id,
+        rawId: _bufToBase64url(credential.rawId),
+        type: credential.type,
+        response: {
+          authenticatorData: _bufToBase64url(credential.response.authenticatorData),
+          clientDataJSON: _bufToBase64url(credential.response.clientDataJSON),
+          signature: _bufToBase64url(credential.response.signature),
+          userHandle: credential.response.userHandle ? _bufToBase64url(credential.response.userHandle) : null
+        }
+      };
+
+      // 5. Verify with server
+      var verRes = await fetch('/api/passkeys/login/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      var data = await verRes.json();
+      if (!verRes.ok) throw new Error(data.error || 'Verification failed');
+
+      setAuth(data.token, data.artist);
+      navigate('/dashboard/overview');
+    } catch(e) {
+      if (e.name === 'NotAllowedError') return; // user cancelled
+      if (errEl) showErr(errEl, e.message || 'Passkey login failed');
+    }
+  }
+
+  async function doPasskeyRegister() {
+    try {
+      // 1. Get options from server
+      var optRes = await apiFetch('/api/passkeys/register/options', { method: 'POST' });
+
+      // 2. Convert challenge and user.id
+      var publicKeyOpts = Object.assign({}, optRes);
+      publicKeyOpts.challenge = _base64urlToBuf(optRes.challenge);
+      publicKeyOpts.user = Object.assign({}, optRes.user, { id: _base64urlToBuf(optRes.user.id) });
+      if (publicKeyOpts.excludeCredentials) {
+        publicKeyOpts.excludeCredentials = publicKeyOpts.excludeCredentials.map(function(c) {
+          return Object.assign({}, c, { id: _base64urlToBuf(c.id) });
+        });
+      }
+
+      // 3. Create credential
+      var credential = await navigator.credentials.create({ publicKey: publicKeyOpts });
+
+      // 4. Encode response
+      var body = {
+        id: credential.id,
+        rawId: _bufToBase64url(credential.rawId),
+        type: credential.type,
+        response: {
+          attestationObject: _bufToBase64url(credential.response.attestationObject),
+          clientDataJSON: _bufToBase64url(credential.response.clientDataJSON)
+        },
+        clientExtensionResults: credential.getClientExtensionResults()
+      };
+      if (credential.response.getTransports) {
+        body.response.transports = credential.response.getTransports();
+      }
+
+      // 5. Verify with server
+      var verRes = await apiFetch('/api/passkeys/register/verify', {
+        method: 'POST',
+        body: JSON.stringify(body)
+      });
+
+      alert('Passkey registered! You can now sign in with your fingerprint or face.');
+    } catch(e) {
+      if (e.name === 'NotAllowedError') return;
+      alert(e.message || 'Failed to register passkey');
+    }
   }
 
   // -- Login -------------------------------------------------
@@ -1670,12 +1798,7 @@ select.field { color: var(--black); }
 
     _applyRoute(window.location.pathname);
 
-    document.getElementById('login-password').addEventListener('keydown', e => {
-      if (e.key === 'Enter') doLogin();
-    });
-    document.getElementById('signup-password').addEventListener('keydown', e => {
-      if (e.key === 'Enter') doSignup();
-    });
+    // Enter key is handled natively by <form> onsubmit
   })();
 </script>
 </body>
