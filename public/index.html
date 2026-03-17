@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Davincii â Artist Portal</title>
+<title>Davincii &mdash; Artist Portal</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&family=Pinyon+Script&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -47,7 +47,7 @@
 
   /* LOGIN */
   #screen-login { flex-direction:row !important; }
-  .login-left { width:44%; background:var(--black); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:52px; }
+  .login-left { width:38%; background:var(--black); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:52px; }
   .login-left-logo { font-family:var(--serif); font-size:14px; font-weight:300; letter-spacing:0.35em; text-transform:uppercase; color:#fff; }
   .login-left h2 { font-size:62px; font-weight:300; line-height:1.05; letter-spacing:-0.025em; color:#fff; margin-bottom:20px; }
   .login-left h2 em { font-style:italic; }
@@ -193,7 +193,15 @@
 <!-- LOGIN -->
 <div class="screen active" id="screen-login">
   <div class="login-left">
-    <div class="dv-logo"><div class="dv-logo-box"><span>DaVincii</span></div></div>
+    <div class="login-left-logo">Davincii</div>
+    <div>
+      <h2>Your royalties,<br><em>finally</em><br>collected.</h2>
+      <p>We find your missing publishing income across every platform and pay you every quarter. Zero upfront cost.</p>
+    </div>
+    <div class="login-stat-border">
+      <div class="login-stat-num">$2.5B</div>
+      <div class="login-stat-lbl">In uncollected royalties annually</div>
+    </div>
   </div>
   <div class="login-right">
     <div class="login-form">
@@ -212,13 +220,12 @@
 </div>
 
 <!-- SIGNUP -->
-<div class="screen" id="screen-signup">
-  <div class="login-left">
+<div class="screen" id="screen-signup" style="flex-direction:column !important;">
+  <div style="background:var(--black);width:100%;display:flex;align-items:center;justify-content:center;padding:28px 52px;">
     <div class="dv-logo"><div class="dv-logo-box"><span>DaVincii</span></div></div>
   </div>
-  <div class="login-right">
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:52px;">
     <div class="login-form">
-      <div class="dv-logo dv-logo-form" style="margin-bottom:52px"><div class="dv-logo-box"><span>DaVincii</span></div></div>
       <h1 class="login-form-title">Create your<br><em>account.</em></h1>
       <p class="login-form-sub">Start recovering your royalties today.</p>
       <div class="error-box" id="signup-error"></div>
@@ -237,7 +244,7 @@
 <!-- DASHBOARD -->
 <div class="screen" id="screen-dash">
   <div class="top-nav">
-    <div class="dv-logo dv-logo-nav"><div class="dv-logo-box"><span>DaVincii</span></div></div>
+    <div class="dv-logo dv-logo-nav" onclick="goTo('screen-login')" style="cursor:pointer"><div class="dv-logo-box"><span>DaVincii</span></div></div>
     <div class="top-nav-right">
       <span class="top-nav-artist" id="nav-artist-name"></span>
       <div class="avatar" id="nav-avatar"></div>
@@ -248,32 +255,32 @@
     <div class="sidebar">
       <div class="sb-section">
         <div class="sb-lbl">Main</div>
-        <button class="nav-lnk active" id="nl-overview" onclick="showPg('pg-overview',this)"><span class="nav-lnk-icon">â</span>Overview</button>
-        <button class="nav-lnk" id="nl-catalog" onclick="showPg('pg-catalog',this)"><span class="nav-lnk-icon">â©</span>Catalog</button>
-        <button class="nav-lnk" id="nl-royalties" onclick="showPg('pg-royalties',this)"><span class="nav-lnk-icon">â</span>Royalties</button>
-        <button class="nav-lnk" id="nl-payouts" onclick="showPg('pg-payouts',this)"><span class="nav-lnk-icon">â</span>Payouts</button>
+        <button class="nav-lnk active" id="nl-overview" onclick="showPg('pg-overview',this)"><span class="nav-lnk-icon">&#8862;</span>Overview</button>
+        <button class="nav-lnk" id="nl-catalog" onclick="showPg('pg-catalog',this)"><span class="nav-lnk-icon">&#9833;</span>Catalog</button>
+        <button class="nav-lnk" id="nl-royalties" onclick="showPg('pg-royalties',this)"><span class="nav-lnk-icon">&#9678;</span>Royalties</button>
+        <button class="nav-lnk" id="nl-payouts" onclick="showPg('pg-payouts',this)"><span class="nav-lnk-icon">&#8593;</span>Payouts</button>
       </div>
       <div class="sb-section">
         <div class="sb-lbl">Account</div>
-        <button class="nav-lnk" onclick="goTo('screen-claim')"><span class="nav-lnk-icon">â¦</span>Claim payment</button>
+        <button class="nav-lnk" onclick="goTo('screen-claim')"><span class="nav-lnk-icon">&#10022;</span>Claim payment</button>
       </div>
     </div>
     <div class="main">
 
       <!-- OVERVIEW -->
       <div id="pg-overview">
-        <div class="pg-title">Good <em id="greeting-time">morning</em>, <em id="greeting-name">â</em></div>
+        <div class="pg-title">Good <em id="greeting-time">morning</em>, <em id="greeting-name">&mdash;</em></div>
         <div class="pg-sub">Here's a summary of your royalty activity.</div>
         <div class="bal-card">
           <div>
             <div class="bal-lbl">Total royalties collected</div>
-            <div class="bal-amt" id="overview-total">â</div>
-            <div class="bal-note" id="overview-count">Loadingâ¦</div>
+            <div class="bal-amt" id="overview-total">&mdash;</div>
+            <div class="bal-note" id="overview-count">Loading...</div>
           </div>
           <div>
             <div class="bal-lbl">Total paid out</div>
-            <div class="bal-amt-sm" id="overview-paid">â</div>
-            <div class="bal-note" id="overview-pending">â</div>
+            <div class="bal-amt-sm" id="overview-paid">&mdash;</div>
+            <div class="bal-note" id="overview-pending">&mdash;</div>
           </div>
           <div class="bal-actions">
             <button class="bal-btn bal-btn-p" onclick="goTo('screen-claim')">Claim payment</button>
@@ -286,7 +293,7 @@
           <div class="stripe-strip-left">
             <div class="stripe-dot loading" id="dash-stripe-dot"></div>
             <div>
-              <div class="stripe-strip-title" id="dash-stripe-title">Checking Stripeâ¦</div>
+              <div class="stripe-strip-title" id="dash-stripe-title">Checking Stripe...</div>
               <div class="stripe-strip-sub" id="dash-stripe-sub"></div>
             </div>
           </div>
@@ -299,7 +306,7 @@
             <button class="sbox-lnk" onclick="showPg('pg-royalties', document.getElementById('nl-royalties'))">See all &rarr;</button>
           </div>
           <div class="sbox-body" id="overview-royalties-body">
-            <div class="loading">Loading royaltiesâ¦</div>
+            <div class="loading">Loading royalties...</div>
           </div>
         </div>
 
@@ -309,7 +316,7 @@
             <button class="sbox-lnk" onclick="showPg('pg-catalog', document.getElementById('nl-catalog'))">See all &rarr;</button>
           </div>
           <div class="sbox-body" id="overview-catalog-body">
-            <div class="loading">Loading catalogâ¦</div>
+            <div class="loading">Loading catalog...</div>
           </div>
         </div>
       </div>
@@ -320,7 +327,7 @@
         <div class="pg-sub" id="catalog-sub">Your registered songs.</div>
         <div class="sbox">
           <div class="sbox-body" id="catalog-body">
-            <div class="loading">Loadingâ¦</div>
+            <div class="loading">Loading...</div>
           </div>
         </div>
       </div>
@@ -331,7 +338,7 @@
         <div class="pg-sub">All royalty payments collected on your behalf.</div>
         <div class="sbox">
           <div class="sbox-body" id="royalties-body">
-            <div class="loading">Loadingâ¦</div>
+            <div class="loading">Loading...</div>
           </div>
         </div>
       </div>
@@ -342,7 +349,7 @@
         <div class="pg-sub">Your payment requests and their status.</div>
         <div class="sbox">
           <div class="sbox-body" id="payouts-body">
-            <div class="loading">Loadingâ¦</div>
+            <div class="loading">Loading...</div>
           </div>
         </div>
       </div>
@@ -354,7 +361,7 @@
 <!-- CLAIM PAYMENT -->
 <div class="screen" id="screen-claim">
   <div class="top-nav">
-    <div class="dv-logo dv-logo-nav"><div class="dv-logo-box"><span>DaVincii</span></div></div>
+    <div class="dv-logo dv-logo-nav" onclick="goTo('screen-login')" style="cursor:pointer"><div class="dv-logo-box"><span>DaVincii</span></div></div>
     <div class="top-nav-right"><span class="top-nav-artist" id="claim-artist-name"></span><div class="avatar" id="claim-avatar"></div></div>
   </div>
   <div style="padding:40px 48px;width:100%;">
@@ -366,11 +373,11 @@
         <div class="claim-avail">
           <div>
             <div class="claim-avail-lbl">Available to claim</div>
-            <div class="claim-avail-amt" id="claim-balance">â</div>
+            <div class="claim-avail-amt" id="claim-balance">&mdash;</div>
           </div>
           <div style="text-align:right">
             <div class="claim-avail-lbl">Total earned</div>
-            <div class="claim-avail-amt" id="claim-total" style="font-size:14px;color:var(--muted)">â</div>
+            <div class="claim-avail-amt" id="claim-total" style="font-size:14px;color:var(--muted)">&mdash;</div>
           </div>
         </div>
         <div class="error-box" id="claim-error"></div>
@@ -378,22 +385,22 @@
         <input class="field" type="number" id="claim-amount" placeholder="e.g. 500" min="10" step="0.01">
         <label class="field-lbl">Payment method</label>
         <div class="method-opts">
-          <label class="mopt sel" id="mopt-stripe-connect"><input type="radio" name="method" value="stripe" checked onchange="updateSummary()"><div class="mopt-lbl">Stripe â bank or debit card</div><div class="mopt-sub">Instant Â· Recommended</div></label>
-          <label class="mopt" id="mopt-ach"><input type="radio" name="method" value="bank_transfer" onchange="updateSummary()"><div class="mopt-lbl">Bank transfer (ACH)</div><div class="mopt-sub">2â3 business days</div></label>
+          <label class="mopt sel" id="mopt-stripe-connect"><input type="radio" name="method" value="stripe" checked onchange="updateSummary()"><div class="mopt-lbl">Stripe &mdash; bank or debit card</div><div class="mopt-sub">Instant &middot; Recommended</div></label>
+          <label class="mopt" id="mopt-ach"><input type="radio" name="method" value="bank_transfer" onchange="updateSummary()"><div class="mopt-lbl">Bank transfer (ACH)</div><div class="mopt-sub">2&ndash;3 business days</div></label>
           <label class="mopt" id="mopt-paypal"><input type="radio" name="method" value="paypal" onchange="updateSummary()"><div class="mopt-lbl">PayPal</div><div class="mopt-sub">Instant</div></label>
         </div>
 
-        <!-- Stripe Connect panel â shown only when Stripe method is selected -->
+        <!-- Stripe Connect panel &mdash; shown only when Stripe method is selected -->
         <div class="stripe-box visible" id="stripe-connect-box">
           <div class="stripe-box-title">Stripe account</div>
           <div class="stripe-status">
             <div class="stripe-dot loading" id="stripe-dot"></div>
             <div>
-              <div class="stripe-status-text" id="stripe-status-text">Checkingâ¦</div>
+              <div class="stripe-status-text" id="stripe-status-text">Checking...</div>
               <div class="stripe-status-sub" id="stripe-status-sub"></div>
             </div>
           </div>
-          <div class="stripe-connected-detail" id="stripe-connected-detail">â Bank account connected â payout will be sent immediately</div>
+          <div class="stripe-connected-detail" id="stripe-connected-detail">&#10003; Bank account connected &mdash; payout will be sent immediately</div>
           <div style="display:flex;align-items:center;gap:10px">
             <button class="btn-stripe" id="stripe-connect-btn" onclick="doStripeConnect()" style="display:none">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -409,7 +416,7 @@
       <div>
         <div class="summary-card">
           <div class="summary-title">Payment summary</div>
-          <div class="sum-row"><div class="sum-key">Amount requested</div><div class="sum-val" id="sum-amount">â</div></div>
+          <div class="sum-row"><div class="sum-key">Amount requested</div><div class="sum-val" id="sum-amount">&mdash;</div></div>
           <div class="sum-row"><div class="sum-key">Method</div><div class="sum-val" id="sum-method">ACH Transfer</div></div>
           <div class="sum-row"><div class="sum-key">Status</div><div class="sum-val">Pending approval</div></div>
         </div>
@@ -420,17 +427,17 @@
 
 <!-- PAYMENT SUCCESS -->
 <div class="screen" id="screen-success">
-  <div class="top-nav"><div class="dv-logo dv-logo-nav"><div class="dv-logo-box"><span>DaVincii</span></div></div><div class="top-nav-right"><div class="avatar" id="success-avatar"></div></div></div>
+  <div class="top-nav"><div class="dv-logo dv-logo-nav" onclick="goTo('screen-login')" style="cursor:pointer"><div class="dv-logo-box"><span>DaVincii</span></div></div><div class="top-nav-right"><div class="avatar" id="success-avatar"></div></div></div>
   <div style="padding:80px 48px;display:flex;justify-content:center;">
     <div class="success-wrap">
-      <div class="success-icon">â</div>
+      <div class="success-icon">&#9678;</div>
       <h2 class="success-title" id="succ-title">Payment<br><em>requested.</em></h2>
-      <p class="success-sub" id="succ-sub">You'll receive a confirmation within 24 hours. Funds arrive within 2â5 business days.</p>
+      <p class="success-sub" id="succ-sub">You'll receive a confirmation within 24 hours. Funds arrive within 2&ndash;5 business days.</p>
       <div class="success-detail">
-        <div class="sd-row"><div class="sd-key">Amount</div><div class="sd-val" id="succ-amount">â</div></div>
-        <div class="sd-row"><div class="sd-key">Method</div><div class="sd-val" id="succ-method">â</div></div>
+        <div class="sd-row"><div class="sd-key">Amount</div><div class="sd-val" id="succ-amount">&mdash;</div></div>
+        <div class="sd-row"><div class="sd-key">Method</div><div class="sd-val" id="succ-method">&mdash;</div></div>
         <div class="sd-row"><div class="sd-key">Status</div><div class="sd-val" id="succ-status">Pending</div></div>
-        <div class="sd-row" id="succ-transfer-row" style="display:none"><div class="sd-key">Transfer ID</div><div class="sd-val" id="succ-transfer-id">â</div></div>
+        <div class="sd-row" id="succ-transfer-row" style="display:none"><div class="sd-key">Transfer ID</div><div class="sd-val" id="succ-transfer-id">&mdash;</div></div>
       </div>
       <button class="btn" style="width:100%" onclick="goTo('screen-dash')">Back to dashboard &rarr;</button>
     </div>
@@ -983,6 +990,6 @@
       if (e.key === 'Enter') doSignup();
     });
   })();
-</script>
+  </script>
 </body>
 </html>
