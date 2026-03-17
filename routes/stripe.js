@@ -6,7 +6,7 @@ const auth = require('../middleware/auth');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const APP_URL = process.env.APP_URL || 'https://davincii-app-production-89cc.up.railway.app';
 
-// ââ POST /api/stripe/connect ââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── POST /api/stripe/connect ──────────────────────────────────────────────────
 // Creates (or re-fetches) a Stripe Connect Express account and returns the
 // hosted onboarding URL. The artist is redirected to Stripe to add their bank.
 router.post('/connect', auth, async (req, res) => {
@@ -46,7 +46,7 @@ router.post('/connect', auth, async (req, res) => {
   }
 });
 
-// ââ GET /api/stripe/connect/refresh ââââââââââââââââââââââââââââââââââââââââââ
+// ── GET /api/stripe/connect/refresh ──────────────────────────────────────────
 // Stripe calls this if the onboarding link expires. Re-generate and redirect.
 router.get('/connect/refresh', auth, async (req, res) => {
   try {
@@ -70,7 +70,7 @@ router.get('/connect/refresh', auth, async (req, res) => {
   }
 });
 
-// ââ GET /api/stripe/connect/status âââââââââââââââââââââââââââââââââââââââââââ
+// ── GET /api/stripe/connect/status ───────────────────────────────────────────
 // Returns current Stripe Connect state for the authenticated artist.
 router.get('/connect/status', auth, async (req, res) => {
   try {
@@ -109,7 +109,7 @@ router.get('/connect/status', auth, async (req, res) => {
   }
 });
 
-// ââ GET /api/stripe/balance âââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── GET /api/stripe/balance ───────────────────────────────────────────────────
 // Returns the artist's available balance: total royalties minus completed payouts.
 router.get('/balance', auth, async (req, res) => {
   try {
@@ -137,7 +137,7 @@ router.get('/balance', auth, async (req, res) => {
   }
 });
 
-// ââ POST /api/stripe/payout âââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── POST /api/stripe/payout ───────────────────────────────────────────────────
 // Initiates an immediate Stripe transfer to the artist's connected account.
 router.post('/payout', auth, async (req, res) => {
   const { amount } = req.body;
@@ -160,7 +160,7 @@ router.post('/payout', auth, async (req, res) => {
       return res.status(400).json({ error: 'Stripe onboarding not complete. Please finish connecting your account.' });
     }
 
-    // ââ Balance check ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+    // ── Balance check ──────────────────────────────────────────────────────────
     const [royResult, payResult] = await Promise.all([
       pool.query(
         'SELECT COALESCE(SUM(amount), 0) AS total FROM royalties WHERE artist_id = $1',
@@ -208,7 +208,7 @@ router.post('/payout', auth, async (req, res) => {
   }
 });
 
-// ââ POST /api/stripe/webhook ââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── POST /api/stripe/webhook ──────────────────────────────────────────────────
 // Body is raw Buffer (registered before express.json() in server.js).
 router.post('/webhook', async (req, res) => {
   const sig = req.headers['stripe-signature'];
@@ -270,7 +270,7 @@ router.post('/webhook', async (req, res) => {
       }
 
       case 'account.application.deauthorized': {
-        // Artist revoked Stripe access â clear their account link in our DB
+        // Artist revoked Stripe access — clear their account link in our DB
         const account = event.data.object;
         await pool.query(
           'UPDATE artists SET stripe_account_id = NULL, stripe_onboarded = FALSE WHERE stripe_account_id = $1',
@@ -290,9 +290,9 @@ router.post('/webhook', async (req, res) => {
   res.json({ received: true });
 });
 
-// ââ DELETE /api/stripe/connect ââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── DELETE /api/stripe/connect ────────────────────────────────────────────────
 // Removes the artist's Stripe account link from Davincii (does not delete the
-// Stripe account itself â the artist retains their Stripe Express account).
+// Stripe account itself — the artist retains their Stripe Express account).
 router.delete('/connect', auth, async (req, res) => {
   try {
     await pool.query(

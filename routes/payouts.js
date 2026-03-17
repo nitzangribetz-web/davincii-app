@@ -32,7 +32,7 @@ router.post('/request', auth, async (req, res) => {
   const validMethods = ['bank_transfer', 'paypal', 'stripe', 'check'];
   if (!validMethods.includes(method)) return res.status(400).json({ error: 'Invalid payment method' });
   try {
-    // Balance check â prevent requesting more than available
+    // Balance check — prevent requesting more than available
     const [royResult, payResult] = await Promise.all([
       pool.query(
         'SELECT COALESCE(SUM(amount), 0) AS total FROM royalties WHERE artist_id = $1',

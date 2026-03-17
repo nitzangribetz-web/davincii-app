@@ -3,250 +3,870 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Davincii &mdash; Artist Portal</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<title>Davincii — Artist Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Inter:wght@300;400;500;600&family=Pinyon+Script&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-  :root {
-    --bg: #FFFFFF; --black: #0A0A0A; --muted: #555; --border: rgba(0,0,0,0.09);
-    --green: #4a8a4a; --green-bg: rgba(74,138,74,0.08);
-    --blue: #3a6ea8; --blue-bg: rgba(58,110,168,0.08);
-    --red: #c0392b; --red-bg: rgba(192,57,43,0.08);
-    --serif: 'Cormorant Garamond', Georgia, serif; --mono: 'DM Mono', monospace;
-  }
-  html, body { width: 100%; min-height: 100vh; background: var(--bg); font-family: var(--serif); color: var(--black); }
-  .screen { display: none; min-height: 100vh; }
-  .screen.active { display: flex; flex-direction: column; animation: fi 0.25s cubic-bezier(0.16,1,0.3,1); }
-  @keyframes fi { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-  /* SHARED */
-  .btn { background:var(--black); color:#fff; border:none; padding:14px 32px; font-family:var(--mono); font-size:11px; letter-spacing:0.18em; text-transform:uppercase; cursor:pointer; transition:opacity 0.2s; white-space:nowrap; }
-  .btn:hover { opacity:0.75; }
-  .btn:disabled { opacity:0.4; cursor:not-allowed; }
-  .btn-sm { padding:10px 20px; font-size:10px; }
-  .btn-outline { background:transparent; color:var(--black); border:1px solid var(--black); padding:12px 28px; font-family:var(--mono); font-size:11px; letter-spacing:0.18em; text-transform:uppercase; cursor:pointer; transition:opacity 0.2s; }
-  .btn-outline:hover { opacity:0.6; }
-  .btn-outline.sm { padding:9px 18px; font-size:10px; }
-  .field-lbl { font-family:var(--mono); font-size:10px; letter-spacing:0.18em; text-transform:uppercase; color:var(--black); margin-bottom:8px; display:block; }
-  .field { width:100%; border:1px solid var(--border); padding:12px 16px; font-family:var(--mono); font-size:13px; color:var(--black); background:transparent; outline:none; margin-bottom:20px; }
-  .field:focus { border-color:var(--black); }
-  .field::placeholder { color:#ccc; }
-  select.field { color:var(--black); }
-  .badge { font-family:var(--mono); font-size:9px; letter-spacing:0.1em; text-transform:uppercase; padding:3px 9px; }
-  .badge-ok { background:var(--green-bg); color:var(--green); }
-  .badge-pend { background:rgba(0,0,0,0.05); color:var(--muted); }
-  .badge-blue { background:var(--blue-bg); color:var(--blue); }
-  .badge-red { background:#fff0f0; color:#c0392b; }
-  .back-btn { font-family:var(--mono); font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); background:none; border:none; cursor:pointer; display:flex; align-items:center; gap:8px; margin-bottom:32px; padding:0; transition:color 0.2s; }
-  .back-btn:hover { color:var(--black); }
-  .info-box { background:#fafafa; border-left:2px solid var(--black); padding:14px 18px; margin-bottom:24px; }
-  .info-box p { font-size:13px; font-weight:300; color:var(--muted); line-height:1.65; }
-  .error-box { background:var(--red-bg); border-left:2px solid var(--red); padding:14px 18px; margin-bottom:20px; font-family:var(--mono); font-size:11px; color:var(--red); display:none; }
-  .empty-state { padding:40px 0; text-align:center; font-family:var(--mono); font-size:10px; letter-spacing:0.12em; color:var(--muted); text-transform:uppercase; }
-  .loading { padding:32px 0; text-align:center; font-family:var(--mono); font-size:10px; letter-spacing:0.12em; color:var(--muted); text-transform:uppercase; }
+:root {
+  --black: #0A0A0A;
+  --white: #FFFFFF;
+  --red: #B80000;
+  --red-soft: rgba(184,0,0,0.08);
+  --muted: #555;
+  --border: rgba(0,0,0,0.11);
+  --green: #2D6A2D;
+  --green-bg: rgba(45,106,45,0.08);
+  --blue: #1a3a6b;
+  --serif: 'Cormorant Garamond', Georgia, serif;
+  --sans: 'Inter', system-ui, sans-serif;
+  --script: 'Pinyon Script', cursive;
+}
 
-  /* LOGIN */
-  #screen-login { flex-direction:row !important; }
-  .login-left { width:22%; min-width:200px; background:var(--black); display:flex; flex-direction:column; align-items:flex-start; justify-content:center; padding:48px 40px; }
-  .login-left h2 { font-size:40px; font-weight:300; line-height:1.1; letter-spacing:-0.02em; color:#fff; }
-  .login-left h2 em { font-style:italic; }
-  .login-right { flex:1; display:flex; align-items:flex-start; justify-content:flex-start; padding:52px; }
-  .login-form { width:100%; max-width:560px; }
-  .login-form-logo { font-family:var(--serif); font-size:14px; font-weight:300; letter-spacing:0.32em; text-transform:uppercase; margin-bottom:52px; display:block; }
-  .login-form-title { font-size:42px; font-weight:300; letter-spacing:-0.02em; margin-bottom:8px; line-height:1.1; }
-  .login-form-title em { font-style:italic; }
-  .login-form-sub { font-size:15px; font-weight:300; color:var(--muted); margin-bottom:40px; line-height:1.6; }
-  .login-hint { font-family:var(--mono); font-size:11px; color:var(--muted); margin-top:20px; text-align:center; }
-  .login-recover-lnk { font-family:var(--mono); font-size:11px; color:var(--black); text-decoration:underline; cursor:pointer; background:none; border:none; padding:0; }
+html, body {
+  width: 100%; min-height: 100vh;
+  background: var(--white);
+  font-family: var(--sans);
+  color: var(--black);
+  -webkit-font-smoothing: antialiased;
+}
 
-  /* TOP NAV */
-  .top-nav { height:60px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; padding:0 40px; position:sticky; top:0; background:var(--bg); z-index:50; flex-shrink:0; }
-  .top-nav-logo { font-family:var(--serif); font-size:14px; font-weight:300; letter-spacing:0.3em; text-transform:uppercase; }
-  .top-nav-right { display:flex; align-items:center; gap:20px; }
-  .top-nav-artist { font-family:var(--mono); font-size:10px; letter-spacing:0.12em; color:var(--muted); }
-  .avatar { width:32px; height:32px; background:var(--black); border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:10px; color:#fff; cursor:pointer; }
-  .top-nav-out { font-family:var(--mono); font-size:9px; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); background:none; border:none; cursor:pointer; transition:color 0.2s; }
-  .top-nav-out:hover { color:var(--black); }
+.screen { display: none; min-height: 100vh; }
+.screen.active { display: flex; flex-direction: column; animation: fadeUp 0.28s ease; }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 
-  /* DASH LAYOUT */
-  .dash-layout { display:grid; grid-template-columns:220px 1fr; flex:1; min-height:calc(100vh - 60px); }
-  .sidebar { border-right:1px solid var(--border); padding:32px 0; position:sticky; top:60px; height:calc(100vh - 60px); overflow-y:auto; }
-  .sb-section { margin-bottom:32px; }
-  .sb-lbl { font-family:var(--mono); font-size:8px; letter-spacing:0.2em; text-transform:uppercase; color:rgba(0,0,0,0.4); padding:0 24px; margin-bottom:6px; }
-  .nav-lnk { display:flex; align-items:center; gap:10px; padding:10px 24px; font-family:var(--mono); font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:#555; cursor:pointer; transition:color 0.2s, background 0.2s; border:none; background:none; width:100%; text-align:left; }
-  .nav-lnk:hover { color:var(--black); background:#f5f5f5; }
-  .nav-lnk.active { color:var(--black); font-weight:400; background:#f5f5f5; }
-  .nav-lnk-icon { font-size:15px; opacity:0.7; }
-  .main { padding:40px 48px; max-width:1060px; }
-  .pg-title { font-size:34px; font-weight:300; letter-spacing:-0.02em; margin-bottom:4px; }
-  .pg-title em { font-style:italic; }
-  .pg-sub { font-size:14px; font-weight:300; color:var(--muted); margin-bottom:36px; }
+/* SHARED FORM ELEMENTS */
+.field-lbl {
+  font-family: var(--sans); font-size: 10px; font-weight: 600;
+  letter-spacing: 0.13em; text-transform: uppercase; color: #333;
+  margin-bottom: 7px; display: block;
+}
+.field {
+  width: 100%; border: 1px solid rgba(0,0,0,0.18); padding: 13px 16px;
+  font-family: var(--sans); font-size: 15px; font-weight: 400; color: var(--black);
+  background: transparent; outline: none; margin-bottom: 18px;
+  transition: border-color 0.18s; border-radius: 0; -webkit-appearance: none;
+}
+.field:focus { border-color: var(--red); }
+.field::placeholder { color: #bbb; }
+select.field { color: var(--black); }
 
-  /* BALANCE CARD */
-  .bal-card { background:var(--black); padding:32px 36px; margin-bottom:28px; display:flex; justify-content:space-between; align-items:center; gap:40px; }
-  .bal-lbl { font-family:var(--mono); font-size:9px; letter-spacing:0.18em; text-transform:uppercase; color:#444; margin-bottom:8px; }
-  .bal-amt { font-size:52px; font-weight:300; color:#fff; letter-spacing:-0.03em; line-height:1; }
-  .bal-amt-sm { font-size:36px; font-weight:300; color:rgba(255,255,255,0.4); letter-spacing:-0.025em; line-height:1; }
-  .bal-note { font-family:var(--mono); font-size:9px; color:#333; margin-top:6px; }
-  .bal-actions { display:flex; gap:10px; flex-shrink:0; }
-  .bal-btn { padding:13px 24px; font-family:var(--mono); font-size:10px; letter-spacing:0.14em; text-transform:uppercase; border:none; cursor:pointer; transition:opacity 0.2s; white-space:nowrap; }
-  .bal-btn:hover { opacity:0.75; }
-  .bal-btn-p { background:#fff; color:var(--black); }
-  .bal-btn-g { background:rgba(255,255,255,0.07); color:rgba(255,255,255,0.5); border:1px solid rgba(255,255,255,0.1); }
+.btn-primary {
+  width: 100%; background: var(--black); color: var(--white); border: none;
+  padding: 15px 32px; font-family: var(--sans); font-size: 12px; font-weight: 600;
+  letter-spacing: 0.14em; text-transform: uppercase; cursor: pointer; transition: background 0.18s;
+}
+.btn-primary:hover { background: #1a1a1a; }
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
 
-  /* SECTION BOX */
-  .sbox { border:1px solid var(--border); margin-bottom:28px; }
-  .sbox-hd { display:flex; justify-content:space-between; align-items:flex-start; padding:20px 24px; border-bottom:1px solid var(--border); }
-  .sbox-title { font-family:var(--mono); font-size:10px; letter-spacing:0.16em; text-transform:uppercase; color:var(--black); margin-bottom3px; }
-  .sbox-sub { font-family:var(--mono); font-size:9px; color:var(--muted); }
-  .sbox-lnk { font-family:var(--mono); font-size:9px; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); background:none; border:none; cursor:pointer; transition:color 0.2s; flex-shrink:0; }
-  .sbox-lnk:hover { color:var(--black); }
-  .sbox-body { padding:0 24px; }
-  .sbox-foot { padding:16px 24px; }
+.btn { width: 100%; background: var(--black); color: var(--white); border: none;
+  padding: 15px 32px; font-family: var(--sans); font-size: 12px; font-weight: 600;
+  letter-spacing: 0.14em; text-transform: uppercase; cursor: pointer; transition: background 0.18s;
+}
+.btn:hover { background: #1a1a1a; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-  /* TABLE */
-  .th-row { display:grid; padding:10px 0; border-bottom:1px solid var(--border); gap:12px; }
-  .th { font-family:var(--mono); font-size:9px; letter-spacing:0.12em; text-transform:uppercase; color:rgba(0,0,0,0.2); }
-  .tr { display:grid; align-items:center; padding:16px 0; border-bottom:1px solid var(--border); gap:12px; }
-  .tr:last-child { border-bottom:none; }
-  .tr-song { font-size:15px; font-weight:300; color:var(--black); margin-bottom:3px; }
-  .tr-meta { font-family:var(--mono); font-size:9px; color:var(--muted); }
-  .tr-cell { font-family:var(--mono); font-size:12px; color:var(--muted); }
-  .tr-amt { font-family:var(--mono); font-size:13px; color:var(--black); text-align:right; }
-  .col-5 { grid-template-columns: 1fr 160px 120px 100px 100px; }
-  .col-4 { grid-template-columns: 1fr 140px 120px 110px; }
-  .col-4c { grid-template-columns: 1fr 200px 100px 100px; }
-  .col-3 { grid-template-columns: 1fr 120px 120px; }
+.btn-social {
+  width: 100%; background: transparent; color: var(--black);
+  border: 1px solid rgba(0,0,0,0.18); padding: 13px 20px;
+  font-family: var(--sans); font-size: 13px; font-weight: 400; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 11px;
+  margin-bottom: 10px; transition: border-color 0.18s, background 0.18s;
+}
+.btn-social:hover { border-color: rgba(0,0,0,0.4); background: rgba(0,0,0,0.02); }
+.btn-social-icon { width: 17px; height: 17px; flex-shrink: 0; }
 
-  /* CLAIM */
-  .claim-layout { display:grid; grid-template-columns:1fr 360px; gap:40px; align-items:start; }
-  .claim-avail { border:1px solid var(--border); padding:24px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center; }
-  .claim-avail-lbl { font-family:var(--mono); font-size:9px; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
-  .claim-avail-amt { font-size:42px; font-weight:300; letter-spacing:-0.025em; }
-  .method-opts { display:flex; flex-direction:column; gap:10px; margin-bottom:24px; }
-  .mopt { border:1px solid var(--border); padding:14px 18px; display:flex; align-items:center; gap:14px; cursor:pointer; transition:border-color 0.2s; }
-  .mopt:hover { border-color:rgba(0,0,0,0.2); }
-  .mopt.sel { border-color:var(--black); }
-  .mopt input[type=radio] { accent-color:var(--black); width:14px; height:14px; flex-shrink:0; }
-  .mopt-lbl { font-size:15px; font-weight:300; }
-  .mopt-sub { font-family:var(--mono); font-size:9px; color:var(--muted); margin-left:auto; }
-  .summary-card { border:1px solid var(--border); padding:24px; position:sticky; top:80px; }
-  .summary-title { font-family:var(--mono); font-size:9px; letter-spacing:0.16em; text-transform:uppercase; color:var(--muted); margin-bottom:20px; }
-  .sum-row { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border); }
-  .sum-row:last-child { border-bottom:none; }
-  .sum-key { font-family:var(--mono); font-size:10px; letter-spacing:0.08em; color:var(--muted); }
-  .sum-val { font-family:var(--mono); font-size:11px; color:var(--black); }
-  .claim-note { font-family:var(--mono); font-size:9px; letter-spacing:0.06em; color:var(--muted); line-height:1.7; padding:14px 16px; border:1px solid var(--border); margin-bottom:24px; }
+.divider { display: flex; align-items: center; gap: 14px; margin: 20px 0; }
+.divider-line { flex: 1; height: 1px; background: var(--border); }
+.divider-text {
+  font-family: var(--sans); font-size: 10px; font-weight: 500;
+  letter-spacing: 0.12em; text-transform: uppercase; color: #999; white-space: nowrap;
+}
 
-  /* STRIPE CONNECT */
-  .stripe-strip { display:flex; align-items:center; justify-content:space-between; border:1px solid var(--border); padding:14px 18px; margin-bottom:20px; }
-  .stripe-strip-left { display:flex; align-items:center; gap:12px; }
-  .stripe-strip-title { font-family:var(--mono); font-size:11px; color:var(--black); }
-  .stripe-strip-sub { font-family:var(--mono); font-size:9px; color:var(--muted); margin-top:2px; }
-  .stripe-strip-btn { font-family:var(--mono); font-size:9px; letter-spacing:0.12em; text-transform:uppercase; background:none; border:1px solid var(--border); padding:6px 12px; cursor:pointer; color:var(--black); }
-  .stripe-strip-btn:hover { background:var(--black); color:#fff; }
-  .stripe-box { border:1px solid var(--border); padding:20px 22px; margin-bottom:24px; display:none; }
-  .stripe-box.visible { display:block; }
-  .stripe-box-title { font-family:var(--mono); font-size:9px; letter-spacing:0.16em; text-transform:uppercase; color:var(--muted); margin-bottom:14px; }
-  .stripe-status { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
-  .stripe-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
-  .stripe-dot.connected { background:#4a8a4a; }
-  .stripe-dot.disconnected { background:#ccc; }
-  .stripe-dot.loading { background:#ccc; animation:pulse 1.2s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-  .stripe-status-text { font-family:var(--mono); font-size:11px; color:var(--black); }
-  .stripe-status-sub { font-family:var(--mono); font-size:9px; color:var(--muted); margin-top:2px; }
-  .btn-stripe { background:#635bff; color:#fff; border:none; padding:12px 24px; font-family:var(--mono); font-size:10px; letter-spacing:0.14em; text-transform:uppercase; cursor:pointer; transition:opacity 0.2s; display:inline-flex; align-items:center; gap:8px; }
-  .btn-stripe:hover { opacity:0.85; }
-  .btn-stripe:disabled { opacity:0.5; cursor:not-allowed; }
-  .stripe-connected-detail { font-family:var(--mono); font-size:10px; color:var(--green); background:var(--green-bg); padding:10px 14px; display:none; }
-  .stripe-connected-detail.visible { display:block; }
-  .stripe-disconnect-btn { font-family:var(--mono); font-size:9px; letter-spacing:0.1em; text-transform:uppercase; background:none; border:1px solid var(--border); padding:8px 14px; cursor:pointer; color:var(--muted); }
-  .stripe-disconnect-btn:hover { border-color:#c0392b; color:#c0392b; }
+.auth-link {
+  font-family: var(--sans); font-size: 13px; color: var(--muted);
+  text-align: center; margin-top: 18px; line-height: 1.6;
+}
+.auth-link a {
+  color: var(--black); font-weight: 500; text-decoration: underline; cursor: pointer;
+  background: none; border: none; font-family: var(--sans); font-size: 13px; padding: 0;
+}
+.auth-forgot {
+  font-family: var(--sans); font-size: 12px; color: var(--muted); text-decoration: underline;
+  cursor: pointer; background: none; border: none; display: block;
+  margin-top: -10px; margin-bottom: 20px; text-align: right; padding: 0; transition: color 0.15s;
+}
+.auth-forgot:hover { color: var(--black); }
 
-  /* SUCCESS */
-  .success-wrap { max-width:520px; margin:60px auto; text-align:center; }
-  .success-icon { font-size:40px; margin-bottom:24px; opacity:0.1; }
-  .success-title { font-size:52px; font-weight:300; letter-spacing:-0.025em; margin-bottom:12px; line-height:1.05; }
-  .success-title em { font-style:italic; }
-  .success-sub { font-size:16px; font-weight:300; color:var(--muted); line-height:1.7; margin-bottom:40px; }
-  .success-detail { border:1px solid var(--border); padding:24px; text-align:left; margin-bottom:36px; }
-  .sd-row { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border); }
-  .sd-row:last-child { border-bottom:none; }
-  .sd-key { font-family:var(--mono); font-size:9px; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); }
-  .sd-val { font-family:var(--mono); font-size:12px; color:var(--black); }
+.error-box {
+  background: var(--red-soft); border-left: 2px solid var(--red);
+  padding: 11px 14px; margin-bottom: 16px; font-size: 13px; color: var(--red); display: none;
+}
+.empty-state { padding: 40px 0; text-align: center; font-family: var(--sans); font-size: 13px; color: var(--muted); }
+.loading { padding: 32px 0; text-align: center; font-family: var(--sans); font-size: 13px; color: var(--muted); }
 
-  /* DAVINCII LOGO */
-  .dv-logo-nav { font-family:var(--serif); font-size:14px; font-weight:300; letter-spacing:0.3em; text-transform:uppercase; cursor:pointer; }
+.badge {
+  font-family: var(--sans); font-size: 9px; font-weight: 600;
+  letter-spacing: 0.10em; text-transform: uppercase; padding: 3px 8px; display: inline-block;
+}
+.badge-ok { background: var(--green-bg); color: var(--green); }
+.badge-pend { background: rgba(0,0,0,0.05); color: #888; }
+.badge-blue { background: rgba(26,58,107,0.08); color: var(--blue); }
+.badge-red { background: var(--red-soft); color: var(--red); }
+
+.back-btn {
+  font-family: var(--sans); font-size: 13px; font-weight: 500; color: var(--muted);
+  background: none; border: none; cursor: pointer; display: flex; align-items: center;
+  gap: 8px; margin-bottom: 32px; padding: 0; transition: color 0.2s;
+}
+.back-btn:hover { color: var(--black); }
+
+/* ─── LANDING PAGE ─── */
+#screen-landing {
+  background: var(--black); min-height: 100vh; position: relative; overflow: hidden;
+}
+#screen-landing::after {
+  content: ''; position: absolute; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 0;
+}
+
+.landing-nav {
+  position: relative; z-index: 10; display: flex;
+  justify-content: space-between; align-items: center; padding: 36px 60px;
+}
+.landing-nav-logo { font-family: var(--script); font-size: 34px; color: var(--white); line-height: 1; }
+.landing-nav-center {
+  display: flex; align-items: center; gap: 36px;
+  position: absolute; left: 50%; transform: translateX(-50%);
+}
+.landing-nav-link {
+  font-family: var(--sans); font-size: 11px; font-weight: 400;
+  letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.55);
+  cursor: pointer; background: none; border: none; transition: color 0.18s; padding: 0;
+}
+.landing-nav-link:hover { color: rgba(255,255,255,0.9); }
+.landing-nav-right { display: flex; gap: 10px; align-items: center; }
+.btn-nav-ghost {
+  font-family: var(--sans); font-size: 11px; font-weight: 500;
+  letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.65);
+  background: transparent; border: 1px solid rgba(255,255,255,0.22);
+  padding: 10px 22px; cursor: pointer; transition: color 0.18s, border-color 0.18s;
+}
+.btn-nav-ghost:hover { color: var(--white); border-color: rgba(255,255,255,0.55); }
+.btn-nav-white {
+  font-family: var(--sans); font-size: 11px; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--black);
+  background: var(--white); border: none; padding: 10px 22px; cursor: pointer; transition: opacity 0.18s;
+}
+.btn-nav-white:hover { opacity: 0.88; }
+
+.landing-hero {
+  position: relative; z-index: 10; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  min-height: calc(100vh - 108px); text-align: center; padding: 0 40px 60px; gap: 0;
+}
+.landing-headline {
+  font-family: var(--serif); font-size: clamp(44px, 5.5vw, 72px); font-weight: 300;
+  color: var(--white); line-height: 1.12; letter-spacing: -0.015em;
+  margin-bottom: 52px; animation: fadeUp 0.5s 0.12s ease both;
+}
+.landing-headline em { font-style: italic; color: rgba(255,255,255,0.75); }
+.headline-rule {
+  width: 32px; height: 2px; background: var(--red);
+  margin: 0 auto 48px; animation: fadeUp 0.5s 0.16s ease both;
+}
+.landing-cta-row {
+  display: flex; gap: 0; align-items: stretch; animation: fadeUp 0.5s 0.2s ease both;
+}
+.btn-cta-main {
+  background: var(--white); color: var(--black); border: none; padding: 17px 44px;
+  font-family: var(--sans); font-size: 12px; font-weight: 600;
+  letter-spacing: 0.14em; text-transform: uppercase; cursor: pointer;
+  transition: opacity 0.18s; white-space: nowrap;
+}
+.btn-cta-main:hover { opacity: 0.88; }
+.btn-cta-secondary {
+  background: transparent; color: rgba(255,255,255,0.7);
+  border: 1px solid rgba(255,255,255,0.22); border-left: none;
+  padding: 17px 44px; font-family: var(--sans); font-size: 12px; font-weight: 500;
+  letter-spacing: 0.14em; text-transform: uppercase; cursor: pointer;
+  transition: color 0.18s, border-color 0.18s; white-space: nowrap;
+}
+.btn-cta-secondary:hover { color: var(--white); border-color: rgba(255,255,255,0.5); }
+
+/* ─── AUTH PAGES ─── */
+#screen-login, #screen-signup, #screen-recover { min-height: 100vh; }
+.auth-layout { display: grid; grid-template-columns: 300px 1fr; min-height: 100vh; }
+.auth-brand {
+  background: var(--black); display: flex; flex-direction: column;
+  justify-content: space-between; padding: 44px 40px 48px; position: relative; overflow: hidden;
+}
+.auth-brand::after {
+  content: ''; position: absolute; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+.auth-brand-logo { font-family: var(--script); font-size: 32px; color: var(--white); line-height: 1; position: relative; z-index: 1; }
+.auth-brand-center { position: relative; z-index: 1; }
+.auth-brand-tagline { font-family: var(--serif); font-size: 36px; font-weight: 300; color: var(--white); line-height: 1.22; letter-spacing: -0.01em; margin-bottom: 20px; }
+.auth-brand-tagline em { font-style: italic; color: rgba(255,255,255,0.7); }
+.auth-brand-rule { width: 24px; height: 2px; background: var(--red); margin-bottom: 20px; }
+.auth-brand-sub { font-family: var(--sans); font-size: 13px; font-weight: 300; color: rgba(255,255,255,0.45); line-height: 1.7; }
+.auth-brand-footer { position: relative; z-index: 1; font-family: var(--sans); font-size: 10px; font-weight: 400; letter-spacing: 0.10em; text-transform: uppercase; color: rgba(255,255,255,0.2); }
+.auth-form-panel { display: flex; align-items: center; justify-content: center; padding: 60px 64px; background: var(--white); }
+.auth-form-inner { width: 100%; max-width: 420px; }
+.auth-form-title { font-family: var(--serif); font-size: 44px; font-weight: 400; letter-spacing: -0.02em; line-height: 1.08; margin-bottom: 8px; color: var(--black); }
+.auth-form-title em { font-style: italic; }
+.auth-title-rule { width: 24px; height: 2px; background: var(--red); margin-bottom: 16px; }
+.auth-form-sub { font-family: var(--sans); font-size: 14px; font-weight: 300; color: var(--muted); margin-bottom: 32px; line-height: 1.65; }
+
+/* ─── DASHBOARD NAV ─── */
+.top-nav {
+  height: 62px; border-bottom: 1px solid var(--border); display: flex;
+  align-items: center; justify-content: space-between; padding: 0 40px;
+  position: sticky; top: 0; background: var(--white); z-index: 50; flex-shrink: 0;
+}
+.top-nav-logo { font-family: var(--script); font-size: 28px; color: var(--black); line-height: 1; cursor: pointer; letter-spacing: 0.01em; }
+.top-nav-logo::after {
+  content: ''; display: inline-block; width: 5px; height: 5px; background: var(--red);
+  border-radius: 50%; margin-left: 4px; vertical-align: middle; position: relative; top: -3px;
+}
+.top-nav-right { display: flex; align-items: center; gap: 20px; }
+.top-nav-artist { font-family: var(--sans); font-size: 12px; font-weight: 400; color: var(--muted); letter-spacing: 0.03em; }
+.avatar {
+  width: 33px; height: 33px; background: var(--black); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--sans); font-size: 11px; font-weight: 600; color: var(--white);
+  cursor: pointer; letter-spacing: 0.04em;
+}
+.top-nav-out {
+  font-family: var(--sans); font-size: 11px; font-weight: 400;
+  letter-spacing: 0.10em; text-transform: uppercase; color: var(--muted);
+  background: none; border: none; cursor: pointer; transition: color 0.18s;
+}
+.top-nav-out:hover { color: var(--black); }
+
+/* ─── DASHBOARD LAYOUT ─── */
+.dash-layout { display: grid; grid-template-columns: 220px 1fr; flex: 1; min-height: calc(100vh - 62px); }
+.sidebar {
+  border-right: 1px solid var(--border); padding: 32px 0;
+  position: sticky; top: 62px; height: calc(100vh - 62px); overflow-y: auto;
+}
+.sb-section { margin-bottom: 32px; }
+.sb-lbl {
+  font-family: var(--sans); font-size: 9px; font-weight: 600;
+  letter-spacing: 0.22em; text-transform: uppercase; color: rgba(0,0,0,0.28);
+  padding: 0 24px; margin-bottom: 6px; display: block;
+}
+.nav-lnk {
+  display: flex; align-items: center; gap: 11px; padding: 10px 24px;
+  font-family: var(--sans); font-size: 13px; font-weight: 400; color: #777;
+  cursor: pointer; transition: color 0.18s, background 0.18s;
+  border: none; background: none; width: 100%; text-align: left;
+}
+.nav-lnk:hover { color: var(--black); background: rgba(0,0,0,0.03); }
+.nav-lnk.active {
+  color: var(--black); font-weight: 500; background: rgba(0,0,0,0.04);
+  border-left: 2px solid var(--red); padding-left: 22px;
+}
+.nav-lnk-icon { font-size: 14px; opacity: 0.5; }
+.nav-lnk.active .nav-lnk-icon { opacity: 1; }
+.main { padding: 44px 52px; max-width: 1060px; }
+
+/* ─── OVERVIEW ─── */
+.pg-title { font-family: var(--serif); font-size: 38px; font-weight: 400; letter-spacing: -0.02em; margin-bottom: 4px; line-height: 1.1; }
+.pg-title em { font-style: italic; }
+.pg-sub { font-family: var(--sans); font-size: 14px; font-weight: 300; color: var(--muted); margin-bottom: 32px; }
+
+.bal-card {
+  background: var(--black); padding: 34px 38px; margin-bottom: 28px;
+  display: flex; justify-content: space-between; align-items: center; gap: 40px;
+  position: relative; overflow: hidden;
+}
+.bal-card::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; background: var(--red); }
+.bal-lbl { font-family: var(--sans); font-size: 10px; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 10px; }
+.bal-amt { font-family: var(--serif); font-size: 56px; font-weight: 300; color: var(--white); letter-spacing: -0.03em; line-height: 1; }
+.bal-amt-sm { font-family: var(--serif); font-size: 36px; font-weight: 300; color: rgba(255,255,255,0.4); letter-spacing: -0.025em; line-height: 1; }
+.bal-note { font-family: var(--sans); font-size: 11px; font-weight: 300; color: rgba(255,255,255,0.28); margin-top: 8px; letter-spacing: 0.02em; }
+.bal-actions { display: flex; gap: 10px; flex-shrink: 0; }
+.bal-btn {
+  padding: 13px 24px; font-family: var(--sans); font-size: 11px; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase; border: none; cursor: pointer;
+  transition: opacity 0.18s; white-space: nowrap;
+}
+.bal-btn:hover { opacity: 0.8; }
+.bal-btn-p { background: var(--white); color: var(--black); }
+.bal-btn-g { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.55); border: 1px solid rgba(255,255,255,0.12); }
+
+/* Section boxes */
+.sbox { border: 1px solid var(--border); margin-bottom: 26px; background: var(--white); }
+.sbox-hd {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 18px 24px; border-bottom: 1px solid var(--border);
+}
+.sbox-title { font-family: var(--sans); font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--black); margin-bottom: 2px; }
+.sbox-sub { font-family: var(--sans); font-size: 12px; font-weight: 300; color: var(--muted); }
+.sbox-lnk {
+  font-family: var(--sans); font-size: 11px; font-weight: 500; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--muted); background: none; border: none;
+  cursor: pointer; transition: color 0.18s;
+}
+.sbox-lnk:hover { color: var(--red); }
+.sbox-body { padding: 0 24px; }
+
+/* Table */
+.th-row { display: grid; padding: 9px 0; border-bottom: 1px solid var(--border); gap: 12px; }
+.th { font-family: var(--sans); font-size: 9px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(0,0,0,0.25); }
+.tr { display: grid; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border); gap: 12px; }
+.tr:last-child { border-bottom: none; }
+.tr-song { font-family: var(--serif); font-size: 17px; font-weight: 400; color: var(--black); margin-bottom: 2px; }
+.tr-meta { font-family: var(--sans); font-size: 11px; font-weight: 300; color: var(--muted); }
+.tr-cell { font-family: var(--sans); font-size: 12px; font-weight: 400; color: var(--muted); }
+.tr-amt { font-family: var(--sans); font-size: 13px; font-weight: 600; color: var(--black); text-align: right; }
+.col-5 { grid-template-columns: 1fr 150px 110px 100px 100px; }
+.col-4 { grid-template-columns: 1fr 150px 140px 110px; }
+.col-4c { grid-template-columns: 1fr 200px 100px 100px; }
+.col-3 { grid-template-columns: 1fr 120px 120px; }
+
+/* ─── CLAIM ─── */
+.claim-layout { display: grid; grid-template-columns: 1fr 360px; gap: 40px; align-items: start; }
+.claim-avail {
+  border: 1px solid var(--border); padding: 24px; margin-bottom: 24px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.claim-avail-lbl { font-family: var(--sans); font-size: 12px; font-weight: 500; color: var(--muted); margin-bottom: 8px; }
+.claim-avail-amt { font-size: 38px; font-weight: 300; letter-spacing: -0.025em; color: var(--black); }
+.method-opts { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+.mopt {
+  border: 1px solid var(--border); padding: 16px 18px; display: flex;
+  align-items: center; gap: 14px; cursor: pointer; transition: all 0.2s;
+}
+.mopt:hover { border-color: rgba(0,0,0,0.25); }
+.mopt.sel { border-color: var(--red); background: var(--red-soft); }
+.mopt input[type=radio] { accent-color: var(--red); width: 16px; height: 16px; flex-shrink: 0; }
+.mopt-lbl { font-size: 15px; font-weight: 400; color: var(--black); }
+.mopt-sub { font-family: var(--sans); font-size: 12px; color: var(--muted); margin-left: auto; }
+.summary-card {
+  border: 1px solid var(--border); padding: 24px; position: sticky; top: 80px; background: #fafafa;
+}
+.summary-title { font-family: var(--sans); font-size: 12px; font-weight: 500; color: var(--muted); margin-bottom: 20px; text-transform: uppercase; letter-spacing: 0.04em; }
+.sum-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.sum-row:last-child { border-bottom: none; }
+.sum-key { font-family: var(--sans); font-size: 13px; color: var(--muted); }
+.sum-val { font-family: var(--sans); font-size: 14px; font-weight: 500; color: var(--black); }
+.claim-note { font-family: var(--sans); font-size: 12px; color: var(--muted); line-height: 1.7; padding: 14px 16px; border: 1px solid var(--border); margin-bottom: 24px; }
+
+/* ─── STRIPE CONNECT ─── */
+.stripe-strip {
+  display: flex; align-items: center; justify-content: space-between;
+  border: 1px solid var(--border); padding: 16px 20px; margin-bottom: 20px;
+}
+.stripe-strip-left { display: flex; align-items: center; gap: 14px; }
+.stripe-strip-title { font-family: var(--sans); font-size: 14px; font-weight: 400; color: var(--black); }
+.stripe-strip-sub { font-family: var(--sans); font-size: 12px; color: var(--muted); margin-top: 2px; }
+.stripe-strip-btn {
+  font-family: var(--sans); font-size: 13px; background: none;
+  border: 1px solid var(--border); padding: 8px 16px; cursor: pointer; color: var(--black); transition: all 0.2s;
+}
+.stripe-strip-btn:hover { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.25); }
+.stripe-box { border: 1px solid var(--border); padding: 20px 22px; margin-bottom: 24px; display: none; }
+.stripe-box.visible { display: block; }
+.stripe-box-title { font-family: var(--sans); font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); margin-bottom: 14px; }
+.stripe-status { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.stripe-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.stripe-dot.connected { background: var(--green); }
+.stripe-dot.disconnected { background: rgba(0,0,0,0.15); }
+.stripe-dot.loading { background: rgba(0,0,0,0.15); animation: pulse 1.2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.stripe-status-text { font-family: var(--sans); font-size: 14px; color: var(--black); }
+.stripe-status-sub { font-family: var(--sans); font-size: 12px; color: var(--muted); margin-top: 2px; }
+.btn-stripe {
+  background: #635bff; color: #fff; border: none; padding: 12px 24px;
+  font-family: var(--sans); font-size: 13px; font-weight: 500; cursor: pointer;
+  transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px;
+}
+.btn-stripe:hover { opacity: 0.88; }
+.btn-stripe:disabled { opacity: 0.5; cursor: not-allowed; }
+.stripe-connected-detail { font-family: var(--sans); font-size: 13px; color: var(--green); background: var(--green-bg); padding: 10px 14px; display: none; }
+.stripe-connected-detail.visible { display: block; }
+.stripe-disconnect-btn {
+  font-family: var(--sans); font-size: 13px; background: none;
+  border: 1px solid var(--border); padding: 8px 14px; cursor: pointer; color: var(--muted); transition: all 0.2s;
+}
+.stripe-disconnect-btn:hover { border-color: var(--red); color: var(--red); }
+
+/* ─── SUCCESS ─── */
+.success-wrap { max-width: 520px; margin: 60px auto; text-align: center; }
+.success-icon { font-size: 40px; margin-bottom: 24px; opacity: 0.1; }
+.success-title { font-family: var(--serif); font-size: 48px; font-weight: 400; letter-spacing: -0.025em; margin-bottom: 12px; line-height: 1.1; color: var(--black); }
+.success-title em { font-style: italic; }
+.success-sub { font-size: 16px; font-weight: 300; color: var(--muted); line-height: 1.7; margin-bottom: 40px; }
+.success-detail { border: 1px solid var(--border); padding: 24px; text-align: left; margin-bottom: 36px; }
+.sd-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.sd-row:last-child { border-bottom: none; }
+.sd-key { font-family: var(--sans); font-size: 12px; color: var(--muted); }
+.sd-val { font-family: var(--sans); font-size: 14px; font-weight: 500; color: var(--black); }
+
+/* ─── MARKETING PAGES ─── */
+.mkt-page { background: var(--white); }
+.mkt-nav {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 28px 60px; border-bottom: 1px solid var(--border);
+}
+.mkt-nav-logo { font-family: var(--script); font-size: 30px; color: var(--black); line-height: 1; cursor: pointer; }
+.mkt-nav-links { display: flex; gap: 28px; align-items: center; }
+.mkt-nav-link {
+  font-family: var(--sans); font-size: 11px; font-weight: 400; letter-spacing: 0.10em;
+  text-transform: uppercase; color: var(--muted); cursor: pointer; background: none;
+  border: none; transition: color 0.18s; padding: 0;
+}
+.mkt-nav-link:hover { color: var(--black); }
+.mkt-nav-link.active { color: var(--black); font-weight: 600; }
+.mkt-nav-right { display: flex; gap: 10px; }
+.btn-mkt-ghost {
+  font-family: var(--sans); font-size: 11px; font-weight: 500; letter-spacing: 0.10em;
+  text-transform: uppercase; color: var(--black); background: transparent;
+  border: 1px solid rgba(0,0,0,0.22); padding: 9px 20px; cursor: pointer; transition: background 0.18s;
+}
+.btn-mkt-ghost:hover { background: rgba(0,0,0,0.04); }
+.btn-mkt-solid {
+  font-family: var(--sans); font-size: 11px; font-weight: 600; letter-spacing: 0.10em;
+  text-transform: uppercase; color: var(--white); background: var(--black); border: none;
+  padding: 9px 20px; cursor: pointer; transition: opacity 0.18s;
+}
+.btn-mkt-solid:hover { opacity: 0.85; }
+
+.mkt-hero { max-width: 860px; margin: 0 auto; padding: 80px 60px 60px; text-align: center; }
+.mkt-hero-eyebrow { font-family: var(--sans); font-size: 10px; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: var(--red); margin-bottom: 20px; }
+.mkt-hero-title { font-family: var(--serif); font-size: clamp(40px, 4.5vw, 60px); font-weight: 400; letter-spacing: -0.02em; line-height: 1.1; color: var(--black); margin-bottom: 20px; }
+.mkt-hero-title em { font-style: italic; }
+.mkt-hero-sub { font-family: var(--sans); font-size: 16px; font-weight: 300; color: var(--muted); line-height: 1.7; max-width: 560px; margin: 0 auto; }
+.mkt-rule { width: 32px; height: 2px; background: var(--red); margin: 24px auto; }
+.mkt-body { max-width: 860px; margin: 0 auto; padding: 0 60px 80px; }
+
+.mkt-step {
+  display: grid; grid-template-columns: 56px 1fr; gap: 28px; align-items: start;
+  padding: 32px 0; border-bottom: 1px solid var(--border);
+}
+.mkt-step:last-child { border-bottom: none; }
+.mkt-step-num { font-family: var(--serif); font-size: 42px; font-weight: 400; color: var(--red); line-height: 1; opacity: 0.7; }
+.mkt-step-title { font-family: var(--serif); font-size: 26px; font-weight: 400; letter-spacing: -0.01em; color: var(--black); margin-bottom: 8px; }
+.mkt-step-title em { font-style: italic; }
+.mkt-step-body { font-family: var(--sans); font-size: 14px; font-weight: 300; color: var(--muted); line-height: 1.75; }
+
+/* Pricing */
+.pricing-card { border: 1px solid var(--red); background: #fafafa; padding: 36px 32px; position: relative; }
+.pricing-pill {
+  position: absolute; top: -13px; left: 32px; background: var(--red); color: var(--white);
+  font-family: var(--sans); font-size: 9px; font-weight: 600; letter-spacing: 0.14em;
+  text-transform: uppercase; padding: 4px 12px;
+}
+.pricing-plan { font-family: var(--sans); font-size: 11px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+.pricing-price { font-family: var(--serif); font-size: 52px; font-weight: 400; letter-spacing: -0.03em; color: var(--black); line-height: 1; margin-bottom: 6px; }
+.pricing-price span { font-family: var(--sans); font-size: 14px; font-weight: 400; color: var(--muted); letter-spacing: 0; }
+.pricing-desc { font-family: var(--sans); font-size: 13px; font-weight: 300; color: var(--muted); line-height: 1.6; margin-bottom: 28px; }
+.pricing-features { list-style: none; margin-bottom: 32px; }
+.pricing-features li {
+  font-family: var(--sans); font-size: 13px; font-weight: 400; color: #333;
+  padding: 8px 0; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px;
+}
+.pricing-features li:last-child { border-bottom: none; }
+.feat-check { color: var(--red); font-size: 14px; flex-shrink: 0; }
+
+/* About */
+.about-stat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); margin-bottom: 48px; }
+.about-stat { background: var(--white); padding: 28px 24px; text-align: center; }
+.about-stat-num { font-family: var(--serif); font-size: 44px; font-weight: 400; letter-spacing: -0.02em; color: var(--black); line-height: 1; margin-bottom: 8px; }
+.about-stat-lbl { font-family: var(--sans); font-size: 11px; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; margin-bottom: 60px; align-items: center; }
+.about-label { font-family: var(--sans); font-size: 10px; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: var(--red); margin-bottom: 16px; }
+.about-title { font-family: var(--serif); font-size: 38px; font-weight: 400; letter-spacing: -0.02em; line-height: 1.15; color: var(--black); margin-bottom: 16px; }
+.about-title em { font-style: italic; }
+.about-body { font-family: var(--sans); font-size: 14px; font-weight: 300; color: var(--muted); line-height: 1.8; }
+.about-dark {
+  background: var(--black); padding: 48px 60px; display: flex;
+  justify-content: space-between; align-items: center; gap: 40px;
+}
+.about-dark-quote { font-family: var(--serif); font-size: 28px; font-weight: 300; color: rgba(255,255,255,0.88); line-height: 1.3; max-width: 500px; }
+.about-dark-quote em { font-style: italic; color: var(--white); }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width:768px) {
+  .landing-nav { padding: 20px; }
+  .landing-nav-center { display: none; }
+  .landing-hero { padding: 80px 24px 60px; min-height: 80vh; }
+  .auth-layout { grid-template-columns: 1fr; }
+  .auth-brand { display: none; }
+  .auth-form-panel { padding: 40px 24px; }
+  .dash-layout { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .main { padding: 24px 20px; }
+  .bal-card { flex-direction: column; align-items: stretch; gap: 24px; padding: 24px; }
+  .claim-layout { grid-template-columns: 1fr; }
+  .col-5 { grid-template-columns: 1fr 100px; }
+  .col-4 { grid-template-columns: 1fr 100px; }
+  .col-4c { grid-template-columns: 1fr 100px; }
+  .mkt-nav { padding: 20px; }
+  .mkt-nav-links { display: none; }
+  .mkt-hero { padding: 40px 24px; }
+  .mkt-body { padding: 0 24px 60px; }
+  .about-grid { grid-template-columns: 1fr; }
+  .about-stat-grid { grid-template-columns: 1fr; }
+  .about-dark { flex-direction: column; padding: 32px 24px; }
+}
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
-<div class="screen active" id="screen-login">
-  <div class="login-left">
-    <h2>Your royalties,<br><em>finally</em><br>collected.</h2>
-  </div>
-  <div class="login-right">
-    <div class="login-form">
-      <div class="login-form-logo">Davincii</div>
-      <h1 class="login-form-title">Welcome <em>back.</em></h1>
-      <p class="login-form-sub">Sign in to your artist portal to view your earnings and claim payments.</p>
-      <div class="error-box" id="login-error"></div>
-      <label class="field-lbl">Email address</label>
-      <input class="field" type="email" id="login-email" placeholder="you@example.com">
-      <label class="field-lbl">Password</label>
-      <input class="field" type="password" id="login-password" placeholder="Enter your password">
-      <button class="btn" style="width:100%" id="login-btn" onclick="doLogin()">Sign in &rarr;</button>
-      <div class="login-hint" style="margin-top:16px">Don't have an account? <a href="javascript:void(0)" onclick="navigate('/signup')" style="color:var(--black);text-decoration:underline;">Create one</a></div>
-      <div class="login-hint" style="margin-top:14px"><button class="login-recover-lnk" onclick="navigate('/recover')">Forgot password? Recover your account</button></div>
+<!-- ════════════════════════════════════
+     LANDING PAGE
+════════════════════════════════════ -->
+<div class="screen active" id="screen-landing">
+  <nav class="landing-nav">
+    <div class="landing-nav-logo">Davincii</div>
+    <div class="landing-nav-center">
+      <button class="landing-nav-link" onclick="navigate('/howitworks')">How it works</button>
+      <button class="landing-nav-link" onclick="navigate('/pricing')">Pricing</button>
+      <button class="landing-nav-link" onclick="navigate('/about')">About</button>
+    </div>
+    <div class="landing-nav-right">
+      <button class="btn-nav-ghost" onclick="navigate('/signup')">Sign up</button>
+      <button class="btn-nav-white" onclick="navigate('/login')">Sign in</button>
+    </div>
+  </nav>
+
+  <div class="landing-hero">
+    <h1 class="landing-headline">
+      Your royalties,<br><em>finally</em> collected.
+    </h1>
+    <div class="headline-rule"></div>
+    <div class="landing-cta-row">
+      <button class="btn-cta-main" onclick="navigate('/signup')">Get started &rarr;</button>
+      <button class="btn-cta-secondary" onclick="navigate('/login')">Sign in to portal</button>
     </div>
   </div>
 </div>
 
-<!-- SIGNUP -->
-<div class="screen" id="screen-signup" style="flex-direction:column !important;">
-  <div style="background:var(--black);width:100%;display:flex;align-items:center;justify-content:center;padding:28px 52px;">
-    <div style="font-family:var(--serif);font-size:14px;font-weight:300;letter-spacing:0.3em;text-transform:uppercase;color:#fff;">Davincii</div>
-  </div>
-  <div style="flex:1;display:flex;align-items:flex-start;justify-content:flex-start;padding:52px;">
-    <div class="login-form">
-      <h1 class="login-form-title">Create your<br><em>account.</em></h1>
-      <p class="login-form-sub">Start recovering your royalties today.</p>
-      <div class="error-box" id="signup-error"></div>
-      <label class="field-lbl">Full name</label>
-      <input class="field" type="text" id="signup-name" placeholder="Your name">
-      <label class="field-lbl">Email address</label>
-      <input class="field" type="email" id="signup-email" placeholder="you@example.com">
-      <label class="field-lbl">Password</label>
-      <input class="field" type="password" id="signup-password" placeholder="Min. 8 characters">
-      <button class="btn" style="width:100%" id="signup-btn" onclick="doSignup()">Create account &rarr;</button>
-      <div class="login-hint">Already have an account? <a href="javascript:void(0)" onclick="navigate('/')" style="color:var(--black);text-decoration:underline;">Sign in</a></div>
+<!-- ════════════════════════════════════
+     LOGIN
+════════════════════════════════════ -->
+<div class="screen" id="screen-login">
+  <div class="auth-layout">
+    <div class="auth-brand">
+      <div class="auth-brand-logo">Davincii</div>
+      <div class="auth-brand-center">
+        <div class="auth-brand-rule"></div>
+        <h2 class="auth-brand-tagline">
+          Every stream,<br>every spin,<br><em>every dollar.</em>
+        </h2>
+        <p class="auth-brand-sub">
+          We track, register, and collect your music royalties from every platform — so nothing goes unclaimed.
+        </p>
+      </div>
+      <div class="auth-brand-footer">davincii.co</div>
+    </div>
+
+    <div class="auth-form-panel">
+      <div class="auth-form-inner">
+        <h1 class="auth-form-title">Welcome <em>back.</em></h1>
+        <div class="auth-title-rule"></div>
+        <p class="auth-form-sub">Sign in to your artist portal to view your earnings and claim payments.</p>
+
+        <div class="error-box" id="login-error"></div>
+
+        <label class="field-lbl">Email address</label>
+        <input class="field" type="email" id="login-email" placeholder="you@example.com">
+
+        <label class="field-lbl">Password</label>
+        <input class="field" type="password" id="login-password" placeholder="Enter your password">
+
+        <button class="auth-forgot" onclick="navigate('/recover')">Forgot your password?</button>
+
+        <button class="btn-primary" id="login-btn" onclick="doLogin()" style="margin-bottom:22px">Sign in &rarr;</button>
+
+        <div class="divider">
+          <div class="divider-line"></div>
+          <span class="divider-text">or continue with</span>
+          <div class="divider-line"></div>
+        </div>
+
+        <button class="btn-social" onclick="doGoogleLogin()">
+          <svg class="btn-social-icon" viewBox="0 0 18 18"><path d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
+          Continue with Google
+        </button>
+        <button class="btn-social" onclick="doAppleLogin()">
+          <svg class="btn-social-icon" viewBox="0 0 18 18"><path d="M12.27.52c.14 1.08-.3 2.15-1.01 2.93-.72.78-1.83 1.37-2.92 1.3-.16-1.07.34-2.17 1.01-2.88C10.07 1.1 11.24.52 12.27.52zM15.98 12.44c-.26.59-.57 1.14-.94 1.65-.49.69-.9 1.17-1.22 1.43-.49.44-1.01.67-1.58.68-.4 0-.89-.12-1.45-.35-.57-.23-1.09-.35-1.57-.35-.5 0-1.04.12-1.61.35-.58.23-1.04.36-1.4.37-.55.02-1.08-.22-1.6-.68-.35-.29-.78-.8-1.29-1.51C3.69 13.14 3.1 12 2.65 10.68c-.49-1.41-.74-2.77-.74-4.09 0-1.51.33-2.81.99-3.89.52-.87 1.21-1.56 2.08-2.07.87-.51 1.81-.77 2.82-.79.44 0 1.02.14 1.74.4.72.27 1.18.4 1.38.4.15 0 .67-.16 1.54-.47.82-.29 1.52-.41 2.1-.37 1.55.12 2.72.73 3.49 1.83-1.39.84-2.07 2.01-2.06 3.52.01 1.17.44 2.15 1.27 2.92.38.36.8.63 1.27.83-.1.29-.21.58-.35.86z" fill="#000"/></svg>
+          Continue with Apple
+        </button>
+
+        <div class="auth-link">
+          Don't have an account? <a onclick="navigate('/signup')">Create one</a>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- RECOVER ACCOUNT -->
+<!-- ════════════════════════════════════
+     SIGN UP
+════════════════════════════════════ -->
+<div class="screen" id="screen-signup">
+  <div class="auth-layout">
+    <div class="auth-brand">
+      <div class="auth-brand-logo">Davincii</div>
+      <div class="auth-brand-center">
+        <div class="auth-brand-rule"></div>
+        <h2 class="auth-brand-tagline">
+          Your music<br>earns more<br><em>than you know.</em>
+        </h2>
+        <p class="auth-brand-sub">
+          Join free. No upfront cost — we only take 15% of what we actually recover for you.
+        </p>
+      </div>
+      <div class="auth-brand-footer">davincii.co</div>
+    </div>
+
+    <div class="auth-form-panel">
+      <div class="auth-form-inner">
+        <h1 class="auth-form-title">Create your <em>account.</em></h1>
+        <div class="auth-title-rule"></div>
+        <p class="auth-form-sub">Start collecting the royalties you're owed. No upfront cost, ever.</p>
+
+        <div class="error-box" id="signup-error"></div>
+
+        <label class="field-lbl">Full name</label>
+        <input class="field" type="text" id="signup-name" placeholder="Your name">
+
+        <label class="field-lbl">Email address</label>
+        <input class="field" type="email" id="signup-email" placeholder="you@example.com">
+
+        <label class="field-lbl">Password</label>
+        <input class="field" type="password" id="signup-password" placeholder="Minimum 8 characters">
+
+        <button class="btn-primary" id="signup-btn" onclick="doSignup()" style="margin-bottom:22px">Create account &rarr;</button>
+
+        <div class="divider">
+          <div class="divider-line"></div>
+          <span class="divider-text">or continue with</span>
+          <div class="divider-line"></div>
+        </div>
+
+        <button class="btn-social" onclick="doGoogleLogin()">
+          <svg class="btn-social-icon" viewBox="0 0 18 18"><path d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
+          Continue with Google
+        </button>
+        <button class="btn-social" onclick="doAppleLogin()">
+          <svg class="btn-social-icon" viewBox="0 0 18 18"><path d="M12.27.52c.14 1.08-.3 2.15-1.01 2.93-.72.78-1.83 1.37-2.92 1.3-.16-1.07.34-2.17 1.01-2.88C10.07 1.1 11.24.52 12.27.52zM15.98 12.44c-.26.59-.57 1.14-.94 1.65-.49.69-.9 1.17-1.22 1.43-.49.44-1.01.67-1.58.68-.4 0-.89-.12-1.45-.35-.57-.23-1.09-.35-1.57-.35-.5 0-1.04.12-1.61.35-.58.23-1.04.36-1.4.37-.55.02-1.08-.22-1.6-.68-.35-.29-.78-.8-1.29-1.51C3.69 13.14 3.1 12 2.65 10.68c-.49-1.41-.74-2.77-.74-4.09 0-1.51.33-2.81.99-3.89.52-.87 1.21-1.56 2.08-2.07.87-.51 1.81-.77 2.82-.79.44 0 1.02.14 1.74.4.72.27 1.18.4 1.38.4.15 0 .67-.16 1.54-.47.82-.29 1.52-.41 2.1-.37 1.55.12 2.72.73 3.49 1.83-1.39.84-2.07 2.01-2.06 3.52.01 1.17.44 2.15 1.27 2.92.38.36.8.63 1.27.83-.1.29-.21.58-.35.86z" fill="#000"/></svg>
+          Continue with Apple
+        </button>
+
+        <div class="auth-link">Already have an account? <a onclick="navigate('/login')">Sign in</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     RECOVER
+════════════════════════════════════ -->
 <div class="screen" id="screen-recover">
-  <div class="login-right" style="min-height:100vh">
-    <div class="login-form">
-      <div class="login-form-logo">Davincii</div>
-      <h1 class="login-form-title">Recover your <em>account.</em></h1>
-      <p class="login-form-sub">Enter your email and we&rsquo;ll send you a link to reset your password.</p>
-      <div class="error-box" id="recover-error"></div>
-      <div id="recover-success" style="display:none;background:var(--green-bg);border-left:2px solid var(--green);padding:14px 18px;margin-bottom:20px;font-family:var(--mono);font-size:11px;color:var(--green);">Check your inbox &mdash; a recovery link is on its way.</div>
-      <label class="field-lbl">Email address</label>
-      <input class="field" type="email" id="recover-email" placeholder="you@example.com">
-      <button class="btn" style="width:100%" id="recover-btn" onclick="doRecover()">Send recovery email &rarr;</button>
-      <div class="login-hint" style="margin-top:16px"><a href="javascript:void(0)" onclick="navigate('/')" style="color:var(--muted);text-decoration:underline;">&larr; Back to sign in</a></div>
+  <div class="auth-layout">
+    <div class="auth-brand">
+      <div class="auth-brand-logo">Davincii</div>
+      <div class="auth-brand-center">
+        <div class="auth-brand-rule"></div>
+        <h2 class="auth-brand-tagline">We'll get<br>you back<br><em>in.</em></h2>
+        <p class="auth-brand-sub">Enter your email and we'll send a secure reset link right away.</p>
+      </div>
+      <div class="auth-brand-footer">davincii.co</div>
+    </div>
+    <div class="auth-form-panel">
+      <div class="auth-form-inner">
+        <h1 class="auth-form-title">Recover your <em>account.</em></h1>
+        <div class="auth-title-rule"></div>
+        <p class="auth-form-sub">Enter your email and we'll send you a link to reset your password.</p>
+        <div class="error-box" id="recover-error"></div>
+        <div id="recover-success" style="display:none;background:var(--green-bg);border-left:2px solid var(--green);padding:11px 14px;margin-bottom:16px;font-family:var(--sans);font-size:13px;color:var(--green);">Check your inbox &mdash; a recovery link is on its way.</div>
+        <label class="field-lbl">Email address</label>
+        <input class="field" type="email" id="recover-email" placeholder="you@example.com">
+        <button class="btn-primary" id="recover-btn" onclick="doRecover()">Send reset link &rarr;</button>
+        <div class="auth-link" style="margin-top:16px"><a onclick="navigate('/login')">&larr; Back to sign in</a></div>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- DASHBOARD -->
+<!-- ════════════════════════════════════
+     HOW IT WORKS
+════════════════════════════════════ -->
+<div class="screen mkt-page" id="screen-howitworks">
+  <nav class="mkt-nav">
+    <span class="mkt-nav-logo" onclick="navigate('/')">Davincii</span>
+    <div class="mkt-nav-links">
+      <button class="mkt-nav-link active" onclick="navigate('/howitworks')">How it works</button>
+      <button class="mkt-nav-link" onclick="navigate('/pricing')">Pricing</button>
+      <button class="mkt-nav-link" onclick="navigate('/about')">About</button>
+    </div>
+    <div class="mkt-nav-right">
+      <button class="btn-mkt-ghost" onclick="navigate('/login')">Sign in</button>
+      <button class="btn-mkt-solid" onclick="navigate('/signup')">Get started</button>
+    </div>
+  </nav>
+  <div class="mkt-hero">
+    <div class="mkt-hero-eyebrow">The process</div>
+    <h1 class="mkt-hero-title">Collecting royalties<br>should be <em>effortless.</em></h1>
+    <div class="mkt-rule"></div>
+    <p class="mkt-hero-sub">We handle the entire publishing administration pipeline — from registration to collection — so you can focus on making music.</p>
+  </div>
+  <div class="mkt-body">
+    <div class="mkt-step">
+      <div class="mkt-step-num">01</div>
+      <div>
+        <div class="mkt-step-title">You sign up &amp; <em>share your catalog</em></div>
+        <p class="mkt-step-body">Create your free account and submit your songs — titles, ISRC codes, co-writer splits, and release dates. We handle everything from there.</p>
+      </div>
+    </div>
+    <div class="mkt-step">
+      <div class="mkt-step-num">02</div>
+      <div>
+        <div class="mkt-step-title">We <em>register</em> your music everywhere</div>
+        <p class="mkt-step-body">Davincii registers your songs with ASCAP, BMI, SoundExchange, the MLC, and Songtrust. Most artists miss royalties simply because their music was never registered properly — we fix that.</p>
+      </div>
+    </div>
+    <div class="mkt-step">
+      <div class="mkt-step-num">03</div>
+      <div>
+        <div class="mkt-step-title">We <em>track &amp; collect</em> every quarter</div>
+        <p class="mkt-step-body">Performing rights royalties, digital performance royalties, mechanical royalties — we audit every platform every quarter and collect on your behalf.</p>
+      </div>
+    </div>
+    <div class="mkt-step">
+      <div class="mkt-step-num">04</div>
+      <div>
+        <div class="mkt-step-title">You <em>get paid</em> directly</div>
+        <p class="mkt-step-body">Log in to your Davincii portal, see exactly what was collected and from where, and claim your balance via ACH, PayPal, or Stripe. We take 15% of what we collect — that's it.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     PRICING
+════════════════════════════════════ -->
+<div class="screen mkt-page" id="screen-pricing">
+  <nav class="mkt-nav">
+    <span class="mkt-nav-logo" onclick="navigate('/')">Davincii</span>
+    <div class="mkt-nav-links">
+      <button class="mkt-nav-link" onclick="navigate('/howitworks')">How it works</button>
+      <button class="mkt-nav-link active" onclick="navigate('/pricing')">Pricing</button>
+      <button class="mkt-nav-link" onclick="navigate('/about')">About</button>
+    </div>
+    <div class="mkt-nav-right">
+      <button class="btn-mkt-ghost" onclick="navigate('/login')">Sign in</button>
+      <button class="btn-mkt-solid" onclick="navigate('/signup')">Get started</button>
+    </div>
+  </nav>
+  <div class="mkt-hero">
+    <div class="mkt-hero-eyebrow">Transparent pricing</div>
+    <h1 class="mkt-hero-title">We only win<br>when <em>you win.</em></h1>
+    <div class="mkt-rule"></div>
+    <p class="mkt-hero-sub">No monthly fees. No upfront costs. We take a commission only on royalties we actually recover for you.</p>
+  </div>
+  <div class="mkt-body">
+    <div style="max-width:480px;margin:0 auto 48px">
+      <div class="pricing-card">
+        <div class="pricing-pill">Simple &amp; transparent</div>
+        <div class="pricing-plan">Standard</div>
+        <div class="pricing-price">15% <span>of collections</span></div>
+        <p class="pricing-desc">We register your catalog, track your royalties across every platform, and pay you quarterly. No upfront cost — ever.</p>
+        <ul class="pricing-features">
+          <li><span class="feat-check">&#10003;</span> Registration with ASCAP, BMI, SoundExchange, MLC, Songtrust</li>
+          <li><span class="feat-check">&#10003;</span> Quarterly royalty collection &amp; distribution</li>
+          <li><span class="feat-check">&#10003;</span> Artist portal with full earnings transparency</li>
+          <li><span class="feat-check">&#10003;</span> ACH, PayPal, or Stripe payouts</li>
+          <li><span class="feat-check">&#10003;</span> Back-catalog royalty audit &amp; recovery</li>
+          <li><span class="feat-check">&#10003;</span> Split sheet management &amp; co-writer tracking</li>
+          <li><span class="feat-check">&#10003;</span> 100% copyright ownership retained</li>
+        </ul>
+        <button class="btn-primary" onclick="navigate('/signup')">Get started free &rarr;</button>
+      </div>
+    </div>
+    <div style="border:1px solid var(--border);padding:28px 32px;background:#fafafa;text-align:center">
+      <div style="font-family:var(--serif);font-size:22px;font-weight:400;color:var(--black);margin-bottom:8px">No collections, <em>no charge.</em></div>
+      <div style="font-family:var(--sans);font-size:13px;font-weight:300;color:var(--muted);line-height:1.7;max-width:480px;margin:0 auto">If we don't recover royalties for you, you pay nothing. Our commission only applies when money actually lands in your account.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     ABOUT
+════════════════════════════════════ -->
+<div class="screen mkt-page" id="screen-about">
+  <nav class="mkt-nav">
+    <span class="mkt-nav-logo" onclick="navigate('/')">Davincii</span>
+    <div class="mkt-nav-links">
+      <button class="mkt-nav-link" onclick="navigate('/howitworks')">How it works</button>
+      <button class="mkt-nav-link" onclick="navigate('/pricing')">Pricing</button>
+      <button class="mkt-nav-link active" onclick="navigate('/about')">About</button>
+    </div>
+    <div class="mkt-nav-right">
+      <button class="btn-mkt-ghost" onclick="navigate('/login')">Sign in</button>
+      <button class="btn-mkt-solid" onclick="navigate('/signup')">Get started</button>
+    </div>
+  </nav>
+  <div class="mkt-hero">
+    <div class="mkt-hero-eyebrow">Our story</div>
+    <h1 class="mkt-hero-title">Built by artists,<br>for <em>artists.</em></h1>
+    <div class="mkt-rule"></div>
+    <p class="mkt-hero-sub">Davincii was founded on a simple belief: every artist deserves to be paid for every play. We built the infrastructure to make that happen.</p>
+  </div>
+  <div class="mkt-body">
+    <div class="about-stat-grid">
+      <div class="about-stat"><div class="about-stat-num">$0</div><div class="about-stat-lbl">Upfront cost</div></div>
+      <div class="about-stat"><div class="about-stat-num">12+</div><div class="about-stat-lbl">Platforms covered</div></div>
+      <div class="about-stat"><div class="about-stat-num">100%</div><div class="about-stat-lbl">Your copyright</div></div>
+    </div>
+    <div class="about-grid">
+      <div>
+        <div class="about-label">The problem</div>
+        <h2 class="about-title">Billions in royalties go <em>uncollected</em> every year.</h2>
+        <p class="about-body">Most independent artists never see the full value of their music because royalty collection is fragmented across dozens of platforms, each with their own registration requirements and payout cycles.</p>
+      </div>
+      <div style="background:#f5f4f2;padding:40px;display:flex;flex-direction:column;gap:20px">
+        <div style="font-family:var(--sans);font-size:10px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted)">Where royalties come from</div>
+        <div style="border-bottom:1px solid var(--border);padding-bottom:16px">
+          <div style="font-family:var(--serif);font-size:18px;color:var(--black);margin-bottom:4px">Performing Rights</div>
+          <div style="font-family:var(--sans);font-size:13px;font-weight:300;color:var(--muted)">ASCAP &middot; BMI — radio, TV, live, streaming</div>
+        </div>
+        <div style="border-bottom:1px solid var(--border);padding-bottom:16px">
+          <div style="font-family:var(--serif);font-size:18px;color:var(--black);margin-bottom:4px">Digital Performance</div>
+          <div style="font-family:var(--sans);font-size:13px;font-weight:300;color:var(--muted)">SoundExchange — Spotify, Apple Music, Pandora</div>
+        </div>
+        <div>
+          <div style="font-family:var(--serif);font-size:18px;color:var(--black);margin-bottom:4px">Mechanical Rights</div>
+          <div style="font-family:var(--sans);font-size:13px;font-weight:300;color:var(--muted)">MLC &middot; Songtrust — on-demand streaming, downloads</div>
+        </div>
+      </div>
+    </div>
+    <div class="about-dark">
+      <div class="about-dark-quote">"We built Davincii because we were tired of watching artists leave money on the table — not from lack of talent, but lack of <em>infrastructure.</em>"</div>
+      <div>
+        <button class="btn-primary" style="white-space:nowrap;width:auto;background:var(--white);color:var(--black)" onclick="navigate('/signup')">Join Davincii &rarr;</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     DASHBOARD
+════════════════════════════════════ -->
 <div class="screen" id="screen-dash">
   <div class="top-nav">
-    <div class="dv-logo-nav" onclick="navigate('/dashboard/overview')">Davincii</div>
+    <span class="top-nav-logo" onclick="navigate('/dashboard/overview')">Davincii</span>
     <div class="top-nav-right">
       <span class="top-nav-artist" id="nav-artist-name"></span>
       <div class="avatar" id="nav-avatar"></div>
@@ -256,14 +876,14 @@
   <div class="dash-layout">
     <div class="sidebar">
       <div class="sb-section">
-        <div class="sb-lbl">Main</div>
+        <span class="sb-lbl">Main</span>
         <button class="nav-lnk active" id="nl-overview" onclick="navigate('/dashboard/overview')"><span class="nav-lnk-icon">&#8862;</span>Overview</button>
         <button class="nav-lnk" id="nl-catalog" onclick="navigate('/dashboard/catalog')"><span class="nav-lnk-icon">&#9833;</span>Catalog</button>
         <button class="nav-lnk" id="nl-royalties" onclick="navigate('/dashboard/royalties')"><span class="nav-lnk-icon">&#9678;</span>Royalties</button>
         <button class="nav-lnk" id="nl-payouts" onclick="navigate('/dashboard/payouts')"><span class="nav-lnk-icon">&#8593;</span>Payouts</button>
       </div>
       <div class="sb-section">
-        <div class="sb-lbl">Account</div>
+        <span class="sb-lbl">Account</span>
         <button class="nav-lnk" onclick="navigate('/claim')"><span class="nav-lnk-icon">&#10022;</span>Claim payment</button>
       </div>
     </div>
@@ -363,7 +983,7 @@
 <!-- CLAIM PAYMENT -->
 <div class="screen" id="screen-claim">
   <div class="top-nav">
-    <div class="dv-logo-nav" onclick="navigate('/dashboard/overview')">Davincii</div>
+    <span class="top-nav-logo" onclick="navigate('/dashboard/overview')">Davincii</span>
     <div class="top-nav-right"><span class="top-nav-artist" id="claim-artist-name"></span><div class="avatar" id="claim-avatar"></div></div>
   </div>
   <div style="padding:40px 48px;width:100%;">
@@ -387,12 +1007,12 @@
         <input class="field" type="number" id="claim-amount" placeholder="e.g. 500" min="10" step="0.01">
         <label class="field-lbl">Payment method</label>
         <div class="method-opts">
-          <label class="mopt sel" id="mopt-stripe-connect"><input type="radio" name="method" value="stripe" checked onchange="updateSummary()"><div class="mopt-lbl">Stripe &mdash; bank or debit card</div><div class="mopt-sub">Instant &middot; Recommended</div></label>
-          <label class="mopt" id="mopt-ach"><input type="radio" name="method" value="bank_transfer" onchange="updateSummary()"><div class="mopt-lbl">Bank transfer (ACH)</div><div class="mopt-sub">2&ndash;3 business days</div></label>
+          <label class="mopt sel" id="mopt-stripe-connect"><input type="radio" name="method" value="stripe" checked onchange="updateSummary()"><div class="mopt-lbl">Stripe &mdash; bank or debit card</div><div class="mopt-sub">Instant</div></label>
+          <label class="mopt" id="mopt-ach"><input type="radio" name="method" value="bank_transfer" onchange="updateSummary()"><div class="mopt-lbl">Bank transfer (ACH)</div><div class="mopt-sub">2&ndash;3 days</div></label>
           <label class="mopt" id="mopt-paypal"><input type="radio" name="method" value="paypal" onchange="updateSummary()"><div class="mopt-lbl">PayPal</div><div class="mopt-sub">Instant</div></label>
         </div>
 
-        <!-- Stripe Connect panel &mdash; shown only when Stripe method is selected -->
+        <!-- Stripe Connect panel -->
         <div class="stripe-box visible" id="stripe-connect-box">
           <div class="stripe-box-title">Stripe account</div>
           <div class="stripe-status">
@@ -429,7 +1049,7 @@
 
 <!-- PAYMENT SUCCESS -->
 <div class="screen" id="screen-success">
-  <div class="top-nav"><div class="dv-logo-nav" onclick="navigate('/dashboard/overview')">Davincii</div><div class="top-nav-right"><div class="avatar" id="success-avatar"></div></div></div>
+  <div class="top-nav"><span class="top-nav-logo" onclick="navigate('/dashboard/overview')">Davincii</span><div class="top-nav-right"><div class="avatar" id="success-avatar"></div></div></div>
   <div style="padding:80px 48px;display:flex;justify-content:center;">
     <div class="success-wrap">
       <div class="success-icon">&#9678;</div>
@@ -447,7 +1067,7 @@
 </div>
 
 <script>
-  const API = '';  // same origin -- backend serves this file
+  const API = '';
 
   // -- Auth helpers ------------------------------------------
   function getToken() { return localStorage.getItem('dvc_token'); }
@@ -485,14 +1105,22 @@
   function _applyRoute(path) {
     var prot = ['/dashboard', '/claim'];
     if (prot.some(function(p){ return path.startsWith(p); }) && !getToken()) {
-      navigate('/', false); return;
+      navigate('/login', false); return;
     }
-    if (path === '/' || path === '/login' || path === '') {
+    if (path === '/' || path === '') {
+      _showScreen('screen-landing');
+    } else if (path === '/login') {
       _showScreen('screen-login');
     } else if (path === '/signup') {
       _showScreen('screen-signup');
     } else if (path === '/recover') {
       _showScreen('screen-recover');
+    } else if (path === '/howitworks') {
+      _showScreen('screen-howitworks');
+    } else if (path === '/pricing') {
+      _showScreen('screen-pricing');
+    } else if (path === '/about') {
+      _showScreen('screen-about');
     } else if (path === '/claim/success') {
       _showScreen('screen-success');
     } else if (path === '/claim' || path.startsWith('/claim/')) {
@@ -527,13 +1155,15 @@
     if (sub === 'payouts') loadPayouts();
   }
 
-  // Compat shims kept for any inline callers
-  function goTo(id) {
-    var m = { 'screen-login':'/', 'screen-signup':'/signup', 'screen-recover':'/recover', 'screen-dash':'/dashboard/overview', 'screen-claim':'/claim' };
-    navigate(m[id] || '/');
-  }
-
   window.addEventListener('popstate', function(){ _applyRoute(window.location.pathname); });
+
+  // -- Social Auth stubs ------------------------------------
+  function doGoogleLogin() {
+    alert('Google login coming soon. Please use email & password for now.');
+  }
+  function doAppleLogin() {
+    alert('Apple login coming soon. Please use email & password for now.');
+  }
 
   // -- Login -------------------------------------------------
   async function doLogin() {
@@ -554,7 +1184,7 @@
     } catch(e) {
       showErr(errEl, e.message);
     } finally {
-      btn.disabled = false; btn.textContent = 'Sign in ->';
+      btn.disabled = false; btn.textContent = 'Sign in \u2192';
     }
   }
 
@@ -580,7 +1210,7 @@
     } catch(e) {
       showErr(errEl, e.message);
     } finally {
-      btn.disabled = false; btn.textContent = 'Create account ->';
+      btn.disabled = false; btn.textContent = 'Create account \u2192';
     }
   }
 
@@ -599,7 +1229,7 @@
     btn.disabled = true; btn.textContent = 'Sending...';
     try { await apiFetch('/api/auth/recover', { method: 'POST', body: JSON.stringify({ email: email }) }); } catch(e) {}
     document.getElementById('recover-success').style.display = 'block';
-    btn.disabled = false; btn.textContent = 'Send recovery email ->';
+    btn.disabled = false; btn.textContent = 'Send reset link \u2192';
   }
 
   function showErr(el, msg) {
@@ -612,17 +1242,14 @@
     const artist = getArtist();
     if (!artist) { doLogout(); return; }
 
-    // Set names
     const initials = artist.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2);
     document.getElementById('nav-artist-name').textContent = artist.name;
     document.getElementById('nav-avatar').textContent = initials;
     document.getElementById('greeting-name').textContent = artist.name.split(' ')[0] + '.';
 
-    // Greeting time
     const h = new Date().getHours();
     document.getElementById('greeting-time').textContent = h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening';
 
-    // Load summary data + Stripe status in parallel
     checkDashStripeStatus().catch(() => {});
     try {
       const [roySum, paySum] = await Promise.all([
@@ -635,7 +1262,6 @@
       document.getElementById('overview-pending').textContent = '$' + Number(paySum.totalPending).toFixed(2) + ' pending';
     } catch(e) {}
 
-    // Recent royalties
     try {
       const royalties = await apiFetch('/api/royalties');
       const recent = royalties.slice(0, 4);
@@ -658,7 +1284,6 @@
       document.getElementById('overview-royalties-body').innerHTML = '<div class="empty-state">Could not load royalties</div>';
     }
 
-    // Recent songs
     try {
       const songs = await apiFetch('/api/songs');
       const recent = songs.slice(0, 4);
@@ -672,7 +1297,7 @@
             <div class="tr col-3">
               <div><div class="tr-song">${s.title}</div><div class="tr-meta">${s.isrc || 'No ISRC'}</div></div>
               <div><span class="badge ${s.status === 'active' ? 'badge-ok' : s.status === 'collecting' ? 'badge-ok' : 'badge-pend'}">${s.status || 'pending'}</span></div>
-              <div class="tr-amt" style="font-size:11px;color:var(--muted)">${new Date(s.created_at).toLocaleDateString('en-US', {month:'short', day:'numeric'})}</div>
+              <div class="tr-amt" style="font-size:12px;color:var(--muted)">${new Date(s.created_at).toLocaleDateString('en-US', {month:'short', day:'numeric'})}</div>
             </div>`).join('')}`;
       }
     } catch(e) {
@@ -688,7 +1313,7 @@
       const songs = await apiFetch('/api/songs');
       document.getElementById('catalog-sub').textContent = songs.length + ' song' + (songs.length !== 1 ? 's' : '') + ' in your catalog.';
       if (songs.length === 0) {
-        body.innerHTML = '<div class="empty-state">No songs yet -- contact Davincii to add your catalog</div>';
+        body.innerHTML = '<div class="empty-state">No songs yet &mdash; contact Davincii to add your catalog</div>';
         return;
       }
       body.innerHTML = `
@@ -698,7 +1323,7 @@
             <div><div class="tr-song">${s.title}</div><div class="tr-meta">Added ${new Date(s.created_at).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'})}</div></div>
             <div class="tr-cell">${s.isrc || '--'}</div>
             <div><span class="badge ${s.status === 'active' || s.status === 'collecting' ? 'badge-ok' : s.status === 'registering' ? 'badge-blue' : 'badge-pend'}">${s.status || 'pending'}</span></div>
-            <div class="tr-amt" style="font-size:11px;color:var(--muted)">${s.release_date ? new Date(s.release_date).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : '--'}</div>
+            <div class="tr-amt" style="font-size:12px;color:var(--muted)">${s.release_date ? new Date(s.release_date).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : '--'}</div>
           </div>`).join('')}`;
     } catch(e) {
       body.innerHTML = '<div class="empty-state">Could not load catalog</div>';
@@ -747,7 +1372,7 @@
           <div class="tr col-4">
             <div>
               <div class="tr-song">${new Date(p.created_at).toLocaleDateString('en-US', {month:'long', day:'numeric', year:'numeric'})}</div>
-              ${p.stripe_transfer_id ? `<div class="tr-meta" style="font-size:9px;letter-spacing:0.04em">${p.stripe_transfer_id}</div>` : ''}
+              ${p.stripe_transfer_id ? `<div class="tr-meta">${p.stripe_transfer_id}</div>` : ''}
             </div>
             <div class="tr-cell">${methodLabel[p.method] || p.method.replace(/_/g, ' ')}</div>
             <div><span class="badge ${p.status === 'completed' ? 'badge-ok' : p.status === 'failed' ? 'badge-red' : 'badge-pend'}">${p.status}</span></div>
@@ -766,7 +1391,6 @@
     document.getElementById('claim-artist-name').textContent = artist.name;
     document.getElementById('claim-avatar').textContent = initials;
     document.getElementById('success-avatar').textContent = initials;
-    // Reset to Stripe method selected by default and show the Stripe panel
     const stripeRadio = document.querySelector('input[name="method"][value="stripe"]');
     if (stripeRadio) {
       stripeRadio.checked = true;
@@ -779,7 +1403,6 @@
       const bal = await apiFetch('/api/stripe/balance');
       document.getElementById('claim-balance').textContent = '$' + Number(bal.available).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
       document.getElementById('claim-total').textContent = '$' + Number(bal.total_royalties).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-      // Pre-fill amount with available balance (if >= $10)
       const avail = parseFloat(bal.available);
       const amtField = document.getElementById('claim-amount');
       if (avail >= 10 && !amtField.value) {
@@ -787,7 +1410,6 @@
         updateSummary();
       }
     } catch(e) {}
-    // Load Stripe status in parallel -- non-blocking
     checkStripeStatus().catch(() => {});
   }
 
@@ -835,19 +1457,19 @@
       if (status.onboarded && status.payouts_enabled) {
         dot.className = 'stripe-dot connected';
         title.textContent = 'Stripe connected';
-        sub.textContent = (status.email || 'Bank account linked') + ' . Instant payouts enabled';
+        sub.textContent = (status.email || 'Bank account linked') + ' \u00b7 Instant payouts enabled';
         btn.style.display = 'none';
       } else if (status.connected && !status.onboarded) {
         dot.className = 'stripe-dot disconnected';
         title.textContent = 'Stripe setup incomplete';
         sub.textContent = 'Finish connecting to enable instant payouts';
-        btn.textContent = 'Continue ->';
+        btn.textContent = 'Continue \u2192';
         btn.style.display = 'inline-block';
       } else {
         dot.className = 'stripe-dot disconnected';
         title.textContent = 'Bank account not connected';
         sub.textContent = 'Connect your bank for instant payouts';
-        btn.textContent = 'Set up ->';
+        btn.textContent = 'Set up \u2192';
         btn.style.display = 'inline-block';
       }
     } catch(e) {
@@ -859,7 +1481,7 @@
   }
 
   // -- Stripe Connect ----------------------------------------
-  let _stripeStatus = null; // cached: { connected, onboarded, email, payouts_enabled }
+  let _stripeStatus = null;
 
   async function checkStripeStatus() {
     const dot = document.getElementById('stripe-dot');
@@ -891,7 +1513,7 @@
         dot.className = 'stripe-dot disconnected';
         text.textContent = 'Onboarding incomplete';
         sub.textContent = 'Finish connecting to enable instant payouts';
-        connectBtn.textContent = 'Continue setup ->';
+        connectBtn.textContent = 'Continue setup \u2192';
         connectBtn.style.display = 'inline-flex';
         disconnectBtn.style.display = 'inline-block';
       } else {
@@ -957,13 +1579,11 @@
     if (!amount || parseFloat(amount) < 10) { showErr(errEl, 'Minimum payout amount is $10.'); return; }
     if (!method) { showErr(errEl, 'Please select a payment method.'); return; }
 
-    // Stripe path
     if (method.value === 'stripe') {
       if (!_stripeStatus || !_stripeStatus.onboarded) {
         showErr(errEl, 'Please connect your Stripe account before requesting a payout.');
         return;
       }
-      // Client-side balance guard
       const balText = document.getElementById('claim-balance').textContent.replace(/[$,]/g, '');
       const avail = parseFloat(balText);
       if (!isNaN(avail) && parseFloat(amount) > avail + 0.001) {
@@ -987,12 +1607,11 @@
       } catch(e) {
         showErr(errEl, e.message);
       } finally {
-        btn.disabled = false; btn.textContent = 'Confirm claim ->';
+        btn.disabled = false; btn.textContent = 'Confirm claim \u2192';
       }
       return;
     }
 
-    // ACH / PayPal path -- also check client-side balance
     const balText2 = document.getElementById('claim-balance').textContent.replace(/[$,]/g, '');
     const avail2 = parseFloat(balText2);
     if (!isNaN(avail2) && parseFloat(amount) > avail2 + 0.001) {
@@ -1016,20 +1635,18 @@
     } catch(e) {
       showErr(errEl, e.message);
     } finally {
-      btn.disabled = false; btn.textContent = 'Confirm claim ->';
+      btn.disabled = false; btn.textContent = 'Confirm claim \u2192';
     }
   }
 
   // -- Init --------------------------------------------------
   (function init() {
-    // Handle return from Stripe Connect onboarding
     const params = new URLSearchParams(window.location.search);
     if (params.get('stripe_connected') === 'true') {
       window.history.replaceState({}, '', '/claim');
       if (getToken() && getArtist()) { navigate('/claim', false); return; }
     }
 
-    // Route to current URL path
     _applyRoute(window.location.pathname);
 
     document.getElementById('login-password').addEventListener('keydown', e => {
