@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DaVincii â Artist Portal (Demo)</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&family=Pinyon+Script&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #FFFFFF; --black: #0A0A0A; --muted: #888; --border: rgba(0,0,0,0.09);
+    --green: #4a8a4a; --green-bg: rgba(74,138,74,0.08);
+    --blue: #3a6ea8; --blue-bg: rgba(58,110,168,0.08);
+    --red: #c0392b; --red-bg: rgba(192,57,43,0.08);
+    --serif: 'Cormorant Garamond', Georgia, serif; --mono: 'DM Mono', monospace;
+  }
+  html, body { width: 100%; min-height: 100vh; background: var(--bg); font-family: var(--serif); color: var(--black); }
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: flex; flex-direction: column; animation: fi 0.25s cubic-bezier(0.16,1,0.3,1); }
+  @keyframes fi { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+  /* DEMO BANNER */
+  .demo-banner { background: var(--black); color: #fff; text-align: center; padding: 9px 16px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; }
+  .demo-banner span { opacity: 0.5; }
+
+  /* SHARED */
+  .btn { background:var(--black); color:#fff; border:none; padding:14px 32px; font-family:var(--mono); font-size:11px; letter-spacing:0.18em; text-transform:uppercase; cursor:pointer; transition:opacity 0.2s; white-space:nowrap; }
+  .btn:hover { opacity:0.75; }
+  .btn-sm { padding:10px 20px; font-size:10px; }
+  .field-lbl { font-family:var(--mono); font-size:9px; letter-spacing:0.18em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; display:block; }
+  .badge { font-family:var(--mono); font-size:9px; letter-spacing:0.1em; text-transform:uppercase; padding:3px 9px; }
+  .badge-ok { background:var(--green-bg); color:var(--green); }
+  .badge-pend { background:rgba(0,0,0,0.05); color:var(--muted); }
+  .badge-blue { background:var(--blue-bg); color:var(--blue); }
+  .back-btn { font-family:var(--mono); font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); background:none; border:none; cursor:pointer; display:flex; align-items:center; gap:8px; margin-bottom:32px; padding:0; transition:color 0.2s; }
+  .back-btn:hover { color:var(--black); }
+  .empty-state { padding:40px 0; text-align:center; font-family:var(--mono); font-size:10px; letter-spacing:0.12em; color:var(--muted); text-transform:uppercase; }
+
+  /* NAV */
+  .top-nav { display:flex; align-items:center; justify-content:space-between; padding:18px 36px; border-bottom:1px solid var(--border); position:sticky; top:0; background:var(--bg); z-index:10; }
+  .top-nav-right { display:flex; align-items:center; gap:16px; }
+  .top-nav-artist { font-family:var(--mono); font-size:11px; color:var(--muted); }
+  .avatar { width:32px; height:32px; border-radius:50%; background:var(--black); color:#fff; display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:11px; letter-spacing:0.04em; }
+  .top-nav-out { font-family:var(--mono); font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); background:none; border:none; cursor:pointer; transition:color 0.2s; }
+  .top-nav-out:hover { color:var(--black); }
+
+  /* DASH LAYOUT */
+  .dash-layout { display:flex; flex:1; }
+  .sidebar { width:200px; min-width:200px; border-right:1px solid var(--border); padding:32px 0; }
+  .sb-section { margin-bottom:24px; }
+  .sb-lbl { font-family:var(--mono); font-size:8px; letter-spacing:0.18em; text-transform:uppercase; color:var(--muted); padding:0 24px; margin-bottom:8px; }
+  .nav-lnk { display:flex; align-items:center; gap:10px; width:100%; padding:10px 24px; font-family:var(--mono); font-size:10px; letter-spacing:0.1em; text-transform:uppercase; background:none; border:none; cursor:pointer; color:var(--muted); transition:all 0.15s; text-align:left; }
+  .nav-lnk:hover, .nav-lnk.active { color:var(--black); background:rgba(0,0,0,0.03); }
+  .nav-lnk-icon { font-size:14px; width:18px; text-align:center; }
+  .main { flex:1; padding:48px 52px; max-width:900px; }
+
+  /* PG HEADER */
+  .pg-title { font-size:36px; font-weight:300; line-height:1.1; margin-bottom:8px; }
+  .pg-title em { font-style:italic; }
+  .pg-sub { font-family:var(--mono); font-size:11px; color:var(--muted); margin-bottom:36px; }
+
+  /* BAL CARD */
+  .bal-card { display:flex; gap:0; border:1px solid var(--border); margin-bottom:36px; }
+  .bal-card > div { padding:28px 36px; flex:1; }
+  .bal-card > div + div { border-left:1px solid var(--border); }
+  .bal-lbl { font-family:var(--mono); font-size:9px; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
+  .bal-amt { font-size:42px; font-weight:300; letter-spacing:-0.01em; margin-bottom:6px; }
+  .bal-amt-sm { font-size:28px; font-weight:300; margin-bottom:6px; }
+  .bal-note { font-family:var(--mono); font-size:10px; color:var(--muted); }
+  .bal-actions { display:flex; flex-direction:column; gap:10px; justify-content:center; padding:20px 28px !important; }
+  .bal-btn { padding:10px 18px; font-family:var(--mono); font-size:10px; letter-spacing:0.14em; text-transform:uppercase; cursor:pointer; transition:opacity 0.2s; border:none; white-space:nowrap; }
+  .bal-btn-p { background:var(--black); color:#fff; }
+  .bal-btn-p:hover { opacity:0.75; }
+  .bal-btn-g { background:transparent; color:var(--black); border:1px solid var(--black); }
+  .bal-btn-g:hover { opacity:0.6; }
+
+  /* SBOX */
+  .sbox { border:1px solid var(--border); margin-bottom:28px; }
+  .sbox-hd { display:flex; align-items:center; justify-content:space-between; padding:18px 24px; border-bottom:1px solid var(--border); }
+  .sbox-title { font-size:17px; font-weight:400; }
+  .sbox-sub { font-family:var(--mono); font-size:9px; color:var(--muted); margin-top:3px; letter-spacing:0.08em; }
+  .sbox-lnk { font-family:var(--mono); font-size:9px; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); background:none; border:none; cursor:pointer; transition:color 0.2s; }
+  .sbox-lnk:hover { color:var(--black); }
+  .sbox-body { padding:0; }
+
+  /* TABLE */
+  .th-row { display:grid; padding:10px 24px; border-bottom:1px solid var(--border); background:rgba(0,0,0,0.02); }
+  .col-5 { grid-template-columns: 2fr 1fr 1fr 1fr 80px; }
+  .col-3 { grid-template-columns: 2fr 1fr 80px; }
+  .col-4 { grid-template-columns: 2fr 1fr 1fr 80px; }
+  .col-4c { grid-template-columns: 2fr 1fr 1fr 100px; }
+  .th { font-family:var(--mono); font-size:8px; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted); }
+  .tr { display:grid; padding:14px 24px; border-bottom:1px solid var(--border); align-items:center; transition:background 0.12s; }
+  .tr:hover { background:rgba(0,0,0,0.015); }
+  .tr:last-child { border-bottom:none; }
+  .tr-song { font-size:14px; font-weight:400; margin-bottom:2px; }
+  .tr-meta { font-family:var(--mono); font-size:9px; color:var(--muted); }
+  .tr-cell { font-family:var(--mono); font-size:11px; color:var(--muted); }
+  .tr-amt { font-family:var(--mono); font-size:12px; text-align:right; color:var(--black); }
+
+  /* STRIPE STRIP */
+  .stripe-strip { display:flex; align-items:center; justify-content:space-between; padding:14px 20px; border:1px solid var(--border); margin-bottom:28px; background:#fafafa; }
+  .stripe-strip-left { display:flex; align-items:center; gap:12px; }
+  .stripe-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+  .stripe-dot.connected { background:var(--green); }
+  .stripe-dot.disconnected { background:#c0392b; }
+  .stripe-strip-title { font-size:13px; font-weight:400; }
+  .stripe-strip-sub { font-family:var(--mono); font-size:9px; color:var(--muted); margin-top:2px; }
+
+  /* LOGO */
+  .dv-logo { display:inline-block; }
+  .dv-logo-box { position:relative; display:inline-block; }
+  .dv-logo-box span { font-family:'Pinyon Script', cursive; font-size:72px; line-height:1.1; color:#c0392b; display:block; }
+  .dv-logo-nav .dv-logo-box span { font-size:28px; }
+
+  /* CLAIM */
+  .claim-layout { display:grid; grid-template-columns:1fr 320px; gap:40px; }
+  .claim-avail { display:flex; justify-content:space-between; align-items:flex-end; padding:24px; border:1px solid var(--border); margin-bottom:28px; }
+  .claim-avail-lbl { font-family:var(--mono); font-size:9px; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
+  .claim-avail-amt { font-size:32px; font-weight:300; }
+  .method-opts { margin-bottom:28px; }
+  .mopt { display:flex; align-items:flex-start; gap:14px; padding:14px 18px; border:1px solid var(--border); margin-bottom:8px; cursor:pointer; transition:border-color 0.15s; }
+  .mopt.sel { border-color:var(--black); }
+  .mopt input[type=radio] { margin-top:2px; accent-color:var(--black); }
+  .mopt-lbl { font-size:14px; font-weight:400; margin-bottom:3px; }
+  .mopt-sub { font-family:var(--mono); font-size:9px; color:var(--muted); }
+  .field { width:100%; border:1px solid var(--border); padding:12px 16px; font-family:var(--mono); font-size:13px; color:var(--black); background:transparent; outline:none; margin-bottom:20px; }
+  .field:focus { border-color:var(--black); }
+  .field::placeholder { color:#ccc; }
+  .summary-card { border:1px solid var(--border); padding:24px; }
+  .summary-title { font-size:17px; font-weight:400; margin-bottom:20px; }
+  .sum-row { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border); }
+  .sum-row:last-child { border-bottom:none; }
+  .sum-key { font-family:var(--mono); font-size:9px; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); }
+  .sum-val { font-family:var(--mono); font-size:12px; }
+  .claim-note { font-family:var(--mono); font-size:9px; color:var(--muted); margin-bottom:20px; line-height:1.7; }
+
+  /* SUCCESS */
+  .success-wrap { max-width:440px; }
+  .success-icon { font-size:48px; margin-bottom:24px; }
+  .success-title { font-size:42px; font-weight:300; line-height:1.1; margin-bottom:16px; }
+  .success-title em { font-style:italic; }
+  .success-sub { font-size:16px; font-weight:300; color:var(--muted); line-height:1.7; margin-bottom:40px; }
+  .success-detail { border:1px solid var(--border); padding:24px; margin-bottom:36px; }
+  .sd-row { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border); }
+  .sd-row:last-child { border-bottom:none; }
+  .sd-key { font-family:var(--mono); font-size:9px; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); }
+  .sd-val { font-family:var(--mono); font-size:12px; color:var(--black); }
+</style>
+</head>
+<body>
+
+<div class="demo-banner">â¬¡ Demo mode â <span>sample data for illustration purposes</span></div>
+
+<!-- DASHBOARD -->
+<div class="screen active" id="screen-dash">
+  <div class="top-nav">
+    <div class="dv-logo dv-logo-nav"><div class="dv-logo-box"><span>DaVincii</span></div></div>
+    <div class="top-nav-right">
+      <span class="top-nav-artist">Jordan Ellis</span>
+      <div class="avatar">JE</div>
+      <button class="top-nav-out" onclick="alert('Demo mode â sign out disabled')">Sign out</button>
+    </div>
+  </div>
+  <div class="dash-layout">
+    <div class="sidebar">
+      <div class="sb-section">
+        <div class="sb-lbl">Main</div>
+        <button class="nav-lnk active" id="nl-overview" onclick="showPg('pg-overview',this)"><span class="nav-lnk-icon">â</span>Overview</button>
+        <button class="nav-lnk" id="nl-catalog" onclick="showPg('pg-catalog',this)"><span class="nav-lnk-icon">â©</span>Catalog</button>
+        <button class="nav-lnk" id="nl-royalties" onclick="showPg('pg-royalties',this)"><span class="nav-lnk-icon">â</span>Royalties</button>
+        <button class="nav-lnk" id="nl-payouts" onclick="showPg('pg-payouts',this)"><span class="nav-lnk-icon">â</span>Payouts</button>
+      </div>
+      <div class="sb-section">
+        <div class="sb-lbl">Account</div>
+        <button class="nav-lnk" onclick="showPg('pg-claim',document.getElementById('nl-payouts'))"><span class="nav-lnk-icon">â </span>Claim payment</button>
+      </div>
+    </div>
+    <div class="main">
+
+      <!-- OVERVIEW -->
+      <div id="pg-overview">
+        <div class="pg-title">Good <em>afternoon</em>, <em>Jordan.</em></div>
+        <div class="pg-sub">Here's a summary of your royalty activity.</div>
+        <div class="bal-card">
+          <div>
+            <div class="bal-lbl">Total royalties collected</div>
+            <div class="bal-amt">$4,812.50</div>
+            <div class="bal-note">23 payments collected</div>
+          </div>
+          <div>
+            <div class="bal-lbl">Total paid out</div>
+            <div class="bal-amt-sm">$3,200.00</div>
+            <div class="bal-note">$1,612.50 pending</div>
+          </div>
+          <div class="bal-actions">
+            <button class="bal-btn bal-btn-p" onclick="showPg('pg-claim',document.getElementById('nl-payouts'))">Claim payment</button>
+            <button class="bal-btn bal-btn-g" onclick="showPg('pg-catalog',document.getElementById('nl-catalog'))">View catalog</button>
+          </div>
+        </div>
+
+        <div class="stripe-strip">
+          <div class="stripe-strip-left">
+            <div class="stripe-dot connected"></div>
+            <div>
+              <div class="stripe-strip-title">Stripe connected</div>
+              <div class="stripe-strip-sub">jordan@ellismusic.com Â· Instant payouts enabled</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sbox">
+          <div class="sbox-hd">
+            <div><div class="sbox-title">Recent Royalties</div><div class="sbox-sub">Latest payments recovered</div></div>
+            <button class="sbox-lnk" onclick="showPg('pg-royalties',document.getElementById('nl-royalties'))">See all &rarr;</button>
+          </div>
+          <div class="sbox-body">
+            <div class="th-row col-5"><div class="th">Song</div><div class="th">Platform</div><div class="th">Period</div><div class="th">Type</div><div class="th" style="text-align:right">Amount</div></div>
+            <div class="tr col-5"><div><div class="tr-song">Midnight Drive</div><div class="tr-meta">Spotify</div></div><div class="tr-cell">Spotify</div><div class="tr-cell">Q4 2024</div><div><span class="badge badge-ok">Streaming</span></div><div class="tr-amt">$412.80</div></div>
+            <div class="tr col-5"><div><div class="tr-song">Golden Hour</div><div class="tr-meta">Apple Music</div></div><div class="tr-cell">Apple Music</div><div class="tr-cell">Q4 2024</div><div><span class="badge badge-ok">Streaming</span></div><div class="tr-amt">$287.40</div></div>
+            <div class="tr col-5"><div><div class="tr-song">Neon Skies</div><div class="tr-meta">YouTube</div></div><div class="tr-cell">YouTube</div><div class="tr-cell">Q3 2024</div><div><span class="badge badge-ok">Sync</span></div><div class="tr-amt">$1,100.00</div></div>
+            <div class="tr col-5"><div><div class="tr-song">Midnight Drive</div><div class="tr-meta">Tidal</div></div><div class="tr-cell">Tidal</div><div class="tr-cell">Q3 2024</div><div><span class="badge badge-ok">Streaming</span></div><div class="tr-amt">$89.20</div></div>
+          </div>
+        </div>
+
+        <div class="sbox">
+          <div class="sbox-hd">
+            <div><div class="sbox-title">Your Catalog</div><div class="sbox-sub">Songs registered across platforms</div></div>
+            <button class="sbox-lnk" onclick="showPg('pg-catalog',document.getElementById('nl-catalog'))">See all &rarr;</button>
+          </div>
+          <div class="sbox-body">
+            <div class="th-row col-3"><div class="th">Song</div><div class="th">Status</div><div class="th" style="text-align:right">Added</div></div>
+            <div class="tr col-3"><div><div class="tr-song">Midnight Drive</div><div class="tr-meta">US-Z03-24-00142</div></div><div><span class="badge badge-ok">collecting</span></div><div class="tr-amt" style="font-size:11px;color:var(--muted)">Jan 12, 2024</div></div>
+            <div class="tr col-3"><div><div class="tr-song">Golden Hour</div><div class="tr-meta">US-Z03-24-00198</div></div><div><span class="badge badge-ok">collecting</span></div><div class="tr-amt" style="font-size:11px;color:var(--muted)">Mar 4, 2024</div></div>
+            <div class="tr col-3"><div><div class="tr-song">Neon Skies</div><div class="tr-meta">US-Z03-23-00871</div></div><div><span class="badge badge-ok">active</span></div><div class="tr-amt" style="font-size:11px;color:var(--muted)">Aug 19, 2023</div></div>
+            <div class="tr col-3"><div><div class="tr-song">Afterglow</div><div class="tr-meta">No ISRC</div></div><div><span class="badge badge-pend">pending</span></div><div class="tr-amt" style="font-size:11px;color:var(--muted)">Nov 2, 2024</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CATALOG -->
+      <div id="pg-catalog" style="display:none">
+        <div class="pg-title">Your <em>Catalog</em></div>
+        <div class="pg-sub">4 songs in your catalog.</div>
+        <div class="sbox">
+          <div class="sbox-body">
+            <div class="th-row col-4c"><div class="th">Song</div><div class="th">ISRC</div><div class="th">Status</div><div class="th" style="text-align:right">Release Date</div></div>
+            <div class="tr col-4c"><div><div class="tr-song">Midnight Drive</div><div class="tr-meta">Added Jan 12, 2024</div></div><div class="tr-cell">US-Z03-24-00142</div><div><span class="badge badge-ok">collecting</span></div><div class="tr-amt" style="font-size:11px;color:var(--muted)">Oct 5, 2023</div></div>
+            <div class="tr col-4c"><div><div class="tr-song">Golden Hour</div><div class="tr-meta">Added Mar 4, 2024</div></div><div class="tr-cell">US-Z03-24-00198</div><div><span class="badge badge-ok">collecting</span></div><div class="tr-amt" style="font-size:11px;color:var(--muted)">Feb 14, 2024</div></div>
+            <div class="tr col-4c"><div><div class="tr-song">Neon Skies</div><div class="tr-meta">Added Aug 19, 2023</div></div><div class="tr-cell">US-Z03-23-00871</div><div><span class="badge badge-ok">active</span></div><div class="tr-amt" style="font-size:11px;color:var(--muted)">Jun 1, 2022</div></div>
+            <div class="tr col-4c"><div><div class="tr-song">Afterglow</div><div class="tr-meta">Added Nov 2, 2024</div></div><div class="tr-cell">â</div><div><span class="badge badge-pend">pending</span></div><div class="tr-amt" style="font-size:11px;color:var(--muted)">â</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ROYALTIES -->
+      <div id="pg-royalties" style="display:none">
+        <div class="pg-title">Your <em>Royalties</em></div>
+        <div class="pg-sub">All royalty payments collected on your behalf.</div>
+        <div class="sbox">
+          <div class="sbox-body">
+            <div class="th-row col-5"><div class="th">Song</div><div class="th">Platform</div><div class="th">Period</div><div class="th">Type</div><div class="th" style="text-align:right">Amount</div></div>
+            <div class="tr col-5"><div><div class="tr-song">Neon Skies</div><div class="tr-meta">YouTube</div></div><div class="tr-cell">YouTube</div><div class="tr-cell">Q3 2024</div><div><span class="badge badge-ok">Sync</span></div><div class="tr-amt">$1,100.00</div></div>
+            <div class="tr col-5"><div><div class="tr-song">Midnight Drive</div><div class="tr-meta">Spotify</div></div><div class="tr-cell">Spotify</div><div class="tr-cell">Q4 2024</div><div><span class="badge badge-ok">Streaming</span></div><div class="tr-amt">$412.80</div></div>
+            <div class="tr col-5"><div><div class="tr-song">Golden Hour</div><div class="tr-meta">Apple Music</div></div><div class="tr-cell">Apple Music</div><div class="tr-cell">Q4 2024</div><div><span class="badge badge-ok">Streaming</span></div><div class="tr-amt">$287.40</div></div>
+            <div class="tr col-5"><div><div class="tr-song">Neon Skies</div><div class="tr-meta">Spotify</div></div><div class="tr-cell">Spotify</div><div class="tr-cell">Q2 2024</div><div><span class="badge badge-ok">Streaming</span></div><div class="tr-amt">$241.10</div></div>
+            <div class="tr col-5"><div><div class="tr-song">Midnight Drive</div><div class="tr-meta">Tidal</div></div><div class="tr-cell">Tidal</div><div class="tr-cell">Q3 2024</div><div><span class="badge badge-ok">Streaming</span></div><div class="tr-amt">$89.20</div></div>
+            <div class="tr col-5"><div><div class="tr-song">Golden Hour</div><div class="tr-meta">Amazon Music</div></div><div class="tr-cell">Amazon Music</div><div class="tr-cell">Q3 2024</div><div><span class="badge badge-ok">Streaming</span></div><div class="tr-amt">$67.50</div></div>
+            <div class="tr col-5"><div><div class="tr-song">Neon Skies</div><div class="tr-meta">Pandora</div></div><div class="tr-cell">Pandora</div><div class="tr-cell">Q1 2024</div><div><span class="badge badge-ok">Performance</span></div><div class="tr-amt">$54.00</div></div>
+            <div class="tr col-5"><div><div class="tr-song">Afterglow</div><div class="tr-meta">Spotify</div></div><div class="tr-cell">Spotify</div><div class="tr-cell">Q4 2024</div><div><span class="badge badge-ok">Streaming</span></div><div class="tr-amt">$38.90</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAYOUTS -->
+      <div id="pg-payouts" style="display:none">
+        <div class="pg-title">Payout <em>History</em></div>
+        <div class="pg-sub">Your payment requests and their status.</div>
+        <div class="sbox">
+          <div class="sbox-body">
+            <div class="th-row col-4"><div class="th">Date</div><div class="th">Method</div><div class="th">Status</div><div class="th" style="text-align:right">Amount</div></div>
+            <div class="tr col-4"><div><div class="tr-song">March 10, 2025</div><div class="tr-meta" style="font-size:9px;letter-spacing:0.04em">tr_3Px9mKDemo001</div></div><div class="tr-cell">Stripe (Instant)</div><div><span class="badge badge-ok">completed</span></div><div class="tr-amt">$1,200.00</div></div>
+            <div class="tr col-4"><div><div class="tr-song">January 22, 2025</div><div class="tr-meta" style="font-size:9px;letter-spacing:0.04em">tr_3Px9mKDemo002</div></div><div class="tr-cell">Stripe (Instant)</div><div><span class="badge badge-ok">completed</span></div><div class="tr-amt">$2,000.00</div></div>
+            <div class="tr col-4"><div><div class="tr-song">October 5, 2024</div><div class="tr-meta" style="font-size:9px;letter-spacing:0.04em">â</div></div><div class="tr-cell">ACH Transfer</div><div><span class="badge badge-pend">pending</span></div><div class="tr-amt">$612.50</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CLAIM -->
+      <div id="pg-claim" style="display:none">
+        <button class="back-btn" onclick="showPg('pg-overview',document.getElementById('nl-overview'))">&larr; Back to dashboard</button>
+        <div class="pg-title">Claim your <em>payment.</em></div>
+        <div class="pg-sub">Your earnings are ready. Choose how you'd like to receive them.</div>
+        <div class="claim-layout">
+          <div>
+            <div class="claim-avail">
+              <div>
+                <div class="claim-avail-lbl">Available to claim</div>
+                <div class="claim-avail-amt">$1,612.50</div>
+              </div>
+              <div style="text-align:right">
+                <div class="claim-avail-lbl">Total earned</div>
+                <div style="font-size:14px;color:var(--muted);font-family:var(--mono)">$4,812.50</div>
+              </div>
+            </div>
+            <label class="field-lbl">Amount to claim</label>
+            <input class="field" type="number" id="claim-amount" placeholder="e.g. 500" min="10" step="0.01" value="1612.50" oninput="updateSummary()">
+            <label class="field-lbl">Payment method</label>
+            <div class="method-opts">
+              <label class="mopt sel" id="mopt-stripe"><input type="radio" name="method" value="stripe" checked onchange="updateSummary()"><div><div class="mopt-lbl">Stripe â bank or debit card</div><div class="mopt-sub">Instant Â· Recommended</div></div></label>
+              <label class="mopt" id="mopt-ach"><input type="radio" name="method" value="bank_transfer" onchange="updateSummary()"><div><div class="mopt-lbl">Bank transfer (ACH)</div><div class="mopt-sub">2â3 business days</div></div></label>
+              <label class="mopt" id="mopt-paypal"><input type="radio" name="method" value="paypal" onchange="updateSummary()"><div><div class="mopt-lbl">PayPal</div><div class="mopt-sub">Instant</div></div></label>
+            </div>
+            <div class="claim-note">Stripe payouts are sent instantly to your connected bank. ACH/PayPal requests are processed within 5 business days. Minimum $10 required.</div>
+            <button class="btn" style="width:100%" onclick="doDemoConfirm()">Confirm claim &rarr;</button>
+          </div>
+          <div>
+            <div class="summary-card">
+              <div class="summary-title">Payment summary</div>
+              <div class="sum-row"><div class="sum-key">Amount requested</div><div class="sum-val" id="sum-amount">$1,612.50</div></div>
+              <div class="sum-row"><div class="sum-key">Method</div><div class="sum-val" id="sum-method">Stripe (Instant)</div></div>
+              <div class="sum-row"><div class="sum-key">Status</div><div class="sum-val">Pending approval</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- SUCCESS -->
+<div class="screen" id="screen-success">
+  <div class="top-nav">
+    <div class="dv-logo dv-logo-nav"><div class="dv-logo-box"><span>DaVincii</span></div></div>
+    <div class="top-nav-right"><div class="avatar">JE</div></div>
+  </div>
+  <div style="padding:80px 48px;display:flex;justify-content:center;">
+    <div class="success-wrap">
+      <div class="success-icon">â</div>
+      <h2 class="success-title">Payment<br><em>sent.</em></h2>
+      <p class="success-sub">Your funds have been transferred to your connected bank account.</p>
+      <div class="success-detail">
+        <div class="sd-row"><div class="sd-key">Amount</div><div class="sd-val" id="succ-amount">$1,612.50</div></div>
+        <div class="sd-row"><div class="sd-key">Method</div><div class="sd-val" id="succ-method">Stripe (Instant)</div></div>
+        <div class="sd-row"><div class="sd-key">Status</div><div class="sd-val">Completed</div></div>
+        <div class="sd-row"><div class="sd-key">Transfer ID</div><div class="sd-val">tr_3Px9mKDemo999</div></div>
+      </div>
+      <button class="btn" style="width:100%" onclick="backToDash()">Back to dashboard &rarr;</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function showPg(pgId, navEl) {
+    document.querySelectorAll('[id^="pg-"]').forEach(p => p.style.display = 'none');
+    document.getElementById(pgId).style.display = 'block';
+    document.querySelectorAll('.nav-lnk').forEach(n => n.classList.remove('active'));
+    if (navEl) navEl.classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  function updateSummary() {
+    const amount = document.getElementById('claim-amount').value;
+    const method = document.querySelector('input[name="method"]:checked');
+    document.getElementById('sum-amount').textContent = amount ? '$' + Number(amount).toFixed(2) : 'â';
+    const labels = { stripe: 'Stripe (Instant)', bank_transfer: 'ACH Transfer', paypal: 'PayPal' };
+    if (method) document.getElementById('sum-method').textContent = labels[method.value] || method.value;
+    document.querySelectorAll('.mopt').forEach(o => o.classList.remove('sel'));
+    if (method) method.closest('.mopt').classList.add('sel');
+  }
+
+  function doDemoConfirm() {
+    const amount = document.getElementById('claim-amount').value;
+    const method = document.querySelector('input[name="method"]:checked');
+    const labels = { stripe: 'Stripe (Instant)', bank_transfer: 'ACH Transfer', paypal: 'PayPal' };
+    document.getElementById('succ-amount').textContent = '$' + Number(amount).toFixed(2);
+    document.getElementById('succ-method').textContent = labels[method ? method.value : 'stripe'];
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-success').classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  function backToDash() {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-dash').classList.add('active');
+    showPg('pg-overview', document.getElementById('nl-overview'));
+  }
+</script>
+</body>
+</html>
