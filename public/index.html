@@ -1075,6 +1075,7 @@ select.field { color: var(--black); }
   function setAuth(token, artist) {
     localStorage.setItem('dvc_token', token);
     localStorage.setItem('dvc_artist', JSON.stringify(artist));
+    if (artist && artist.email) localStorage.setItem('dvc_last_email', artist.email);
   }
   function clearAuth() {
     localStorage.removeItem('dvc_token');
@@ -1111,6 +1112,9 @@ select.field { color: var(--black); }
       _showScreen('screen-landing');
     } else if (path === '/login') {
       _showScreen('screen-login');
+      var lastEmail = localStorage.getItem('dvc_last_email');
+      var emailField = document.getElementById('login-email');
+      if (lastEmail && emailField) emailField.value = lastEmail;
     } else if (path === '/signup') {
       _showScreen('screen-signup');
     } else if (path === '/recover') {
