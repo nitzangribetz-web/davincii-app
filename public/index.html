@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Davincii — Artist Portal</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Inter:wght@300;400;500;600&family=Pinyon+Script&display=swap" rel="stylesheet">
 <style>
@@ -27,7 +27,7 @@
   --noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
 }
 
-html, body { width:100%; min-height:100vh; background:var(--white); font-family:var(--sans); color:var(--black); -webkit-font-smoothing:antialiased; }
+html, body { width:100%; min-height:100vh; background:var(--white); font-family:var(--sans); color:var(--black); -webkit-font-smoothing:antialiased; overflow-x:hidden; }
 
 .screen { display:none; min-height:100vh; flex-direction:column; }
 .screen.active { display:flex; animation:fadeUp 0.3s ease; }
@@ -373,35 +373,312 @@ select.field { color:var(--black); }
 .legal-contact-line { font-family:var(--sans); font-size:13px; font-weight:300; color:var(--muted); margin-bottom:4px; }
 .legal-contact-line a { color:var(--red); text-decoration:none; }
 
+/* ── MOBILE-ONLY / DESKTOP-ONLY VISIBILITY ── */
+.mob-only { display:none !important; }
+
+@media (min-width:769px) {
+  .mob-only { display:none !important; }
+}
+
+/* ════════════════════════════
+   MOBILE FOOTER
+════════════════════════════ */
+.mob-footer {
+  background: var(--black);
+  padding: 44px 24px 32px;
+  position: relative;
+  overflow: hidden;
+}
+.mob-footer::before { content:''; position:absolute; inset:0; background-image:var(--noise); opacity:0.04; pointer-events:none; }
+.mob-footer-logo { font-family:var(--script); font-size:34px; color:var(--white); display:block; margin-bottom:8px; position:relative; z-index:1; }
+.mob-footer-rule { width:24px; height:2px; background:var(--red); margin-bottom:16px; position:relative; z-index:1; }
+.mob-footer-desc { font-family:var(--sans); font-size:13px; font-weight:300; color:rgba(255,255,255,0.38); line-height:1.7; margin-bottom:32px; position:relative; z-index:1; }
+.mob-footer-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px 16px; margin-bottom:32px; position:relative; z-index:1; }
+.mob-footer-col-title { font-family:var(--sans); font-size:9px; font-weight:600; letter-spacing:0.18em; text-transform:uppercase; color:rgba(255,255,255,0.28); margin-bottom:12px; }
+.mob-footer-links { display:flex; flex-direction:column; gap:10px; }
+.mob-footer-link { font-family:var(--sans); font-size:13px; font-weight:300; color:rgba(255,255,255,0.5); background:none; border:none; text-align:left; padding:0; cursor:pointer; text-decoration:none; }
+.mob-footer-email { font-family:var(--sans); font-size:13px; font-weight:400; color:rgba(255,255,255,0.65); text-decoration:none; }
+.mob-footer-bottom { border-top:1px solid rgba(255,255,255,0.08); padding-top:20px; display:flex; flex-direction:column; gap:12px; position:relative; z-index:1; }
+.mob-footer-legal { display:flex; gap:16px; flex-wrap:wrap; }
+.mob-footer-legal-link { font-family:var(--sans); font-size:12px; font-weight:300; color:rgba(255,255,255,0.5); background:none; border:none; padding:0; cursor:pointer; text-decoration:none; }
+.mob-footer-copy { font-family:var(--sans); font-size:11px; font-weight:300; color:rgba(255,255,255,0.22); }
+
+/* ════════════════════════════
+   MOBILE LANDING
+════════════════════════════ */
+.mob-landing-nav {
+  position: relative; z-index: 10;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 28px 24px 20px;
+}
+.mob-landing-logo { font-family:var(--script); font-size:32px; color:var(--white); line-height:1; }
+.mob-landing-nav-btns { display:flex; gap:8px; }
+.btn-mob-ghost { font-family:var(--sans); font-size:10px; font-weight:500; letter-spacing:0.10em; text-transform:uppercase; color:rgba(255,255,255,0.65); background:transparent; border:1px solid rgba(255,255,255,0.22); padding:9px 16px; cursor:pointer; }
+.btn-mob-white { font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.10em; text-transform:uppercase; color:var(--black); background:var(--white); border:none; padding:9px 16px; cursor:pointer; }
+
+.mob-landing-hero {
+  position: relative; z-index: 10;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  flex: 1; text-align: center; padding: 40px 24px 180px;
+}
+.mob-landing-nav-links { display: flex; gap: 24px; margin-bottom: 52px; }
+.mob-landing-nav-link { font-family:var(--sans); font-size:10px; font-weight:400; letter-spacing:0.14em; text-transform:uppercase; color:rgba(255,255,255,0.35); background:none; border:none; cursor:pointer; padding:0; }
+.mob-headline { font-family:var(--serif); font-size:52px; font-weight:300; color:var(--white); line-height:1.1; letter-spacing:-0.02em; margin-bottom:36px; }
+.mob-rule { width:28px; height:2px; background:var(--red); margin:0 auto 36px; }
+.mob-cta { display:flex; flex-direction:column; gap:10px; width:100%; max-width:300px; }
+.btn-mob-cta-main { background:var(--white); color:var(--black); border:none; padding:17px; font-family:var(--sans); font-size:12px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; cursor:pointer; }
+.btn-mob-cta-ghost { background:transparent; color:rgba(255,255,255,0.7); border:1px solid rgba(255,255,255,0.22); padding:16px; font-family:var(--sans); font-size:12px; font-weight:400; letter-spacing:0.12em; text-transform:uppercase; cursor:pointer; }
+
+/* Mobile partners strip */
+.mob-partners {
+  position: absolute; bottom: 0; left: 0; right: 0; z-index: 10;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding: 16px 0 0; background: rgba(0,0,0,0.15); backdrop-filter: blur(4px);
+}
+.mob-partners-eyebrow { font-family:var(--sans); font-size:9px; font-weight:500; letter-spacing:0.20em; text-transform:uppercase; color:rgba(255,255,255,0.22); text-align:center; margin-bottom:12px; }
+.mob-partners-wrap { overflow:hidden; mask-image:linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%); -webkit-mask-image:linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%); }
+.mob-partners-track { display:flex; align-items:center; width:max-content; animation:mob-marquee 40s linear infinite; }
+@keyframes mob-marquee { from { transform:translateX(0); } to { transform:translateX(-50%); } }
+.mob-partner-item { display:flex; align-items:center; padding:0 24px; border-right:1px solid rgba(255,255,255,0.07); color:rgba(255,255,255,0.28); height:48px; }
+.mob-partner-svg { height:32px; width:auto; display:block; overflow:visible; }
+
+/* ════════════════════════════
+   MOBILE AUTH
+════════════════════════════ */
+.mob-auth-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 24px; border-bottom: 1px solid var(--border);
+}
+.mob-auth-logo { font-family:var(--script); font-size:28px; color:var(--black); line-height:1; }
+.mob-back-btn { font-family:var(--sans); font-size:11px; font-weight:400; letter-spacing:0.10em; text-transform:uppercase; color:var(--muted); background:none; border:none; cursor:pointer; padding:0; }
+.mob-auth-hero {
+  background: var(--black); padding: 32px 24px 28px;
+  position: relative; overflow: hidden;
+}
+.mob-auth-hero::before { content:''; position:absolute; inset:0; background-image:var(--noise); opacity:0.04; pointer-events:none; }
+.mob-auth-hero::after { content:''; position:absolute; bottom:-80px; left:-60px; width:260px; height:260px; background:radial-gradient(ellipse, rgba(184,0,0,0.08) 0%, transparent 70%); pointer-events:none; }
+.mob-auth-rule { width:20px; height:2px; background:var(--red); margin-bottom:14px; position:relative; z-index:1; }
+.mob-auth-tagline { font-family:var(--serif); font-size:28px; font-weight:300; color:var(--white); line-height:1.2; position:relative; z-index:1; }
+.mob-auth-tagline em { font-style:italic; color:rgba(255,255,255,0.6); }
+.mob-auth-form { padding:28px 24px 40px; flex:1; }
+.mob-auth-title { font-family:var(--serif); font-size:36px; font-weight:400; letter-spacing:-0.02em; line-height:1.1; margin-bottom:6px; }
+.mob-auth-title em { font-style:italic; }
+.mob-auth-title-rule { width:20px; height:2px; background:var(--red); margin-bottom:14px; }
+.mob-auth-sub { font-family:var(--sans); font-size:13px; font-weight:300; color:var(--muted); margin-bottom:24px; line-height:1.6; }
+
+/* ════════════════════════════
+   MOBILE DASHBOARD
+════════════════════════════ */
+.mob-top-nav {
+  height: 56px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 20px; position: sticky; top: 0;
+  background: rgba(255,255,255,0.97); backdrop-filter: blur(8px); z-index: 50; flex-shrink: 0;
+}
+.mob-nav-logo { font-family:var(--script); font-size:26px; color:var(--black); line-height:1; cursor:pointer; }
+.mob-nav-right { display:flex; align-items:center; gap:12px; }
+.mob-avatar { width:32px; height:32px; background:var(--black); border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:var(--sans); font-size:11px; font-weight:600; color:var(--white); cursor:pointer; }
+
+/* Bottom tab bar */
+.mob-tab-bar {
+  position: fixed; bottom: 0; left: 0; right: 0; height: 64px;
+  background: rgba(255,255,255,0.97); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-around;
+  z-index: 100; padding-bottom: env(safe-area-inset-bottom, 0);
+}
+.mob-tab {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  cursor: pointer; background: none; border: none; padding: 6px 12px;
+  flex: 1; transition: opacity 0.15s;
+}
+.mob-tab-icon { font-size: 18px; color: #bbb; transition: color 0.15s; }
+.mob-tab-label { font-family:var(--sans); font-size:9px; font-weight:500; letter-spacing:0.08em; text-transform:uppercase; color:#bbb; transition:color 0.15s; }
+.mob-tab.active .mob-tab-icon { color:var(--black); }
+.mob-tab.active .mob-tab-label { color:var(--red); }
+.mob-dash-content { padding:24px 20px 80px; flex:1; overflow-y:auto; }
+
+/* Mobile page title */
+.mob-page-title { font-family:var(--serif); font-size:30px; font-weight:400; letter-spacing:-0.02em; margin-bottom:3px; }
+.mob-page-title em { font-style:italic; }
+.mob-page-sub { font-family:var(--sans); font-size:13px; font-weight:300; color:var(--muted); margin-bottom:20px; }
+.mob-page-rule { width:20px; height:2px; background:var(--red); margin-bottom:20px; }
+
+/* Mobile balance card */
+.mob-bal-card {
+  background: var(--black); padding: 24px; margin-bottom: 20px;
+  position: relative; overflow: hidden;
+}
+.mob-bal-card::before { content:''; position:absolute; top:0; left:0; width:3px; height:100%; background:var(--red); }
+.mob-bal-card::after { content:''; position:absolute; inset:0; background-image:var(--noise); opacity:0.03; pointer-events:none; }
+.mob-bal-label { font-family:var(--sans); font-size:9px; font-weight:500; letter-spacing:0.16em; text-transform:uppercase; color:rgba(255,255,255,0.3); margin-bottom:8px; }
+.mob-bal-amount { font-family:var(--serif); font-size:44px; font-weight:300; color:var(--white); letter-spacing:-0.03em; line-height:1; margin-bottom:4px; position:relative; z-index:1; }
+.mob-bal-note { font-family:var(--sans); font-size:11px; font-weight:300; color:rgba(255,255,255,0.25); margin-bottom:20px; position:relative; z-index:1; }
+.mob-bal-actions { display:flex; gap:8px; position:relative; z-index:1; }
+.mob-bal-btn { flex:1; padding:12px; font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.10em; text-transform:uppercase; border:none; cursor:pointer; }
+.mob-bal-btn-white { background:var(--white); color:var(--black); }
+.mob-bal-btn-ghost { background:rgba(255,255,255,0.07); color:rgba(255,255,255,0.5); border:1px solid rgba(255,255,255,0.12); }
+
+/* Mobile stat cards */
+.mob-stat-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px; }
+.mob-stat-card { border:1px solid var(--border); padding:16px; background:var(--white); }
+.mob-stat-card-red { border-left:3px solid var(--red); }
+.mob-stat-num { font-family:var(--serif); font-size:26px; font-weight:400; letter-spacing:-0.02em; color:var(--black); line-height:1; margin-bottom:4px; }
+.mob-stat-lbl { font-family:var(--sans); font-size:10px; font-weight:400; letter-spacing:0.06em; color:var(--muted); text-transform:uppercase; }
+
+/* Mobile section boxes */
+.mob-sbox { border:1px solid var(--border); margin-bottom:16px; background:var(--white); }
+.mob-sbox-head { display:flex; justify-content:space-between; align-items:center; padding:14px 16px; border-bottom:1px solid var(--border); }
+.mob-sbox-title { font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--black); margin-bottom:2px; }
+.mob-sbox-sub { font-family:var(--sans); font-size:11px; font-weight:300; color:var(--muted); }
+.mob-sbox-link { font-family:var(--sans); font-size:10px; font-weight:500; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); background:none; border:none; cursor:pointer; white-space:nowrap; }
+.mob-sbox-body { padding:0 16px; }
+
+/* Mobile rows */
+.mob-row { display:flex; justify-content:space-between; align-items:center; padding:14px 0; border-bottom:1px solid rgba(0,0,0,0.06); }
+.mob-row:last-child { border-bottom:none; }
+.mob-row-song { font-family:var(--serif); font-size:16px; font-weight:400; color:var(--black); }
+.mob-row-meta { font-family:var(--sans); font-size:11px; font-weight:300; color:var(--muted); margin-top:1px; }
+.mob-row-right { text-align:right; flex-shrink:0; margin-left:12px; }
+.mob-row-amount { font-family:var(--sans); font-size:13px; font-weight:600; color:var(--black); }
+.mob-row-platform { font-family:var(--sans); font-size:11px; font-weight:300; color:var(--muted); margin-top:2px; }
+
+/* ════════════════════════════
+   MOBILE MARKETING
+════════════════════════════ */
+.mob-mkt-nav { display:flex; justify-content:space-between; align-items:center; padding:20px 24px; border-bottom:1px solid var(--border); }
+.mob-mkt-logo { font-family:var(--script); font-size:28px; color:var(--black); cursor:pointer; }
+.mob-mkt-btns { display:flex; gap:8px; }
+.btn-mob-mkt-ghost { font-family:var(--sans); font-size:10px; font-weight:500; letter-spacing:0.10em; text-transform:uppercase; color:var(--black); background:transparent; border:1px solid rgba(0,0,0,0.2); padding:8px 14px; cursor:pointer; }
+.btn-mob-mkt-solid { font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.10em; text-transform:uppercase; color:var(--white); background:var(--black); border:none; padding:8px 14px; cursor:pointer; }
+
+.mob-mkt-hero { padding:36px 24px 28px; }
+.mob-mkt-eyebrow { font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.22em; text-transform:uppercase; color:var(--red); margin-bottom:14px; }
+.mob-mkt-title { font-family:var(--serif); font-size:36px; font-weight:400; letter-spacing:-0.02em; line-height:1.1; color:var(--black); margin-bottom:14px; }
+.mob-mkt-title em { font-style:italic; }
+.mob-mkt-rule { width:24px; height:2px; background:var(--red); margin-bottom:16px; }
+.mob-mkt-sub { font-family:var(--sans); font-size:14px; font-weight:300; color:var(--muted); line-height:1.7; }
+
+.mob-mkt-body { padding:0 24px 48px; }
+.mob-step { padding:24px 0; border-bottom:1px solid var(--border); display:flex; gap:20px; }
+.mob-step:last-child { border-bottom:none; }
+.mob-step-num { font-family:var(--serif); font-size:36px; font-weight:400; color:var(--red); line-height:1; opacity:0.65; flex-shrink:0; }
+.mob-step-title { font-family:var(--serif); font-size:20px; font-weight:400; color:var(--black); margin-bottom:8px; }
+.mob-step-title em { font-style:italic; }
+.mob-step-body { font-family:var(--sans); font-size:13px; font-weight:300; color:var(--muted); line-height:1.75; }
+
+/* Mobile about stats */
+.mob-stat-trio { display:grid; grid-template-columns:1fr 1fr 1fr; gap:1px; background:var(--border); border:1px solid var(--border); margin-bottom:28px; }
+.mob-trio-item { background:var(--white); padding:20px 12px; text-align:center; }
+.mob-trio-num { font-family:var(--serif); font-size:30px; font-weight:400; letter-spacing:-0.02em; color:var(--black); line-height:1; margin-bottom:4px; }
+.mob-trio-lbl { font-family:var(--sans); font-size:9px; font-weight:400; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); }
+
+.mob-about-dark { background:var(--black); padding:28px 24px; margin:0 -24px; position:relative; overflow:hidden; }
+.mob-about-dark::before { content:''; position:absolute; inset:0; background-image:var(--noise); opacity:0.04; pointer-events:none; }
+.mob-about-quote { font-family:var(--serif); font-size:22px; font-weight:300; color:rgba(255,255,255,0.88); line-height:1.3; margin-bottom:20px; position:relative; z-index:1; }
+.mob-about-quote em { font-style:italic; color:var(--white); }
+
+/* Mobile legal */
+.mob-legal-body { padding:28px 24px 48px; }
+.mob-legal-eyebrow { font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.22em; text-transform:uppercase; color:var(--red); margin-bottom:12px; }
+.mob-legal-title { font-family:var(--serif); font-size:34px; font-weight:400; letter-spacing:-0.02em; line-height:1.1; color:var(--black); margin-bottom:10px; }
+.mob-legal-title em { font-style:italic; }
+.mob-legal-meta { font-family:var(--sans); font-size:12px; font-weight:300; color:var(--muted-light); margin-bottom:28px; padding-bottom:20px; border-bottom:1px solid var(--border); line-height:1.6; }
+.mob-legal-section { margin-bottom:32px; }
+.mob-legal-section-title { font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; color:var(--black); margin-bottom:10px; padding-bottom:8px; border-bottom:1px solid var(--border); }
+.mob-legal-p { font-family:var(--sans); font-size:14px; font-weight:300; color:var(--muted); line-height:1.85; margin-bottom:12px; }
+.mob-legal-list { list-style:none; margin:10px 0 12px 0; }
+.mob-legal-list li { font-family:var(--sans); font-size:13px; font-weight:300; color:var(--muted); line-height:1.75; padding:6px 0 6px 16px; position:relative; border-bottom:1px solid rgba(0,0,0,0.06); }
+.mob-legal-list li:last-child { border-bottom:none; }
+.mob-legal-list li::before { content:'\2013'; position:absolute; left:0; color:var(--red); }
+.mob-legal-highlight { background:rgba(184,0,0,0.05); border-left:2px solid var(--red); padding:14px 16px; margin:16px 0; }
+.mob-legal-highlight p { font-family:var(--sans); font-size:13px; font-weight:400; color:var(--black); line-height:1.7; margin:0; }
+
+/* Mobile avatar dropdown */
+.mob-avatar-dropdown {
+  display:none; position:absolute; top:calc(100% + 8px); right:0;
+  width:200px; background:var(--white); border:1px solid var(--border);
+  box-shadow:0 8px 32px rgba(0,0,0,0.14); z-index:200; animation:fadeUp 0.18s ease;
+}
+.avatar-wrap.open .mob-avatar-dropdown { display:block; }
+.mob-dd-header { padding:14px 16px 12px; border-bottom:1px solid var(--border); }
+.mob-dd-name { font-family:var(--sans); font-size:13px; font-weight:600; color:var(--black); margin-bottom:2px; }
+.mob-dd-email { font-family:var(--sans); font-size:11px; font-weight:300; color:var(--muted); }
+.mob-dd-section { padding:4px 0; border-bottom:1px solid var(--border); }
+.mob-dd-section:last-child { border-bottom:none; }
+.mob-dd-item { display:flex; align-items:center; gap:10px; width:100%; padding:10px 16px; font-family:var(--sans); font-size:13px; font-weight:400; color:#444; background:none; border:none; cursor:pointer; text-align:left; }
+.mob-dd-item:hover { background:rgba(0,0,0,0.04); }
+.mob-dd-item.danger { color:var(--red); }
+.mob-dd-icon { font-size:14px; opacity:0.6; width:16px; text-align:center; flex-shrink:0; }
+
 /* ── RESPONSIVE ── */
 @media (max-width:768px) {
-  .landing-nav { padding:20px; }
-  .landing-nav-center { display:none; }
-  .landing-hero { padding:80px 24px 60px; min-height:80vh; }
+  /* Hide desktop-only elements */
+  .desk-only { display:none !important; }
+  .mob-only { display:block !important; }
+  .mob-only.mob-flex { display:flex !important; }
+  nav.mob-only { display:flex !important; }
+  .mob-tab-bar.mob-only { display:flex !important; }
+
+  /* Landing */
+  .landing-nav { display:none; }
+  .landing-hero { display:none; }
+  .partners-section { display:none; }
+
+  /* Auth */
   .auth-layout { grid-template-columns:1fr; }
   .auth-brand { display:none; }
-  .auth-form-panel { padding:40px 24px; }
+  .auth-form-panel { padding:0; }
+  .auth-form-inner { max-width:100%; }
+
+  /* Dashboard */
   .dash-layout { grid-template-columns:1fr; }
   .sidebar { display:none; }
-  .main, .main-content { padding:24px 20px; }
+  .main, .main-content { padding:24px 20px 80px; }
+
+  /* Balance card mobile */
   .bal-card { flex-direction:column; align-items:stretch; gap:24px; padding:24px; }
-  .claim-layout { grid-template-columns:1fr; }
+
+  /* Table columns */
   .col-5 { grid-template-columns:1fr 100px; }
+  .col-5 .th:nth-child(n+3), .col-5 .tr-cell:nth-child(n+3),
+  .col-5 > div:nth-child(n+3):not(:last-child) { display:none; }
   .col-4 { grid-template-columns:1fr 100px; }
   .col-4c { grid-template-columns:1fr 100px; }
+
+  /* Marketing */
   .mkt-nav { padding:20px; }
   .mkt-nav-links { display:none; }
   .mkt-hero { padding:40px 24px; }
   .mkt-body { padding:0 24px 60px; }
+  .mkt-step { grid-template-columns:40px 1fr; gap:16px; }
   .about-grid { grid-template-columns:1fr; }
-  .about-stat-grid { grid-template-columns:1fr; }
+  .about-stat-grid { grid-template-columns:1fr 1fr 1fr; }
   .about-dark { flex-direction:column; padding:32px 24px; }
+
+  /* Legal */
   .legal-nav { padding:20px; }
   .legal-body { padding:40px 24px 60px; }
+
+  /* Footer */
   .footer-top { grid-template-columns:1fr; gap:32px; }
   .footer-inner { padding:40px 24px 32px; }
   .footer-bottom { flex-direction:column; gap:12px; text-align:center; }
+
+  /* Partners */
   .partners-section { position:relative; }
+
+  /* Claim page */
+  .claim-layout { grid-template-columns:1fr; }
+  #screen-claim > div { padding:24px 20px !important; }
+  .summary-card { position:static; }
+
+  /* Success page */
+  .success-wrap { margin:32px auto; }
+  #screen-success > div { padding:40px 20px !important; }
+
+  /* Form inputs 16px to prevent iOS zoom */
+  .field { font-size:16px; }
 }
 </style>
 </head>
@@ -409,7 +686,8 @@ select.field { color:var(--black); }
 
 <!-- ════════════════ FOOTER TEMPLATE (reused) ════════════════ -->
 <template id="footer-tpl">
-  <footer class="site-footer">
+  <!-- Desktop footer -->
+  <footer class="site-footer desk-only">
     <div class="footer-inner">
       <div class="footer-top">
         <div>
@@ -448,11 +726,100 @@ select.field { color:var(--black); }
       </div>
     </div>
   </footer>
+  <!-- Mobile footer -->
+  <div class="mob-footer mob-only">
+    <span class="mob-footer-logo">Davincii</span>
+    <div class="mob-footer-rule"></div>
+    <p class="mob-footer-desc">Music publishing administration — we register, track, and collect every royalty you're owed.</p>
+    <div class="mob-footer-grid">
+      <div>
+        <div class="mob-footer-col-title">Navigate</div>
+        <div class="mob-footer-links">
+          <button class="mob-footer-link" onclick="navigate('/')">Home</button>
+          <button class="mob-footer-link" onclick="navigate('/howitworks')">How it works</button>
+          <button class="mob-footer-link" onclick="navigate('/about')">About</button>
+          <button class="mob-footer-link" onclick="navigate('/login')">Sign in</button>
+          <button class="mob-footer-link" onclick="navigate('/signup')">Get started</button>
+        </div>
+      </div>
+      <div>
+        <div class="mob-footer-col-title">Contact</div>
+        <div class="mob-footer-links">
+          <a class="mob-footer-email" href="mailto:info@davincii.co">info@davincii.co</a>
+          <span class="mob-footer-link" style="cursor:default;color:rgba(255,255,255,0.3)">For artists &amp; inquiries</span>
+        </div>
+      </div>
+    </div>
+    <div class="mob-footer-bottom">
+      <div class="mob-footer-legal">
+        <button class="mob-footer-legal-link" onclick="navigate('/terms')">Terms of Service</button>
+        <button class="mob-footer-legal-link" onclick="navigate('/privacy')">Privacy Policy</button>
+      </div>
+      <div class="mob-footer-copy">&copy; 2026 Davincii LLC &middot; davincii.co</div>
+    </div>
+  </div>
 </template>
 
 <!-- ════════════════ LANDING ════════════════ -->
 <div class="screen active" id="screen-landing">
-  <nav class="landing-nav">
+  <!-- Mobile landing nav -->
+  <nav class="mob-landing-nav mob-only">
+    <div class="mob-landing-logo">Davincii</div>
+    <div class="mob-landing-nav-btns">
+      <button class="btn-mob-ghost" onclick="navigate('/signup')">Sign up</button>
+      <button class="btn-mob-white" onclick="navigate('/login')">Sign in</button>
+    </div>
+  </nav>
+  <!-- Mobile landing hero -->
+  <div class="mob-landing-hero mob-only">
+    <div class="mob-landing-nav-links">
+      <button class="mob-landing-nav-link" onclick="navigate('/howitworks')">How it works</button>
+      <button class="mob-landing-nav-link" onclick="navigate('/about')">About</button>
+    </div>
+    <h1 class="mob-headline">Collect royalties.</h1>
+    <div class="mob-rule"></div>
+    <div class="mob-cta">
+      <button class="btn-mob-cta-main" onclick="navigate('/signup')">Get started &rarr;</button>
+      <button class="btn-mob-cta-ghost" onclick="navigate('/login')">Sign in to portal</button>
+    </div>
+    <!-- Mobile partners strip -->
+    <div class="mob-partners">
+      <div class="mob-partners-eyebrow">Registered &amp; collected across 12+ platforms</div>
+      <div class="mob-partners-wrap">
+        <div class="mob-partners-track">
+          <div class="mob-partner-item"><svg viewBox="0 0 110 44" class="mob-partner-svg"><rect x="0" y="0" width="110" height="44" rx="4" fill="currentColor" opacity="0.06"/><text x="55" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="2" text-anchor="middle">ASCAP</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 80 44" class="mob-partner-svg"><circle cx="40" cy="22" r="20" fill="currentColor" opacity="0.08"/><text x="40" y="28" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="1.5" text-anchor="middle">BMI</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 105 44" class="mob-partner-svg"><line x1="0" y1="42" x2="105" y2="42" stroke="currentColor" stroke-width="1.5" opacity="0.3"/><text x="52" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="2" text-anchor="middle">SESAC</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 90 44" class="mob-partner-svg"><rect x="2" y="6" width="86" height="32" rx="3" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"/><text x="45" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="18" fill="currentColor" letter-spacing="2" text-anchor="middle">MLC</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 140 44" class="mob-partner-svg"><circle cx="12" cy="22" r="8" fill="currentColor" opacity="0.5"/><circle cx="12" cy="22" r="4" fill="currentColor" opacity="0.8"/><text x="28" y="28" font-family="Georgia,serif" font-weight="400" font-size="17" fill="currentColor" letter-spacing="0.3">Songtrust</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 155 44" class="mob-partner-svg"><text x="0" y="18" font-family="Arial Black,sans-serif" font-weight="900" font-size="13" fill="currentColor" letter-spacing="1.5">HARRY FOX</text><text x="0" y="36" font-family="Arial,sans-serif" font-weight="300" font-size="11" fill="currentColor" letter-spacing="4" opacity="0.7">AGENCY</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 82 44" class="mob-partner-svg"><rect x="0" y="8" width="4" height="28" fill="currentColor" opacity="0.6"/><text x="12" y="30" font-family="Arial Black,sans-serif" font-weight="900" font-size="22" fill="currentColor" letter-spacing="3">PPL</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 155 44" class="mob-partner-svg"><text x="0" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="22" fill="currentColor">PRS</text><text x="52" y="29" font-family="Arial,sans-serif" font-weight="300" font-size="14" fill="currentColor" letter-spacing="0.5" opacity="0.75">for Music</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 115 44" class="mob-partner-svg"><path d="M 0 38 Q 57 8 115 38" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.25"/><text x="57" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="1.5" text-anchor="middle">SOCAN</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 110 44" class="mob-partner-svg"><line x1="0" y1="4" x2="0" y2="40" stroke="currentColor" stroke-width="2" opacity="0.35"/><text x="10" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="1.5">SACEM</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 100 44" class="mob-partner-svg"><rect x="0" y="0" width="100" height="44" rx="22" fill="currentColor" opacity="0.07"/><text x="50" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="2" text-anchor="middle">GEMA</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 85 44" class="mob-partner-svg"><line x1="0" y1="42" x2="85" y2="42" stroke="currentColor" stroke-width="1.5" opacity="0.3"/><line x1="0" y1="2" x2="85" y2="2" stroke="currentColor" stroke-width="1.5" opacity="0.3"/><text x="42" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="22" fill="currentColor" letter-spacing="2" text-anchor="middle">SIAE</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 160 44" class="mob-partner-svg"><text x="0" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="1">APRA</text><line x1="82" y1="8" x2="82" y2="36" stroke="currentColor" stroke-width="1.5" opacity="0.3"/><text x="90" y="29" font-family="Arial,sans-serif" font-weight="300" font-size="18" fill="currentColor" letter-spacing="1" opacity="0.8">AMCOS</text></svg></div>
+          <!-- Duplicate set for seamless loop -->
+          <div class="mob-partner-item"><svg viewBox="0 0 110 44" class="mob-partner-svg"><rect x="0" y="0" width="110" height="44" rx="4" fill="currentColor" opacity="0.06"/><text x="55" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="2" text-anchor="middle">ASCAP</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 80 44" class="mob-partner-svg"><circle cx="40" cy="22" r="20" fill="currentColor" opacity="0.08"/><text x="40" y="28" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="1.5" text-anchor="middle">BMI</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 105 44" class="mob-partner-svg"><line x1="0" y1="42" x2="105" y2="42" stroke="currentColor" stroke-width="1.5" opacity="0.3"/><text x="52" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="2" text-anchor="middle">SESAC</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 90 44" class="mob-partner-svg"><rect x="2" y="6" width="86" height="32" rx="3" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"/><text x="45" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="18" fill="currentColor" letter-spacing="2" text-anchor="middle">MLC</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 140 44" class="mob-partner-svg"><circle cx="12" cy="22" r="8" fill="currentColor" opacity="0.5"/><circle cx="12" cy="22" r="4" fill="currentColor" opacity="0.8"/><text x="28" y="28" font-family="Georgia,serif" font-weight="400" font-size="17" fill="currentColor" letter-spacing="0.3">Songtrust</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 155 44" class="mob-partner-svg"><text x="0" y="18" font-family="Arial Black,sans-serif" font-weight="900" font-size="13" fill="currentColor" letter-spacing="1.5">HARRY FOX</text><text x="0" y="36" font-family="Arial,sans-serif" font-weight="300" font-size="11" fill="currentColor" letter-spacing="4" opacity="0.7">AGENCY</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 82 44" class="mob-partner-svg"><rect x="0" y="8" width="4" height="28" fill="currentColor" opacity="0.6"/><text x="12" y="30" font-family="Arial Black,sans-serif" font-weight="900" font-size="22" fill="currentColor" letter-spacing="3">PPL</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 155 44" class="mob-partner-svg"><text x="0" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="22" fill="currentColor">PRS</text><text x="52" y="29" font-family="Arial,sans-serif" font-weight="300" font-size="14" fill="currentColor" letter-spacing="0.5" opacity="0.75">for Music</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 115 44" class="mob-partner-svg"><path d="M 0 38 Q 57 8 115 38" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.25"/><text x="57" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="1.5" text-anchor="middle">SOCAN</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 110 44" class="mob-partner-svg"><line x1="0" y1="4" x2="0" y2="40" stroke="currentColor" stroke-width="2" opacity="0.35"/><text x="10" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="1.5">SACEM</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 100 44" class="mob-partner-svg"><rect x="0" y="0" width="100" height="44" rx="22" fill="currentColor" opacity="0.07"/><text x="50" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="2" text-anchor="middle">GEMA</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 85 44" class="mob-partner-svg"><line x1="0" y1="42" x2="85" y2="42" stroke="currentColor" stroke-width="1.5" opacity="0.3"/><line x1="0" y1="2" x2="85" y2="2" stroke="currentColor" stroke-width="1.5" opacity="0.3"/><text x="42" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="22" fill="currentColor" letter-spacing="2" text-anchor="middle">SIAE</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 160 44" class="mob-partner-svg"><text x="0" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="1">APRA</text><line x1="82" y1="8" x2="82" y2="36" stroke="currentColor" stroke-width="1.5" opacity="0.3"/><text x="90" y="29" font-family="Arial,sans-serif" font-weight="300" font-size="18" fill="currentColor" letter-spacing="1" opacity="0.8">AMCOS</text></svg></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Desktop landing nav -->
+  <nav class="landing-nav desk-only">
     <div class="landing-nav-logo">Davincii</div>
     <div class="landing-nav-center">
       <button class="landing-nav-link" onclick="navigate('/howitworks')">How it works</button>
@@ -464,7 +831,7 @@ select.field { color:var(--black); }
     </div>
   </nav>
 
-  <div class="landing-hero">
+  <div class="landing-hero desk-only">
     <h1 class="landing-headline">Collect royalties.</h1>
     <div class="headline-rule"></div>
     <div class="landing-cta-row">
@@ -514,6 +881,15 @@ select.field { color:var(--black); }
 
 <!-- ════════════════ LOGIN ════════════════ -->
 <div class="screen" id="screen-login">
+  <!-- Mobile auth nav & hero -->
+  <nav class="mob-auth-nav mob-only">
+    <span class="mob-auth-logo">Davincii</span>
+    <button class="mob-back-btn" onclick="navigate('/')">&larr; Back</button>
+  </nav>
+  <div class="mob-auth-hero mob-only">
+    <div class="mob-auth-rule"></div>
+    <div class="mob-auth-tagline">Every stream,<br>every spin,<br><em>every dollar.</em></div>
+  </div>
   <div class="auth-layout">
     <div class="auth-brand">
       <div class="auth-brand-logo">Davincii</div>
@@ -559,6 +935,15 @@ select.field { color:var(--black); }
 
 <!-- ════════════════ SIGN UP ════════════════ -->
 <div class="screen" id="screen-signup">
+  <!-- Mobile auth nav & hero -->
+  <nav class="mob-auth-nav mob-only">
+    <span class="mob-auth-logo">Davincii</span>
+    <button class="mob-back-btn" onclick="navigate('/')">&larr; Back</button>
+  </nav>
+  <div class="mob-auth-hero mob-only">
+    <div class="mob-auth-rule"></div>
+    <div class="mob-auth-tagline">Your music<br>earns more<br><em>than you know.</em></div>
+  </div>
   <div class="auth-layout">
     <div class="auth-brand">
       <div class="auth-brand-logo">Davincii</div>
@@ -601,6 +986,15 @@ select.field { color:var(--black); }
 
 <!-- ════════════════ RECOVER ════════════════ -->
 <div class="screen" id="screen-recover">
+  <!-- Mobile auth nav & hero -->
+  <nav class="mob-auth-nav mob-only">
+    <span class="mob-auth-logo">Davincii</span>
+    <button class="mob-back-btn" onclick="navigate('/login')">&larr; Back</button>
+  </nav>
+  <div class="mob-auth-hero mob-only">
+    <div class="mob-auth-rule"></div>
+    <div class="mob-auth-tagline">We'll get<br>you back<br><em>in.</em></div>
+  </div>
   <div class="auth-layout">
     <div class="auth-brand">
       <div class="auth-brand-logo">Davincii</div>
@@ -944,7 +1338,41 @@ select.field { color:var(--black); }
 
 <!-- ════════════════ DASHBOARD ════════════════ -->
 <div class="screen" id="screen-dash">
-  <div class="top-nav">
+  <!-- Mobile top nav -->
+  <div class="mob-top-nav mob-only">
+    <span class="mob-nav-logo" onclick="navigate('/')">Davincii</span>
+    <div class="mob-nav-right">
+      <span style="font-family:var(--sans);font-size:12px;color:var(--muted)" id="mob-nav-artist-name"></span>
+      <div class="avatar-wrap" id="mob-avatar-wrap">
+        <div class="mob-avatar" id="mob-nav-avatar" onclick="toggleMobAvatarMenu()"></div>
+        <div class="mob-avatar-dropdown" id="mob-avatar-dropdown">
+          <div class="mob-dd-header">
+            <div class="mob-dd-name" id="mob-avatar-dd-name"></div>
+            <div class="mob-dd-email" id="mob-avatar-dd-email"></div>
+          </div>
+          <div class="mob-dd-section">
+            <button class="mob-dd-item" onclick="navigate('/dashboard/overview');closeMobAvatarMenu()"><span class="mob-dd-icon">&#8862;</span>Overview</button>
+            <button class="mob-dd-item" onclick="navigate('/dashboard/catalog');closeMobAvatarMenu()"><span class="mob-dd-icon">&#9833;</span>My Catalog</button>
+            <button class="mob-dd-item" onclick="navigate('/dashboard/royalties');closeMobAvatarMenu()"><span class="mob-dd-icon">&#9678;</span>Royalties</button>
+            <button class="mob-dd-item" onclick="navigate('/dashboard/payouts');closeMobAvatarMenu()"><span class="mob-dd-icon">&#8593;</span>Payouts</button>
+          </div>
+          <div class="mob-dd-section">
+            <button class="mob-dd-item" onclick="navigate('/claim');closeMobAvatarMenu()"><span class="mob-dd-icon">&#10022;</span>Claim payment</button>
+            <button class="mob-dd-item" onclick="closeMobAvatarMenu()"><span class="mob-dd-icon">&#9881;</span>Settings</button>
+          </div>
+          <div class="mob-dd-section">
+            <button class="mob-dd-item" onclick="navigate('/terms');closeMobAvatarMenu()"><span class="mob-dd-icon">&#128196;</span>Terms</button>
+            <button class="mob-dd-item" onclick="navigate('/privacy');closeMobAvatarMenu()"><span class="mob-dd-icon">&#128274;</span>Privacy</button>
+          </div>
+          <div class="mob-dd-section">
+            <button class="mob-dd-item danger" onclick="doLogout();closeMobAvatarMenu()"><span class="mob-dd-icon">&#8594;</span>Sign out</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Desktop top nav -->
+  <div class="top-nav desk-only">
     <span class="top-nav-logo" onclick="navigate('/dashboard/overview')">Davincii</span>
     <div class="top-nav-right">
       <span class="top-nav-artist" id="nav-artist-name"></span>
@@ -1102,6 +1530,25 @@ select.field { color:var(--black); }
 
     </div>
   </div>
+  <!-- Mobile bottom tab bar -->
+  <nav class="mob-tab-bar mob-only">
+    <button class="mob-tab active" id="mob-tab-overview" onclick="navigate('/dashboard/overview')">
+      <span class="mob-tab-icon">&#8862;</span>
+      <span class="mob-tab-label">Overview</span>
+    </button>
+    <button class="mob-tab" id="mob-tab-catalog" onclick="navigate('/dashboard/catalog')">
+      <span class="mob-tab-icon">&#9833;</span>
+      <span class="mob-tab-label">Catalog</span>
+    </button>
+    <button class="mob-tab" id="mob-tab-royalties" onclick="navigate('/dashboard/royalties')">
+      <span class="mob-tab-icon">&#9678;</span>
+      <span class="mob-tab-label">Royalties</span>
+    </button>
+    <button class="mob-tab" id="mob-tab-payouts" onclick="navigate('/dashboard/payouts')">
+      <span class="mob-tab-icon">&#8593;</span>
+      <span class="mob-tab-label">Payouts</span>
+    </button>
+  </nav>
 </div>
 
 <!-- ════════════════ CLAIM PAYMENT ════════════════ -->
@@ -1213,9 +1660,20 @@ select.field { color:var(--black); }
     var wrap = document.getElementById('avatar-wrap');
     if (wrap) wrap.classList.remove('open');
   }
+  // Mobile avatar dropdown
+  function toggleMobAvatarMenu() {
+    var wrap = document.getElementById('mob-avatar-wrap');
+    if (wrap) wrap.classList.toggle('open');
+  }
+  function closeMobAvatarMenu() {
+    var wrap = document.getElementById('mob-avatar-wrap');
+    if (wrap) wrap.classList.remove('open');
+  }
   document.addEventListener('click', function(e) {
     var wrap = document.getElementById('avatar-wrap');
     if (wrap && !wrap.contains(e.target)) closeAvatarMenu();
+    var mobWrap = document.getElementById('mob-avatar-wrap');
+    if (mobWrap && !mobWrap.contains(e.target)) closeMobAvatarMenu();
   });
 
   // -- Auth helpers ------------------------------------------
@@ -1323,6 +1781,10 @@ select.field { color:var(--black); }
     document.getElementById(pgId).style.display = 'block';
     document.querySelectorAll('.nav-lnk').forEach(function(n){ n.classList.remove('active'); });
     document.getElementById(nlId).classList.add('active');
+    // Update mobile bottom tab bar
+    document.querySelectorAll('.mob-tab').forEach(function(t){ t.classList.remove('active'); });
+    var mobTab = document.getElementById('mob-tab-' + (sub || 'overview'));
+    if (mobTab) mobTab.classList.add('active');
     if (sub === 'catalog') loadCatalog();
     if (sub === 'royalties') loadRoyalties();
     if (sub === 'payouts') loadPayouts();
@@ -1536,6 +1998,16 @@ select.field { color:var(--black); }
     var ddEmail = document.getElementById('avatar-dd-email');
     if (ddName) ddName.textContent = artist.name;
     if (ddEmail) ddEmail.textContent = artist.email || '';
+
+    // Populate mobile nav
+    var mobArtistName = document.getElementById('mob-nav-artist-name');
+    var mobAvatar = document.getElementById('mob-nav-avatar');
+    var mobDdName = document.getElementById('mob-avatar-dd-name');
+    var mobDdEmail = document.getElementById('mob-avatar-dd-email');
+    if (mobArtistName) mobArtistName.textContent = artist.name;
+    if (mobAvatar) mobAvatar.textContent = initials;
+    if (mobDdName) mobDdName.textContent = artist.name;
+    if (mobDdEmail) mobDdEmail.textContent = artist.email || '';
 
     const h = new Date().getHours();
     document.getElementById('greeting-time').textContent = h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening';
