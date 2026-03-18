@@ -9,528 +9,453 @@
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
-  --black: #0A0A0A;
+  --black: #080808;
   --white: #FFFFFF;
+  --off-white: #F9F8F6;
   --red: #B80000;
-  --red-soft: rgba(184,0,0,0.08);
+  --red-soft: rgba(184,0,0,0.07);
   --muted: #555;
-  --border: rgba(0,0,0,0.11);
-  --green: #2D6A2D;
-  --green-bg: rgba(45,106,45,0.08);
+  --muted-light: #888;
+  --border: rgba(0,0,0,0.10);
+  --border-light: rgba(0,0,0,0.06);
+  --green: #1E6B1E;
+  --green-bg: rgba(30,107,30,0.08);
   --blue: #1a3a6b;
   --serif: 'Cormorant Garamond', Georgia, serif;
   --sans: 'Inter', system-ui, sans-serif;
   --script: 'Pinyon Script', cursive;
+  --noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
 }
 
-html, body {
-  width: 100%; min-height: 100vh;
-  background: var(--white);
-  font-family: var(--sans);
-  color: var(--black);
-  -webkit-font-smoothing: antialiased;
-}
+html, body { width:100%; min-height:100vh; background:var(--white); font-family:var(--sans); color:var(--black); -webkit-font-smoothing:antialiased; }
 
-.screen { display: none; min-height: 100vh; }
-.screen.active { display: flex; flex-direction: column; animation: fadeUp 0.28s ease; }
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
+.screen { display:none; min-height:100vh; flex-direction:column; }
+.screen.active { display:flex; animation:fadeUp 0.3s ease; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
 
-/* SHARED FORM ELEMENTS */
-.field-lbl {
-  font-family: var(--sans); font-size: 10px; font-weight: 600;
-  letter-spacing: 0.13em; text-transform: uppercase; color: #333;
-  margin-bottom: 7px; display: block;
-}
-.field {
-  width: 100%; border: 1px solid rgba(0,0,0,0.18); padding: 13px 16px;
-  font-family: var(--sans); font-size: 15px; font-weight: 400; color: var(--black);
-  background: transparent; outline: none; margin-bottom: 18px;
-  transition: border-color 0.18s; border-radius: 0; -webkit-appearance: none;
-}
-.field:focus { border-color: var(--red); }
-.field::placeholder { color: #bbb; }
-select.field { color: var(--black); }
+/* ── SHARED FORM ── */
+.field-label, .field-lbl { font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.13em; text-transform:uppercase; color:#2a2a2a; margin-bottom:7px; display:block; }
+.field { width:100%; border:1px solid rgba(0,0,0,0.16); padding:13px 16px; font-family:var(--sans); font-size:15px; font-weight:400; color:var(--black); background:transparent; outline:none; margin-bottom:18px; transition:border-color 0.18s; border-radius:0; -webkit-appearance:none; }
+.field:focus { border-color:var(--red); }
+.field::placeholder { color:#c0c0c0; }
+select.field { color:var(--black); }
 
-.btn-primary {
-  width: 100%; background: var(--black); color: var(--white); border: none;
-  padding: 15px 32px; font-family: var(--sans); font-size: 12px; font-weight: 600;
-  letter-spacing: 0.14em; text-transform: uppercase; cursor: pointer; transition: background 0.18s;
-}
-.btn-primary:hover { background: #1a1a1a; }
-.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-primary { width:100%; background:var(--black); color:var(--white); border:none; padding:15px 32px; font-family:var(--sans); font-size:12px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; cursor:pointer; transition:background 0.18s; }
+.btn-primary:hover { background:#222; }
+.btn-primary:disabled { opacity:0.4; cursor:not-allowed; }
 
-.btn { width: 100%; background: var(--black); color: var(--white); border: none;
-  padding: 15px 32px; font-family: var(--sans); font-size: 12px; font-weight: 600;
-  letter-spacing: 0.14em; text-transform: uppercase; cursor: pointer; transition: background 0.18s;
-}
-.btn:hover { background: #1a1a1a; }
-.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn { width:100%; background:var(--black); color:var(--white); border:none; padding:15px 32px; font-family:var(--sans); font-size:12px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; cursor:pointer; transition:background 0.18s; }
+.btn:hover { background:#1a1a1a; }
+.btn:disabled { opacity:0.4; cursor:not-allowed; }
 
-.btn-social {
-  width: 100%; background: transparent; color: var(--black);
-  border: 1px solid rgba(0,0,0,0.18); padding: 13px 20px;
-  font-family: var(--sans); font-size: 13px; font-weight: 400; cursor: pointer;
-  display: flex; align-items: center; justify-content: center; gap: 11px;
-  margin-bottom: 10px; transition: border-color 0.18s, background 0.18s;
-}
-.btn-social:hover { border-color: rgba(0,0,0,0.4); background: rgba(0,0,0,0.02); }
-.btn-social-icon { width: 17px; height: 17px; flex-shrink: 0; }
+.btn-social { width:100%; background:transparent; color:var(--black); border:1px solid rgba(0,0,0,0.16); padding:13px 20px; font-family:var(--sans); font-size:13px; font-weight:400; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:11px; margin-bottom:10px; transition:border-color 0.18s,background 0.18s; }
+.btn-social:hover { border-color:rgba(0,0,0,0.38); background:rgba(0,0,0,0.02); }
+.btn-social-icon { width:17px; height:17px; flex-shrink:0; }
+.divider { display:flex; align-items:center; gap:14px; margin:20px 0; }
+.divider-line { flex:1; height:1px; background:var(--border); }
+.divider-text { font-family:var(--sans); font-size:10px; font-weight:500; letter-spacing:0.12em; text-transform:uppercase; color:#aaa; white-space:nowrap; }
+.auth-link { font-family:var(--sans); font-size:13px; color:var(--muted); text-align:center; margin-top:18px; line-height:1.6; }
+.auth-link a { color:var(--black); font-weight:500; text-decoration:underline; cursor:pointer; background:none; border:none; font-family:var(--sans); font-size:13px; padding:0; }
+.auth-forgot { font-family:var(--sans); font-size:12px; color:var(--muted-light); text-decoration:underline; cursor:pointer; background:none; border:none; display:block; margin-top:-10px; margin-bottom:20px; text-align:right; padding:0; transition:color 0.15s; }
+.auth-forgot:hover { color:var(--black); }
+.error-box { background:var(--red-soft); border-left:2px solid var(--red); padding:11px 14px; margin-bottom:16px; font-size:13px; color:var(--red); display:none; }
+.empty-state { padding:40px 0; text-align:center; font-family:var(--sans); font-size:13px; color:var(--muted); }
+.loading { padding:32px 0; text-align:center; font-family:var(--sans); font-size:13px; color:var(--muted); }
 
-.divider { display: flex; align-items: center; gap: 14px; margin: 20px 0; }
-.divider-line { flex: 1; height: 1px; background: var(--border); }
-.divider-text {
-  font-family: var(--sans); font-size: 10px; font-weight: 500;
-  letter-spacing: 0.12em; text-transform: uppercase; color: #999; white-space: nowrap;
-}
+.badge { font-family:var(--sans); font-size:9px; font-weight:600; letter-spacing:0.10em; text-transform:uppercase; padding:3px 8px; display:inline-block; }
+.badge-ok { background:var(--green-bg); color:var(--green); }
+.badge-pend { background:rgba(0,0,0,0.05); color:#888; }
+.badge-blue { background:rgba(26,58,107,0.08); color:var(--blue); }
+.badge-red { background:var(--red-soft); color:var(--red); }
 
-.auth-link {
-  font-family: var(--sans); font-size: 13px; color: var(--muted);
-  text-align: center; margin-top: 18px; line-height: 1.6;
-}
-.auth-link a {
-  color: var(--black); font-weight: 500; text-decoration: underline; cursor: pointer;
-  background: none; border: none; font-family: var(--sans); font-size: 13px; padding: 0;
-}
-.auth-forgot {
-  font-family: var(--sans); font-size: 12px; color: var(--muted); text-decoration: underline;
-  cursor: pointer; background: none; border: none; display: block;
-  margin-top: -10px; margin-bottom: 20px; text-align: right; padding: 0; transition: color 0.15s;
-}
-.auth-forgot:hover { color: var(--black); }
+.back-btn { font-family:var(--sans); font-size:13px; font-weight:500; color:var(--muted); background:none; border:none; cursor:pointer; display:flex; align-items:center; gap:8px; margin-bottom:32px; padding:0; transition:color 0.2s; }
+.back-btn:hover { color:var(--black); }
 
-.error-box {
-  background: var(--red-soft); border-left: 2px solid var(--red);
-  padding: 11px 14px; margin-bottom: 16px; font-size: 13px; color: var(--red); display: none;
-}
-.empty-state { padding: 40px 0; text-align: center; font-family: var(--sans); font-size: 13px; color: var(--muted); }
-.loading { padding: 32px 0; text-align: center; font-family: var(--sans); font-size: 13px; color: var(--muted); }
+/* ── FOOTER ── */
+.site-footer { background:var(--black); color:rgba(255,255,255,0.5); position:relative; overflow:hidden; }
+.site-footer::before { content:''; position:absolute; inset:0; background-image:var(--noise); opacity:0.035; pointer-events:none; }
+.footer-inner { max-width:1100px; margin:0 auto; padding:56px 60px 40px; position:relative; z-index:1; }
+.footer-top { display:grid; grid-template-columns:1fr 1fr 1fr; gap:48px; padding-bottom:44px; border-bottom:1px solid rgba(255,255,255,0.08); margin-bottom:32px; }
+.footer-brand-name { font-family:var(--script); font-size:38px; color:var(--white); line-height:1; margin-bottom:12px; display:block; }
+.footer-brand-desc { font-family:var(--sans); font-size:13px; font-weight:300; color:rgba(255,255,255,0.38); line-height:1.7; max-width:240px; }
+.footer-col-title { font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.18em; text-transform:uppercase; color:rgba(255,255,255,0.3); margin-bottom:16px; }
+.footer-links { display:flex; flex-direction:column; gap:10px; }
+.footer-link { font-family:var(--sans); font-size:13px; font-weight:300; color:rgba(255,255,255,0.5); cursor:pointer; background:none; border:none; text-align:left; padding:0; transition:color 0.18s; text-decoration:none; }
+.footer-link:hover { color:var(--white); }
+.footer-contact-email { font-family:var(--sans); font-size:13px; font-weight:400; color:rgba(255,255,255,0.65); text-decoration:none; transition:color 0.18s; }
+.footer-contact-email:hover { color:var(--white); }
+.footer-bottom { display:flex; justify-content:space-between; align-items:center; position:relative; z-index:1; padding-top:28px; border-top:1px solid rgba(255,255,255,0.08); }
+.footer-copy { font-family:var(--sans); font-size:12px; font-weight:300; color:rgba(255,255,255,0.5); letter-spacing:0.03em; }
+.footer-legal { display:flex; gap:24px; }
+.footer-legal-link { font-family:var(--sans); font-size:12px; font-weight:300; color:rgba(255,255,255,0.5); cursor:pointer; background:none; border:none; padding:0; transition:color 0.18s; text-decoration:none; }
+.footer-legal-link:hover { color:var(--white); }
+.footer-red-line { width:32px; height:2px; background:var(--red); margin-bottom:20px; }
 
-.badge {
-  font-family: var(--sans); font-size: 9px; font-weight: 600;
-  letter-spacing: 0.10em; text-transform: uppercase; padding: 3px 8px; display: inline-block;
-}
-.badge-ok { background: var(--green-bg); color: var(--green); }
-.badge-pend { background: rgba(0,0,0,0.05); color: #888; }
-.badge-blue { background: rgba(26,58,107,0.08); color: var(--blue); }
-.badge-red { background: var(--red-soft); color: var(--red); }
+/* ── LANDING ── */
+#screen-landing { background:var(--black); position:relative; overflow:hidden; }
+#screen-landing::before { content:''; position:absolute; inset:0; background-image:var(--noise); opacity:0.05; pointer-events:none; z-index:0; }
+#screen-landing::after { content:''; position:absolute; top:-20%; left:50%; transform:translateX(-50%); width:900px; height:600px; background:radial-gradient(ellipse at center, rgba(184,0,0,0.08) 0%, transparent 70%); pointer-events:none; z-index:0; }
 
-.back-btn {
-  font-family: var(--sans); font-size: 13px; font-weight: 500; color: var(--muted);
-  background: none; border: none; cursor: pointer; display: flex; align-items: center;
-  gap: 8px; margin-bottom: 32px; padding: 0; transition: color 0.2s;
-}
-.back-btn:hover { color: var(--black); }
+.landing-nav { position:relative; z-index:10; display:flex; justify-content:space-between; align-items:center; padding:36px 60px; }
+.landing-nav-logo { font-family:var(--script); font-size:34px; color:var(--white); line-height:1; }
+.landing-nav-center { display:flex; align-items:center; gap:36px; position:absolute; left:50%; transform:translateX(-50%); }
+.landing-nav-link { font-family:var(--sans); font-size:11px; font-weight:400; letter-spacing:0.12em; text-transform:uppercase; color:rgba(255,255,255,0.45); cursor:pointer; background:none; border:none; transition:color 0.18s; padding:0; }
+.landing-nav-link:hover { color:rgba(255,255,255,0.88); }
+.landing-nav-right { display:flex; gap:10px; align-items:center; }
+.btn-nav-ghost { font-family:var(--sans); font-size:11px; font-weight:500; letter-spacing:0.12em; text-transform:uppercase; color:rgba(255,255,255,0.6); background:transparent; border:1px solid rgba(255,255,255,0.2); padding:10px 22px; cursor:pointer; transition:color 0.18s,border-color 0.18s; }
+.btn-nav-ghost:hover { color:var(--white); border-color:rgba(255,255,255,0.5); }
+.btn-nav-white { font-family:var(--sans); font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--black); background:var(--white); border:none; padding:10px 22px; cursor:pointer; transition:opacity 0.18s; }
+.btn-nav-white:hover { opacity:0.88; }
 
-/* ─── LANDING PAGE ─── */
-#screen-landing {
-  background: var(--black); min-height: 100vh; position: relative; overflow: hidden;
-}
-#screen-landing::after {
-  content: ''; position: absolute; inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-  pointer-events: none; z-index: 0;
-}
+.landing-hero { position:relative; z-index:10; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:calc(100vh - 110px); text-align:center; padding:0 40px 140px; }
+.landing-headline { font-family:var(--serif); font-size:clamp(48px,6vw,80px); font-weight:300; color:var(--white); line-height:1.08; letter-spacing:-0.02em; margin-bottom:48px; animation:fadeUp 0.6s 0.08s ease both; }
+.landing-headline em { font-style:italic; color:rgba(255,255,255,0.6); }
+.headline-rule { width:32px; height:2px; background:var(--red); margin:0 auto 44px; animation:fadeUp 0.6s 0.14s ease both; }
+.landing-cta-row, .landing-cta { display:flex; gap:0; align-items:stretch; animation:fadeUp 0.6s 0.2s ease both; box-shadow:0 20px 60px rgba(0,0,0,0.4); }
+.btn-cta-main { background:var(--white); color:var(--black); border:none; padding:18px 48px; font-family:var(--sans); font-size:12px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; cursor:pointer; transition:opacity 0.18s; white-space:nowrap; }
+.btn-cta-main:hover { opacity:0.88; }
+.btn-cta-secondary { background:transparent; color:rgba(255,255,255,0.65); border:1px solid rgba(255,255,255,0.2); border-left:none; padding:18px 48px; font-family:var(--sans); font-size:12px; font-weight:400; letter-spacing:0.14em; text-transform:uppercase; cursor:pointer; transition:color 0.18s,border-color 0.18s; white-space:nowrap; }
+.btn-cta-secondary:hover { color:var(--white); border-color:rgba(255,255,255,0.45); }
 
-.landing-nav {
-  position: relative; z-index: 10; display: flex;
-  justify-content: space-between; align-items: center; padding: 36px 60px;
-}
-.landing-nav-logo { font-family: var(--script); font-size: 34px; color: var(--white); line-height: 1; }
-.landing-nav-center {
-  display: flex; align-items: center; gap: 36px;
-  position: absolute; left: 50%; transform: translateX(-50%);
-}
-.landing-nav-link {
-  font-family: var(--sans); font-size: 11px; font-weight: 400;
-  letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.55);
-  cursor: pointer; background: none; border: none; transition: color 0.18s; padding: 0;
-}
-.landing-nav-link:hover { color: rgba(255,255,255,0.9); }
-.landing-nav-right { display: flex; gap: 10px; align-items: center; }
-.btn-nav-ghost {
-  font-family: var(--sans); font-size: 11px; font-weight: 500;
-  letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.65);
-  background: transparent; border: 1px solid rgba(255,255,255,0.22);
-  padding: 10px 22px; cursor: pointer; transition: color 0.18s, border-color 0.18s;
-}
-.btn-nav-ghost:hover { color: var(--white); border-color: rgba(255,255,255,0.55); }
-.btn-nav-white {
-  font-family: var(--sans); font-size: 11px; font-weight: 600;
-  letter-spacing: 0.12em; text-transform: uppercase; color: var(--black);
-  background: var(--white); border: none; padding: 10px 22px; cursor: pointer; transition: opacity 0.18s;
-}
-.btn-nav-white:hover { opacity: 0.88; }
+/* ── PARTNERS SECTION ── */
+.partners-section { position:absolute; bottom:0; left:0; right:0; z-index:10; border-top:1px solid rgba(255,255,255,0.08); padding:20px 0 0; background:rgba(0,0,0,0.15); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); }
+.partners-eyebrow { font-family:var(--sans); font-size:10px; font-weight:500; letter-spacing:0.22em; text-transform:uppercase; color:rgba(255,255,255,0.22); text-align:center; margin-bottom:20px; }
+.partners-track-wrap { overflow:hidden; mask-image:linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%); -webkit-mask-image:linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%); }
+.partners-track { display:flex; align-items:center; gap:0; width:max-content; animation:marquee 50s linear infinite; }
+.partners-track:hover { animation-play-state:paused; }
+@keyframes marquee { from { transform:translateX(0); } to { transform:translateX(-50%); } }
+.partner-item { display:flex; align-items:center; padding:0 40px; border-right:1px solid rgba(255,255,255,0.07); color:rgba(255,255,255,0.28); transition:color 0.25s; cursor:default; height:60px; }
+.partner-item:hover { color:rgba(255,255,255,0.65); }
+.partner-svg { height:44px; width:auto; display:block; fill:currentColor; overflow:visible; }
 
-.landing-hero {
-  position: relative; z-index: 10; display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  min-height: calc(100vh - 108px); text-align: center; padding: 0 40px 60px; gap: 0;
-}
-.landing-headline {
-  font-family: var(--serif); font-size: clamp(44px, 5.5vw, 72px); font-weight: 300;
-  color: var(--white); line-height: 1.12; letter-spacing: -0.015em;
-  margin-bottom: 52px; animation: fadeUp 0.5s 0.12s ease both;
-}
-.landing-headline em { font-style: italic; color: rgba(255,255,255,0.75); }
-.headline-rule {
-  width: 32px; height: 2px; background: var(--red);
-  margin: 0 auto 48px; animation: fadeUp 0.5s 0.16s ease both;
-}
-.landing-cta-row {
-  display: flex; gap: 0; align-items: stretch; animation: fadeUp 0.5s 0.2s ease both;
-}
-.btn-cta-main {
-  background: var(--white); color: var(--black); border: none; padding: 17px 44px;
-  font-family: var(--sans); font-size: 12px; font-weight: 600;
-  letter-spacing: 0.14em; text-transform: uppercase; cursor: pointer;
-  transition: opacity 0.18s; white-space: nowrap;
-}
-.btn-cta-main:hover { opacity: 0.88; }
-.btn-cta-secondary {
-  background: transparent; color: rgba(255,255,255,0.7);
-  border: 1px solid rgba(255,255,255,0.22); border-left: none;
-  padding: 17px 44px; font-family: var(--sans); font-size: 12px; font-weight: 500;
-  letter-spacing: 0.14em; text-transform: uppercase; cursor: pointer;
-  transition: color 0.18s, border-color 0.18s; white-space: nowrap;
-}
-.btn-cta-secondary:hover { color: var(--white); border-color: rgba(255,255,255,0.5); }
+/* ── AUTH PAGES ── */
+#screen-login, #screen-signup, #screen-recover { min-height:100vh; }
+.auth-layout { display:grid; grid-template-columns:300px 1fr; min-height:100vh; }
+.auth-brand { background:var(--black); display:flex; flex-direction:column; justify-content:space-between; padding:44px 40px 48px; position:relative; overflow:hidden; }
+.auth-brand::before { content:''; position:absolute; inset:0; background-image:var(--noise); opacity:0.04; pointer-events:none; }
+.auth-brand::after { content:''; position:absolute; bottom:-100px; left:-100px; width:400px; height:400px; background:radial-gradient(ellipse, rgba(184,0,0,0.07) 0%, transparent 70%); pointer-events:none; }
+.auth-brand-logo { font-family:var(--script); font-size:32px; color:var(--white); line-height:1; position:relative; z-index:1; }
+.auth-brand-center { position:relative; z-index:1; }
+.auth-brand-rule { width:24px; height:2px; background:var(--red); margin-bottom:20px; }
+.auth-brand-tagline { font-family:var(--serif); font-size:clamp(28px,2.5vw,38px); font-weight:300; color:var(--white); line-height:1.22; letter-spacing:-0.01em; margin-bottom:20px; }
+.auth-brand-tagline em { font-style:italic; color:rgba(255,255,255,0.6); }
+.auth-brand-sub { font-family:var(--sans); font-size:13px; font-weight:300; color:rgba(255,255,255,0.4); line-height:1.72; }
+.auth-brand-footer { position:relative; z-index:1; font-family:var(--sans); font-size:10px; font-weight:400; letter-spacing:0.10em; text-transform:uppercase; color:rgba(255,255,255,0.18); }
+.auth-form-panel { display:flex; align-items:center; justify-content:center; padding:60px 64px; background:var(--white); }
+.auth-form-inner { width:100%; max-width:420px; }
+.auth-form-title { font-family:var(--serif); font-size:44px; font-weight:400; letter-spacing:-0.02em; line-height:1.08; margin-bottom:8px; color:var(--black); }
+.auth-form-title em { font-style:italic; }
+.auth-title-rule { width:24px; height:2px; background:var(--red); margin-bottom:16px; }
+.auth-form-sub { font-family:var(--sans); font-size:14px; font-weight:300; color:var(--muted); margin-bottom:32px; line-height:1.65; }
 
-/* ─── AUTH PAGES ─── */
-#screen-login, #screen-signup, #screen-recover { min-height: 100vh; }
-.auth-layout { display: grid; grid-template-columns: 300px 1fr; min-height: 100vh; }
-.auth-brand {
-  background: var(--black); display: flex; flex-direction: column;
-  justify-content: space-between; padding: 44px 40px 48px; position: relative; overflow: hidden;
-}
-.auth-brand::after {
-  content: ''; position: absolute; inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
-  pointer-events: none;
-}
-.auth-brand-logo { font-family: var(--script); font-size: 32px; color: var(--white); line-height: 1; position: relative; z-index: 1; }
-.auth-brand-center { position: relative; z-index: 1; }
-.auth-brand-tagline { font-family: var(--serif); font-size: 36px; font-weight: 300; color: var(--white); line-height: 1.22; letter-spacing: -0.01em; margin-bottom: 20px; }
-.auth-brand-tagline em { font-style: italic; color: rgba(255,255,255,0.7); }
-.auth-brand-rule { width: 24px; height: 2px; background: var(--red); margin-bottom: 20px; }
-.auth-brand-sub { font-family: var(--sans); font-size: 13px; font-weight: 300; color: rgba(255,255,255,0.45); line-height: 1.7; }
-.auth-brand-footer { position: relative; z-index: 1; font-family: var(--sans); font-size: 10px; font-weight: 400; letter-spacing: 0.10em; text-transform: uppercase; color: rgba(255,255,255,0.2); }
-.auth-form-panel { display: flex; align-items: center; justify-content: center; padding: 60px 64px; background: var(--white); }
-.auth-form-inner { width: 100%; max-width: 420px; }
-.auth-form-title { font-family: var(--serif); font-size: 44px; font-weight: 400; letter-spacing: -0.02em; line-height: 1.08; margin-bottom: 8px; color: var(--black); }
-.auth-form-title em { font-style: italic; }
-.auth-title-rule { width: 24px; height: 2px; background: var(--red); margin-bottom: 16px; }
-.auth-form-sub { font-family: var(--sans); font-size: 14px; font-weight: 300; color: var(--muted); margin-bottom: 32px; line-height: 1.65; }
+/* ── DASHBOARD NAV ── */
+.top-nav { height:62px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; padding:0 40px; position:sticky; top:0; background:rgba(255,255,255,0.97); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); z-index:50; flex-shrink:0; }
+.top-nav-logo { font-family:var(--script); font-size:28px; color:var(--black); line-height:1; cursor:pointer; letter-spacing:0.01em; }
+.top-nav-logo::after { content:''; display:inline-block; width:5px; height:5px; background:var(--red); border-radius:50%; margin-left:4px; vertical-align:middle; position:relative; top:-3px; }
+.top-nav-right { display:flex; align-items:center; gap:20px; }
+.top-nav-name, .top-nav-artist { font-family:var(--sans); font-size:12px; font-weight:400; color:var(--muted); letter-spacing:0.03em; }
+.top-nav-signout, .top-nav-out { font-family:var(--sans); font-size:11px; font-weight:400; letter-spacing:0.10em; text-transform:uppercase; color:var(--muted); background:none; border:none; cursor:pointer; transition:color 0.18s; }
+.top-nav-signout:hover, .top-nav-out:hover { color:var(--black); }
 
-/* ─── DASHBOARD NAV ─── */
-.top-nav {
-  height: 62px; border-bottom: 1px solid var(--border); display: flex;
-  align-items: center; justify-content: space-between; padding: 0 40px;
-  position: sticky; top: 0; background: var(--white); z-index: 50; flex-shrink: 0;
-}
-.top-nav-logo { font-family: var(--script); font-size: 28px; color: var(--black); line-height: 1; cursor: pointer; letter-spacing: 0.01em; }
-.top-nav-logo::after {
-  content: ''; display: inline-block; width: 5px; height: 5px; background: var(--red);
-  border-radius: 50%; margin-left: 4px; vertical-align: middle; position: relative; top: -3px;
-}
-.top-nav-right { display: flex; align-items: center; gap: 20px; }
-.top-nav-artist { font-family: var(--sans); font-size: 12px; font-weight: 400; color: var(--muted); letter-spacing: 0.03em; }
-.avatar {
-  width: 33px; height: 33px; background: var(--black); border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--sans); font-size: 11px; font-weight: 600; color: var(--white);
-  cursor: pointer; letter-spacing: 0.04em;
-}
-.top-nav-out {
-  font-family: var(--sans); font-size: 11px; font-weight: 400;
-  letter-spacing: 0.10em; text-transform: uppercase; color: var(--muted);
-  background: none; border: none; cursor: pointer; transition: color 0.18s;
-}
-.top-nav-out:hover { color: var(--black); }
+/* ── AVATAR DROPDOWN ── */
+.avatar-wrap { position:relative; }
+.avatar { width:33px; height:33px; background:var(--black); border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:var(--sans); font-size:11px; font-weight:600; color:var(--white); cursor:pointer; transition:opacity 0.18s; user-select:none; letter-spacing:0.04em; }
+.avatar:hover { opacity:0.82; }
+.avatar-dropdown { display:none; position:absolute; top:calc(100% + 10px); right:0; width:220px; background:var(--white); border:1px solid var(--border); box-shadow:0 8px 32px rgba(0,0,0,0.12); z-index:200; animation:fadeUp 0.18s ease; }
+.avatar-wrap.open .avatar-dropdown { display:block; }
+.avatar-dropdown-header { padding:16px 18px 14px; border-bottom:1px solid var(--border); }
+.avatar-dropdown-name { font-family:var(--sans); font-size:13px; font-weight:600; color:var(--black); margin-bottom:2px; }
+.avatar-dropdown-email { font-family:var(--sans); font-size:12px; font-weight:300; color:var(--muted); }
+.avatar-dropdown-section { padding:6px 0; border-bottom:1px solid var(--border); }
+.avatar-dropdown-section:last-child { border-bottom:none; }
+.avatar-menu-item { display:flex; align-items:center; gap:12px; width:100%; padding:10px 18px; font-family:var(--sans); font-size:13px; font-weight:400; color:#444; background:none; border:none; cursor:pointer; text-align:left; transition:background 0.15s, color 0.15s; }
+.avatar-menu-item:hover { background:rgba(0,0,0,0.04); color:var(--black); }
+.avatar-menu-item.danger { color:var(--red); }
+.avatar-menu-item.danger:hover { background:var(--red-soft); color:var(--red); }
+.avatar-menu-icon { font-size:15px; width:18px; text-align:center; opacity:0.6; flex-shrink:0; }
+.avatar-menu-item:hover .avatar-menu-icon { opacity:1; }
 
-/* ─── DASHBOARD LAYOUT ─── */
-.dash-layout { display: grid; grid-template-columns: 220px 1fr; flex: 1; min-height: calc(100vh - 62px); }
-.sidebar {
-  border-right: 1px solid var(--border); padding: 32px 0;
-  position: sticky; top: 62px; height: calc(100vh - 62px); overflow-y: auto;
-}
-.sb-section { margin-bottom: 32px; }
-.sb-lbl {
-  font-family: var(--sans); font-size: 9px; font-weight: 600;
-  letter-spacing: 0.22em; text-transform: uppercase; color: rgba(0,0,0,0.28);
-  padding: 0 24px; margin-bottom: 6px; display: block;
-}
-.nav-lnk {
-  display: flex; align-items: center; gap: 11px; padding: 10px 24px;
-  font-family: var(--sans); font-size: 13px; font-weight: 400; color: #777;
-  cursor: pointer; transition: color 0.18s, background 0.18s;
-  border: none; background: none; width: 100%; text-align: left;
-}
-.nav-lnk:hover { color: var(--black); background: rgba(0,0,0,0.03); }
-.nav-lnk.active {
-  color: var(--black); font-weight: 500; background: rgba(0,0,0,0.04);
-  border-left: 2px solid var(--red); padding-left: 22px;
-}
-.nav-lnk-icon { font-size: 14px; opacity: 0.5; }
-.nav-lnk.active .nav-lnk-icon { opacity: 1; }
-.main { padding: 44px 52px; max-width: 1060px; }
+/* ── DASHBOARD LAYOUT ── */
+.dash-layout { display:grid; grid-template-columns:220px 1fr; flex:1; min-height:calc(100vh - 62px); }
+.sidebar { border-right:1px solid var(--border); padding:32px 0; position:sticky; top:62px; height:calc(100vh - 62px); overflow-y:auto; background:var(--off-white); }
+.sb-section { margin-bottom:32px; }
+.sb-label, .sb-lbl { font-family:var(--sans); font-size:9px; font-weight:600; letter-spacing:0.22em; text-transform:uppercase; color:rgba(0,0,0,0.28); padding:0 24px; margin-bottom:6px; display:block; }
+.nav-lnk { display:flex; align-items:center; gap:11px; padding:10px 24px; font-family:var(--sans); font-size:13px; font-weight:400; color:#777; cursor:pointer; transition:color 0.18s,background 0.18s; border:none; background:none; width:100%; text-align:left; }
+.nav-lnk:hover { color:var(--black); background:rgba(0,0,0,0.04); }
+.nav-lnk.active { color:var(--black); font-weight:500; background:rgba(0,0,0,0.05); border-left:2px solid var(--red); padding-left:22px; }
+.nav-icon, .nav-lnk-icon { font-size:14px; opacity:0.5; }
+.nav-lnk.active .nav-icon, .nav-lnk.active .nav-lnk-icon { opacity:1; }
+.main-content, .main { padding:44px 52px; max-width:1060px; }
 
-/* ─── OVERVIEW ─── */
-.pg-title { font-family: var(--serif); font-size: 38px; font-weight: 400; letter-spacing: -0.02em; margin-bottom: 4px; line-height: 1.1; }
-.pg-title em { font-style: italic; }
-.pg-sub { font-family: var(--sans); font-size: 14px; font-weight: 300; color: var(--muted); margin-bottom: 32px; }
+/* ── OVERVIEW ── */
+.page-title, .pg-title { font-family:var(--serif); font-size:38px; font-weight:400; letter-spacing:-0.02em; margin-bottom:4px; line-height:1.1; }
+.page-title em, .pg-title em { font-style:italic; }
+.page-sub, .pg-sub { font-family:var(--sans); font-size:14px; font-weight:300; color:var(--muted); margin-bottom:32px; }
+.page-rule { width:24px; height:2px; background:var(--red); margin-bottom:28px; }
 
-.bal-card {
-  background: var(--black); padding: 34px 38px; margin-bottom: 28px;
-  display: flex; justify-content: space-between; align-items: center; gap: 40px;
-  position: relative; overflow: hidden;
-}
-.bal-card::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; background: var(--red); }
-.bal-lbl { font-family: var(--sans); font-size: 10px; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 10px; }
-.bal-amt { font-family: var(--serif); font-size: 56px; font-weight: 300; color: var(--white); letter-spacing: -0.03em; line-height: 1; }
-.bal-amt-sm { font-family: var(--serif); font-size: 36px; font-weight: 300; color: rgba(255,255,255,0.4); letter-spacing: -0.025em; line-height: 1; }
-.bal-note { font-family: var(--sans); font-size: 11px; font-weight: 300; color: rgba(255,255,255,0.28); margin-top: 8px; letter-spacing: 0.02em; }
-.bal-actions { display: flex; gap: 10px; flex-shrink: 0; }
-.bal-btn {
-  padding: 13px 24px; font-family: var(--sans); font-size: 11px; font-weight: 600;
-  letter-spacing: 0.12em; text-transform: uppercase; border: none; cursor: pointer;
-  transition: opacity 0.18s; white-space: nowrap;
-}
-.bal-btn:hover { opacity: 0.8; }
-.bal-btn-p { background: var(--white); color: var(--black); }
-.bal-btn-g { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.55); border: 1px solid rgba(255,255,255,0.12); }
+.bal-card { background:var(--black); padding:36px 40px; margin-bottom:28px; display:flex; justify-content:space-between; align-items:center; gap:40px; position:relative; overflow:hidden; }
+.bal-card::before { content:''; position:absolute; top:0; left:0; width:3px; height:100%; background:var(--red); }
+.bal-card::after { content:''; position:absolute; inset:0; background-image:var(--noise); opacity:0.03; pointer-events:none; }
+.bal-label, .bal-lbl { font-family:var(--sans); font-size:10px; font-weight:500; letter-spacing:0.16em; text-transform:uppercase; color:rgba(255,255,255,0.3); margin-bottom:10px; }
+.bal-amount, .bal-amt { font-family:var(--serif); font-size:56px; font-weight:300; color:var(--white); letter-spacing:-0.03em; line-height:1; }
+.bal-amount-sm, .bal-amt-sm { font-family:var(--serif); font-size:36px; font-weight:300; color:rgba(255,255,255,0.38); letter-spacing:-0.025em; line-height:1; }
+.bal-note { font-family:var(--sans); font-size:11px; font-weight:300; color:rgba(255,255,255,0.25); margin-top:8px; }
+.bal-actions { display:flex; gap:10px; flex-shrink:0; position:relative; z-index:1; }
+.bal-btn { padding:13px 24px; font-family:var(--sans); font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; border:none; cursor:pointer; transition:opacity 0.18s; white-space:nowrap; }
+.bal-btn:hover { opacity:0.8; }
+.bal-btn-white, .bal-btn-p { background:var(--white); color:var(--black); }
+.bal-btn-ghost, .bal-btn-g { background:rgba(255,255,255,0.07); color:rgba(255,255,255,0.5); border:1px solid rgba(255,255,255,0.12); }
 
-/* Section boxes */
-.sbox { border: 1px solid var(--border); margin-bottom: 26px; background: var(--white); }
-.sbox-hd {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 18px 24px; border-bottom: 1px solid var(--border);
-}
-.sbox-title { font-family: var(--sans); font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--black); margin-bottom: 2px; }
-.sbox-sub { font-family: var(--sans); font-size: 12px; font-weight: 300; color: var(--muted); }
-.sbox-lnk {
-  font-family: var(--sans); font-size: 11px; font-weight: 500; letter-spacing: 0.08em;
-  text-transform: uppercase; color: var(--muted); background: none; border: none;
-  cursor: pointer; transition: color 0.18s;
-}
-.sbox-lnk:hover { color: var(--red); }
-.sbox-body { padding: 0 24px; }
+.sbox { border:1px solid var(--border); margin-bottom:26px; background:var(--white); }
+.sbox-head, .sbox-hd { display:flex; justify-content:space-between; align-items:center; padding:18px 24px; border-bottom:1px solid var(--border); }
+.sbox-title { font-family:var(--sans); font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--black); margin-bottom:2px; }
+.sbox-sub { font-family:var(--sans); font-size:12px; font-weight:300; color:var(--muted); }
+.sbox-link, .sbox-lnk { font-family:var(--sans); font-size:11px; font-weight:500; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); background:none; border:none; cursor:pointer; transition:color 0.18s; }
+.sbox-link:hover, .sbox-lnk:hover { color:var(--red); }
+.sbox-body { padding:0 24px; }
 
-/* Table */
-.th-row { display: grid; padding: 9px 0; border-bottom: 1px solid var(--border); gap: 12px; }
-.th { font-family: var(--sans); font-size: 9px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(0,0,0,0.25); }
-.tr { display: grid; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border); gap: 12px; }
-.tr:last-child { border-bottom: none; }
-.tr-song { font-family: var(--serif); font-size: 17px; font-weight: 400; color: var(--black); margin-bottom: 2px; }
-.tr-meta { font-family: var(--sans); font-size: 11px; font-weight: 300; color: var(--muted); }
-.tr-cell { font-family: var(--sans); font-size: 12px; font-weight: 400; color: var(--muted); }
-.tr-amt { font-family: var(--sans); font-size: 13px; font-weight: 600; color: var(--black); text-align: right; }
-.col-5 { grid-template-columns: 1fr 150px 110px 100px 100px; }
-.col-4 { grid-template-columns: 1fr 150px 140px 110px; }
-.col-4c { grid-template-columns: 1fr 200px 100px 100px; }
-.col-3 { grid-template-columns: 1fr 120px 120px; }
+/* Table - aliases for both old and new class names */
+.t-head, .th-row { display:grid; padding:9px 0; border-bottom:1px solid var(--border); gap:12px; }
+.t-th, .th { font-family:var(--sans); font-size:9px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; color:rgba(0,0,0,0.22); }
+.t-row, .tr { display:grid; align-items:center; padding:15px 0; border-bottom:1px solid var(--border-light); gap:12px; transition:background 0.15s; }
+.t-row:last-child, .tr:last-child { border-bottom:none; }
+.t-song, .tr-song { font-family:var(--serif); font-size:17px; font-weight:400; color:var(--black); margin-bottom:2px; }
+.t-meta, .tr-meta { font-family:var(--sans); font-size:11px; font-weight:300; color:var(--muted-light); }
+.t-cell, .tr-cell { font-family:var(--sans); font-size:12px; font-weight:400; color:var(--muted); }
+.t-amount, .tr-amt { font-family:var(--sans); font-size:13px; font-weight:600; color:var(--black); text-align:right; }
+.col-5 { grid-template-columns:1fr 150px 110px 100px 100px; }
+.col-4 { grid-template-columns:1fr 150px 140px 110px; }
+.col-4c { grid-template-columns:1fr 200px 100px 100px; }
+.col-3 { grid-template-columns:1fr 120px 120px; }
 
-/* ─── CLAIM ─── */
-.claim-layout { display: grid; grid-template-columns: 1fr 360px; gap: 40px; align-items: start; }
-.claim-avail {
-  border: 1px solid var(--border); padding: 24px; margin-bottom: 24px;
-  display: flex; justify-content: space-between; align-items: center;
-}
-.claim-avail-lbl { font-family: var(--sans); font-size: 12px; font-weight: 500; color: var(--muted); margin-bottom: 8px; }
-.claim-avail-amt { font-size: 38px; font-weight: 300; letter-spacing: -0.025em; color: var(--black); }
-.method-opts { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
-.mopt {
-  border: 1px solid var(--border); padding: 16px 18px; display: flex;
-  align-items: center; gap: 14px; cursor: pointer; transition: all 0.2s;
-}
-.mopt:hover { border-color: rgba(0,0,0,0.25); }
-.mopt.sel { border-color: var(--red); background: var(--red-soft); }
-.mopt input[type=radio] { accent-color: var(--red); width: 16px; height: 16px; flex-shrink: 0; }
-.mopt-lbl { font-size: 15px; font-weight: 400; color: var(--black); }
-.mopt-sub { font-family: var(--sans); font-size: 12px; color: var(--muted); margin-left: auto; }
-.summary-card {
-  border: 1px solid var(--border); padding: 24px; position: sticky; top: 80px; background: #fafafa;
-}
-.summary-title { font-family: var(--sans); font-size: 12px; font-weight: 500; color: var(--muted); margin-bottom: 20px; text-transform: uppercase; letter-spacing: 0.04em; }
-.sum-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
-.sum-row:last-child { border-bottom: none; }
-.sum-key { font-family: var(--sans); font-size: 13px; color: var(--muted); }
-.sum-val { font-family: var(--sans); font-size: 14px; font-weight: 500; color: var(--black); }
-.claim-note { font-family: var(--sans); font-size: 12px; color: var(--muted); line-height: 1.7; padding: 14px 16px; border: 1px solid var(--border); margin-bottom: 24px; }
+/* ── STAT CARDS ── */
+.stat-card { border:1px solid var(--border); padding:20px 24px; background:var(--white); }
+.stat-card-red { border-left:3px solid var(--red); }
+.stat-num { font-family:var(--serif); font-size:32px; font-weight:400; letter-spacing:-0.02em; color:var(--black); line-height:1; margin-bottom:6px; }
+.stat-lbl { font-family:var(--sans); font-size:11px; font-weight:400; letter-spacing:0.06em; color:var(--muted); text-transform:uppercase; }
+.btn-add { font-family:var(--sans); font-size:11px; font-weight:600; letter-spacing:0.10em; text-transform:uppercase; color:var(--white); background:var(--black); border:none; padding:9px 18px; cursor:pointer; transition:opacity 0.18s; }
+.btn-add:hover { opacity:0.8; }
 
-/* ─── STRIPE CONNECT ─── */
-.stripe-strip {
-  display: flex; align-items: center; justify-content: space-between;
-  border: 1px solid var(--border); padding: 16px 20px; margin-bottom: 20px;
-}
-.stripe-strip-left { display: flex; align-items: center; gap: 14px; }
-.stripe-strip-title { font-family: var(--sans); font-size: 14px; font-weight: 400; color: var(--black); }
-.stripe-strip-sub { font-family: var(--sans); font-size: 12px; color: var(--muted); margin-top: 2px; }
-.stripe-strip-btn {
-  font-family: var(--sans); font-size: 13px; background: none;
-  border: 1px solid var(--border); padding: 8px 16px; cursor: pointer; color: var(--black); transition: all 0.2s;
-}
-.stripe-strip-btn:hover { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.25); }
-.stripe-box { border: 1px solid var(--border); padding: 20px 22px; margin-bottom: 24px; display: none; }
-.stripe-box.visible { display: block; }
-.stripe-box-title { font-family: var(--sans); font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); margin-bottom: 14px; }
-.stripe-status { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-.stripe-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.stripe-dot.connected { background: var(--green); }
-.stripe-dot.disconnected { background: rgba(0,0,0,0.15); }
-.stripe-dot.loading { background: rgba(0,0,0,0.15); animation: pulse 1.2s infinite; }
+/* ── CLAIM ── */
+.claim-layout { display:grid; grid-template-columns:1fr 360px; gap:40px; align-items:start; }
+.claim-avail { border:1px solid var(--border); padding:24px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center; }
+.claim-avail-lbl { font-family:var(--sans); font-size:12px; font-weight:500; color:var(--muted); margin-bottom:8px; }
+.claim-avail-amt { font-size:38px; font-weight:300; letter-spacing:-0.025em; color:var(--black); }
+.method-opts { display:flex; flex-direction:column; gap:10px; margin-bottom:24px; }
+.mopt { border:1px solid var(--border); padding:16px 18px; display:flex; align-items:center; gap:14px; cursor:pointer; transition:all 0.2s; }
+.mopt:hover { border-color:rgba(0,0,0,0.25); }
+.mopt.sel { border-color:var(--red); background:var(--red-soft); }
+.mopt input[type=radio] { accent-color:var(--red); width:16px; height:16px; flex-shrink:0; }
+.mopt-lbl { font-size:15px; font-weight:400; color:var(--black); }
+.mopt-sub { font-family:var(--sans); font-size:12px; color:var(--muted); margin-left:auto; }
+.summary-card { border:1px solid var(--border); padding:24px; position:sticky; top:80px; background:#fafafa; }
+.summary-title { font-family:var(--sans); font-size:12px; font-weight:500; color:var(--muted); margin-bottom:20px; text-transform:uppercase; letter-spacing:0.04em; }
+.sum-row { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border); }
+.sum-row:last-child { border-bottom:none; }
+.sum-key { font-family:var(--sans); font-size:13px; color:var(--muted); }
+.sum-val { font-family:var(--sans); font-size:14px; font-weight:500; color:var(--black); }
+.claim-note { font-family:var(--sans); font-size:12px; color:var(--muted); line-height:1.7; padding:14px 16px; border:1px solid var(--border); margin-bottom:24px; }
+
+/* ── STRIPE CONNECT ── */
+.stripe-strip { display:flex; align-items:center; justify-content:space-between; border:1px solid var(--border); padding:16px 20px; margin-bottom:20px; }
+.stripe-strip-left { display:flex; align-items:center; gap:14px; }
+.stripe-strip-title { font-family:var(--sans); font-size:14px; font-weight:400; color:var(--black); }
+.stripe-strip-sub { font-family:var(--sans); font-size:12px; color:var(--muted); margin-top:2px; }
+.stripe-strip-btn { font-family:var(--sans); font-size:13px; background:none; border:1px solid var(--border); padding:8px 16px; cursor:pointer; color:var(--black); transition:all 0.2s; }
+.stripe-strip-btn:hover { background:rgba(0,0,0,0.04); border-color:rgba(0,0,0,0.25); }
+.stripe-box { border:1px solid var(--border); padding:20px 22px; margin-bottom:24px; display:none; }
+.stripe-box.visible { display:block; }
+.stripe-box-title { font-family:var(--sans); font-size:12px; font-weight:500; text-transform:uppercase; letter-spacing:0.04em; color:var(--muted); margin-bottom:14px; }
+.stripe-status { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+.stripe-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.stripe-dot.connected { background:var(--green); }
+.stripe-dot.disconnected { background:rgba(0,0,0,0.15); }
+.stripe-dot.loading { background:rgba(0,0,0,0.15); animation:pulse 1.2s infinite; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-.stripe-status-text { font-family: var(--sans); font-size: 14px; color: var(--black); }
-.stripe-status-sub { font-family: var(--sans); font-size: 12px; color: var(--muted); margin-top: 2px; }
-.btn-stripe {
-  background: #635bff; color: #fff; border: none; padding: 12px 24px;
-  font-family: var(--sans); font-size: 13px; font-weight: 500; cursor: pointer;
-  transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px;
-}
-.btn-stripe:hover { opacity: 0.88; }
-.btn-stripe:disabled { opacity: 0.5; cursor: not-allowed; }
-.stripe-connected-detail { font-family: var(--sans); font-size: 13px; color: var(--green); background: var(--green-bg); padding: 10px 14px; display: none; }
-.stripe-connected-detail.visible { display: block; }
-.stripe-disconnect-btn {
-  font-family: var(--sans); font-size: 13px; background: none;
-  border: 1px solid var(--border); padding: 8px 14px; cursor: pointer; color: var(--muted); transition: all 0.2s;
-}
-.stripe-disconnect-btn:hover { border-color: var(--red); color: var(--red); }
+.stripe-status-text { font-family:var(--sans); font-size:14px; color:var(--black); }
+.stripe-status-sub { font-family:var(--sans); font-size:12px; color:var(--muted); margin-top:2px; }
+.btn-stripe { background:#635bff; color:#fff; border:none; padding:12px 24px; font-family:var(--sans); font-size:13px; font-weight:500; cursor:pointer; transition:all 0.2s; display:inline-flex; align-items:center; gap:8px; }
+.btn-stripe:hover { opacity:0.88; }
+.btn-stripe:disabled { opacity:0.5; cursor:not-allowed; }
+.stripe-connected-detail { font-family:var(--sans); font-size:13px; color:var(--green); background:var(--green-bg); padding:10px 14px; display:none; }
+.stripe-connected-detail.visible { display:block; }
+.stripe-disconnect-btn { font-family:var(--sans); font-size:13px; background:none; border:1px solid var(--border); padding:8px 14px; cursor:pointer; color:var(--muted); transition:all 0.2s; }
+.stripe-disconnect-btn:hover { border-color:var(--red); color:var(--red); }
 
-/* ─── SUCCESS ─── */
-.success-wrap { max-width: 520px; margin: 60px auto; text-align: center; }
-.success-icon { font-size: 40px; margin-bottom: 24px; opacity: 0.1; }
-.success-title { font-family: var(--serif); font-size: 48px; font-weight: 400; letter-spacing: -0.025em; margin-bottom: 12px; line-height: 1.1; color: var(--black); }
-.success-title em { font-style: italic; }
-.success-sub { font-size: 16px; font-weight: 300; color: var(--muted); line-height: 1.7; margin-bottom: 40px; }
-.success-detail { border: 1px solid var(--border); padding: 24px; text-align: left; margin-bottom: 36px; }
-.sd-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
-.sd-row:last-child { border-bottom: none; }
-.sd-key { font-family: var(--sans); font-size: 12px; color: var(--muted); }
-.sd-val { font-family: var(--sans); font-size: 14px; font-weight: 500; color: var(--black); }
+/* ── SUCCESS ── */
+.success-wrap { max-width:520px; margin:60px auto; text-align:center; }
+.success-icon { font-size:40px; margin-bottom:24px; opacity:0.1; }
+.success-title { font-family:var(--serif); font-size:48px; font-weight:400; letter-spacing:-0.025em; margin-bottom:12px; line-height:1.1; color:var(--black); }
+.success-title em { font-style:italic; }
+.success-sub { font-size:16px; font-weight:300; color:var(--muted); line-height:1.7; margin-bottom:40px; }
+.success-detail { border:1px solid var(--border); padding:24px; text-align:left; margin-bottom:36px; }
+.sd-row { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border); }
+.sd-row:last-child { border-bottom:none; }
+.sd-key { font-family:var(--sans); font-size:12px; color:var(--muted); }
+.sd-val { font-family:var(--sans); font-size:14px; font-weight:500; color:var(--black); }
 
-/* ─── MARKETING PAGES ─── */
-.mkt-page { background: var(--white); }
-.mkt-nav {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 28px 60px; border-bottom: 1px solid var(--border);
-}
-.mkt-nav-logo { font-family: var(--script); font-size: 30px; color: var(--black); line-height: 1; cursor: pointer; }
-.mkt-nav-links { display: flex; gap: 28px; align-items: center; }
-.mkt-nav-link {
-  font-family: var(--sans); font-size: 11px; font-weight: 400; letter-spacing: 0.10em;
-  text-transform: uppercase; color: var(--muted); cursor: pointer; background: none;
-  border: none; transition: color 0.18s; padding: 0;
-}
-.mkt-nav-link:hover { color: var(--black); }
-.mkt-nav-link.active { color: var(--black); font-weight: 600; }
-.mkt-nav-right { display: flex; gap: 10px; }
-.btn-mkt-ghost {
-  font-family: var(--sans); font-size: 11px; font-weight: 500; letter-spacing: 0.10em;
-  text-transform: uppercase; color: var(--black); background: transparent;
-  border: 1px solid rgba(0,0,0,0.22); padding: 9px 20px; cursor: pointer; transition: background 0.18s;
-}
-.btn-mkt-ghost:hover { background: rgba(0,0,0,0.04); }
-.btn-mkt-solid {
-  font-family: var(--sans); font-size: 11px; font-weight: 600; letter-spacing: 0.10em;
-  text-transform: uppercase; color: var(--white); background: var(--black); border: none;
-  padding: 9px 20px; cursor: pointer; transition: opacity 0.18s;
-}
-.btn-mkt-solid:hover { opacity: 0.85; }
-
-.mkt-hero { max-width: 860px; margin: 0 auto; padding: 80px 60px 60px; text-align: center; }
-.mkt-hero-eyebrow { font-family: var(--sans); font-size: 10px; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: var(--red); margin-bottom: 20px; }
-.mkt-hero-title { font-family: var(--serif); font-size: clamp(40px, 4.5vw, 60px); font-weight: 400; letter-spacing: -0.02em; line-height: 1.1; color: var(--black); margin-bottom: 20px; }
-.mkt-hero-title em { font-style: italic; }
-.mkt-hero-sub { font-family: var(--sans); font-size: 16px; font-weight: 300; color: var(--muted); line-height: 1.7; max-width: 560px; margin: 0 auto; }
-.mkt-rule { width: 32px; height: 2px; background: var(--red); margin: 24px auto; }
-.mkt-body { max-width: 860px; margin: 0 auto; padding: 0 60px 80px; }
-
-.mkt-step {
-  display: grid; grid-template-columns: 56px 1fr; gap: 28px; align-items: start;
-  padding: 32px 0; border-bottom: 1px solid var(--border);
-}
-.mkt-step:last-child { border-bottom: none; }
-.mkt-step-num { font-family: var(--serif); font-size: 42px; font-weight: 400; color: var(--red); line-height: 1; opacity: 0.7; }
-.mkt-step-title { font-family: var(--serif); font-size: 26px; font-weight: 400; letter-spacing: -0.01em; color: var(--black); margin-bottom: 8px; }
-.mkt-step-title em { font-style: italic; }
-.mkt-step-body { font-family: var(--sans); font-size: 14px; font-weight: 300; color: var(--muted); line-height: 1.75; }
+/* ── MARKETING PAGES ── */
+.mkt-page { background:var(--white); }
+.mkt-nav { display:flex; justify-content:space-between; align-items:center; padding:28px 60px; border-bottom:1px solid var(--border); }
+.mkt-nav-logo { font-family:var(--script); font-size:30px; color:var(--black); line-height:1; cursor:pointer; }
+.mkt-nav-links { display:flex; gap:28px; align-items:center; }
+.mkt-nav-link { font-family:var(--sans); font-size:11px; font-weight:400; letter-spacing:0.10em; text-transform:uppercase; color:var(--muted); cursor:pointer; background:none; border:none; transition:color 0.18s; padding:0; }
+.mkt-nav-link:hover { color:var(--black); }
+.mkt-nav-link.active { color:var(--black); font-weight:600; }
+.mkt-nav-right { display:flex; gap:10px; }
+.btn-mkt-ghost { font-family:var(--sans); font-size:11px; font-weight:500; letter-spacing:0.10em; text-transform:uppercase; color:var(--black); background:transparent; border:1px solid rgba(0,0,0,0.2); padding:9px 20px; cursor:pointer; transition:background 0.18s; }
+.btn-mkt-ghost:hover { background:rgba(0,0,0,0.04); }
+.btn-mkt-solid { font-family:var(--sans); font-size:11px; font-weight:600; letter-spacing:0.10em; text-transform:uppercase; color:var(--white); background:var(--black); border:none; padding:9px 20px; cursor:pointer; transition:opacity 0.18s; }
+.btn-mkt-solid:hover { opacity:0.85; }
+.mkt-hero { max-width:860px; margin:0 auto; padding:80px 60px 60px; text-align:center; }
+.mkt-hero-eyebrow { font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.22em; text-transform:uppercase; color:var(--red); margin-bottom:20px; }
+.mkt-hero-title { font-family:var(--serif); font-size:clamp(40px,4.5vw,60px); font-weight:400; letter-spacing:-0.02em; line-height:1.1; color:var(--black); margin-bottom:20px; }
+.mkt-hero-title em { font-style:italic; }
+.mkt-hero-sub { font-family:var(--sans); font-size:16px; font-weight:300; color:var(--muted); line-height:1.7; max-width:560px; margin:0 auto; }
+.mkt-rule { width:32px; height:2px; background:var(--red); margin:24px auto; }
+.mkt-body { max-width:860px; margin:0 auto; padding:0 60px 0; }
+.mkt-step { display:grid; grid-template-columns:56px 1fr; gap:28px; align-items:start; padding:32px 0; border-bottom:1px solid var(--border); }
+.mkt-step:last-child { border-bottom:none; }
+.mkt-step-num { font-family:var(--serif); font-size:42px; font-weight:400; color:var(--red); line-height:1; opacity:0.65; }
+.mkt-step-title { font-family:var(--serif); font-size:26px; font-weight:400; letter-spacing:-0.01em; color:var(--black); margin-bottom:8px; }
+.mkt-step-title em { font-style:italic; }
+.mkt-step-body { font-family:var(--sans); font-size:14px; font-weight:300; color:var(--muted); line-height:1.75; }
 
 /* Pricing */
-.pricing-card { border: 1px solid var(--red); background: #fafafa; padding: 36px 32px; position: relative; }
-.pricing-pill {
-  position: absolute; top: -13px; left: 32px; background: var(--red); color: var(--white);
-  font-family: var(--sans); font-size: 9px; font-weight: 600; letter-spacing: 0.14em;
-  text-transform: uppercase; padding: 4px 12px;
-}
-.pricing-plan { font-family: var(--sans); font-size: 11px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
-.pricing-price { font-family: var(--serif); font-size: 52px; font-weight: 400; letter-spacing: -0.03em; color: var(--black); line-height: 1; margin-bottom: 6px; }
-.pricing-price span { font-family: var(--sans); font-size: 14px; font-weight: 400; color: var(--muted); letter-spacing: 0; }
-.pricing-desc { font-family: var(--sans); font-size: 13px; font-weight: 300; color: var(--muted); line-height: 1.6; margin-bottom: 28px; }
-.pricing-features { list-style: none; margin-bottom: 32px; }
-.pricing-features li {
-  font-family: var(--sans); font-size: 13px; font-weight: 400; color: #333;
-  padding: 8px 0; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px;
-}
-.pricing-features li:last-child { border-bottom: none; }
-.feat-check { color: var(--red); font-size: 14px; flex-shrink: 0; }
+.pricing-card { border:1px solid var(--red); background:#fafafa; position:relative; padding:44px 40px; max-width:520px; margin:0 auto 48px; }
+.pricing-pill { position:absolute; top:-13px; left:36px; background:var(--red); color:var(--white); font-family:var(--sans); font-size:9px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; padding:4px 12px; }
+.pricing-plan { font-family:var(--sans); font-size:11px; font-weight:600; letter-spacing:0.16em; text-transform:uppercase; color:var(--muted); margin-bottom:16px; }
+.pricing-price { font-family:var(--serif); font-size:56px; font-weight:400; letter-spacing:-0.03em; color:var(--black); line-height:1; margin-bottom:6px; }
+.pricing-price span { font-family:var(--sans); font-size:14px; font-weight:400; color:var(--muted); letter-spacing:0; }
+.pricing-desc { font-family:var(--sans); font-size:13px; font-weight:300; color:var(--muted); line-height:1.6; margin-bottom:28px; }
+.pricing-features { list-style:none; margin-bottom:32px; }
+.pricing-features li { font-family:var(--sans); font-size:13px; font-weight:400; color:#333; padding:9px 0; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; }
+.pricing-features li:last-child { border-bottom:none; }
+.feat-check { color:var(--red); font-size:14px; flex-shrink:0; }
 
 /* About */
-.about-stat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); margin-bottom: 48px; }
-.about-stat { background: var(--white); padding: 28px 24px; text-align: center; }
-.about-stat-num { font-family: var(--serif); font-size: 44px; font-weight: 400; letter-spacing: -0.02em; color: var(--black); line-height: 1; margin-bottom: 8px; }
-.about-stat-lbl { font-family: var(--sans); font-size: 11px; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
-.about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; margin-bottom: 60px; align-items: center; }
-.about-label { font-family: var(--sans); font-size: 10px; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: var(--red); margin-bottom: 16px; }
-.about-title { font-family: var(--serif); font-size: 38px; font-weight: 400; letter-spacing: -0.02em; line-height: 1.15; color: var(--black); margin-bottom: 16px; }
-.about-title em { font-style: italic; }
-.about-body { font-family: var(--sans); font-size: 14px; font-weight: 300; color: var(--muted); line-height: 1.8; }
-.about-dark {
-  background: var(--black); padding: 48px 60px; display: flex;
-  justify-content: space-between; align-items: center; gap: 40px;
-}
-.about-dark-quote { font-family: var(--serif); font-size: 28px; font-weight: 300; color: rgba(255,255,255,0.88); line-height: 1.3; max-width: 500px; }
-.about-dark-quote em { font-style: italic; color: var(--white); }
+.about-grid { display:grid; grid-template-columns:1fr 1fr; gap:48px; margin-bottom:60px; align-items:center; }
+.about-label { font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.22em; text-transform:uppercase; color:var(--red); margin-bottom:16px; }
+.about-title { font-family:var(--serif); font-size:38px; font-weight:400; letter-spacing:-0.02em; line-height:1.15; color:var(--black); margin-bottom:16px; }
+.about-title em { font-style:italic; }
+.about-body { font-family:var(--sans); font-size:14px; font-weight:300; color:var(--muted); line-height:1.8; }
+.about-stat-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--border); border:1px solid var(--border); margin-bottom:48px; }
+.about-stat { background:var(--white); padding:32px 24px; text-align:center; }
+.about-stat-num { font-family:var(--serif); font-size:44px; font-weight:400; letter-spacing:-0.02em; color:var(--black); line-height:1; margin-bottom:8px; }
+.about-stat-lbl { font-family:var(--sans); font-size:11px; font-weight:400; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); }
+.about-dark { background:var(--black); padding:52px 60px; display:flex; justify-content:space-between; align-items:center; gap:40px; position:relative; overflow:hidden; }
+.about-dark::before { content:''; position:absolute; inset:0; background-image:var(--noise); opacity:0.04; pointer-events:none; }
+.about-dark-quote { font-family:var(--serif); font-size:28px; font-weight:300; color:rgba(255,255,255,0.88); line-height:1.3; max-width:500px; position:relative; z-index:1; }
+.about-dark-quote em { font-style:italic; color:var(--white); }
 
-/* ─── RESPONSIVE ─── */
+/* ── LEGAL PAGES ── */
+.legal-page { background:var(--white); }
+.legal-nav { display:flex; justify-content:space-between; align-items:center; padding:28px 60px; border-bottom:1px solid var(--border); }
+.legal-nav-logo { font-family:var(--script); font-size:30px; color:var(--black); line-height:1; cursor:pointer; }
+.legal-body { max-width:720px; margin:0 auto; padding:64px 60px 80px; }
+.legal-eyebrow { font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.22em; text-transform:uppercase; color:var(--red); margin-bottom:16px; }
+.legal-title { font-family:var(--serif); font-size:clamp(36px,4vw,52px); font-weight:400; letter-spacing:-0.02em; line-height:1.1; color:var(--black); margin-bottom:12px; }
+.legal-title em { font-style:italic; }
+.legal-meta { font-family:var(--sans); font-size:13px; font-weight:300; color:var(--muted-light); margin-bottom:40px; padding-bottom:32px; border-bottom:1px solid var(--border); }
+.legal-rule { width:24px; height:2px; background:var(--red); margin-bottom:40px; }
+.legal-section { margin-bottom:44px; }
+.legal-section-title { font-family:var(--sans); font-size:12px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; color:var(--black); margin-bottom:14px; padding-bottom:8px; border-bottom:1px solid var(--border); }
+.legal-p { font-family:var(--sans); font-size:14px; font-weight:300; color:var(--muted); line-height:1.85; margin-bottom:14px; }
+.legal-p:last-child { margin-bottom:0; }
+.legal-list { list-style:none; margin:12px 0 14px 0; }
+.legal-list li { font-family:var(--sans); font-size:14px; font-weight:300; color:var(--muted); line-height:1.75; padding:6px 0 6px 18px; position:relative; border-bottom:1px solid var(--border-light); }
+.legal-list li:last-child { border-bottom:none; }
+.legal-list li::before { content:'–'; position:absolute; left:0; color:var(--red); font-weight:400; }
+.legal-highlight { background:rgba(184,0,0,0.05); border-left:2px solid var(--red); padding:16px 20px; margin:20px 0; }
+.legal-highlight p { font-family:var(--sans); font-size:14px; font-weight:400; color:var(--black); line-height:1.7; margin:0; }
+.legal-contact { border:1px solid var(--border); padding:24px 28px; margin-top:20px; }
+.legal-contact-name { font-family:var(--sans); font-size:13px; font-weight:600; color:var(--black); margin-bottom:6px; }
+.legal-contact-line { font-family:var(--sans); font-size:13px; font-weight:300; color:var(--muted); margin-bottom:4px; }
+.legal-contact-line a { color:var(--red); text-decoration:none; }
+
+/* ── RESPONSIVE ── */
 @media (max-width:768px) {
-  .landing-nav { padding: 20px; }
-  .landing-nav-center { display: none; }
-  .landing-hero { padding: 80px 24px 60px; min-height: 80vh; }
-  .auth-layout { grid-template-columns: 1fr; }
-  .auth-brand { display: none; }
-  .auth-form-panel { padding: 40px 24px; }
-  .dash-layout { grid-template-columns: 1fr; }
-  .sidebar { display: none; }
-  .main { padding: 24px 20px; }
-  .bal-card { flex-direction: column; align-items: stretch; gap: 24px; padding: 24px; }
-  .claim-layout { grid-template-columns: 1fr; }
-  .col-5 { grid-template-columns: 1fr 100px; }
-  .col-4 { grid-template-columns: 1fr 100px; }
-  .col-4c { grid-template-columns: 1fr 100px; }
-  .mkt-nav { padding: 20px; }
-  .mkt-nav-links { display: none; }
-  .mkt-hero { padding: 40px 24px; }
-  .mkt-body { padding: 0 24px 60px; }
-  .about-grid { grid-template-columns: 1fr; }
-  .about-stat-grid { grid-template-columns: 1fr; }
-  .about-dark { flex-direction: column; padding: 32px 24px; }
+  .landing-nav { padding:20px; }
+  .landing-nav-center { display:none; }
+  .landing-hero { padding:80px 24px 60px; min-height:80vh; }
+  .auth-layout { grid-template-columns:1fr; }
+  .auth-brand { display:none; }
+  .auth-form-panel { padding:40px 24px; }
+  .dash-layout { grid-template-columns:1fr; }
+  .sidebar { display:none; }
+  .main, .main-content { padding:24px 20px; }
+  .bal-card { flex-direction:column; align-items:stretch; gap:24px; padding:24px; }
+  .claim-layout { grid-template-columns:1fr; }
+  .col-5 { grid-template-columns:1fr 100px; }
+  .col-4 { grid-template-columns:1fr 100px; }
+  .col-4c { grid-template-columns:1fr 100px; }
+  .mkt-nav { padding:20px; }
+  .mkt-nav-links { display:none; }
+  .mkt-hero { padding:40px 24px; }
+  .mkt-body { padding:0 24px 60px; }
+  .about-grid { grid-template-columns:1fr; }
+  .about-stat-grid { grid-template-columns:1fr; }
+  .about-dark { flex-direction:column; padding:32px 24px; }
+  .legal-nav { padding:20px; }
+  .legal-body { padding:40px 24px 60px; }
+  .footer-top { grid-template-columns:1fr; gap:32px; }
+  .footer-inner { padding:40px 24px 32px; }
+  .footer-bottom { flex-direction:column; gap:12px; text-align:center; }
+  .partners-section { position:relative; }
 }
 </style>
 </head>
 <body>
 
-<!-- ════════════════════════════════════
-     LANDING PAGE
-════════════════════════════════════ -->
+<!-- ════════════════ FOOTER TEMPLATE (reused) ════════════════ -->
+<template id="footer-tpl">
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-top">
+        <div>
+          <span class="footer-brand-name">Davincii</span>
+          <div class="footer-red-line"></div>
+          <p class="footer-brand-desc">Music publishing administration — we register, track, and collect every royalty you're owed.</p>
+        </div>
+        <div>
+          <div class="footer-col-title">Navigate</div>
+          <div class="footer-links">
+            <button class="footer-link" onclick="navigate('/')">Home</button>
+            <button class="footer-link" onclick="navigate('/howitworks')">How it works</button>
+            <button class="footer-link" onclick="navigate('/about')">About</button>
+            <button class="footer-link" onclick="navigate('/login')">Sign in</button>
+            <button class="footer-link" onclick="navigate('/signup')">Get started</button>
+          </div>
+        </div>
+        <div>
+          <div class="footer-col-title">Contact</div>
+          <div class="footer-links">
+            <a class="footer-contact-email" href="mailto:info@davincii.co">info@davincii.co</a>
+            <span class="footer-link" style="cursor:default">For artists &amp; inquiries</span>
+          </div>
+          <div style="margin-top:28px">
+            <div class="footer-col-title">Legal</div>
+            <div class="footer-links" style="margin-top:8px">
+              <button class="footer-legal-link" onclick="navigate('/terms')" style="background:none;border:none;cursor:pointer;padding:0;text-align:left">Terms of Service</button>
+              <button class="footer-legal-link" onclick="navigate('/privacy')" style="background:none;border:none;cursor:pointer;padding:0;text-align:left">Privacy Policy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span class="footer-copy">&copy; 2026 Davincii. All rights reserved.</span>
+        <span class="footer-copy" style="letter-spacing:0.08em">davincii.co</span>
+      </div>
+    </div>
+  </footer>
+</template>
+
+<!-- ════════════════ LANDING ════════════════ -->
 <div class="screen active" id="screen-landing">
   <nav class="landing-nav">
     <div class="landing-nav-logo">Davincii</div>
     <div class="landing-nav-center">
       <button class="landing-nav-link" onclick="navigate('/howitworks')">How it works</button>
-      <button class="landing-nav-link" onclick="navigate('/pricing')">Pricing</button>
       <button class="landing-nav-link" onclick="navigate('/about')">About</button>
     </div>
     <div class="landing-nav-right">
@@ -540,62 +465,80 @@ select.field { color: var(--black); }
   </nav>
 
   <div class="landing-hero">
-    <h1 class="landing-headline">
-      Your royalties,<br><em>finally</em> collected.
-    </h1>
+    <h1 class="landing-headline">Collect royalties.</h1>
     <div class="headline-rule"></div>
     <div class="landing-cta-row">
       <button class="btn-cta-main" onclick="navigate('/signup')">Get started &rarr;</button>
       <button class="btn-cta-secondary" onclick="navigate('/login')">Sign in to portal</button>
     </div>
+
+    <!-- PARTNERS STRIP -->
+    <div class="partners-section">
+      <div class="partners-eyebrow">Registered &amp; collected across 12+ platforms worldwide</div>
+      <div class="partners-track-wrap">
+        <div class="partners-track" id="partners-track">
+          <div class="partner-item"><svg viewBox="0 0 110 44" class="partner-svg" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="110" height="44" rx="4" fill="currentColor" opacity="0.06"/><text x="55" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="2" text-anchor="middle">ASCAP</text></svg></div>
+          <div class="partner-item"><svg viewBox="0 0 80 44" class="partner-svg" xmlns="http://www.w3.org/2000/svg"><circle cx="40" cy="22" r="20" fill="currentColor" opacity="0.08"/><text x="40" y="28" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="1.5" text-anchor="middle">BMI</text></svg></div>
+          <div class="partner-item"><svg viewBox="0 0 105 44" class="partner-svg" xmlns="http://www.w3.org/2000/svg"><line x1="0" y1="42" x2="105" y2="42" stroke="currentColor" stroke-width="1.5" opacity="0.3"/><text x="52" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="2" text-anchor="middle">SESAC</text></svg></div>
+          <div class="partner-item"><svg viewBox="0 0 90 44" class="partner-svg" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="6" width="86" height="32" rx="3" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"/><text x="45" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="18" fill="currentColor" letter-spacing="2" text-anchor="middle">MLC</text></svg></div>
+          <div class="partner-item"><svg viewBox="0 0 140 44" class="partner-svg" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="22" r="8" fill="currentColor" opacity="0.5"/><circle cx="12" cy="22" r="4" fill="currentColor" opacity="0.8"/><text x="28" y="28" font-family="Georgia,serif" font-weight="400" font-size="17" fill="currentColor" letter-spacing="0.3">Songtrust</text></svg></div>
+          <div class="partner-item"><svg viewBox="0 0 155 44" class="partner-svg" xmlns="http://www.w3.org/2000/svg"><text x="0" y="18" font-family="Arial Black,sans-serif" font-weight="900" font-size="13" fill="currentColor" letter-spacing="1.5">HARRY FOX</text><text x="0" y="36" font-family="Arial,sans-serif" font-weight="300" font-size="11" fill="currentColor" letter-spacing="4" opacity="0.7">AGENCY</text></svg></div>
+          <div class="partner-item"><svg viewBox="0 0 82 44" class="partner-svg" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="8" width="4" height="28" fill="currentColor" opacity="0.6"/><text x="12" y="30" font-family="Arial Black,sans-serif" font-weight="900" font-size="22" fill="currentColor" letter-spacing="3">PPL</text></svg></div>
+          <div class="partner-item"><svg viewBox="0 0 155 44" class="partner-svg" xmlns="http://www.w3.org/2000/svg"><text x="0" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="22" fill="currentColor">PRS</text><text x="52" y="29" font-family="Arial,sans-serif" font-weight="300" font-size="14" fill="currentColor" letter-spacing="0.5" opacity="0.75">for Music</text></svg></div>
+          <div class="partner-item"><svg viewBox="0 0 115 44" class="partner-svg" xmlns="http://www.w3.org/2000/svg"><path d="M 0 38 Q 57 8 115 38" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.25"/><text x="57" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="1.5" text-anchor="middle">SOCAN</text></svg></div>
+          <div class="partner-item"><svg viewBox="0 0 110 44" class="partner-svg" xmlns="http://www.w3.org/2000/svg"><line x1="0" y1="4" x2="0" y2="40" stroke="currentColor" stroke-width="2" opacity="0.35"/><text x="10" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="1.5">SACEM</text></svg></div>
+          <div class="partner-item"><svg viewBox="0 0 100 44" class="partner-svg" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="100" height="44" rx="22" fill="currentColor" opacity="0.07"/><text x="50" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="2" text-anchor="middle">GEMA</text></svg></div>
+          <div class="partner-item"><svg viewBox="0 0 85 44" class="partner-svg" xmlns="http://www.w3.org/2000/svg"><line x1="0" y1="42" x2="85" y2="42" stroke="currentColor" stroke-width="1.5" opacity="0.3"/><line x1="0" y1="2" x2="85" y2="2" stroke="currentColor" stroke-width="1.5" opacity="0.3"/><text x="42" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="22" fill="currentColor" letter-spacing="2" text-anchor="middle">SIAE</text></svg></div>
+          <div class="partner-item"><svg viewBox="0 0 160 44" class="partner-svg" xmlns="http://www.w3.org/2000/svg"><text x="0" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="1">APRA</text><line x1="82" y1="8" x2="82" y2="36" stroke="currentColor" stroke-width="1.5" opacity="0.3"/><text x="90" y="29" font-family="Arial,sans-serif" font-weight="300" font-size="18" fill="currentColor" letter-spacing="1" opacity="0.8">AMCOS</text></svg></div>
+          <!-- DUPLICATE SET for seamless marquee -->
+          <div class="partner-item"><svg viewBox="0 0 110 44" class="partner-svg" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="110" height="44" rx="4" fill="currentColor" opacity="0.06"/><text x="55" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="2" text-anchor="middle">ASCAP</text></svg></div>
+          <div class="partner-item"><svg viewBox="0 0 80 44" class="partner-svg" xmlns="http://www.w3.org/2000/svg"><circle cx="40" cy="22" r="20" fill="currentColor" opacity="0.08"/><text x="40" y="28" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="1.5" text-anchor="middle">BMI</text></svg></div>
+          <div class="partner-item"><svg viewBox="0 0 105 44" class="partner-svg" xmlns="http://www.w3.org/2000/svg"><line x1="0" y1="42" x2="105" y2="42" stroke="currentColor" stroke-width="1.5" opacity="0.3"/><text x="52" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="2" text-anchor="middle">SESAC</text></svg></div>
+          <div class="partner-item"><svg viewBox="0 0 90 44" class="partner-svg" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="6" width="86" height="32" rx="3" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"/><text x="45" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="18" fill="currentColor" letter-spacing="2" text-anchor="middle">MLC</text></svg></div>
+          <div class="partner-item"><svg viewBox="0 0 140 44" class="partner-svg" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="22" r="8" fill="currentColor" opacity="0.5"/><circle cx="12" cy="22" r="4" fill="currentColor" opacity="0.8"/><text x="28" y="28" font-family="Georgia,serif" font-weight="400" font-size="17" fill="currentColor" letter-spacing="0.3">Songtrust</text></svg></div>
+          <div class="partner-item"><svg viewBox="0 0 155 44" class="partner-svg" xmlns="http://www.w3.org/2000/svg"><text x="0" y="18" font-family="Arial Black,sans-serif" font-weight="900" font-size="13" fill="currentColor" letter-spacing="1.5">HARRY FOX</text><text x="0" y="36" font-family="Arial,sans-serif" font-weight="300" font-size="11" fill="currentColor" letter-spacing="4" opacity="0.7">AGENCY</text></svg></div>
+          <div class="partner-item"><svg viewBox="0 0 82 44" class="partner-svg" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="8" width="4" height="28" fill="currentColor" opacity="0.6"/><text x="12" y="30" font-family="Arial Black,sans-serif" font-weight="900" font-size="22" fill="currentColor" letter-spacing="3">PPL</text></svg></div>
+          <div class="partner-item"><svg viewBox="0 0 155 44" class="partner-svg" xmlns="http://www.w3.org/2000/svg"><text x="0" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="22" fill="currentColor">PRS</text><text x="52" y="29" font-family="Arial,sans-serif" font-weight="300" font-size="14" fill="currentColor" letter-spacing="0.5" opacity="0.75">for Music</text></svg></div>
+          <div class="partner-item"><svg viewBox="0 0 115 44" class="partner-svg" xmlns="http://www.w3.org/2000/svg"><path d="M 0 38 Q 57 8 115 38" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.25"/><text x="57" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="1.5" text-anchor="middle">SOCAN</text></svg></div>
+          <div class="partner-item"><svg viewBox="0 0 110 44" class="partner-svg" xmlns="http://www.w3.org/2000/svg"><line x1="0" y1="4" x2="0" y2="40" stroke="currentColor" stroke-width="2" opacity="0.35"/><text x="10" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="1.5">SACEM</text></svg></div>
+          <div class="partner-item"><svg viewBox="0 0 100 44" class="partner-svg" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="100" height="44" rx="22" fill="currentColor" opacity="0.07"/><text x="50" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="2" text-anchor="middle">GEMA</text></svg></div>
+          <div class="partner-item"><svg viewBox="0 0 85 44" class="partner-svg" xmlns="http://www.w3.org/2000/svg"><line x1="0" y1="42" x2="85" y2="42" stroke="currentColor" stroke-width="1.5" opacity="0.3"/><line x1="0" y1="2" x2="85" y2="2" stroke="currentColor" stroke-width="1.5" opacity="0.3"/><text x="42" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="22" fill="currentColor" letter-spacing="2" text-anchor="middle">SIAE</text></svg></div>
+          <div class="partner-item"><svg viewBox="0 0 160 44" class="partner-svg" xmlns="http://www.w3.org/2000/svg"><text x="0" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="1">APRA</text><line x1="82" y1="8" x2="82" y2="36" stroke="currentColor" stroke-width="1.5" opacity="0.3"/><text x="90" y="29" font-family="Arial,sans-serif" font-weight="300" font-size="18" fill="currentColor" letter-spacing="1" opacity="0.8">AMCOS</text></svg></div>
+        </div>
+      </div>
+    </div>
   </div>
+
+  <div id="landing-footer"></div>
 </div>
 
-<!-- ════════════════════════════════════
-     LOGIN
-════════════════════════════════════ -->
+<!-- ════════════════ LOGIN ════════════════ -->
 <div class="screen" id="screen-login">
   <div class="auth-layout">
     <div class="auth-brand">
       <div class="auth-brand-logo">Davincii</div>
       <div class="auth-brand-center">
         <div class="auth-brand-rule"></div>
-        <h2 class="auth-brand-tagline">
-          Every stream,<br>every spin,<br><em>every dollar.</em>
-        </h2>
-        <p class="auth-brand-sub">
-          We track, register, and collect your music royalties from every platform — so nothing goes unclaimed.
-        </p>
+        <h2 class="auth-brand-tagline">Every stream,<br>every spin,<br><em>every dollar.</em></h2>
+        <p class="auth-brand-sub">We track, register, and collect your music royalties from every platform — so nothing goes unclaimed.</p>
       </div>
-      <div class="auth-brand-footer">davincii.co</div>
+      <div class="auth-brand-footer">info@davincii.co</div>
     </div>
-
     <div class="auth-form-panel">
       <div class="auth-form-inner">
         <h1 class="auth-form-title">Welcome <em>back.</em></h1>
         <div class="auth-title-rule"></div>
         <p class="auth-form-sub">Sign in to your artist portal to view your earnings and claim payments.</p>
-
         <div class="error-box" id="login-error"></div>
-
         <form id="login-form" action="/api/auth/login" method="POST" autocomplete="on" onsubmit="event.preventDefault(); doLogin();">
         <label class="field-lbl">Email address</label>
         <input class="field" type="email" id="login-email" name="email" autocomplete="username" placeholder="you@example.com">
-
         <label class="field-lbl">Password</label>
         <input class="field" type="password" id="login-password" name="password" autocomplete="current-password" placeholder="Enter your password">
-
         <button class="auth-forgot" type="button" onclick="navigate('/recover')">Forgot your password?</button>
-
         <button class="btn-primary" id="login-btn" type="submit" style="margin-bottom:22px">Sign in &rarr;</button>
         </form>
-
-        <div class="divider">
-          <div class="divider-line"></div>
-          <span class="divider-text">or continue with</span>
-          <div class="divider-line"></div>
-        </div>
-
+        <div class="divider"><div class="divider-line"></div><span class="divider-text">or continue with</span><div class="divider-line"></div></div>
         <button class="btn-social" onclick="doGoogleLogin()">
           <svg class="btn-social-icon" viewBox="0 0 18 18"><path d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
           Continue with Google
@@ -608,61 +551,40 @@ select.field { color: var(--black); }
           <svg class="btn-social-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><circle cx="12" cy="16" r="1"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           Sign in with Passkey
         </button>
-
-        <div class="auth-link">
-          Don't have an account? <a onclick="navigate('/signup')">Create one</a>
-        </div>
+        <div class="auth-link">Don't have an account? <a onclick="navigate('/signup')">Create one</a></div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ════════════════════════════════════
-     SIGN UP
-════════════════════════════════════ -->
+<!-- ════════════════ SIGN UP ════════════════ -->
 <div class="screen" id="screen-signup">
   <div class="auth-layout">
     <div class="auth-brand">
       <div class="auth-brand-logo">Davincii</div>
       <div class="auth-brand-center">
         <div class="auth-brand-rule"></div>
-        <h2 class="auth-brand-tagline">
-          Your music<br>earns more<br><em>than you know.</em>
-        </h2>
-        <p class="auth-brand-sub">
-          Join free. No upfront cost — we only take 15% of what we actually recover for you.
-        </p>
+        <h2 class="auth-brand-tagline">Your music<br>earns more<br><em>than you know.</em></h2>
+        <p class="auth-brand-sub">Join free. No upfront cost — we only take 15% of what we actually recover for you.</p>
       </div>
-      <div class="auth-brand-footer">davincii.co</div>
+      <div class="auth-brand-footer">info@davincii.co</div>
     </div>
-
     <div class="auth-form-panel">
       <div class="auth-form-inner">
         <h1 class="auth-form-title">Create your <em>account.</em></h1>
         <div class="auth-title-rule"></div>
         <p class="auth-form-sub">Start collecting the royalties you're owed. No upfront cost, ever.</p>
-
         <div class="error-box" id="signup-error"></div>
-
         <form id="signup-form" action="/api/auth/signup" method="POST" autocomplete="on" onsubmit="event.preventDefault(); doSignup();">
         <label class="field-lbl">Full name</label>
         <input class="field" type="text" id="signup-name" name="name" autocomplete="name" placeholder="Your name">
-
         <label class="field-lbl">Email address</label>
         <input class="field" type="email" id="signup-email" name="email" autocomplete="email" placeholder="you@example.com">
-
         <label class="field-lbl">Password</label>
         <input class="field" type="password" id="signup-password" name="password" autocomplete="new-password" placeholder="Minimum 8 characters">
-
         <button class="btn-primary" id="signup-btn" type="submit" style="margin-bottom:22px">Create account &rarr;</button>
         </form>
-
-        <div class="divider">
-          <div class="divider-line"></div>
-          <span class="divider-text">or continue with</span>
-          <div class="divider-line"></div>
-        </div>
-
+        <div class="divider"><div class="divider-line"></div><span class="divider-text">or continue with</span><div class="divider-line"></div></div>
         <button class="btn-social" onclick="doGoogleLogin()">
           <svg class="btn-social-icon" viewBox="0 0 18 18"><path d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
           Continue with Google
@@ -671,16 +593,13 @@ select.field { color: var(--black); }
           <svg class="btn-social-icon" viewBox="0 0 18 18"><path d="M12.27.52c.14 1.08-.3 2.15-1.01 2.93-.72.78-1.83 1.37-2.92 1.3-.16-1.07.34-2.17 1.01-2.88C10.07 1.1 11.24.52 12.27.52zM15.98 12.44c-.26.59-.57 1.14-.94 1.65-.49.69-.9 1.17-1.22 1.43-.49.44-1.01.67-1.58.68-.4 0-.89-.12-1.45-.35-.57-.23-1.09-.35-1.57-.35-.5 0-1.04.12-1.61.35-.58.23-1.04.36-1.4.37-.55.02-1.08-.22-1.6-.68-.35-.29-.78-.8-1.29-1.51C3.69 13.14 3.1 12 2.65 10.68c-.49-1.41-.74-2.77-.74-4.09 0-1.51.33-2.81.99-3.89.52-.87 1.21-1.56 2.08-2.07.87-.51 1.81-.77 2.82-.79.44 0 1.02.14 1.74.4.72.27 1.18.4 1.38.4.15 0 .67-.16 1.54-.47.82-.29 1.52-.41 2.1-.37 1.55.12 2.72.73 3.49 1.83-1.39.84-2.07 2.01-2.06 3.52.01 1.17.44 2.15 1.27 2.92.38.36.8.63 1.27.83-.1.29-.21.58-.35.86z" fill="#000"/></svg>
           Continue with Apple
         </button>
-
         <div class="auth-link">Already have an account? <a onclick="navigate('/login')">Sign in</a></div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ════════════════════════════════════
-     RECOVER
-════════════════════════════════════ -->
+<!-- ════════════════ RECOVER ════════════════ -->
 <div class="screen" id="screen-recover">
   <div class="auth-layout">
     <div class="auth-brand">
@@ -690,7 +609,7 @@ select.field { color: var(--black); }
         <h2 class="auth-brand-tagline">We'll get<br>you back<br><em>in.</em></h2>
         <p class="auth-brand-sub">Enter your email and we'll send a secure reset link right away.</p>
       </div>
-      <div class="auth-brand-footer">davincii.co</div>
+      <div class="auth-brand-footer">info@davincii.co</div>
     </div>
     <div class="auth-form-panel">
       <div class="auth-form-inner">
@@ -708,15 +627,12 @@ select.field { color: var(--black); }
   </div>
 </div>
 
-<!-- ════════════════════════════════════
-     HOW IT WORKS
-════════════════════════════════════ -->
+<!-- ════════════════ HOW IT WORKS ════════════════ -->
 <div class="screen mkt-page" id="screen-howitworks">
   <nav class="mkt-nav">
     <span class="mkt-nav-logo" onclick="navigate('/')">Davincii</span>
     <div class="mkt-nav-links">
       <button class="mkt-nav-link active" onclick="navigate('/howitworks')">How it works</button>
-      <button class="mkt-nav-link" onclick="navigate('/pricing')">Pricing</button>
       <button class="mkt-nav-link" onclick="navigate('/about')">About</button>
     </div>
     <div class="mkt-nav-right">
@@ -735,36 +651,35 @@ select.field { color: var(--black); }
       <div class="mkt-step-num">01</div>
       <div>
         <div class="mkt-step-title">You sign up &amp; <em>share your catalog</em></div>
-        <p class="mkt-step-body">Create your free account and submit your songs — titles, ISRC codes, co-writer splits, and release dates. We handle everything from there.</p>
+        <p class="mkt-step-body">Create your free account and submit your songs — titles, ISRC codes, co-writer splits, and release dates. We handle everything from there. No upfront cost, no contracts that lock you in.</p>
       </div>
     </div>
     <div class="mkt-step">
       <div class="mkt-step-num">02</div>
       <div>
         <div class="mkt-step-title">We <em>register</em> your music everywhere</div>
-        <p class="mkt-step-body">Davincii registers your songs with ASCAP, BMI, SoundExchange, the MLC, and Songtrust. Most artists miss royalties simply because their music was never registered properly — we fix that.</p>
+        <p class="mkt-step-body">Davincii registers your songs with ASCAP, BMI, SoundExchange, the MLC, and Songtrust. Most artists miss royalties simply because their music was never registered properly — we fix that across 12+ platforms.</p>
       </div>
     </div>
     <div class="mkt-step">
       <div class="mkt-step-num">03</div>
       <div>
         <div class="mkt-step-title">We <em>track &amp; collect</em> every quarter</div>
-        <p class="mkt-step-body">Performing rights royalties, digital performance royalties, mechanical royalties — we audit every platform every quarter and collect on your behalf.</p>
+        <p class="mkt-step-body">Performing rights royalties, digital performance royalties, mechanical royalties — we audit every platform every quarter and collect on your behalf. Nothing slips through.</p>
       </div>
     </div>
     <div class="mkt-step">
       <div class="mkt-step-num">04</div>
       <div>
         <div class="mkt-step-title">You <em>get paid</em> directly</div>
-        <p class="mkt-step-body">Log in to your Davincii portal, see exactly what was collected and from where, and claim your balance via ACH, PayPal, or Stripe. We take 15% of what we collect — that's it.</p>
+        <p class="mkt-step-body">Log in to your Davincii portal, see exactly what was collected and from where, and claim your balance via ACH, PayPal, or Stripe. We take 15% of what we collect — that's it. You keep 100% of your copyrights.</p>
       </div>
     </div>
   </div>
+  <div id="howitworks-footer" style="margin-top:80px"></div>
 </div>
 
-<!-- ════════════════════════════════════
-     PRICING
-════════════════════════════════════ -->
+<!-- ════════════════ PRICING ════════════════ -->
 <div class="screen mkt-page" id="screen-pricing">
   <nav class="mkt-nav">
     <span class="mkt-nav-logo" onclick="navigate('/')">Davincii</span>
@@ -810,15 +725,12 @@ select.field { color: var(--black); }
   </div>
 </div>
 
-<!-- ════════════════════════════════════
-     ABOUT
-════════════════════════════════════ -->
+<!-- ════════════════ ABOUT ════════════════ -->
 <div class="screen mkt-page" id="screen-about">
   <nav class="mkt-nav">
     <span class="mkt-nav-logo" onclick="navigate('/')">Davincii</span>
     <div class="mkt-nav-links">
       <button class="mkt-nav-link" onclick="navigate('/howitworks')">How it works</button>
-      <button class="mkt-nav-link" onclick="navigate('/pricing')">Pricing</button>
       <button class="mkt-nav-link active" onclick="navigate('/about')">About</button>
     </div>
     <div class="mkt-nav-right">
@@ -842,9 +754,9 @@ select.field { color: var(--black); }
       <div>
         <div class="about-label">The problem</div>
         <h2 class="about-title">Billions in royalties go <em>uncollected</em> every year.</h2>
-        <p class="about-body">Most independent artists never see the full value of their music because royalty collection is fragmented across dozens of platforms, each with their own registration requirements and payout cycles.</p>
+        <p class="about-body">Most independent artists never see the full value of their music because royalty collection is fragmented across dozens of platforms, each with their own registration requirements and payout cycles. A song can generate income from performing rights, digital performance rights, and mechanical rights — and miss out on all three simply because no one was watching.</p>
       </div>
-      <div style="background:#f5f4f2;padding:40px;display:flex;flex-direction:column;gap:20px">
+      <div style="background:var(--off-white);padding:40px;display:flex;flex-direction:column;gap:20px">
         <div style="font-family:var(--sans);font-size:10px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted)">Where royalties come from</div>
         <div style="border-bottom:1px solid var(--border);padding-bottom:16px">
           <div style="font-family:var(--serif);font-size:18px;color:var(--black);margin-bottom:4px">Performing Rights</div>
@@ -860,24 +772,226 @@ select.field { color: var(--black); }
         </div>
       </div>
     </div>
-    <div class="about-dark">
+    <div class="about-dark" style="margin-bottom:0">
       <div class="about-dark-quote">"Collect what's owed to you."</div>
-      <div>
-        <button class="btn-primary" style="white-space:nowrap;width:auto;background:var(--white);color:var(--black)" onclick="navigate('/signup')">Join Davincii &rarr;</button>
+      <div style="position:relative;z-index:1;flex-shrink:0">
+        <button class="btn-primary" style="width:auto;white-space:nowrap" onclick="navigate('/signup')">Join Davincii &rarr;</button>
       </div>
     </div>
   </div>
+  <div id="about-footer"></div>
 </div>
 
-<!-- ════════════════════════════════════
-     DASHBOARD
-════════════════════════════════════ -->
+<!-- ════════════════ TERMS OF SERVICE ════════════════ -->
+<div class="screen legal-page" id="screen-terms">
+  <nav class="legal-nav">
+    <span class="legal-nav-logo" onclick="navigate('/')">Davincii</span>
+    <button class="btn-mkt-ghost" onclick="navigate('/')">&larr; Back</button>
+  </nav>
+  <div class="legal-body">
+    <div class="legal-eyebrow">Legal</div>
+    <h1 class="legal-title">Terms of <em>Service</em></h1>
+    <div class="legal-meta">Effective Date: March 2026 &nbsp;&middot;&nbsp; Governed by the laws of the State of New York &nbsp;&middot;&nbsp; Questions: <a href="mailto:info@davincii.co" style="color:var(--red);text-decoration:none">info@davincii.co</a></div>
+    <div class="legal-section">
+      <div class="legal-section-title">Overview</div>
+      <p class="legal-p">These Terms of Service govern your access to and use of the Davincii platform, website (davincii.co), and artist portal, operated by Davincii LLC, a limited liability company organized under the laws of the State of New York. By creating an account or using the Service, you agree to be bound by these Terms.</p>
+      <p class="legal-p">Davincii provides music publishing administration services — registering your compositions with PROs, SoundExchange, the MLC, Songtrust, and other collection societies, and collecting and disbursing royalty income on your behalf. Davincii does not acquire copyright ownership in any compositions. Artists retain 100% of their copyrights at all times.</p>
+    </div>
+    <div class="legal-section">
+      <div class="legal-section-title">Eligibility &amp; Account</div>
+      <p class="legal-p">You must be at least 18 years of age to use the Service. By registering, you represent that you have full legal authority to enter into a binding agreement with Davincii and to grant the administrative rights described herein. You are responsible for maintaining the confidentiality of your login credentials and all activity that occurs under your account.</p>
+    </div>
+    <div class="legal-section">
+      <div class="legal-section-title">Publishing Administration Agreement</div>
+      <p class="legal-p">Use of Davincii's royalty collection services requires execution of a separate Music Publishing Administration Agreement. Key terms include:</p>
+      <ul class="legal-list">
+        <li>15% administration fee retained on all Gross Receipts collected on your behalf</li>
+        <li>Non-exclusive grant of administrative rights for the duration of the term</li>
+        <li>Operational cost recovery including third-party registration fees ($100 per co-writer registration)</li>
+        <li>Quarterly accounting statements and payment of Net Receipts above $50.00</li>
+        <li>12-month Collection Tail Period following termination</li>
+        <li>Exclusive administration rights during the term — artists may not appoint other administrators for compositions covered under the Agreement</li>
+      </ul>
+      <div class="legal-highlight"><p>No upfront fees are charged. All compensation is deducted exclusively from royalty income collected on your behalf. If no royalties are collected, you owe nothing.</p></div>
+    </div>
+    <div class="legal-section">
+      <div class="legal-section-title">Artist Responsibilities</div>
+      <p class="legal-p">You agree to provide accurate and complete metadata for all compositions submitted, including song titles, co-writer names and splits, ISRC and ISWC codes, release dates, and PRO affiliation. Davincii is not responsible for registration failures or missed royalties resulting from inaccurate or incomplete information provided by you.</p>
+    </div>
+    <div class="legal-section">
+      <div class="legal-section-title">Synchronization Rights</div>
+      <p class="legal-p">Davincii does not license synchronization rights (use of your music in film, TV, or advertising) without your prior written approval on a case-by-case basis.</p>
+    </div>
+    <div class="legal-section">
+      <div class="legal-section-title">Payments &amp; Accounting</div>
+      <p class="legal-p">Quarterly Accounting Statements are rendered within 45 days following the close of each calendar quarter. Net Receipts are remitted concurrently, provided the balance exceeds $50.00. Payments are processed via ACH, PayPal, Stripe, or other agreed electronic methods. Davincii does not directly store bank account or card numbers — payment credentials are handled exclusively by Stripe.</p>
+      <p class="legal-p">You have the right to audit Davincii's records once per calendar year upon 30 days' written notice, at your sole expense. Accounting Statements are deemed final unless you object in writing within 60 days of receipt.</p>
+    </div>
+    <div class="legal-section">
+      <div class="legal-section-title">Termination</div>
+      <p class="legal-p">Either party may terminate upon 30 days' written notice. Following termination, Davincii will render a final Accounting Statement and remit all Net Receipts within 60 days. The 12-month Collection Tail Period applies — Davincii retains the right to collect and take its administration fee on all royalties generated during the term, regardless of when received.</p>
+    </div>
+    <div class="legal-section">
+      <div class="legal-section-title">Representations &amp; Warranties</div>
+      <p class="legal-p">You represent that you have full authority to enter these Terms, that you own or control the compositions submitted, that you have not previously encumbered those rights in a conflicting manner, and that your compositions do not infringe any third-party rights. You agree to indemnify Davincii from claims arising from any breach of these representations.</p>
+    </div>
+    <div class="legal-section">
+      <div class="legal-section-title">Limitation of Liability</div>
+      <p class="legal-p">Davincii makes no guarantee as to the amount of royalties that may be collected. Davincii's aggregate liability shall not exceed the total administration fees retained in the 12 months preceding any claim. Davincii is not liable for indirect, incidental, or consequential damages of any kind.</p>
+    </div>
+    <div class="legal-section">
+      <div class="legal-section-title">Dispute Resolution &amp; Governing Law</div>
+      <p class="legal-p">These Terms are governed by the laws of the State of New York. Disputes shall first be submitted to good-faith mediation in New York, NY. If unresolved within 30 days, disputes proceed to binding arbitration under the Commercial Arbitration Rules of the American Arbitration Association. The prevailing party recovers reasonable attorneys' fees.</p>
+    </div>
+    <div class="legal-section">
+      <div class="legal-section-title">Contact</div>
+      <div class="legal-contact">
+        <div class="legal-contact-name">Davincii LLC</div>
+        <div class="legal-contact-line"><a href="mailto:info@davincii.co">info@davincii.co</a></div>
+        <div class="legal-contact-line">davincii.co &nbsp;&middot;&nbsp; New York, NY</div>
+      </div>
+    </div>
+  </div>
+  <div id="terms-footer"></div>
+</div>
+
+<!-- ════════════════ PRIVACY POLICY ════════════════ -->
+<div class="screen legal-page" id="screen-privacy">
+  <nav class="legal-nav">
+    <span class="legal-nav-logo" onclick="navigate('/')">Davincii</span>
+    <button class="btn-mkt-ghost" onclick="navigate('/')">&larr; Back</button>
+  </nav>
+  <div class="legal-body">
+    <div class="legal-eyebrow">Legal</div>
+    <h1 class="legal-title">Privacy <em>Policy</em></h1>
+    <div class="legal-meta">Effective Date: March 2026 &nbsp;&middot;&nbsp; Questions: <a href="mailto:info@davincii.co" style="color:var(--red);text-decoration:none">info@davincii.co</a></div>
+    <div class="legal-section">
+      <div class="legal-section-title">Overview</div>
+      <p class="legal-p">This Privacy Policy explains how Davincii LLC collects, uses, shares, and protects personal information when you use the Davincii platform and artist portal. By using the Service, you agree to the practices described here.</p>
+    </div>
+    <div class="legal-section">
+      <div class="legal-section-title">Information We Collect</div>
+      <p class="legal-p">When you register or use the Service, we collect:</p>
+      <ul class="legal-list">
+        <li>Full name and artist/professional name</li>
+        <li>Email address and PRO affiliation (ASCAP, BMI, SESAC, or other)</li>
+        <li>Composition metadata: song titles, co-writer names, ownership splits, ISRC and ISWC codes, release dates</li>
+        <li>Payment information — processed through Stripe. We do not store card or bank account numbers directly.</li>
+        <li>Log data: IP address, browser type, pages visited, and session data</li>
+        <li>Correspondence and communications with Davincii</li>
+      </ul>
+      <p class="legal-p">We may also receive information from third parties including ASCAP, BMI, SoundExchange, the MLC, Songtrust, and DistroKid in connection with administering your royalties. This information is used solely to fulfill our administration obligations.</p>
+    </div>
+    <div class="legal-section">
+      <div class="legal-section-title">How We Use Your Information</div>
+      <ul class="legal-list">
+        <li>Registering your compositions with PROs, SoundExchange, MLC, Songtrust, and other collection societies</li>
+        <li>Collecting, processing, and disbursing royalty income on your behalf</li>
+        <li>Providing access to your artist portal and quarterly accounting statements</li>
+        <li>Processing payouts via Stripe (ACH, PayPal, or other agreed methods)</li>
+        <li>Communicating about your account, royalty activity, and platform updates</li>
+        <li>Complying with legal obligations and enforcing our Terms of Service</li>
+        <li>Improving and securing the platform</li>
+      </ul>
+    </div>
+    <div class="legal-section">
+      <div class="legal-section-title">How We Share Your Information</div>
+      <p class="legal-p">We do not sell your personal information. We share it only with:</p>
+      <ul class="legal-list">
+        <li><strong style="color:var(--black);font-weight:500">Stripe</strong> — for payment processing and artist payouts via Stripe Connect. Stripe's privacy policy governs their handling of payment data.</li>
+        <li><strong style="color:var(--black);font-weight:500">PROs &amp; collection societies</strong> — ASCAP, BMI, SESAC, SoundExchange, MLC, and Songtrust for composition registration and royalty collection</li>
+        <li><strong style="color:var(--black);font-weight:500">Cloud infrastructure providers</strong> — for hosting and platform operations</li>
+        <li><strong style="color:var(--black);font-weight:500">Legal authorities</strong> — when required by law, court order, or to protect the rights and safety of Davincii or its users</li>
+      </ul>
+      <div class="legal-highlight"><p>Davincii's products are ad-free. We do not share data with advertisers or use third-party advertising cookies.</p></div>
+    </div>
+    <div class="legal-section">
+      <div class="legal-section-title">Stripe &amp; Payment Data</div>
+      <p class="legal-p">All payment processing is handled by Stripe, Inc. Davincii does not collect, store, or process credit card numbers or bank account numbers. When you connect a payment method via Stripe Connect, that data is transmitted directly to and stored by Stripe. Davincii only receives confirmation of successful transactions and basic payout details.</p>
+    </div>
+    <div class="legal-section">
+      <div class="legal-section-title">Data Retention</div>
+      <p class="legal-p">We retain your personal information for as long as your account is active and for a reasonable period thereafter to fulfill obligations under the Administration Agreement, including the 12-month Collection Tail Period following termination. Royalty accounting records are retained for a minimum of 3 years. You may request deletion of your account by contacting info@davincii.co; however, we may retain certain records as required by law.</p>
+    </div>
+    <div class="legal-section">
+      <div class="legal-section-title">Your Rights</div>
+      <p class="legal-p">Depending on your jurisdiction, you may have the right to access, correct, delete, or request portability of your personal information, or to object to certain processing. To exercise any of these rights, contact us at info@davincii.co. We will respond within 30 days.</p>
+      <p class="legal-p">If you are located in the European Economic Area (EEA), UK, or Switzerland, you have additional rights under GDPR. Our legal basis for processing your data is performance of a contract, legitimate interests, and legal compliance. You may lodge a complaint with your local data protection authority.</p>
+    </div>
+    <div class="legal-section">
+      <div class="legal-section-title">Security</div>
+      <p class="legal-p">We implement reasonable technical and organizational measures to protect your information, including HTTPS encryption in transit and access controls. No system is entirely secure. In the event of a data breach affecting your information, we will notify you as required by applicable law.</p>
+    </div>
+    <div class="legal-section">
+      <div class="legal-section-title">Children's Privacy</div>
+      <p class="legal-p">The Service is not directed to individuals under 18. We do not knowingly collect information from minors. If you believe a minor has provided us with personal information, please contact info@davincii.co and we will promptly delete it.</p>
+    </div>
+    <div class="legal-section">
+      <div class="legal-section-title">Changes to This Policy</div>
+      <p class="legal-p">We may update this Privacy Policy periodically. We will notify you of material changes by email to the address associated with your account. Continued use of the Service after the effective date constitutes acceptance of the updated policy.</p>
+    </div>
+    <div class="legal-section">
+      <div class="legal-section-title">Contact</div>
+      <div class="legal-contact">
+        <div class="legal-contact-name">Davincii LLC</div>
+        <div class="legal-contact-line"><a href="mailto:info@davincii.co">info@davincii.co</a></div>
+        <div class="legal-contact-line">davincii.co &nbsp;&middot;&nbsp; New York, NY</div>
+      </div>
+    </div>
+  </div>
+  <div id="privacy-footer"></div>
+</div>
+
+<!-- ════════════════ DASHBOARD ════════════════ -->
 <div class="screen" id="screen-dash">
   <div class="top-nav">
     <span class="top-nav-logo" onclick="navigate('/dashboard/overview')">Davincii</span>
     <div class="top-nav-right">
       <span class="top-nav-artist" id="nav-artist-name"></span>
-      <div class="avatar" id="nav-avatar"></div>
+      <div class="avatar-wrap" id="avatar-wrap">
+        <div class="avatar" id="nav-avatar" onclick="toggleAvatarMenu()"></div>
+        <div class="avatar-dropdown" id="avatar-dropdown">
+          <div class="avatar-dropdown-header">
+            <div class="avatar-dropdown-name" id="avatar-dd-name"></div>
+            <div class="avatar-dropdown-email" id="avatar-dd-email"></div>
+          </div>
+          <div class="avatar-dropdown-section">
+            <button class="avatar-menu-item" onclick="navigate('/dashboard/overview');closeAvatarMenu()">
+              <span class="avatar-menu-icon">&#8862;</span> Overview
+            </button>
+            <button class="avatar-menu-item" onclick="navigate('/dashboard/catalog');closeAvatarMenu()">
+              <span class="avatar-menu-icon">&#9833;</span> My Catalog
+            </button>
+            <button class="avatar-menu-item" onclick="navigate('/dashboard/royalties');closeAvatarMenu()">
+              <span class="avatar-menu-icon">&#9678;</span> Royalties
+            </button>
+            <button class="avatar-menu-item" onclick="navigate('/dashboard/payouts');closeAvatarMenu()">
+              <span class="avatar-menu-icon">&#8593;</span> Payouts
+            </button>
+          </div>
+          <div class="avatar-dropdown-section">
+            <button class="avatar-menu-item" onclick="navigate('/claim');closeAvatarMenu()">
+              <span class="avatar-menu-icon">&#10022;</span> Claim payment
+            </button>
+            <button class="avatar-menu-item" onclick="closeAvatarMenu()">
+              <span class="avatar-menu-icon">&#9881;</span> Settings
+            </button>
+          </div>
+          <div class="avatar-dropdown-section">
+            <button class="avatar-menu-item" onclick="navigate('/terms');closeAvatarMenu()">
+              <span class="avatar-menu-icon">&#128196;</span> Terms of Service
+            </button>
+            <button class="avatar-menu-item" onclick="navigate('/privacy');closeAvatarMenu()">
+              <span class="avatar-menu-icon">&#128274;</span> Privacy Policy
+            </button>
+          </div>
+          <div class="avatar-dropdown-section">
+            <button class="avatar-menu-item danger" onclick="doLogout();closeAvatarMenu()">
+              <span class="avatar-menu-icon">&#8594;</span> Sign out
+            </button>
+          </div>
+        </div>
+      </div>
       <button class="top-nav-out" onclick="doLogout()">Sign out</button>
     </div>
   </div>
@@ -893,6 +1007,7 @@ select.field { color: var(--black); }
       <div class="sb-section">
         <span class="sb-lbl">Account</span>
         <button class="nav-lnk" onclick="navigate('/claim')"><span class="nav-lnk-icon">&#10022;</span>Claim payment</button>
+        <button class="nav-lnk" onclick=""><span class="nav-lnk-icon">&#9881;</span>Settings</button>
         <button class="nav-lnk" id="passkey-setup-btn" onclick="doPasskeyRegister()" style="display:none"><span class="nav-lnk-icon">&#128274;</span>Set up Passkey</button>
       </div>
     </div>
@@ -989,7 +1104,7 @@ select.field { color: var(--black); }
   </div>
 </div>
 
-<!-- CLAIM PAYMENT -->
+<!-- ════════════════ CLAIM PAYMENT ════════════════ -->
 <div class="screen" id="screen-claim">
   <div class="top-nav">
     <span class="top-nav-logo" onclick="navigate('/dashboard/overview')">Davincii</span>
@@ -1056,7 +1171,7 @@ select.field { color: var(--black); }
   </div>
 </div>
 
-<!-- PAYMENT SUCCESS -->
+<!-- ════════════════ PAYMENT SUCCESS ════════════════ -->
 <div class="screen" id="screen-success">
   <div class="top-nav"><span class="top-nav-logo" onclick="navigate('/dashboard/overview')">Davincii</span><div class="top-nav-right"><div class="avatar" id="success-avatar"></div></div></div>
   <div style="padding:80px 48px;display:flex;justify-content:center;">
@@ -1077,6 +1192,31 @@ select.field { color: var(--black); }
 
 <script>
   const API = '';
+
+  // -- Footer injection --------------------------------------
+  function injectFooters() {
+    var tpl = document.getElementById('footer-tpl');
+    if (!tpl) return;
+    ['landing-footer','howitworks-footer','about-footer','terms-footer','privacy-footer'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el && !el.hasChildNodes()) el.appendChild(tpl.content.cloneNode(true));
+    });
+  }
+  injectFooters();
+
+  // -- Avatar dropdown ---------------------------------------
+  function toggleAvatarMenu() {
+    var wrap = document.getElementById('avatar-wrap');
+    if (wrap) wrap.classList.toggle('open');
+  }
+  function closeAvatarMenu() {
+    var wrap = document.getElementById('avatar-wrap');
+    if (wrap) wrap.classList.remove('open');
+  }
+  document.addEventListener('click', function(e) {
+    var wrap = document.getElementById('avatar-wrap');
+    if (wrap && !wrap.contains(e.target)) closeAvatarMenu();
+  });
 
   // -- Auth helpers ------------------------------------------
   function getToken() { return localStorage.getItem('dvc_token'); }
@@ -1134,8 +1274,11 @@ select.field { color: var(--black); }
       _showScreen('screen-pricing');
     } else if (path === '/about') {
       _showScreen('screen-about');
+    } else if (path === '/terms') {
+      _showScreen('screen-terms');
+    } else if (path === '/privacy') {
+      _showScreen('screen-privacy');
     } else if (path === '/auth-success') {
-      // Handle OAuth callback - extract token and artist from URL params
       var params = new URLSearchParams(window.location.search);
       var token = params.get('token');
       var artistStr = params.get('artist');
@@ -1222,23 +1365,16 @@ select.field { color: var(--black); }
   async function doPasskeyLogin() {
     var errEl = document.getElementById('login-error');
     try {
-      // 1. Get options from server
       var optRes = await fetch('/api/passkeys/login/options', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
       var options = await optRes.json();
       if (!optRes.ok) throw new Error(options.error || 'Failed to get options');
-
-      // 2. Convert challenge
       options.challenge = _base64urlToBuf(options.challenge);
       if (options.allowCredentials) {
         options.allowCredentials = options.allowCredentials.map(function(c) {
           return Object.assign({}, c, { id: _base64urlToBuf(c.id) });
         });
       }
-
-      // 3. Prompt user for passkey
       var credential = await navigator.credentials.get({ publicKey: options });
-
-      // 4. Encode response
       var body = {
         id: credential.id,
         rawId: _bufToBase64url(credential.rawId),
@@ -1250,8 +1386,6 @@ select.field { color: var(--black); }
           userHandle: credential.response.userHandle ? _bufToBase64url(credential.response.userHandle) : null
         }
       };
-
-      // 5. Verify with server
       var verRes = await fetch('/api/passkeys/login/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1259,21 +1393,17 @@ select.field { color: var(--black); }
       });
       var data = await verRes.json();
       if (!verRes.ok) throw new Error(data.error || 'Verification failed');
-
       setAuth(data.token, data.artist);
       navigate('/dashboard/overview');
     } catch(e) {
-      if (e.name === 'NotAllowedError') return; // user cancelled
+      if (e.name === 'NotAllowedError') return;
       if (errEl) showErr(errEl, e.message || 'Passkey login failed');
     }
   }
 
   async function doPasskeyRegister() {
     try {
-      // 1. Get options from server
       var optRes = await apiFetch('/api/passkeys/register/options', { method: 'POST' });
-
-      // 2. Convert challenge and user.id
       var publicKeyOpts = Object.assign({}, optRes);
       publicKeyOpts.challenge = _base64urlToBuf(optRes.challenge);
       publicKeyOpts.user = Object.assign({}, optRes.user, { id: _base64urlToBuf(optRes.user.id) });
@@ -1282,11 +1412,7 @@ select.field { color: var(--black); }
           return Object.assign({}, c, { id: _base64urlToBuf(c.id) });
         });
       }
-
-      // 3. Create credential
       var credential = await navigator.credentials.create({ publicKey: publicKeyOpts });
-
-      // 4. Encode response
       var body = {
         id: credential.id,
         rawId: _bufToBase64url(credential.rawId),
@@ -1300,13 +1426,10 @@ select.field { color: var(--black); }
       if (credential.response.getTransports) {
         body.response.transports = credential.response.getTransports();
       }
-
-      // 5. Verify with server
       var verRes = await apiFetch('/api/passkeys/register/verify', {
         method: 'POST',
         body: JSON.stringify(body)
       });
-
       alert('Passkey registered! You can now sign in with your fingerprint or face.');
     } catch(e) {
       if (e.name === 'NotAllowedError') return;
@@ -1328,7 +1451,6 @@ select.field { color: var(--black); }
         method: 'POST',
         body: JSON.stringify({ email, password })
       });
-      // Ask browser to save credentials for autocomplete
       if (window.PasswordCredential) {
         try {
           var cred = new PasswordCredential({ id: email, password: password, name: data.artist.name || email });
@@ -1361,7 +1483,6 @@ select.field { color: var(--black); }
         method: 'POST',
         body: JSON.stringify({ name, email, password })
       });
-      // Ask browser to save credentials for autocomplete
       if (window.PasswordCredential) {
         try {
           var cred = new PasswordCredential({ id: email, password: password, name: name || email });
@@ -1410,6 +1531,12 @@ select.field { color: var(--black); }
     document.getElementById('nav-avatar').textContent = initials;
     document.getElementById('greeting-name').textContent = artist.name.split(' ')[0] + '.';
 
+    // Populate avatar dropdown
+    var ddName = document.getElementById('avatar-dd-name');
+    var ddEmail = document.getElementById('avatar-dd-email');
+    if (ddName) ddName.textContent = artist.name;
+    if (ddEmail) ddEmail.textContent = artist.email || '';
+
     const h = new Date().getHours();
     document.getElementById('greeting-time').textContent = h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening';
 
@@ -1432,16 +1559,8 @@ select.field { color: var(--black); }
       if (recent.length === 0) {
         body.innerHTML = '<div class="empty-state">No royalties recorded yet</div>';
       } else {
-        body.innerHTML = `
-          <div class="th-row col-5"><div class="th">Song</div><div class="th">Platform</div><div class="th">Period</div><div class="th">Type</div><div class="th" style="text-align:right">Amount</div></div>
-          ${recent.map(r => `
-            <div class="tr col-5">
-              <div><div class="tr-song">${r.songs ? r.songs.title : '--'}</div><div class="tr-meta">${r.platform}</div></div>
-              <div class="tr-cell">${r.platform}</div>
-              <div class="tr-cell">${r.period || '--'}</div>
-              <div><span class="badge badge-ok">${r.royalty_type || 'Royalty'}</span></div>
-              <div class="tr-amt">$${Number(r.amount).toFixed(2)}</div>
-            </div>`).join('')}`;
+        body.innerHTML = '<div class="th-row col-5"><div class="th">Song</div><div class="th">Platform</div><div class="th">Period</div><div class="th">Type</div><div class="th" style="text-align:right">Amount</div></div>' +
+          recent.map(function(r) { return '<div class="tr col-5"><div><div class="tr-song">' + (r.songs ? r.songs.title : '--') + '</div><div class="tr-meta">' + r.platform + '</div></div><div class="tr-cell">' + r.platform + '</div><div class="tr-cell">' + (r.period || '--') + '</div><div><span class="badge badge-ok">' + (r.royalty_type || 'Royalty') + '</span></div><div class="tr-amt">$' + Number(r.amount).toFixed(2) + '</div></div>'; }).join('');
       }
     } catch(e) {
       document.getElementById('overview-royalties-body').innerHTML = '<div class="empty-state">Could not load royalties</div>';
@@ -1454,14 +1573,8 @@ select.field { color: var(--black); }
       if (recent.length === 0) {
         body.innerHTML = '<div class="empty-state">No songs in catalog yet</div>';
       } else {
-        body.innerHTML = `
-          <div class="th-row col-3"><div class="th">Song</div><div class="th">Status</div><div class="th" style="text-align:right">Added</div></div>
-          ${recent.map(s => `
-            <div class="tr col-3">
-              <div><div class="tr-song">${s.title}</div><div class="tr-meta">${s.isrc || 'No ISRC'}</div></div>
-              <div><span class="badge ${s.status === 'active' ? 'badge-ok' : s.status === 'collecting' ? 'badge-ok' : 'badge-pend'}">${s.status || 'pending'}</span></div>
-              <div class="tr-amt" style="font-size:12px;color:var(--muted)">${new Date(s.created_at).toLocaleDateString('en-US', {month:'short', day:'numeric'})}</div>
-            </div>`).join('')}`;
+        body.innerHTML = '<div class="th-row col-3"><div class="th">Song</div><div class="th">Status</div><div class="th" style="text-align:right">Added</div></div>' +
+          recent.map(function(s) { return '<div class="tr col-3"><div><div class="tr-song">' + s.title + '</div><div class="tr-meta">' + (s.isrc || 'No ISRC') + '</div></div><div><span class="badge ' + (s.status === 'active' ? 'badge-ok' : s.status === 'collecting' ? 'badge-ok' : 'badge-pend') + '">' + (s.status || 'pending') + '</span></div><div class="tr-amt" style="font-size:12px;color:var(--muted)">' + new Date(s.created_at).toLocaleDateString('en-US', {month:'short', day:'numeric'}) + '</div></div>'; }).join('');
       }
     } catch(e) {
       document.getElementById('overview-catalog-body').innerHTML = '<div class="empty-state">Could not load catalog</div>';
@@ -1479,15 +1592,8 @@ select.field { color: var(--black); }
         body.innerHTML = '<div class="empty-state">No songs yet &mdash; contact Davincii to add your catalog</div>';
         return;
       }
-      body.innerHTML = `
-        <div class="th-row col-4c"><div class="th">Song</div><div class="th">ISRC</div><div class="th">Status</div><div class="th" style="text-align:right">Release Date</div></div>
-        ${songs.map(s => `
-          <div class="tr col-4c">
-            <div><div class="tr-song">${s.title}</div><div class="tr-meta">Added ${new Date(s.created_at).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'})}</div></div>
-            <div class="tr-cell">${s.isrc || '--'}</div>
-            <div><span class="badge ${s.status === 'active' || s.status === 'collecting' ? 'badge-ok' : s.status === 'registering' ? 'badge-blue' : 'badge-pend'}">${s.status || 'pending'}</span></div>
-            <div class="tr-amt" style="font-size:12px;color:var(--muted)">${s.release_date ? new Date(s.release_date).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : '--'}</div>
-          </div>`).join('')}`;
+      body.innerHTML = '<div class="th-row col-4c"><div class="th">Song</div><div class="th">ISRC</div><div class="th">Status</div><div class="th" style="text-align:right">Release Date</div></div>' +
+        songs.map(function(s) { return '<div class="tr col-4c"><div><div class="tr-song">' + s.title + '</div><div class="tr-meta">Added ' + new Date(s.created_at).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) + '</div></div><div class="tr-cell">' + (s.isrc || '--') + '</div><div><span class="badge ' + (s.status === 'active' || s.status === 'collecting' ? 'badge-ok' : s.status === 'registering' ? 'badge-blue' : 'badge-pend') + '">' + (s.status || 'pending') + '</span></div><div class="tr-amt" style="font-size:12px;color:var(--muted)">' + (s.release_date ? new Date(s.release_date).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : '--') + '</div></div>'; }).join('');
     } catch(e) {
       body.innerHTML = '<div class="empty-state">Could not load catalog</div>';
     }
@@ -1503,16 +1609,8 @@ select.field { color: var(--black); }
         body.innerHTML = '<div class="empty-state">No royalties recorded yet</div>';
         return;
       }
-      body.innerHTML = `
-        <div class="th-row col-5"><div class="th">Song</div><div class="th">Platform</div><div class="th">Period</div><div class="th">Type</div><div class="th" style="text-align:right">Amount</div></div>
-        ${royalties.map(r => `
-          <div class="tr col-5">
-            <div><div class="tr-song">${r.songs ? r.songs.title : '--'}</div><div class="tr-meta">${r.platform}</div></div>
-            <div class="tr-cell">${r.platform}</div>
-            <div class="tr-cell">${r.period || '--'}</div>
-            <div><span class="badge badge-ok">${r.royalty_type || 'Royalty'}</span></div>
-            <div class="tr-amt">$${Number(r.amount).toFixed(2)}</div>
-          </div>`).join('')}`;
+      body.innerHTML = '<div class="th-row col-5"><div class="th">Song</div><div class="th">Platform</div><div class="th">Period</div><div class="th">Type</div><div class="th" style="text-align:right">Amount</div></div>' +
+        royalties.map(function(r) { return '<div class="tr col-5"><div><div class="tr-song">' + (r.songs ? r.songs.title : '--') + '</div><div class="tr-meta">' + r.platform + '</div></div><div class="tr-cell">' + r.platform + '</div><div class="tr-cell">' + (r.period || '--') + '</div><div><span class="badge badge-ok">' + (r.royalty_type || 'Royalty') + '</span></div><div class="tr-amt">$' + Number(r.amount).toFixed(2) + '</div></div>'; }).join('');
     } catch(e) {
       body.innerHTML = '<div class="empty-state">Could not load royalties</div>';
     }
@@ -1529,18 +1627,8 @@ select.field { color: var(--black); }
         return;
       }
       const methodLabel = { bank_transfer: 'ACH Transfer', paypal: 'PayPal', stripe: 'Stripe (Instant)', check: 'Check' };
-      body.innerHTML = `
-        <div class="th-row col-4"><div class="th">Date</div><div class="th">Method</div><div class="th">Status</div><div class="th" style="text-align:right">Amount</div></div>
-        ${payouts.map(p => `
-          <div class="tr col-4">
-            <div>
-              <div class="tr-song">${new Date(p.created_at).toLocaleDateString('en-US', {month:'long', day:'numeric', year:'numeric'})}</div>
-              ${p.stripe_transfer_id ? `<div class="tr-meta">${p.stripe_transfer_id}</div>` : ''}
-            </div>
-            <div class="tr-cell">${methodLabel[p.method] || p.method.replace(/_/g, ' ')}</div>
-            <div><span class="badge ${p.status === 'completed' ? 'badge-ok' : p.status === 'failed' ? 'badge-red' : 'badge-pend'}">${p.status}</span></div>
-            <div class="tr-amt">$${Number(p.amount).toFixed(2)}</div>
-          </div>`).join('')}`;
+      body.innerHTML = '<div class="th-row col-4"><div class="th">Date</div><div class="th">Method</div><div class="th">Status</div><div class="th" style="text-align:right">Amount</div></div>' +
+        payouts.map(function(p) { return '<div class="tr col-4"><div><div class="tr-song">' + new Date(p.created_at).toLocaleDateString('en-US', {month:'long', day:'numeric', year:'numeric'}) + '</div>' + (p.stripe_transfer_id ? '<div class="tr-meta">' + p.stripe_transfer_id + '</div>' : '') + '</div><div class="tr-cell">' + (methodLabel[p.method] || p.method.replace(/_/g, ' ')) + '</div><div><span class="badge ' + (p.status === 'completed' ? 'badge-ok' : p.status === 'failed' ? 'badge-red' : 'badge-pend') + '">' + p.status + '</span></div><div class="tr-amt">$' + Number(p.amount).toFixed(2) + '</div></div>'; }).join('');
     } catch(e) {
       body.innerHTML = '<div class="empty-state">Could not load payouts</div>';
     }
@@ -1732,7 +1820,7 @@ select.field { color: var(--black); }
     }
   }
 
-  // -- Claim -------------------------------------------------
+  // -- Claim submit ------------------------------------------
   async function doClaim() {
     const amount = document.getElementById('claim-amount').value;
     const method = document.querySelector('input[name="method"]:checked');
@@ -1750,7 +1838,7 @@ select.field { color: var(--black); }
       const balText = document.getElementById('claim-balance').textContent.replace(/[$,]/g, '');
       const avail = parseFloat(balText);
       if (!isNaN(avail) && parseFloat(amount) > avail + 0.001) {
-        showErr(errEl, `Amount exceeds your available balance of $${avail.toFixed(2)}.`);
+        showErr(errEl, 'Amount exceeds your available balance of $' + avail.toFixed(2) + '.');
         return;
       }
       btn.disabled = true; btn.textContent = 'Sending transfer...';
@@ -1778,7 +1866,7 @@ select.field { color: var(--black); }
     const balText2 = document.getElementById('claim-balance').textContent.replace(/[$,]/g, '');
     const avail2 = parseFloat(balText2);
     if (!isNaN(avail2) && parseFloat(amount) > avail2 + 0.001) {
-      showErr(errEl, `Amount exceeds your available balance of $${avail2.toFixed(2)}.`);
+      showErr(errEl, 'Amount exceeds your available balance of $' + avail2.toFixed(2) + '.');
       return;
     }
     btn.disabled = true; btn.textContent = 'Processing...';
@@ -1811,8 +1899,6 @@ select.field { color: var(--black); }
     }
 
     _applyRoute(window.location.pathname);
-
-    // Enter key is handled natively by <form> onsubmit
   })();
 </script>
 </body>
