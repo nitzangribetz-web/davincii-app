@@ -409,7 +409,7 @@ select.field { color:var(--black); }
 .mob-landing-nav {
   position: relative; z-index: 10;
   display: flex; justify-content: space-between; align-items: center;
-  padding: 28px 24px 20px;
+  padding: 20px 24px 12px;
 }
 .mob-landing-logo { font-family:var(--script); font-size:32px; color:var(--white); line-height:1; }
 .mob-landing-nav-btns { display:flex; gap:8px; }
@@ -418,20 +418,23 @@ select.field { color:var(--black); }
 
 .mob-landing-hero {
   position: relative; z-index: 10;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  flex: 1; text-align: center; padding: 40px 24px 180px;
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center;
+  flex: 1; text-align: center; padding: 0 24px 96px;
 }
-.mob-landing-nav-links { display: flex; gap: 24px; margin-bottom: 52px; }
+.mob-landing-center { display:flex; flex-direction:column; align-items:center; margin-top:-24px; }
+.mob-landing-nav-links { display: flex; gap: 24px; margin-bottom: 28px; }
 .mob-landing-nav-link { font-family:var(--sans); font-size:10px; font-weight:400; letter-spacing:0.14em; text-transform:uppercase; color:rgba(255,255,255,0.35); background:none; border:none; cursor:pointer; padding:0; }
-.mob-headline { font-family:var(--serif); font-size:52px; font-weight:300; color:var(--white); line-height:1.1; letter-spacing:-0.02em; margin-bottom:36px; }
-.mob-rule { width:28px; height:2px; background:var(--red); margin:0 auto 36px; }
-.mob-cta { display:flex; flex-direction:column; gap:10px; width:100%; max-width:300px; }
-.btn-mob-cta-main { background:var(--white); color:var(--black); border:none; padding:17px; font-family:var(--sans); font-size:12px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; cursor:pointer; }
-.btn-mob-cta-ghost { background:transparent; color:rgba(255,255,255,0.7); border:1px solid rgba(255,255,255,0.22); padding:16px; font-family:var(--sans); font-size:12px; font-weight:400; letter-spacing:0.12em; text-transform:uppercase; cursor:pointer; }
+.mob-headline { font-family:var(--serif); font-size:48px; font-weight:300; color:var(--white); line-height:1.1; letter-spacing:-0.02em; margin-bottom:24px; }
+.mob-rule { width:28px; height:2px; background:var(--red); margin:0 auto 28px; }
+.mob-cta { display:flex; flex-direction:column; gap:10px; width:100%; max-width:280px; }
+.btn-mob-cta-main { background:var(--white); color:var(--black); border:none; padding:15px; font-family:var(--sans); font-size:11px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; cursor:pointer; }
+.btn-mob-cta-ghost { background:transparent; color:rgba(255,255,255,0.7); border:1px solid rgba(255,255,255,0.22); padding:14px; font-family:var(--sans); font-size:11px; font-weight:400; letter-spacing:0.12em; text-transform:uppercase; cursor:pointer; }
 
 /* Mobile partners strip */
 .mob-partners {
-  position: absolute; bottom: 0; left: 0; right: 0; z-index: 10;
+  position: absolute; bottom: 0; left: 0; right: 0;
+  z-index: 10;
   border-top: 1px solid rgba(255,255,255,0.08);
   padding: 16px 0 0; background: rgba(0,0,0,0.15); backdrop-filter: blur(4px);
 }
@@ -619,8 +622,11 @@ select.field { color:var(--black); }
   .mob-only.mob-flex { display:flex !important; }
   nav.mob-only { display:flex !important; }
   .mob-tab-bar.mob-only { display:flex !important; }
+  .mob-landing-hero.mob-only { display:flex !important; }
 
   /* Landing */
+  #screen-landing { height:100vh; height:100dvh; min-height:0; overflow:hidden; }
+  #screen-landing #landing-footer { display:none; }
   .landing-nav { display:none; }
   .landing-hero { display:none; }
   .partners-section { display:none; }
@@ -772,15 +778,17 @@ select.field { color:var(--black); }
   </nav>
   <!-- Mobile landing hero -->
   <div class="mob-landing-hero mob-only">
-    <div class="mob-landing-nav-links">
-      <button class="mob-landing-nav-link" onclick="navigate('/howitworks')">How it works</button>
-      <button class="mob-landing-nav-link" onclick="navigate('/about')">About</button>
-    </div>
-    <h1 class="mob-headline">Collect royalties.</h1>
-    <div class="mob-rule"></div>
-    <div class="mob-cta">
-      <button class="btn-mob-cta-main" onclick="navigate('/signup')">Get started &rarr;</button>
-      <button class="btn-mob-cta-ghost" onclick="navigate('/login')">Sign in to portal</button>
+    <div class="mob-landing-center">
+      <div class="mob-landing-nav-links">
+        <button class="mob-landing-nav-link" onclick="navigate('/howitworks')">How it works</button>
+        <button class="mob-landing-nav-link" onclick="navigate('/about')">About</button>
+      </div>
+      <h1 class="mob-headline">Collect royalties.</h1>
+      <div class="mob-rule"></div>
+      <div class="mob-cta">
+        <button class="btn-mob-cta-main" onclick="navigate('/signup')">Get started &rarr;</button>
+        <button class="btn-mob-cta-ghost" onclick="navigate('/login')">Sign in to portal</button>
+      </div>
     </div>
     <!-- Mobile partners strip -->
     <div class="mob-partners">
