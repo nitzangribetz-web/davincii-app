@@ -540,11 +540,11 @@ select.field { color:var(--black); }
 .mob-landing-nav {
   position: relative; z-index: 100;
   display: flex; justify-content: space-between; align-items: center;
-  padding: 20px 24px 16px;
+  padding: 14px 20px 12px;
   overflow: visible;
 }
 .mob-landing-logo { line-height:1; }
-.mob-landing-logo img { height:28px; width:auto; display:block; }
+.mob-landing-logo img { height:26px; width:auto; display:block; }
 .mob-landing-avatar {
   width: 36px; height: 36px;
   border: 1px solid rgba(255,255,255,0.3);
@@ -643,10 +643,10 @@ select.field { color:var(--black); }
 ════════════════════════════ */
 .mob-auth-nav {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 20px 24px; border-bottom: 1px solid var(--border);
+  padding: 14px 20px; border-bottom: 1px solid var(--border);
 }
 .mob-auth-logo { line-height:1; }
-.mob-auth-logo img { height:24px; width:auto; display:block; }
+.mob-auth-logo img { height:22px; width:auto; display:block; }
 .mob-back-btn { font-family:var(--sans); font-size:11px; font-weight:400; letter-spacing:0.10em; text-transform:uppercase; color:var(--muted); background:none; border:none; cursor:pointer; padding:0; }
 .mob-auth-hero {
   background: var(--black); padding: 32px 24px 28px;
@@ -667,13 +667,13 @@ select.field { color:var(--black); }
    MOBILE DASHBOARD
 ════════════════════════════ */
 .mob-top-nav {
-  height: 56px; border-bottom: 1px solid var(--border);
+  height: 52px; border-bottom: 1px solid var(--border);
   display: flex; align-items: center; justify-content: space-between;
   padding: 0 20px; position: sticky; top: 0;
   background: rgba(255,255,255,0.97); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 50; flex-shrink: 0;
 }
-.mob-nav-logo { line-height:1; cursor:pointer; margin-top:2px; }
-.mob-nav-logo img { height:20px; width:auto; display:block; }
+.mob-nav-logo { line-height:1; cursor:pointer; }
+.mob-nav-logo img { height:22px; width:auto; display:block; }
 .mob-nav-right { display:flex; align-items:center; gap:12px; }
 .mob-nav-artist-name { font-family:var(--sans); font-size:12px; font-weight:500; color:var(--black); letter-spacing:0.02em; }
 .mob-avatar { width:32px; height:32px; background:var(--black); border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:var(--sans); font-size:11px; font-weight:600; color:var(--white); cursor:pointer; flex-shrink:0; }
@@ -864,7 +864,8 @@ select.field { color:var(--black); }
   .col-4c { grid-template-columns:1fr 100px; }
 
   /* Marketing */
-  .mkt-nav { padding:20px; }
+  .mkt-nav { padding:14px 20px; }
+  .mkt-nav-logo img { height:22px; }
   .mkt-nav-links { display:none; }
   .mkt-nav-right { display:none; }
   .mkt-nav-hamburger { display:flex; }
@@ -876,7 +877,8 @@ select.field { color:var(--black); }
   .about-dark { flex-direction:column; padding:32px 24px; }
 
   /* Legal */
-  .legal-nav { padding:20px; }
+  .legal-nav { padding:14px 20px; }
+  .legal-nav-logo img { height:22px; }
   .legal-body { padding:40px 24px 60px; }
 
   /* Footer */
@@ -1487,7 +1489,7 @@ select.field { color:var(--black); }
     <div class="error-box" id="mob-recover-error"></div>
     <div id="mob-recover-success" style="display:none;background:var(--green-bg);border-left:2px solid var(--green);padding:11px 14px;margin-bottom:16px;font-family:var(--sans);font-size:13px;color:var(--green);">Check your inbox &mdash; a recovery link is on its way.</div>
     <label class="field-label">Email address</label>
-    <input class="field" type="email" id="mob-recover-email" placeholder="you@example.com">
+    <input class="field" type="email" id="mob-recover-email" name="email" autocomplete="email" placeholder="you@example.com">
     <button class="btn-primary" onclick="doRecover()">Send reset link &rarr;</button>
     <div class="auth-link" style="margin-top:16px"><a onclick="navigate('/login')">&larr; Back to sign in</a></div>
   </div>
@@ -1510,7 +1512,7 @@ select.field { color:var(--black); }
         <div class="error-box" id="recover-error"></div>
         <div id="recover-success" style="display:none;background:var(--green-bg);border-left:2px solid var(--green);padding:11px 14px;margin-bottom:16px;font-family:var(--sans);font-size:13px;color:var(--green);">Check your inbox &mdash; a recovery link is on its way.</div>
         <label class="field-lbl">Email address</label>
-        <input class="field" type="email" id="recover-email" placeholder="you@example.com">
+        <input class="field" type="email" id="recover-email" name="email" autocomplete="email" placeholder="you@example.com">
         <button class="btn-primary" id="recover-btn" onclick="doRecover()">Send reset link &rarr;</button>
         <div class="auth-link" style="margin-top:16px"><a onclick="navigate('/login')">&larr; Back to sign in</a></div>
       </div>
@@ -1521,7 +1523,7 @@ select.field { color:var(--black); }
 <!-- ════════════════ HOW IT WORKS ════════════════ -->
 <div class="screen mkt-page" id="screen-howitworks">
   <nav class="mkt-nav">
-    <span class="mkt-nav-logo" onclick="navigate('/')"><img src="/logo-sm.png" alt="Davincii"></span>
+    <span class="mkt-nav-logo" onclick="goHome()"><img src="/logo-sm.png" alt="Davincii"></span>
     <div class="mkt-nav-links">
       <button class="mkt-nav-link active" onclick="navigate('/howitworks')">How it works</button>
       <button class="mkt-nav-link" onclick="navigate('/pricing')">Pricing</button>
@@ -1588,7 +1590,7 @@ select.field { color:var(--black); }
 <!-- ════════════════ PRICING ════════════════ -->
 <div class="screen mkt-page" id="screen-pricing">
   <nav class="mkt-nav">
-    <span class="mkt-nav-logo" onclick="navigate('/')"><img src="/logo-sm.png" alt="Davincii"></span>
+    <span class="mkt-nav-logo" onclick="goHome()"><img src="/logo-sm.png" alt="Davincii"></span>
     <div class="mkt-nav-links">
       <button class="mkt-nav-link" onclick="navigate('/howitworks')">How it works</button>
       <button class="mkt-nav-link active" onclick="navigate('/pricing')">Pricing</button>
@@ -1648,7 +1650,7 @@ select.field { color:var(--black); }
 <!-- ════════════════ ABOUT ════════════════ -->
 <div class="screen mkt-page" id="screen-about">
   <nav class="mkt-nav">
-    <span class="mkt-nav-logo" onclick="navigate('/')"><img src="/logo-sm.png" alt="Davincii"></span>
+    <span class="mkt-nav-logo" onclick="goHome()"><img src="/logo-sm.png" alt="Davincii"></span>
     <div class="mkt-nav-links">
       <button class="mkt-nav-link" onclick="navigate('/howitworks')">How it works</button>
       <button class="mkt-nav-link" onclick="navigate('/pricing')">Pricing</button>
@@ -1720,7 +1722,7 @@ select.field { color:var(--black); }
 <!-- ════════════════ TERMS OF SERVICE ════════════════ -->
 <div class="screen legal-page" id="screen-terms">
   <nav class="legal-nav">
-    <span class="legal-nav-logo" onclick="navigate('/')"><img src="/logo-sm.png" alt="Davincii"></span>
+    <span class="legal-nav-logo" onclick="goHome()"><img src="/logo-sm.png" alt="Davincii"></span>
     <button class="btn-mkt-ghost" onclick="navigate('/')">&larr; Back</button>
   </nav>
   <div class="legal-body">
@@ -1793,7 +1795,7 @@ select.field { color:var(--black); }
 <!-- ════════════════ PRIVACY POLICY ════════════════ -->
 <div class="screen legal-page" id="screen-privacy">
   <nav class="legal-nav">
-    <span class="legal-nav-logo" onclick="navigate('/')"><img src="/logo-sm.png" alt="Davincii"></span>
+    <span class="legal-nav-logo" onclick="goHome()"><img src="/logo-sm.png" alt="Davincii"></span>
     <button class="btn-mkt-ghost" onclick="navigate('/')">&larr; Back</button>
   </nav>
   <div class="legal-body">
@@ -2237,6 +2239,7 @@ select.field { color:var(--black); }
 
   // -- Auth helpers ------------------------------------------
   function getToken() { return localStorage.getItem('dvc_token'); }
+  function goHome() { navigate(getToken() ? '/dashboard/overview' : '/'); }
   function getArtist() { try { return JSON.parse(localStorage.getItem('dvc_artist')); } catch(e) { return null; } }
   function setAuth(token, artist) {
     localStorage.setItem('dvc_token', token);
@@ -2403,13 +2406,16 @@ select.field { color:var(--black); }
     if (window.PublicKeyCredential) {
       var btn = document.getElementById('passkey-login-btn');
       if (btn) btn.style.display = '';
+      var mobBtn = document.querySelector('.mob-passkey-login-btn');
+      if (mobBtn) mobBtn.style.display = '';
       var setupBtn = document.getElementById('passkey-setup-btn');
       if (setupBtn) setupBtn.style.display = '';
     }
   })();
 
   async function doPasskeyLogin() {
-    var errEl = document.getElementById('login-error');
+    var isMob = window.innerWidth <= 768;
+    var errEl = document.getElementById(isMob ? 'mob-login-error' : 'login-error');
     try {
       var optRes = await fetch('/api/passkeys/login/options', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
       var options = await optRes.json();
