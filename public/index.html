@@ -79,7 +79,8 @@ select.field { color:var(--black); }
 .site-footer::before { content:''; position:absolute; inset:0; background-image:var(--noise); opacity:0.035; pointer-events:none; }
 .footer-inner { max-width:1100px; margin:0 auto; padding:56px 60px 40px; position:relative; z-index:1; }
 .footer-top { display:grid; grid-template-columns:1fr 1fr 1fr; gap:48px; padding-bottom:44px; border-bottom:1px solid rgba(255,255,255,0.08); margin-bottom:32px; }
-.footer-brand-name { font-family:var(--script); font-size:38px; color:var(--white); line-height:1; margin-bottom:12px; display:block; }
+.footer-brand-name { line-height:1; margin-bottom:12px; display:block; }
+.footer-brand-name img { height:32px; width:auto; display:block; }
 .footer-brand-desc { font-family:var(--sans); font-size:13px; font-weight:300; color:rgba(255,255,255,0.38); line-height:1.7; max-width:240px; }
 .footer-col-title { font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.18em; text-transform:uppercase; color:rgba(255,255,255,0.3); margin-bottom:16px; }
 .footer-links { display:flex; flex-direction:column; gap:10px; }
@@ -100,7 +101,8 @@ select.field { color:var(--black); }
 #screen-landing::after { content:''; position:absolute; top:-20%; left:50%; transform:translateX(-50%); width:900px; height:600px; background:radial-gradient(ellipse at center, rgba(184,0,0,0.08) 0%, transparent 70%); pointer-events:none; z-index:0; }
 
 .landing-nav { position:relative; z-index:10; display:flex; justify-content:space-between; align-items:center; padding:36px 60px; }
-.landing-nav-logo { font-family:var(--script); font-size:34px; color:var(--white); line-height:1; }
+.landing-nav-logo { line-height:1; }
+.landing-nav-logo img { height:30px; width:auto; display:block; }
 .landing-nav-center { display:flex; align-items:center; gap:36px; position:absolute; left:50%; transform:translateX(-50%); }
 .landing-nav-link { font-family:var(--sans); font-size:11px; font-weight:400; letter-spacing:0.12em; text-transform:uppercase; color:rgba(255,255,255,0.45); cursor:pointer; background:none; border:none; transition:color 0.18s; padding:0; }
 .landing-nav-link:hover { color:rgba(255,255,255,0.88); }
@@ -137,7 +139,8 @@ select.field { color:var(--black); }
 .auth-brand { background:var(--black); display:flex; flex-direction:column; justify-content:space-between; padding:44px 40px 48px; position:relative; overflow:hidden; }
 .auth-brand::before { content:''; position:absolute; inset:0; background-image:var(--noise); opacity:0.04; pointer-events:none; }
 .auth-brand::after { content:''; position:absolute; bottom:-100px; left:-100px; width:400px; height:400px; background:radial-gradient(ellipse, rgba(184,0,0,0.07) 0%, transparent 70%); pointer-events:none; }
-.auth-brand-logo { font-family:var(--script); font-size:32px; color:var(--white); line-height:1; position:relative; z-index:1; }
+.auth-brand-logo { line-height:1; position:relative; z-index:1; }
+.auth-brand-logo img { height:28px; width:auto; display:block; }
 .auth-brand-center { position:relative; z-index:1; }
 .auth-brand-rule { width:24px; height:2px; background:var(--red); margin-bottom:20px; }
 .auth-brand-tagline { font-family:var(--serif); font-size:clamp(28px,2.5vw,38px); font-weight:300; color:var(--white); line-height:1.22; letter-spacing:-0.01em; margin-bottom:20px; }
@@ -153,8 +156,8 @@ select.field { color:var(--black); }
 
 /* ── DASHBOARD NAV ── */
 .top-nav { height:62px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; padding:0 40px; position:sticky; top:0; background:rgba(255,255,255,0.97); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); z-index:50; flex-shrink:0; }
-.top-nav-logo { font-family:var(--script); font-size:28px; color:var(--black); line-height:1; cursor:pointer; letter-spacing:0.01em; }
-.top-nav-logo::after { content:''; display:inline-block; width:5px; height:5px; background:var(--red); border-radius:50%; margin-left:4px; vertical-align:middle; position:relative; top:-3px; }
+.top-nav-logo { line-height:1; cursor:pointer; }
+.top-nav-logo img { height:24px; width:auto; display:block; }
 .top-nav-right { display:flex; align-items:center; gap:20px; }
 .top-nav-name, .top-nav-artist { font-family:var(--sans); font-size:12px; font-weight:400; color:var(--muted); letter-spacing:0.03em; }
 .top-nav-signout, .top-nav-out { font-family:var(--sans); font-size:11px; font-weight:400; letter-spacing:0.10em; text-transform:uppercase; color:var(--muted); background:none; border:none; cursor:pointer; transition:color 0.18s; }
@@ -300,7 +303,8 @@ select.field { color:var(--black); }
 /* ── MARKETING PAGES ── */
 .mkt-page { background:var(--white); }
 .mkt-nav { display:flex; justify-content:space-between; align-items:center; padding:28px 60px; border-bottom:1px solid var(--border); }
-.mkt-nav-logo { font-family:var(--script); font-size:30px; color:var(--black); line-height:1; cursor:pointer; }
+.mkt-nav-logo { line-height:1; cursor:pointer; }
+.mkt-nav-logo img { height:26px; width:auto; display:block; }
 .mkt-nav-links { display:flex; gap:0; align-items:center; }
 .mkt-nav-link { font-family:var(--sans); font-size:11px; font-weight:400; letter-spacing:0.10em; text-transform:uppercase; color:var(--muted); cursor:pointer; background:none; border:none; transition:color 0.18s; padding:0 22px; position:relative; }
 .mkt-nav-link:hover { color:var(--black); }
@@ -367,7 +371,8 @@ select.field { color:var(--black); }
 /* ── LEGAL PAGES ── */
 .legal-page { background:var(--white); }
 .legal-nav { display:flex; justify-content:space-between; align-items:center; padding:28px 60px; border-bottom:1px solid var(--border); }
-.legal-nav-logo { font-family:var(--script); font-size:30px; color:var(--black); line-height:1; cursor:pointer; }
+.legal-nav-logo { line-height:1; cursor:pointer; }
+.legal-nav-logo img { height:26px; width:auto; display:block; }
 .legal-body { max-width:720px; margin:0 auto; padding:64px 60px 80px; }
 .legal-eyebrow { font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.22em; text-transform:uppercase; color:var(--red); margin-bottom:16px; }
 .legal-title { font-family:var(--serif); font-size:clamp(36px,4vw,52px); font-weight:400; letter-spacing:-0.02em; line-height:1.1; color:var(--black); margin-bottom:12px; }
@@ -515,7 +520,8 @@ select.field { color:var(--black); }
   overflow: hidden;
 }
 .mob-footer::before { content:''; position:absolute; inset:0; background-image:var(--noise); opacity:0.04; pointer-events:none; }
-.mob-footer-logo { font-family:var(--script); font-size:34px; color:var(--white); display:block; margin-bottom:8px; position:relative; z-index:1; }
+.mob-footer-logo { display:block; margin-bottom:8px; position:relative; z-index:1; }
+.mob-footer-logo img { height:28px; width:auto; display:block; }
 .mob-footer-rule { width:24px; height:2px; background:var(--red); margin-bottom:16px; position:relative; z-index:1; }
 .mob-footer-desc { font-family:var(--sans); font-size:13px; font-weight:300; color:rgba(255,255,255,0.38); line-height:1.7; margin-bottom:32px; position:relative; z-index:1; }
 .mob-footer-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px 16px; margin-bottom:32px; position:relative; z-index:1; }
@@ -537,7 +543,8 @@ select.field { color:var(--black); }
   padding: 20px 24px 16px;
   overflow: visible;
 }
-.mob-landing-logo { font-family:var(--script); font-size:32px; color:var(--white); line-height:1; }
+.mob-landing-logo { line-height:1; }
+.mob-landing-logo img { height:28px; width:auto; display:block; }
 .mob-landing-avatar {
   width: 36px; height: 36px;
   border: 1px solid rgba(255,255,255,0.3);
@@ -638,7 +645,8 @@ select.field { color:var(--black); }
   display: flex; align-items: center; justify-content: space-between;
   padding: 20px 24px; border-bottom: 1px solid var(--border);
 }
-.mob-auth-logo { font-family:var(--script); font-size:28px; color:var(--black); line-height:1; }
+.mob-auth-logo { line-height:1; }
+.mob-auth-logo img { height:24px; width:auto; display:block; }
 .mob-back-btn { font-family:var(--sans); font-size:11px; font-weight:400; letter-spacing:0.10em; text-transform:uppercase; color:var(--muted); background:none; border:none; cursor:pointer; padding:0; }
 .mob-auth-hero {
   background: var(--black); padding: 32px 24px 28px;
@@ -664,7 +672,8 @@ select.field { color:var(--black); }
   padding: 0 20px; position: sticky; top: 0;
   background: rgba(255,255,255,0.97); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 50; flex-shrink: 0;
 }
-.mob-nav-logo { font-family:var(--script); font-size:26px; color:var(--black); line-height:1; cursor:pointer; margin-top:4px; }
+.mob-nav-logo { line-height:1; cursor:pointer; margin-top:4px; }
+.mob-nav-logo img { height:22px; width:auto; display:block; }
 .mob-nav-right { display:flex; align-items:center; gap:10px; }
 .mob-nav-artist-name { font-family:var(--sans); font-size:12px; font-weight:400; color:var(--muted); letter-spacing:0.02em; }
 .mob-avatar { width:32px; height:32px; background:var(--black); border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:var(--sans); font-size:11px; font-weight:600; color:var(--white); cursor:pointer; flex-shrink:0; }
@@ -901,7 +910,7 @@ select.field { color:var(--black); }
     <div class="footer-inner">
       <div class="footer-top">
         <div>
-          <span class="footer-brand-name">Davincii</span>
+          <span class="footer-brand-name"><img src="/logo-white-sm.png" alt="Davincii"></span>
           <div class="footer-red-line"></div>
           <p class="footer-brand-desc">Music publishing administration — we register, track, and collect every royalty you're owed.</p>
         </div>
@@ -938,7 +947,7 @@ select.field { color:var(--black); }
   </footer>
   <!-- Mobile footer -->
   <div class="mob-footer mob-only">
-    <span class="mob-footer-logo">Davincii</span>
+    <span class="mob-footer-logo"><img src="/logo-white-sm.png" alt="Davincii"></span>
     <div class="mob-footer-rule"></div>
     <p class="mob-footer-desc">Music publishing administration — we register, track, and collect every royalty you're owed.</p>
     <div class="mob-footer-grid">
@@ -974,7 +983,7 @@ select.field { color:var(--black); }
 <div class="screen active" id="screen-landing">
   <!-- Mobile landing nav -->
   <nav class="mob-landing-nav mob-only">
-    <div class="mob-landing-logo">Davincii</div>
+    <div class="mob-landing-logo"><img src="/logo-white-sm.png" alt="Davincii"></div>
     <div class="mob-landing-avatar" id="landing-avatar" onclick="toggleLandingMenu()">
       <div class="mob-landing-avatar-icon">
         <span></span><span></span><span></span>
@@ -1126,7 +1135,7 @@ select.field { color:var(--black); }
   </div><!-- /mob-scroll -->
   <!-- Desktop landing nav -->
   <nav class="landing-nav desk-only">
-    <div class="landing-nav-logo">Davincii</div>
+    <div class="landing-nav-logo"><img src="/logo-white-sm.png" alt="Davincii"></div>
     <div class="landing-nav-center">
       <button class="landing-nav-link" onclick="navigate('/howitworks')">How it works</button>
       <button class="landing-nav-link" onclick="scrollToPricing()">Pricing</button>
@@ -1301,7 +1310,7 @@ select.field { color:var(--black); }
 <div class="screen" id="screen-login">
   <!-- Mobile auth nav & hero -->
   <nav class="mob-auth-nav mob-only">
-    <span class="mob-auth-logo">Davincii</span>
+    <span class="mob-auth-logo"><img src="/logo-sm.png" alt="Davincii"></span>
     <button class="mob-back-btn" onclick="navigate('/')">&larr; Back</button>
   </nav>
   <div class="mob-auth-hero mob-only">
@@ -1340,7 +1349,7 @@ select.field { color:var(--black); }
   <!-- Desktop auth layout -->
   <div class="auth-layout desk-only">
     <div class="auth-brand">
-      <div class="auth-brand-logo">Davincii</div>
+      <div class="auth-brand-logo"><img src="/logo-white-sm.png" alt="Davincii"></div>
       <div class="auth-brand-center">
         <div class="auth-brand-rule"></div>
         <h2 class="auth-brand-tagline">Every stream,<br>every spin,<br><em>every dollar.</em></h2>
@@ -1385,7 +1394,7 @@ select.field { color:var(--black); }
 <div class="screen" id="screen-signup">
   <!-- Mobile auth nav & hero -->
   <nav class="mob-auth-nav mob-only">
-    <span class="mob-auth-logo">Davincii</span>
+    <span class="mob-auth-logo"><img src="/logo-sm.png" alt="Davincii"></span>
     <button class="mob-back-btn" onclick="navigate('/')">&larr; Back</button>
   </nav>
   <div class="mob-auth-hero mob-only">
@@ -1421,7 +1430,7 @@ select.field { color:var(--black); }
   <!-- Desktop signup layout -->
   <div class="auth-layout desk-only">
     <div class="auth-brand">
-      <div class="auth-brand-logo">Davincii</div>
+      <div class="auth-brand-logo"><img src="/logo-white-sm.png" alt="Davincii"></div>
       <div class="auth-brand-center">
         <div class="auth-brand-rule"></div>
         <h2 class="auth-brand-tagline">Your music<br>earns more<br><em>than you know.</em></h2>
@@ -1463,7 +1472,7 @@ select.field { color:var(--black); }
 <div class="screen" id="screen-recover">
   <!-- Mobile auth nav & hero -->
   <nav class="mob-auth-nav mob-only">
-    <span class="mob-auth-logo">Davincii</span>
+    <span class="mob-auth-logo"><img src="/logo-sm.png" alt="Davincii"></span>
     <button class="mob-back-btn" onclick="navigate('/login')">&larr; Back</button>
   </nav>
   <div class="mob-auth-hero mob-only">
@@ -1485,7 +1494,7 @@ select.field { color:var(--black); }
   <!-- Desktop recover layout -->
   <div class="auth-layout desk-only">
     <div class="auth-brand">
-      <div class="auth-brand-logo">Davincii</div>
+      <div class="auth-brand-logo"><img src="/logo-white-sm.png" alt="Davincii"></div>
       <div class="auth-brand-center">
         <div class="auth-brand-rule"></div>
         <h2 class="auth-brand-tagline">We'll get<br>you back<br><em>in.</em></h2>
@@ -1512,7 +1521,7 @@ select.field { color:var(--black); }
 <!-- ════════════════ HOW IT WORKS ════════════════ -->
 <div class="screen mkt-page" id="screen-howitworks">
   <nav class="mkt-nav">
-    <span class="mkt-nav-logo" onclick="navigate('/')">Davincii</span>
+    <span class="mkt-nav-logo" onclick="navigate('/')"><img src="/logo-sm.png" alt="Davincii"></span>
     <div class="mkt-nav-links">
       <button class="mkt-nav-link active" onclick="navigate('/howitworks')">How it works</button>
       <button class="mkt-nav-link" onclick="navigate('/pricing')">Pricing</button>
@@ -1579,7 +1588,7 @@ select.field { color:var(--black); }
 <!-- ════════════════ PRICING ════════════════ -->
 <div class="screen mkt-page" id="screen-pricing">
   <nav class="mkt-nav">
-    <span class="mkt-nav-logo" onclick="navigate('/')">Davincii</span>
+    <span class="mkt-nav-logo" onclick="navigate('/')"><img src="/logo-sm.png" alt="Davincii"></span>
     <div class="mkt-nav-links">
       <button class="mkt-nav-link" onclick="navigate('/howitworks')">How it works</button>
       <button class="mkt-nav-link active" onclick="navigate('/pricing')">Pricing</button>
@@ -1639,7 +1648,7 @@ select.field { color:var(--black); }
 <!-- ════════════════ ABOUT ════════════════ -->
 <div class="screen mkt-page" id="screen-about">
   <nav class="mkt-nav">
-    <span class="mkt-nav-logo" onclick="navigate('/')">Davincii</span>
+    <span class="mkt-nav-logo" onclick="navigate('/')"><img src="/logo-sm.png" alt="Davincii"></span>
     <div class="mkt-nav-links">
       <button class="mkt-nav-link" onclick="navigate('/howitworks')">How it works</button>
       <button class="mkt-nav-link" onclick="navigate('/pricing')">Pricing</button>
@@ -1711,7 +1720,7 @@ select.field { color:var(--black); }
 <!-- ════════════════ TERMS OF SERVICE ════════════════ -->
 <div class="screen legal-page" id="screen-terms">
   <nav class="legal-nav">
-    <span class="legal-nav-logo" onclick="navigate('/')">Davincii</span>
+    <span class="legal-nav-logo" onclick="navigate('/')"><img src="/logo-sm.png" alt="Davincii"></span>
     <button class="btn-mkt-ghost" onclick="navigate('/')">&larr; Back</button>
   </nav>
   <div class="legal-body">
@@ -1784,7 +1793,7 @@ select.field { color:var(--black); }
 <!-- ════════════════ PRIVACY POLICY ════════════════ -->
 <div class="screen legal-page" id="screen-privacy">
   <nav class="legal-nav">
-    <span class="legal-nav-logo" onclick="navigate('/')">Davincii</span>
+    <span class="legal-nav-logo" onclick="navigate('/')"><img src="/logo-sm.png" alt="Davincii"></span>
     <button class="btn-mkt-ghost" onclick="navigate('/')">&larr; Back</button>
   </nav>
   <div class="legal-body">
@@ -1872,7 +1881,7 @@ select.field { color:var(--black); }
 <div class="screen" id="screen-dash">
   <!-- Mobile top nav -->
   <div class="mob-top-nav mob-only">
-    <span class="mob-nav-logo" onclick="navigate('/')">Davincii</span>
+    <span class="mob-nav-logo" onclick="navigate('/')"><img src="/logo-sm.png" alt="Davincii"></span>
     <div class="mob-nav-right">
       <span class="mob-nav-artist-name" id="mob-nav-artist-name"></span>
       <div class="avatar-wrap" id="mob-avatar-wrap">
@@ -1905,7 +1914,7 @@ select.field { color:var(--black); }
   </div>
   <!-- Desktop top nav -->
   <div class="top-nav desk-only">
-    <span class="top-nav-logo" onclick="navigate('/dashboard/overview')">Davincii</span>
+    <span class="top-nav-logo" onclick="navigate('/dashboard/overview')"><img src="/logo-sm.png" alt="Davincii"></span>
     <div class="top-nav-right">
       <span class="top-nav-artist" id="nav-artist-name"></span>
       <div class="avatar-wrap" id="avatar-wrap">
@@ -2086,7 +2095,7 @@ select.field { color:var(--black); }
 <!-- ════════════════ CLAIM PAYMENT ════════════════ -->
 <div class="screen" id="screen-claim">
   <div class="top-nav">
-    <span class="top-nav-logo" onclick="navigate('/dashboard/overview')">Davincii</span>
+    <span class="top-nav-logo" onclick="navigate('/dashboard/overview')"><img src="/logo-sm.png" alt="Davincii"></span>
     <div class="top-nav-right"><span class="top-nav-artist" id="claim-artist-name"></span><div class="avatar" id="claim-avatar"></div></div>
   </div>
   <div style="padding:40px 48px;width:100%;">
@@ -2152,7 +2161,7 @@ select.field { color:var(--black); }
 
 <!-- ════════════════ PAYMENT SUCCESS ════════════════ -->
 <div class="screen" id="screen-success">
-  <div class="top-nav"><span class="top-nav-logo" onclick="navigate('/dashboard/overview')">Davincii</span><div class="top-nav-right"><div class="avatar" id="success-avatar"></div></div></div>
+  <div class="top-nav"><span class="top-nav-logo" onclick="navigate('/dashboard/overview')"><img src="/logo-sm.png" alt="Davincii"></span><div class="top-nav-right"><div class="avatar" id="success-avatar"></div></div></div>
   <div style="padding:80px 48px;display:flex;justify-content:center;">
     <div class="success-wrap">
       <div class="success-icon">&#9678;</div>
