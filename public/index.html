@@ -301,10 +301,12 @@ select.field { color:var(--black); }
 .mkt-page { background:var(--white); }
 .mkt-nav { display:flex; justify-content:space-between; align-items:center; padding:28px 60px; border-bottom:1px solid var(--border); }
 .mkt-nav-logo { font-family:var(--script); font-size:30px; color:var(--black); line-height:1; cursor:pointer; }
-.mkt-nav-links { display:flex; gap:28px; align-items:center; }
-.mkt-nav-link { font-family:var(--sans); font-size:11px; font-weight:400; letter-spacing:0.10em; text-transform:uppercase; color:var(--muted); cursor:pointer; background:none; border:none; transition:color 0.18s; padding:0; }
+.mkt-nav-links { display:flex; gap:0; align-items:center; }
+.mkt-nav-link { font-family:var(--sans); font-size:11px; font-weight:400; letter-spacing:0.10em; text-transform:uppercase; color:var(--muted); cursor:pointer; background:none; border:none; transition:color 0.18s; padding:0 22px; position:relative; }
 .mkt-nav-link:hover { color:var(--black); }
 .mkt-nav-link.active { color:var(--black); font-weight:600; }
+.mkt-nav-link.active::after { content:''; position:absolute; bottom:-28px; left:50%; transform:translateX(-50%); width:100%; height:2px; background:var(--red); }
+.mkt-nav-link + .mkt-nav-link::before { content:''; position:absolute; left:0; top:50%; transform:translateY(-50%); width:3px; height:3px; border-radius:50%; background:var(--red); opacity:0.5; }
 .mkt-nav-right { display:flex; gap:10px; }
 .btn-mkt-ghost { font-family:var(--sans); font-size:11px; font-weight:500; letter-spacing:0.10em; text-transform:uppercase; color:var(--black); background:transparent; border:1px solid rgba(0,0,0,0.2); padding:9px 20px; cursor:pointer; transition:background 0.18s; }
 .btn-mkt-ghost:hover { background:rgba(0,0,0,0.04); }
@@ -376,6 +378,115 @@ select.field { color:var(--black); }
 .legal-contact-line { font-family:var(--sans); font-size:13px; font-weight:300; color:var(--muted); margin-bottom:4px; }
 .legal-contact-line a { color:var(--red); text-decoration:none; }
 
+/* ── DESKTOP LANDING SCROLL SECTIONS ── */
+.landing-scroll { background:var(--white); position:relative; z-index:10; }
+
+.ls-stats { display:flex; align-items:center; justify-content:center; gap:0; padding:64px 60px; border-bottom:1px solid var(--border); max-width:1100px; margin:0 auto; }
+.ls-stat { flex:1; text-align:center; padding:0 40px; }
+.ls-stat-num { font-family:var(--serif); font-size:52px; font-weight:400; letter-spacing:-0.02em; color:var(--black); line-height:1; margin-bottom:10px; }
+.ls-stat-lbl { font-family:var(--sans); font-size:11px; font-weight:400; letter-spacing:0.10em; text-transform:uppercase; color:var(--muted); }
+.ls-stat-div { width:1px; height:56px; background:var(--border); flex-shrink:0; }
+
+.ls-section-eyebrow { font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.22em; text-transform:uppercase; color:var(--red); margin-bottom:20px; }
+.ls-why { display:grid; grid-template-columns:1fr 1fr; gap:80px; align-items:start; padding:80px 60px; max-width:1100px; margin:0 auto; border-bottom:1px solid var(--border); }
+.ls-why-title { font-family:var(--serif); font-size:38px; font-weight:400; letter-spacing:-0.02em; line-height:1.15; color:var(--black); margin-bottom:20px; }
+.ls-why-title em { font-style:italic; }
+.ls-why-body { font-family:var(--sans); font-size:14px; font-weight:300; color:var(--muted); line-height:1.8; margin-bottom:28px; }
+.ls-why-btn { background:none; border:none; font-family:var(--sans); font-size:12px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--black); cursor:pointer; padding:0; border-bottom:1px solid var(--black); padding-bottom:2px; transition:opacity 0.18s; }
+.ls-why-btn:hover { opacity:0.6; }
+.ls-why-right { display:flex; flex-direction:column; gap:0; }
+.ls-why-card { display:flex; gap:16px; align-items:flex-start; padding:20px 0; border-bottom:1px solid var(--border); }
+.ls-why-card:last-child { border-bottom:none; }
+.ls-why-check { color:var(--red); font-size:16px; flex-shrink:0; margin-top:1px; font-weight:600; }
+.ls-why-card-title { font-family:var(--sans); font-size:14px; font-weight:600; color:var(--black); margin-bottom:4px; }
+.ls-why-card-sub { font-family:var(--sans); font-size:13px; font-weight:300; color:var(--muted); line-height:1.65; }
+
+.ls-testimonials { padding:80px 60px; max-width:1100px; margin:0 auto; border-bottom:1px solid var(--border); }
+.ls-testi-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:24px; }
+.ls-testi-card { border:1px solid var(--border); padding:28px 26px; display:flex; flex-direction:column; justify-content:space-between; gap:24px; background:var(--white); transition:border-color 0.18s; }
+.ls-testi-card:hover { border-color:rgba(0,0,0,0.25); }
+.ls-testi-quote { font-family:var(--serif); font-size:18px; font-weight:400; color:var(--black); line-height:1.5; font-style:italic; }
+.ls-testi-author { display:flex; align-items:center; gap:12px; }
+.ls-testi-avatar { width:36px; height:36px; background:var(--black); border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:var(--sans); font-size:13px; font-weight:600; color:var(--white); flex-shrink:0; }
+.ls-testi-name { font-family:var(--sans); font-size:13px; font-weight:600; color:var(--black); }
+.ls-testi-genre { font-family:var(--sans); font-size:11px; font-weight:300; color:var(--muted); margin-top:2px; }
+
+.ls-pricing { background:var(--off-white); border-bottom:1px solid var(--border); }
+.ls-pricing-inner { max-width:1100px; margin:0 auto; padding:80px 60px; }
+.ls-pricing-title { font-family:var(--serif); font-size:38px; font-weight:400; letter-spacing:-0.02em; line-height:1.1; color:var(--black); margin-bottom:12px; text-align:center; }
+.ls-pricing-title em { font-style:italic; }
+.ls-pricing-sub { font-family:var(--sans); font-size:14px; font-weight:300; color:var(--muted); line-height:1.7; text-align:center; max-width:560px; margin:0 auto 48px; }
+.ls-pricing-card { display:grid; grid-template-columns:1fr 1fr; border:1px solid var(--red); background:var(--white); }
+.ls-pricing-card-left { padding:40px 36px; border-right:1px solid var(--border); }
+.ls-pricing-plan { font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.18em; text-transform:uppercase; color:var(--muted); margin-bottom:16px; }
+.ls-pricing-amount { font-family:var(--serif); font-size:32px; font-weight:400; color:var(--black); letter-spacing:-0.01em; margin-bottom:12px; }
+.ls-pricing-note { font-family:var(--sans); font-size:13px; font-weight:300; color:var(--muted); line-height:1.7; }
+.ls-pricing-card-right { padding:40px 36px; display:flex; flex-direction:column; gap:0; }
+.ls-pricing-feature { font-family:var(--sans); font-size:13px; font-weight:400; color:#333; padding:10px 0; border-bottom:1px solid var(--border); }
+.ls-pricing-feature:last-of-type { border-bottom:none; margin-bottom:24px; }
+.ls-pricing-btn { background:var(--black); color:var(--white); border:none; padding:14px 28px; font-family:var(--sans); font-size:12px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; cursor:pointer; transition:opacity 0.18s; align-self:flex-start; }
+.ls-pricing-btn:hover { opacity:0.82; }
+.ls-pricing-footnote { font-family:var(--sans); font-size:12px; font-weight:300; color:var(--muted-light); text-align:center; margin-top:20px; }
+
+.ls-faq { border-bottom:1px solid var(--border); }
+.ls-faq-inner { max-width:760px; margin:0 auto; padding:80px 60px; }
+.ls-faq-title { font-family:var(--serif); font-size:38px; font-weight:400; letter-spacing:-0.02em; line-height:1.1; color:var(--black); margin-bottom:48px; }
+.ls-faq-title em { font-style:italic; }
+.ls-faq-list { display:flex; flex-direction:column; }
+.ls-faq-item { border-bottom:1px solid var(--border); cursor:pointer; }
+.ls-faq-q { font-family:var(--sans); font-size:15px; font-weight:500; color:var(--black); padding:20px 0; display:flex; justify-content:space-between; align-items:center; gap:16px; user-select:none; }
+.ls-faq-icon { font-size:20px; font-weight:300; color:var(--red); flex-shrink:0; transition:transform 0.2s; line-height:1; }
+.ls-faq-item.open .ls-faq-icon { transform:rotate(45deg); }
+.ls-faq-a { font-family:var(--sans); font-size:14px; font-weight:300; color:var(--muted); line-height:1.8; max-height:0; overflow:hidden; transition:max-height 0.28s ease, padding 0.2s; padding:0; }
+.ls-faq-item.open .ls-faq-a { max-height:200px; padding-bottom:20px; }
+
+.ls-cta-band { background:var(--black); position:relative; overflow:hidden; }
+.ls-cta-band::before { content:''; position:absolute; inset:0; background-image:var(--noise); opacity:0.04; pointer-events:none; }
+.ls-cta-band-inner { max-width:1100px; margin:0 auto; padding:52px 60px; display:flex; align-items:center; justify-content:space-between; gap:40px; position:relative; z-index:1; }
+.ls-cta-band-title { font-family:var(--serif); font-size:32px; font-weight:400; letter-spacing:-0.01em; color:var(--white); margin-bottom:8px; line-height:1.2; }
+.ls-cta-band-sub { font-family:var(--sans); font-size:14px; font-weight:300; color:rgba(255,255,255,0.45); line-height:1.6; }
+.ls-cta-btn { background:var(--white); color:var(--black); border:none; padding:16px 40px; font-family:var(--sans); font-size:12px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; cursor:pointer; transition:opacity 0.18s; white-space:nowrap; flex-shrink:0; }
+.ls-cta-btn:hover { opacity:0.88; }
+
+/* ── MOBILE SCROLL SECTIONS (new) ── */
+.mob-scroll { background:var(--white); }
+.mob-ls-section { padding:40px 24px; border-bottom:1px solid var(--border); }
+.mob-ls-eyebrow { font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.22em; text-transform:uppercase; color:var(--red); margin-bottom:14px; }
+.mob-ls-title { font-family:var(--serif); font-size:28px; font-weight:400; letter-spacing:-0.01em; line-height:1.15; color:var(--black); margin-bottom:14px; }
+.mob-ls-title em { font-style:italic; }
+.mob-ls-body { font-family:var(--sans); font-size:14px; font-weight:300; color:var(--muted); line-height:1.75; margin-bottom:24px; }
+.mob-ls-cards { display:flex; flex-direction:column; gap:0; }
+.mob-ls-card { display:flex; gap:14px; align-items:flex-start; padding:16px 0; border-bottom:1px solid var(--border); }
+.mob-ls-card:last-child { border-bottom:none; }
+.mob-ls-check { color:var(--red); font-size:15px; flex-shrink:0; font-weight:600; margin-top:1px; }
+.mob-ls-card-title { font-family:var(--sans); font-size:13px; font-weight:600; color:var(--black); margin-bottom:3px; }
+.mob-ls-card-sub { font-family:var(--sans); font-size:12px; font-weight:300; color:var(--muted); line-height:1.6; }
+.mob-ls-testi { display:flex; flex-direction:column; gap:16px; }
+.mob-ls-testi-card { border:1px solid var(--border); padding:20px; background:var(--white); }
+.mob-ls-testi-quote { font-family:var(--serif); font-size:16px; font-weight:400; color:var(--black); line-height:1.5; font-style:italic; margin-bottom:16px; }
+.mob-ls-testi-author { display:flex; align-items:center; gap:10px; }
+.mob-ls-testi-av { width:32px; height:32px; background:var(--black); border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:var(--sans); font-size:11px; font-weight:600; color:var(--white); flex-shrink:0; }
+.mob-ls-testi-name { font-family:var(--sans); font-size:12px; font-weight:600; color:var(--black); }
+.mob-ls-testi-genre { font-family:var(--sans); font-size:11px; font-weight:300; color:var(--muted); }
+.mob-pricing-card { border:1px solid var(--red); padding:24px; background:var(--white); }
+.mob-pricing-plan { font-family:var(--sans); font-size:9px; font-weight:600; letter-spacing:0.18em; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
+.mob-pricing-amount { font-family:var(--serif); font-size:24px; font-weight:400; color:var(--black); margin-bottom:8px; }
+.mob-pricing-note { font-family:var(--sans); font-size:13px; font-weight:300; color:var(--muted); line-height:1.65; }
+.mob-pricing-feature { font-family:var(--sans); font-size:13px; font-weight:400; color:#333; padding:9px 0; border-bottom:1px solid var(--border); }
+.mob-pricing-feature:last-of-type { border-bottom:none; }
+.mob-faq-list { display:flex; flex-direction:column; }
+.mob-faq-item { border-bottom:1px solid var(--border); cursor:pointer; }
+.mob-faq-q { font-family:var(--sans); font-size:14px; font-weight:500; color:var(--black); padding:16px 0; display:flex; justify-content:space-between; align-items:center; gap:12px; user-select:none; }
+.mob-faq-icon { font-size:18px; font-weight:300; color:var(--red); flex-shrink:0; transition:transform 0.2s; }
+.mob-faq-item.open .mob-faq-icon { transform:rotate(45deg); }
+.mob-faq-a { font-family:var(--sans); font-size:13px; font-weight:300; color:var(--muted); line-height:1.75; max-height:0; overflow:hidden; transition:max-height 0.28s ease, padding 0.2s; }
+.mob-faq-item.open .mob-faq-a { max-height:200px; padding-bottom:16px; }
+.mob-ls-cta { background:var(--black); padding:40px 24px; position:relative; overflow:hidden; }
+.mob-ls-cta::before { content:''; position:absolute; inset:0; background-image:var(--noise); opacity:0.04; pointer-events:none; }
+.mob-ls-cta-title { font-family:var(--serif); font-size:26px; font-weight:400; color:var(--white); line-height:1.2; margin-bottom:10px; position:relative; z-index:1; }
+.mob-ls-cta-sub { font-family:var(--sans); font-size:13px; font-weight:300; color:rgba(255,255,255,0.45); line-height:1.6; margin-bottom:24px; position:relative; z-index:1; }
+.mob-ls-cta .btn-primary { position:relative; z-index:1; background:var(--white); color:var(--black); }
+
 /* ── MOBILE-ONLY / DESKTOP-ONLY VISIBILITY ── */
 .mob-only { display:none !important; }
 
@@ -423,7 +534,8 @@ select.field { color:var(--black); }
   position: relative; z-index: 10;
   display: flex; flex-direction: column; align-items: center;
   justify-content: center;
-  flex: 1; text-align: center; padding: 0 24px 96px;
+  min-height: calc(100vh - 60px); min-height: calc(100dvh - 60px);
+  text-align: center; padding: 0 24px 96px;
 }
 .mob-landing-center { display:flex; flex-direction:column; align-items:center; margin-top:-24px; }
 .mob-landing-nav-links { display: flex; gap: 24px; margin-bottom: 28px; }
@@ -447,6 +559,27 @@ select.field { color:var(--black); }
 @keyframes mob-marquee { from { transform:translateX(0); } to { transform:translateX(-50%); } }
 .mob-partner-item { display:flex; align-items:center; padding:0 24px; border-right:1px solid rgba(255,255,255,0.07); color:rgba(255,255,255,0.28); height:48px; }
 .mob-partner-svg { height:32px; width:auto; display:block; overflow:visible; }
+
+/* ════════════════════════════
+   MOBILE LANDING SCROLL SECTIONS
+════════════════════════════ */
+.mob-ls { background:var(--white); position:relative; z-index:10; }
+.mob-ls-stats { display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--border); border-bottom:1px solid var(--border); }
+.mob-ls-stat { background:var(--white); padding:28px 20px; text-align:center; }
+.mob-ls-stat-num { font-family:var(--serif); font-size:36px; font-weight:400; letter-spacing:-0.02em; color:var(--black); line-height:1; margin-bottom:6px; }
+.mob-ls-stat-lbl { font-family:var(--sans); font-size:10px; font-weight:400; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); }
+.mob-ls-how { padding:40px 24px 44px; }
+.mob-ls-how-eyebrow { font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.22em; text-transform:uppercase; color:var(--red); margin-bottom:32px; text-align:center; }
+.mob-ls-step { padding:20px 0; border-bottom:1px solid var(--border); display:flex; gap:16px; }
+.mob-ls-step:last-child { border-bottom:none; }
+.mob-ls-step-num { font-family:var(--serif); font-size:32px; font-weight:400; color:var(--red); opacity:0.5; line-height:1; flex-shrink:0; }
+.mob-ls-step-title { font-family:var(--sans); font-size:14px; font-weight:600; color:var(--black); margin-bottom:6px; letter-spacing:-0.01em; }
+.mob-ls-step-body { font-family:var(--sans); font-size:13px; font-weight:300; color:var(--muted); line-height:1.7; }
+.mob-ls-cta-band { background:var(--black); padding:40px 24px; position:relative; overflow:hidden; }
+.mob-ls-cta-band::before { content:''; position:absolute; inset:0; background-image:var(--noise); opacity:0.04; pointer-events:none; }
+.mob-ls-cta-title { font-family:var(--serif); font-size:28px; font-weight:400; letter-spacing:-0.01em; color:var(--white); margin-bottom:8px; line-height:1.2; position:relative; z-index:1; }
+.mob-ls-cta-sub { font-family:var(--sans); font-size:13px; font-weight:300; color:rgba(255,255,255,0.45); line-height:1.6; margin-bottom:24px; position:relative; z-index:1; }
+.mob-ls-cta-btn { display:block; width:100%; background:var(--white); color:var(--black); border:none; padding:16px; font-family:var(--sans); font-size:12px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; cursor:pointer; position:relative; z-index:1; }
 
 /* ════════════════════════════
    MOBILE AUTH
@@ -479,11 +612,12 @@ select.field { color:var(--black); }
   height: 56px; border-bottom: 1px solid var(--border);
   display: flex; align-items: center; justify-content: space-between;
   padding: 0 20px; position: sticky; top: 0;
-  background: rgba(255,255,255,0.97); backdrop-filter: blur(8px); z-index: 50; flex-shrink: 0;
+  background: rgba(255,255,255,0.97); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 50; flex-shrink: 0;
 }
-.mob-nav-logo { font-family:var(--script); font-size:26px; color:var(--black); line-height:1; cursor:pointer; }
-.mob-nav-right { display:flex; align-items:center; gap:12px; }
-.mob-avatar { width:32px; height:32px; background:var(--black); border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:var(--sans); font-size:11px; font-weight:600; color:var(--white); cursor:pointer; }
+.mob-nav-logo { font-family:var(--script); font-size:26px; color:var(--black); line-height:1; cursor:pointer; margin-top:4px; }
+.mob-nav-right { display:flex; align-items:center; gap:10px; }
+.mob-nav-artist-name { font-family:var(--sans); font-size:12px; font-weight:400; color:var(--muted); letter-spacing:0.02em; }
+.mob-avatar { width:32px; height:32px; background:var(--black); border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:var(--sans); font-size:11px; font-weight:600; color:var(--white); cursor:pointer; flex-shrink:0; }
 
 /* Bottom tab bar */
 .mob-tab-bar {
@@ -602,8 +736,8 @@ select.field { color:var(--black); }
 
 /* Mobile avatar dropdown */
 .mob-avatar-dropdown {
-  display:none; position:absolute; top:calc(100% + 8px); right:0;
-  width:200px; background:var(--white); border:1px solid var(--border);
+  display:none; position:absolute; top:calc(100% + 8px); right:-8px;
+  width:220px; background:var(--white); border:1px solid var(--border);
   box-shadow:0 8px 32px rgba(0,0,0,0.14); z-index:200; animation:fadeUp 0.18s ease;
 }
 .avatar-wrap.open .mob-avatar-dropdown { display:block; }
@@ -628,31 +762,32 @@ select.field { color:var(--black); }
   .mob-landing-hero.mob-only { display:flex !important; }
 
   /* Landing */
-  #screen-landing { height:100vh; height:100dvh; min-height:0; overflow:hidden; }
-  #screen-landing #landing-footer { display:none; }
+  #screen-landing { min-height:100vh; min-height:100dvh; overflow-y:auto; height:auto; }
   .landing-nav { display:none; }
   .landing-hero { display:none; }
   .partners-section { display:none; }
+  .landing-scroll { display:none; }
+
+  /* Mobile scroll sections */
+  .ls-pricing-card { grid-template-columns:1fr; }
+  .ls-pricing-card-left { border-right:none; border-bottom:1px solid var(--border); }
+  .ls-testi-grid { grid-template-columns:1fr; }
 
   /* Auth */
-  .auth-layout { grid-template-columns:1fr; min-height:0; }
-  .auth-brand { display:none; }
-  .auth-form-panel { padding:20px 24px 28px; align-items:flex-start; }
-  .auth-form-inner { max-width:100%; }
-  .auth-form-title { font-size:28px; margin-bottom:4px; }
-  .auth-title-rule { margin-bottom:10px; }
-  .auth-form-sub { font-size:13px; margin-bottom:18px; }
   #screen-login, #screen-signup, #screen-recover { min-height:0; }
-  .mob-auth-hero { padding:22px 24px 20px; }
-  .mob-auth-tagline { font-size:24px; }
+  .mob-auth-hero { padding:24px 24px 20px; }
+  .mob-auth-tagline { font-size:26px; }
   .mob-auth-nav { padding:16px 24px; }
-  .field { padding:12px 16px; margin-bottom:12px; }
-  .field-lbl { margin-bottom:5px; }
-  .btn-primary { padding:14px; margin-bottom:16px !important; }
-  .btn-social { padding:12px 16px; margin-bottom:8px; }
-  .divider { margin-bottom:14px; }
-  .auth-forgot { margin-bottom:14px; }
-  .auth-link { margin-top:14px; }
+  .mob-auth-form { padding:24px 24px 32px; }
+  .mob-auth-title { font-size:32px; margin-bottom:4px; }
+  .mob-auth-sub { font-size:13px; margin-bottom:20px; }
+  .field { padding:14px 16px; margin-bottom:14px; font-size:16px; }
+  .field-lbl, .field-label { margin-bottom:5px; }
+  .btn-primary { padding:15px; }
+  .btn-social { padding:13px 16px; margin-bottom:8px; }
+  .divider { margin:16px 0; }
+  .auth-forgot { margin-bottom:16px; }
+  .auth-link { margin-top:16px; }
 
   /* Dashboard */
   .dash-layout { grid-template-columns:1fr; }
@@ -843,11 +978,94 @@ select.field { color:var(--black); }
       </div>
     </div>
   </div>
+  <!-- Mobile scroll sections -->
+  <div class="mob-scroll mob-only">
+
+    <!-- HOW IT WORKS -->
+    <div class="mob-ls-section">
+      <div class="mob-ls-eyebrow">How it works</div>
+      <h2 class="mob-ls-title">Collecting royalties<br>should be <em>effortless.</em></h2>
+      <p style="font-family:var(--sans);font-size:14px;font-weight:300;color:var(--muted);line-height:1.75;margin-bottom:28px;">We handle the entire publishing administration pipeline — from registration to collection.</p>
+      <div style="display:flex;flex-direction:column;gap:0">
+        <div class="mob-ls-step"><span class="mob-ls-step-num">01</span><div><div class="mob-ls-step-title">Sign up &amp; share your catalog</div><div class="mob-ls-step-body">Create your free account and submit your songs. No upfront cost, no contracts that lock you in.</div></div></div>
+        <div class="mob-ls-step"><span class="mob-ls-step-num">02</span><div><div class="mob-ls-step-title">We register everywhere</div><div class="mob-ls-step-body">We register your works with every relevant PRO, MRO, and collecting society worldwide.</div></div></div>
+        <div class="mob-ls-step"><span class="mob-ls-step-num">03</span><div><div class="mob-ls-step-title">Royalties flow in</div><div class="mob-ls-step-body">As your music is played, streamed, and synced — royalties from every source funnel into your portal.</div></div></div>
+        <div class="mob-ls-step"><span class="mob-ls-step-num">04</span><div><div class="mob-ls-step-title">You get paid</div><div class="mob-ls-step-body">Claim your balance anytime via ACH, PayPal, or Stripe. Full transparency, always.</div></div></div>
+      </div>
+      <div style="margin-top:24px"><button style="font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--black);background:none;border:none;border-bottom:1px solid var(--black);padding-bottom:2px;cursor:pointer" onclick="navigate('/howitworks')">Learn more &rarr;</button></div>
+    </div>
+
+    <!-- GET PAID BY DIRECT DEPOSIT -->
+    <div class="mob-ls-section" style="background:var(--black);position:relative;overflow:hidden">
+      <div style="position:absolute;inset:0;background-image:var(--noise);opacity:0.04;pointer-events:none"></div>
+      <div style="position:relative;z-index:1">
+        <div class="mob-ls-eyebrow" style="color:var(--red)">Get paid</div>
+        <h2 style="font-family:var(--serif);font-size:28px;font-weight:400;letter-spacing:-0.01em;line-height:1.15;color:var(--white);margin-bottom:14px">Get paid by <em style="font-style:italic;color:rgba(255,255,255,0.6)">direct deposit</em></h2>
+        <p style="font-family:var(--sans);font-size:14px;font-weight:300;color:rgba(255,255,255,0.45);line-height:1.75;margin-bottom:0">Signing up is quick and easy. Go to your account settings to add your details — all you need is your bank account information found on a personal check.</p>
+      </div>
+    </div>
+
+    <!-- WHY DAVINCII -->
+    <div class="mob-ls-section" style="background:var(--off-white)">
+      <div class="mob-ls-eyebrow">Why Davincii</div>
+      <h2 class="mob-ls-title">Most artists leave thousands on the table. <em>Not yours.</em></h2>
+      <div class="mob-ls-cards">
+        <div class="mob-ls-card"><span class="mob-ls-check">&#10003;</span><div><div class="mob-ls-card-title">No upfront cost, ever</div><div class="mob-ls-card-sub">We only get paid when you do.</div></div></div>
+        <div class="mob-ls-card"><span class="mob-ls-check">&#10003;</span><div><div class="mob-ls-card-title">Full catalog coverage</div><div class="mob-ls-card-sub">Every song, every platform, every quarter.</div></div></div>
+        <div class="mob-ls-card"><span class="mob-ls-check">&#10003;</span><div><div class="mob-ls-card-title">You keep your rights</div><div class="mob-ls-card-sub">100% copyright — we administer, we never own.</div></div></div>
+        <div class="mob-ls-card"><span class="mob-ls-check">&#10003;</span><div><div class="mob-ls-card-title">Complete transparency</div><div class="mob-ls-card-sub">Your portal shows exactly what was collected.</div></div></div>
+      </div>
+    </div>
+
+    <!-- FAQ -->
+    <div class="mob-ls-section">
+      <div class="mob-ls-eyebrow">Common questions</div>
+      <h2 class="mob-ls-title">Everything you <em>need to know.</em></h2>
+      <div class="mob-faq-list">
+        <div class="mob-faq-item" onclick="this.classList.toggle('open')">
+          <div class="mob-faq-q">Do I keep my copyrights?<span class="mob-faq-icon">+</span></div>
+          <div class="mob-faq-a">Yes, always. Davincii administers your rights — we never acquire or own them. You retain 100% copyright ownership at all times.</div>
+        </div>
+        <div class="mob-faq-item" onclick="this.classList.toggle('open')">
+          <div class="mob-faq-q">How do I get paid?<span class="mob-faq-icon">+</span></div>
+          <div class="mob-faq-a">We render quarterly statements and send payouts via ACH, PayPal, or Stripe directly from your artist portal once your balance exceeds $50.</div>
+        </div>
+        <div class="mob-faq-item" onclick="this.classList.toggle('open')">
+          <div class="mob-faq-q">I'm already with ASCAP or BMI — do I need this?<span class="mob-faq-icon">+</span></div>
+          <div class="mob-faq-a">Yes. Davincii works alongside your PRO. We cover the publishing side — mechanical, digital performance, and neighboring rights that your PRO doesn't handle.</div>
+        </div>
+        <div class="mob-faq-item" onclick="this.classList.toggle('open')">
+          <div class="mob-faq-q">What royalties do you collect?<span class="mob-faq-icon">+</span></div>
+          <div class="mob-faq-a">Performing rights (ASCAP, BMI, SESAC), mechanical royalties (MLC, Songtrust), digital performance (SoundExchange), and neighboring rights across 12+ international territories.</div>
+        </div>
+        <div class="mob-faq-item" onclick="this.classList.toggle('open')">
+          <div class="mob-faq-q">Can I leave at any time?<span class="mob-faq-icon">+</span></div>
+          <div class="mob-faq-a">Yes, 30 days written notice. We'll collect royalties generated during your term for 12 months after, then remit your final balance.</div>
+        </div>
+        <div class="mob-faq-item" onclick="this.classList.toggle('open')">
+          <div class="mob-faq-q">Is there a minimum catalog size?<span class="mob-faq-icon">+</span></div>
+          <div class="mob-faq-a">No. We work with artists at any stage — whether you have 1 song or 100. Every release deserves to be fully registered and earning.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA BAND -->
+    <div class="mob-ls-cta">
+      <div class="mob-ls-cta-title">Ready to collect what you're owed?</div>
+      <div class="mob-ls-cta-sub">Join free. No upfront cost. We only get paid when you do.</div>
+      <button class="btn-primary" onclick="navigate('/signup')">Get started &rarr;</button>
+      <div style="margin-top:16px;position:relative;z-index:1;text-align:center">
+        <button onclick="navigate('/pricing')" style="font-family:var(--sans);font-size:12px;font-weight:400;color:rgba(255,255,255,0.45);background:none;border:none;cursor:pointer;text-decoration:underline">View pricing &rarr;</button>
+      </div>
+    </div>
+
+  </div><!-- /mob-scroll -->
   <!-- Desktop landing nav -->
   <nav class="landing-nav desk-only">
     <div class="landing-nav-logo">Davincii</div>
     <div class="landing-nav-center">
       <button class="landing-nav-link" onclick="navigate('/howitworks')">How it works</button>
+      <button class="landing-nav-link" onclick="scrollToPricing()">Pricing</button>
       <button class="landing-nav-link" onclick="navigate('/about')">About</button>
     </div>
     <div class="landing-nav-right">
@@ -901,6 +1119,117 @@ select.field { color:var(--black); }
     </div>
   </div>
 
+  <!-- ── DESKTOP SCROLL CONTENT SECTION ── -->
+  <div class="landing-scroll desk-only">
+
+    <!-- STATS ROW -->
+    <div class="ls-stats">
+      <div class="ls-stat"><div class="ls-stat-num">$0</div><div class="ls-stat-lbl">To get started</div></div>
+      <div class="ls-stat-div"></div>
+      <div class="ls-stat"><div class="ls-stat-num">12+</div><div class="ls-stat-lbl">Platforms worldwide</div></div>
+      <div class="ls-stat-div"></div>
+      <div class="ls-stat"><div class="ls-stat-num">100%</div><div class="ls-stat-lbl">Your copyright</div></div>
+      <div class="ls-stat-div"></div>
+      <div class="ls-stat"><div class="ls-stat-num">Q</div><div class="ls-stat-lbl">Quarterly payouts</div></div>
+    </div>
+
+    <!-- WHY DAVINCII -->
+    <div class="ls-why">
+      <div class="ls-why-left">
+        <div class="ls-section-eyebrow">Why Davincii</div>
+        <h2 class="ls-why-title">Most artists leave thousands on the table. <em>Not yours.</em></h2>
+        <p class="ls-why-body">Royalty collection is fragmented across dozens of platforms, each with their own registration requirements and payout cycles. Most artists miss income not from lack of talent — but lack of infrastructure. Davincii is that infrastructure.</p>
+        <button class="ls-why-btn" onclick="navigate('/howitworks')">See how it works &rarr;</button>
+      </div>
+      <div class="ls-why-right">
+        <div class="ls-why-card"><div class="ls-why-check">&#10003;</div><div><div class="ls-why-card-title">No upfront cost, ever</div><div class="ls-why-card-sub">We only get paid when you do. No registration fees, no monthly plans.</div></div></div>
+        <div class="ls-why-card"><div class="ls-why-check">&#10003;</div><div><div class="ls-why-card-title">Full catalog coverage</div><div class="ls-why-card-sub">Every song, every platform, every quarter — nothing unclaimed.</div></div></div>
+        <div class="ls-why-card"><div class="ls-why-check">&#10003;</div><div><div class="ls-why-card-title">You keep your rights</div><div class="ls-why-card-sub">100% copyright ownership. We administer — we never own.</div></div></div>
+        <div class="ls-why-card"><div class="ls-why-check">&#10003;</div><div><div class="ls-why-card-title">Complete transparency</div><div class="ls-why-card-sub">Your portal shows exactly what was collected, from where, and when.</div></div></div>
+      </div>
+    </div>
+
+    <!-- PRICING -->
+    <div class="ls-pricing" id="ls-pricing-anchor">
+      <div class="ls-pricing-inner">
+        <div class="ls-section-eyebrow" style="text-align:center">Pricing</div>
+        <h2 class="ls-pricing-title">Simple. <em>Performance-based.</em></h2>
+        <p class="ls-pricing-sub">We don't charge you to work with us. Our fee is a small percentage of what we actually recover — meaning we only succeed when you do. No collections, no charge.</p>
+        <div class="ls-pricing-card">
+          <div class="ls-pricing-card-left">
+            <div class="ls-pricing-plan">Standard</div>
+            <div class="ls-pricing-amount">Performance-based</div>
+            <div class="ls-pricing-note">A competitive share of royalties collected — only charged on what we recover for you.</div>
+          </div>
+          <div class="ls-pricing-card-right">
+            <div class="ls-pricing-feature">&#10003; &nbsp;Registration across 12+ global platforms</div>
+            <div class="ls-pricing-feature">&#10003; &nbsp;Quarterly royalty collection &amp; distribution</div>
+            <div class="ls-pricing-feature">&#10003; &nbsp;Full artist portal with earnings transparency</div>
+            <div class="ls-pricing-feature">&#10003; &nbsp;Back-catalog audit &amp; recovery</div>
+            <div class="ls-pricing-feature">&#10003; &nbsp;ACH, PayPal, or Stripe payouts</div>
+            <div class="ls-pricing-feature">&#10003; &nbsp;100% copyright ownership retained</div>
+            <button class="ls-pricing-btn" onclick="navigate('/signup')">Get started free &rarr;</button>
+          </div>
+        </div>
+        <div class="ls-pricing-footnote">Fee details are outlined in your publishing administration agreement. Contact us at info@davincii.co with any questions.</div>
+      </div>
+    </div>
+
+    <!-- FAQ -->
+    <div class="ls-faq">
+      <div class="ls-faq-inner">
+        <div class="ls-section-eyebrow">Common questions</div>
+        <h2 class="ls-faq-title">Everything you <em>need to know.</em></h2>
+        <div class="ls-faq-list">
+          <div class="ls-faq-item" onclick="toggleFaq(this)">
+            <div class="ls-faq-q">Do I keep my copyrights?<span class="ls-faq-icon">+</span></div>
+            <div class="ls-faq-a">Yes, always. Davincii administers your rights — we never acquire or own them. You retain 100% copyright ownership of all your compositions at all times.</div>
+          </div>
+          <div class="ls-faq-item" onclick="toggleFaq(this)">
+            <div class="ls-faq-q">How do I get paid?<span class="ls-faq-icon">+</span></div>
+            <div class="ls-faq-a">We render quarterly accounting statements and send payouts via ACH transfer, PayPal, or Stripe. You can request payment directly from your artist portal once your balance exceeds $50.</div>
+          </div>
+          <div class="ls-faq-item" onclick="toggleFaq(this)">
+            <div class="ls-faq-q">What if I'm already registered with ASCAP or BMI?<span class="ls-faq-icon">+</span></div>
+            <div class="ls-faq-a">Great — you should be. Davincii works alongside your existing PRO membership. We handle the publishing side of your registrations and collect mechanical, digital performance, and neighboring rights royalties that your PRO may not cover.</div>
+          </div>
+          <div class="ls-faq-item" onclick="toggleFaq(this)">
+            <div class="ls-faq-q">What types of royalties do you collect?<span class="ls-faq-icon">+</span></div>
+            <div class="ls-faq-a">We collect performing rights royalties (via ASCAP, BMI, SESAC), mechanical royalties (via MLC and Songtrust), digital performance royalties (via SoundExchange), and neighboring rights through international collection societies in 12+ territories.</div>
+          </div>
+          <div class="ls-faq-item" onclick="toggleFaq(this)">
+            <div class="ls-faq-q">Can I leave at any time?<span class="ls-faq-icon">+</span></div>
+            <div class="ls-faq-a">Yes. Either party can terminate with 30 days written notice. Following termination, we continue collecting royalties generated during your term for 12 months to ensure nothing is missed, then remit your final balance.</div>
+          </div>
+          <div class="ls-faq-item" onclick="toggleFaq(this)">
+            <div class="ls-faq-q">How long does registration take?<span class="ls-faq-icon">+</span></div>
+            <div class="ls-faq-a">Most registrations are completed within 2–4 weeks. Some international collection societies can take longer. We'll keep your portal updated as each registration is confirmed.</div>
+          </div>
+          <div class="ls-faq-item" onclick="toggleFaq(this)">
+            <div class="ls-faq-q">What information do I need to submit?<span class="ls-faq-icon">+</span></div>
+            <div class="ls-faq-a">Song titles, release dates, co-writer names and ownership splits, ISRC codes, and your PRO affiliation. The more complete your metadata, the faster and more accurately we can register and collect.</div>
+          </div>
+          <div class="ls-faq-item" onclick="toggleFaq(this)">
+            <div class="ls-faq-q">Is there a minimum catalog size?<span class="ls-faq-icon">+</span></div>
+            <div class="ls-faq-a">No. We work with artists at any stage — whether you have 1 song or 100. Every release deserves to be fully registered and earning.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DARK CTA BAND -->
+    <div class="ls-cta-band">
+      <div class="ls-cta-band-inner">
+        <div>
+          <div class="ls-cta-band-title">Ready to collect what you're owed?</div>
+          <div class="ls-cta-band-sub">Join free. No upfront cost. We only get paid when you do.</div>
+        </div>
+        <button class="ls-cta-btn" onclick="navigate('/signup')">Get started &rarr;</button>
+      </div>
+    </div>
+
+  </div><!-- /landing-scroll -->
+
   <div id="landing-footer"></div>
 </div>
 
@@ -915,7 +1244,37 @@ select.field { color:var(--black); }
     <div class="mob-auth-rule"></div>
     <div class="mob-auth-tagline">Every stream,<br>every spin,<br><em>every dollar.</em></div>
   </div>
-  <div class="auth-layout">
+  <!-- Mobile auth form -->
+  <div class="mob-auth-form mob-only">
+    <h1 class="mob-auth-title">Welcome <em>back.</em></h1>
+    <div class="mob-auth-title-rule"></div>
+    <p class="mob-auth-sub">Sign in to your artist portal to view your earnings and claim payments.</p>
+    <div class="error-box" id="mob-login-error"></div>
+    <form onsubmit="event.preventDefault(); doLogin();" autocomplete="on">
+    <label class="field-label">Email address</label>
+    <input class="field" type="email" id="mob-login-email" name="email" autocomplete="username" placeholder="you@example.com">
+    <label class="field-label">Password</label>
+    <input class="field" type="password" id="mob-login-password" name="password" autocomplete="current-password" placeholder="Enter your password">
+    <button class="auth-forgot" type="button" onclick="navigate('/recover')">Forgot your password?</button>
+    <button class="btn-primary" type="submit" style="margin-bottom:20px">Sign in &rarr;</button>
+    </form>
+    <div class="divider"><div class="divider-line"></div><span class="divider-text">or continue with</span><div class="divider-line"></div></div>
+    <button class="btn-social" onclick="doGoogleLogin()">
+      <svg class="btn-social-icon" viewBox="0 0 18 18"><path d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
+      Continue with Google
+    </button>
+    <button class="btn-social" onclick="doAppleLogin()">
+      <svg class="btn-social-icon" viewBox="0 0 18 18"><path d="M12.27.52c.14 1.08-.3 2.15-1.01 2.93-.72.78-1.83 1.37-2.92 1.3-.16-1.07.34-2.17 1.01-2.88C10.07 1.1 11.24.52 12.27.52zM15.98 12.44c-.26.59-.57 1.14-.94 1.65-.49.69-.9 1.17-1.22 1.43-.49.44-1.01.67-1.58.68-.4 0-.89-.12-1.45-.35-.57-.23-1.09-.35-1.57-.35-.5 0-1.04.12-1.61.35-.58.23-1.04.36-1.4.37-.55.02-1.08-.22-1.6-.68-.35-.29-.78-.8-1.29-1.51C3.69 13.14 3.1 12 2.65 10.68c-.49-1.41-.74-2.77-.74-4.09 0-1.51.33-2.81.99-3.89.52-.87 1.21-1.56 2.08-2.07.87-.51 1.81-.77 2.82-.79.44 0 1.02.14 1.74.4.72.27 1.18.4 1.38.4.15 0 .67-.16 1.54-.47.82-.29 1.52-.41 2.1-.37 1.55.12 2.72.73 3.49 1.83-1.39.84-2.07 2.01-2.06 3.52.01 1.17.44 2.15 1.27 2.92.38.36.8.63 1.27.83-.1.29-.21.58-.35.86z" fill="#000"/></svg>
+      Continue with Apple
+    </button>
+    <button class="btn-social mob-passkey-login-btn" onclick="doPasskeyLogin()" style="display:none">
+      <svg class="btn-social-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><circle cx="12" cy="16" r="1"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Sign in with Passkey
+    </button>
+    <div class="auth-link">Don't have an account? <a onclick="navigate('/signup')">Create one</a></div>
+  </div>
+  <!-- Desktop auth layout -->
+  <div class="auth-layout desk-only">
     <div class="auth-brand">
       <div class="auth-brand-logo">Davincii</div>
       <div class="auth-brand-center">
@@ -969,7 +1328,34 @@ select.field { color:var(--black); }
     <div class="mob-auth-rule"></div>
     <div class="mob-auth-tagline">Your music<br>earns more<br><em>than you know.</em></div>
   </div>
-  <div class="auth-layout">
+  <!-- Mobile signup form -->
+  <div class="mob-auth-form mob-only">
+    <h1 class="mob-auth-title">Create your <em>account.</em></h1>
+    <div class="mob-auth-title-rule"></div>
+    <p class="mob-auth-sub">Start collecting the royalties you're owed. No upfront cost, ever.</p>
+    <div class="error-box" id="mob-signup-error"></div>
+    <form onsubmit="event.preventDefault(); doSignup();" autocomplete="on">
+    <label class="field-label">Full name</label>
+    <input class="field" type="text" id="mob-signup-name" name="name" autocomplete="name" placeholder="Your name">
+    <label class="field-label">Email address</label>
+    <input class="field" type="email" id="mob-signup-email" name="email" autocomplete="email" placeholder="you@example.com">
+    <label class="field-label">Password</label>
+    <input class="field" type="password" id="mob-signup-password" name="password" autocomplete="new-password" placeholder="Minimum 8 characters">
+    <button class="btn-primary" type="submit" style="margin-bottom:20px">Create account &rarr;</button>
+    </form>
+    <div class="divider"><div class="divider-line"></div><span class="divider-text">or continue with</span><div class="divider-line"></div></div>
+    <button class="btn-social" onclick="doGoogleLogin()">
+      <svg class="btn-social-icon" viewBox="0 0 18 18"><path d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
+      Continue with Google
+    </button>
+    <button class="btn-social" onclick="doAppleLogin()">
+      <svg class="btn-social-icon" viewBox="0 0 18 18"><path d="M12.27.52c.14 1.08-.3 2.15-1.01 2.93-.72.78-1.83 1.37-2.92 1.3-.16-1.07.34-2.17 1.01-2.88C10.07 1.1 11.24.52 12.27.52zM15.98 12.44c-.26.59-.57 1.14-.94 1.65-.49.69-.9 1.17-1.22 1.43-.49.44-1.01.67-1.58.68-.4 0-.89-.12-1.45-.35-.57-.23-1.09-.35-1.57-.35-.5 0-1.04.12-1.61.35-.58.23-1.04.36-1.4.37-.55.02-1.08-.22-1.6-.68-.35-.29-.78-.8-1.29-1.51C3.69 13.14 3.1 12 2.65 10.68c-.49-1.41-.74-2.77-.74-4.09 0-1.51.33-2.81.99-3.89.52-.87 1.21-1.56 2.08-2.07.87-.51 1.81-.77 2.82-.79.44 0 1.02.14 1.74.4.72.27 1.18.4 1.38.4.15 0 .67-.16 1.54-.47.82-.29 1.52-.41 2.1-.37 1.55.12 2.72.73 3.49 1.83-1.39.84-2.07 2.01-2.06 3.52.01 1.17.44 2.15 1.27 2.92.38.36.8.63 1.27.83-.1.29-.21.58-.35.86z" fill="#000"/></svg>
+      Continue with Apple
+    </button>
+    <div class="auth-link">Already have an account? <a onclick="navigate('/login')">Sign in</a></div>
+  </div>
+  <!-- Desktop signup layout -->
+  <div class="auth-layout desk-only">
     <div class="auth-brand">
       <div class="auth-brand-logo">Davincii</div>
       <div class="auth-brand-center">
@@ -1020,7 +1406,20 @@ select.field { color:var(--black); }
     <div class="mob-auth-rule"></div>
     <div class="mob-auth-tagline">We'll get<br>you back<br><em>in.</em></div>
   </div>
-  <div class="auth-layout">
+  <!-- Mobile recover form -->
+  <div class="mob-auth-form mob-only">
+    <h1 class="mob-auth-title">Recover your <em>account.</em></h1>
+    <div class="mob-auth-title-rule"></div>
+    <p class="mob-auth-sub">Enter your email and we'll send you a link to reset your password.</p>
+    <div class="error-box" id="mob-recover-error"></div>
+    <div id="mob-recover-success" style="display:none;background:var(--green-bg);border-left:2px solid var(--green);padding:11px 14px;margin-bottom:16px;font-family:var(--sans);font-size:13px;color:var(--green);">Check your inbox &mdash; a recovery link is on its way.</div>
+    <label class="field-label">Email address</label>
+    <input class="field" type="email" id="mob-recover-email" placeholder="you@example.com">
+    <button class="btn-primary" onclick="doRecover()">Send reset link &rarr;</button>
+    <div class="auth-link" style="margin-top:16px"><a onclick="navigate('/login')">&larr; Back to sign in</a></div>
+  </div>
+  <!-- Desktop recover layout -->
+  <div class="auth-layout desk-only">
     <div class="auth-brand">
       <div class="auth-brand-logo">Davincii</div>
       <div class="auth-brand-center">
@@ -1052,6 +1451,7 @@ select.field { color:var(--black); }
     <span class="mkt-nav-logo" onclick="navigate('/')">Davincii</span>
     <div class="mkt-nav-links">
       <button class="mkt-nav-link active" onclick="navigate('/howitworks')">How it works</button>
+      <button class="mkt-nav-link" onclick="navigate('/pricing')">Pricing</button>
       <button class="mkt-nav-link" onclick="navigate('/about')">About</button>
     </div>
     <div class="mkt-nav-right">
@@ -1150,6 +1550,7 @@ select.field { color:var(--black); }
     <span class="mkt-nav-logo" onclick="navigate('/')">Davincii</span>
     <div class="mkt-nav-links">
       <button class="mkt-nav-link" onclick="navigate('/howitworks')">How it works</button>
+      <button class="mkt-nav-link" onclick="navigate('/pricing')">Pricing</button>
       <button class="mkt-nav-link active" onclick="navigate('/about')">About</button>
     </div>
     <div class="mkt-nav-right">
@@ -1367,7 +1768,7 @@ select.field { color:var(--black); }
   <div class="mob-top-nav mob-only">
     <span class="mob-nav-logo" onclick="navigate('/')">Davincii</span>
     <div class="mob-nav-right">
-      <span style="font-family:var(--sans);font-size:12px;color:var(--muted)" id="mob-nav-artist-name"></span>
+      <span class="mob-nav-artist-name" id="mob-nav-artist-name"></span>
       <div class="avatar-wrap" id="mob-avatar-wrap">
         <div class="mob-avatar" id="mob-nav-avatar" onclick="toggleMobAvatarMenu()"></div>
         <div class="mob-avatar-dropdown" id="mob-avatar-dropdown">
@@ -1747,6 +2148,18 @@ select.field { color:var(--black); }
       var lastEmail = localStorage.getItem('dvc_last_email');
       var emailField = document.getElementById('login-email');
       if (lastEmail && emailField) emailField.value = lastEmail;
+      // Show OAuth error if redirected back from failed OAuth
+      var qp = new URLSearchParams(window.location.search);
+      var oauthErr = qp.get('error');
+      if (oauthErr) {
+        var errBox = document.getElementById('login-error');
+        if (errBox) {
+          errBox.textContent = oauthErr === 'oauth_failed' ? 'Google sign-in failed. Please try again or use email login.'
+            : oauthErr === 'callback_failed' ? 'Authentication callback failed. Please try again.'
+            : 'Sign-in error. Please try again.';
+          errBox.style.display = 'block';
+        }
+      }
     } else if (path === '/signup') {
       _showScreen('screen-signup');
     } else if (path === '/recover') {
@@ -1817,12 +2230,25 @@ select.field { color:var(--black); }
 
   window.addEventListener('popstate', function(){ _applyRoute(window.location.pathname); });
 
-  // -- Social Auth (OAuth via Supabase) ----------------------
+  // -- Social Auth ----------------------
   function doGoogleLogin() {
-    window.location.href = '/api/auth/google';
+    alert('Sign in with Google is coming soon!');
   }
   function doAppleLogin() {
     alert('Sign in with Apple is coming soon!');
+  }
+
+  // -- FAQ toggle & scroll-to-pricing -------------------------
+  function toggleFaq(el) {
+    el.classList.toggle('open');
+  }
+  function scrollToPricing() {
+    var anchor = document.getElementById('ls-pricing-anchor');
+    if (anchor) {
+      anchor.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      navigate('/pricing');
+    }
   }
 
   // -- Passkey (WebAuthn) ------------------------------------
@@ -1926,13 +2352,14 @@ select.field { color:var(--black); }
 
   // -- Login -------------------------------------------------
   async function doLogin() {
-    const email = document.getElementById('login-email').value.trim();
-    const password = document.getElementById('login-password').value;
-    const errEl = document.getElementById('login-error');
-    const btn = document.getElementById('login-btn');
+    const isMob = window.innerWidth <= 768;
+    const email = document.getElementById(isMob ? 'mob-login-email' : 'login-email').value.trim();
+    const password = document.getElementById(isMob ? 'mob-login-password' : 'login-password').value;
+    const errEl = document.getElementById(isMob ? 'mob-login-error' : 'login-error');
+    const btn = isMob ? null : document.getElementById('login-btn');
     errEl.style.display = 'none';
     if (!email || !password) { showErr(errEl, 'Please enter your email and password.'); return; }
-    btn.disabled = true; btn.textContent = 'Signing in...';
+    if (btn) { btn.disabled = true; btn.textContent = 'Signing in...'; }
     try {
       const data = await apiFetch('/api/auth/login', {
         method: 'POST',
@@ -1949,22 +2376,23 @@ select.field { color:var(--black); }
     } catch(e) {
       showErr(errEl, e.message);
     } finally {
-      btn.disabled = false; btn.textContent = 'Sign in \u2192';
+      if (btn) { btn.disabled = false; btn.textContent = 'Sign in \u2192'; }
     }
   }
 
   // -- Signup ------------------------------------------------
   async function doSignup() {
-    const name = document.getElementById('signup-name').value.trim();
-    const email = document.getElementById('signup-email').value.trim();
-    const password = document.getElementById('signup-password').value;
-    const errEl = document.getElementById('signup-error');
-    const btn = document.getElementById('signup-btn');
+    const isMob = window.innerWidth <= 768;
+    const name = document.getElementById(isMob ? 'mob-signup-name' : 'signup-name').value.trim();
+    const email = document.getElementById(isMob ? 'mob-signup-email' : 'signup-email').value.trim();
+    const password = document.getElementById(isMob ? 'mob-signup-password' : 'signup-password').value;
+    const errEl = document.getElementById(isMob ? 'mob-signup-error' : 'signup-error');
+    const btn = isMob ? null : document.getElementById('signup-btn');
     errEl.style.display = 'none';
     if (!name) { showErr(errEl, 'Please enter your full name.'); return; }
     if (!email) { showErr(errEl, 'Please enter your email address.'); return; }
     if (!password || password.length < 8) { showErr(errEl, 'Password must be at least 8 characters.'); return; }
-    btn.disabled = true; btn.textContent = 'Creating account...';
+    if (btn) { btn.disabled = true; btn.textContent = 'Creating account...'; }
     try {
       const data = await apiFetch('/api/auth/signup', {
         method: 'POST',
@@ -1981,7 +2409,7 @@ select.field { color:var(--black); }
     } catch(e) {
       showErr(errEl, e.message);
     } finally {
-      btn.disabled = false; btn.textContent = 'Create account \u2192';
+      if (btn) { btn.disabled = false; btn.textContent = 'Create account \u2192'; }
     }
   }
 
@@ -1992,15 +2420,17 @@ select.field { color:var(--black); }
 
   // -- Recover -----------------------------------------------
   async function doRecover() {
-    var email = document.getElementById('recover-email').value.trim();
-    var errEl = document.getElementById('recover-error');
-    var btn = document.getElementById('recover-btn');
+    var isMob = window.innerWidth <= 768;
+    var email = document.getElementById(isMob ? 'mob-recover-email' : 'recover-email').value.trim();
+    var errEl = document.getElementById(isMob ? 'mob-recover-error' : 'recover-error');
+    var btn = isMob ? null : document.getElementById('recover-btn');
     errEl.style.display = 'none';
     if (!email) { showErr(errEl, 'Please enter your email address.'); return; }
-    btn.disabled = true; btn.textContent = 'Sending...';
+    if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
     try { await apiFetch('/api/auth/recover', { method: 'POST', body: JSON.stringify({ email: email }) }); } catch(e) {}
-    document.getElementById('recover-success').style.display = 'block';
-    btn.disabled = false; btn.textContent = 'Send reset link \u2192';
+    var successEl = document.getElementById(isMob ? 'mob-recover-success' : 'recover-success');
+    if (successEl) successEl.style.display = 'block';
+    if (btn) { btn.disabled = false; btn.textContent = 'Send reset link \u2192'; }
   }
 
   function showErr(el, msg) {
