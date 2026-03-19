@@ -2496,6 +2496,25 @@ select.field { color:var(--black); }
     }
   }
 
+  // -- Password save helper (Safari/iOS) ----------------------
+  function _triggerPasswordSave(email, password) {
+    try {
+      var iframe = document.createElement('iframe');
+      iframe.name = '_pw_save_frame';
+      iframe.style.cssText = 'position:absolute;width:0;height:0;border:0;opacity:0;pointer-events:none;';
+      document.body.appendChild(iframe);
+      var doc = iframe.contentDocument || iframe.contentWindow.document;
+      doc.open();
+      doc.write('<html><body><form method="POST" action="/api/auth/login">' +
+        '<input type="email" name="email" autocomplete="username" value="' + email.replace(/"/g, '&quot;') + '">' +
+        '<input type="password" name="password" autocomplete="current-password" value="' + password.replace(/"/g, '&quot;') + '">' +
+        '</form></body></html>');
+      doc.close();
+      doc.forms[0].submit();
+      setTimeout(function() { iframe.remove(); }, 3000);
+    } catch(e) {}
+  }
+
   // -- Login -------------------------------------------------
   async function doLogin() {
     const isMob = window.innerWidth <= 768;
@@ -2511,6 +2530,8 @@ select.field { color:var(--black); }
         method: 'POST',
         body: JSON.stringify({ email, password })
       });
+      // Trigger Safari/iOS password save by briefly submitting a hidden iframe form
+      _triggerPasswordSave(email, password);
       if (window.PasswordCredential) {
         try {
           var cred = new PasswordCredential({ id: email, password: password, name: data.artist.name || email });
@@ -2544,6 +2565,8 @@ select.field { color:var(--black); }
         method: 'POST',
         body: JSON.stringify({ name, email, password })
       });
+      // Trigger Safari/iOS password save
+      _triggerPasswordSave(email, password);
       if (window.PasswordCredential) {
         try {
           var cred = new PasswordCredential({ id: email, password: password, name: name || email });
