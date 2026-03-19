@@ -587,13 +587,13 @@ select.field { color:var(--black); }
   position: relative; z-index: 10;
   display: flex; flex-direction: column; align-items: stretch;
   justify-content: center;
-  min-height: 100vh; min-height: 100dvh;
+  min-height: calc(100vh - 72px); min-height: calc(100dvh - 72px);
   padding: 0;
 }
 .mob-hero-inner {
   flex: 1;
-  display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
-  padding: 100px 28px 180px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 0 28px 110px;
   text-align: center;
 }
 .mob-headline { font-family:var(--serif); font-size:58px; font-weight:300; color:var(--white); line-height:1.0; letter-spacing:-0.02em; margin-bottom:28px; text-align:center; }
@@ -608,14 +608,14 @@ select.field { color:var(--black); }
   position: absolute; bottom: 0; left: 0; right: 0;
   z-index: 10;
   border-top: 1px solid rgba(255,255,255,0.08);
-  padding: 18px 0 0; background: rgba(0,0,0,0.2); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  padding: 14px 0 10px; background: rgba(0,0,0,0.2); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
 }
-.mob-partners-eyebrow { font-family:var(--sans); font-size:9px; font-weight:500; letter-spacing:0.20em; text-transform:uppercase; color:rgba(255,255,255,0.22); text-align:center; margin-bottom:14px; }
+.mob-partners-eyebrow { font-family:var(--sans); font-size:9px; font-weight:500; letter-spacing:0.20em; text-transform:uppercase; color:rgba(255,255,255,0.22); text-align:center; margin-bottom:10px; }
 .mob-partners-wrap { overflow:hidden; mask-image:linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%); -webkit-mask-image:linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%); }
 .mob-partners-track { display:flex; align-items:center; width:max-content; animation:mob-marquee 40s linear infinite; }
 @keyframes mob-marquee { from { transform:translateX(0); } to { transform:translateX(-50%); } }
-.mob-partner-item { display:flex; align-items:center; padding:0 24px; border-right:1px solid rgba(255,255,255,0.07); color:rgba(255,255,255,0.28); height:52px; }
-.mob-partner-svg { height:34px; width:auto; display:block; overflow:visible; }
+.mob-partner-item { display:flex; align-items:center; padding:0 24px; border-right:1px solid rgba(255,255,255,0.07); color:rgba(255,255,255,0.28); height:42px; }
+.mob-partner-svg { height:28px; width:auto; display:block; overflow:visible; }
 
 /* ════════════════════════════
    MOBILE LANDING SCROLL SECTIONS
