@@ -672,7 +672,7 @@ select.field { color:var(--black); }
   padding: 0 20px; position: sticky; top: 0;
   background: rgba(255,255,255,0.97); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 50; flex-shrink: 0;
 }
-.mob-nav-logo { line-height:1; cursor:pointer; margin-top:6px; }
+.mob-nav-logo { line-height:1; cursor:pointer; margin-top:2px; }
 .mob-nav-logo img { height:20px; width:auto; display:block; }
 .mob-nav-right { display:flex; align-items:center; gap:12px; }
 .mob-nav-artist-name { font-family:var(--sans); font-size:12px; font-weight:500; color:var(--black); letter-spacing:0.02em; }
@@ -1881,7 +1881,7 @@ select.field { color:var(--black); }
 <div class="screen" id="screen-dash">
   <!-- Mobile top nav -->
   <div class="mob-top-nav mob-only">
-    <span class="mob-nav-logo" onclick="navigate('/')"><img src="/logo-sm.png" alt="Davincii"></span>
+    <span class="mob-nav-logo" onclick="navigate('/dashboard/overview')"><img src="/logo-sm.png" alt="Davincii"></span>
     <div class="mob-nav-right">
       <span class="mob-nav-artist-name" id="mob-nav-artist-name"></span>
       <div class="avatar-wrap" id="mob-avatar-wrap">
