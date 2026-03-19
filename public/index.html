@@ -308,6 +308,17 @@ select.field { color:var(--black); }
 .mkt-nav-link.active::after { content:''; position:absolute; bottom:-28px; left:50%; transform:translateX(-50%); width:100%; height:2px; background:var(--red); }
 .mkt-nav-link + .mkt-nav-link::before { content:''; position:absolute; left:0; top:50%; transform:translateY(-50%); width:3px; height:3px; border-radius:50%; background:var(--red); opacity:0.5; }
 .mkt-nav-right { display:flex; gap:10px; }
+.mkt-nav-hamburger { display:none; width:36px; height:36px; border:1px solid var(--border); border-radius:50%; align-items:center; justify-content:center; cursor:pointer; position:relative; background:none; }
+.mkt-nav-hamburger-icon { display:flex; flex-direction:column; gap:4px; align-items:center; justify-content:center; }
+.mkt-nav-hamburger-icon span { display:block; width:14px; height:1.5px; background:var(--muted); border-radius:1px; }
+.mkt-nav-dropdown { display:none; position:absolute; top:calc(100% + 10px); right:0; width:220px; background:var(--white); border:1px solid var(--border); border-radius:14px; box-shadow:0 8px 32px rgba(0,0,0,0.12); z-index:300; overflow:hidden; animation:fadeUp 0.18s ease; }
+.mkt-nav-hamburger.open .mkt-nav-dropdown { display:block; }
+.mkt-nav-dd-section { padding:10px 0; border-bottom:1px solid var(--border); }
+.mkt-nav-dd-section:last-child { border-bottom:none; }
+.mkt-nav-dd-item { display:block; width:100%; text-align:left; padding:10px 20px; font-family:var(--sans); font-size:13px; color:var(--black); background:none; border:none; cursor:pointer; }
+.mkt-nav-dd-item:hover { background:var(--light); }
+.mkt-nav-dd-item.primary { color:var(--red); font-weight:600; }
+.mkt-nav-dd-item.muted { color:var(--muted); font-size:11px; }
 .btn-mkt-ghost { font-family:var(--sans); font-size:11px; font-weight:500; letter-spacing:0.10em; text-transform:uppercase; color:var(--black); background:transparent; border:1px solid rgba(0,0,0,0.2); padding:9px 20px; cursor:pointer; transition:background 0.18s; }
 .btn-mkt-ghost:hover { background:rgba(0,0,0,0.04); }
 .btn-mkt-solid { font-family:var(--sans); font-size:11px; font-weight:600; letter-spacing:0.10em; text-transform:uppercase; color:var(--white); background:var(--black); border:none; padding:9px 20px; cursor:pointer; transition:opacity 0.18s; }
@@ -521,44 +532,83 @@ select.field { color:var(--black); }
    MOBILE LANDING
 ════════════════════════════ */
 .mob-landing-nav {
-  position: relative; z-index: 10;
+  position: relative; z-index: 100;
   display: flex; justify-content: space-between; align-items: center;
-  padding: 20px 24px 12px;
+  padding: 20px 24px 16px;
+  overflow: visible;
 }
 .mob-landing-logo { font-family:var(--script); font-size:32px; color:var(--white); line-height:1; }
-.mob-landing-nav-btns { display:flex; gap:8px; }
-.btn-mob-ghost { font-family:var(--sans); font-size:10px; font-weight:500; letter-spacing:0.10em; text-transform:uppercase; color:rgba(255,255,255,0.65); background:transparent; border:1px solid rgba(255,255,255,0.22); padding:9px 16px; cursor:pointer; }
-.btn-mob-white { font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.10em; text-transform:uppercase; color:var(--black); background:var(--white); border:none; padding:9px 16px; cursor:pointer; }
+.mob-landing-avatar {
+  width: 36px; height: 36px;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; position: relative;
+}
+.mob-landing-avatar-icon {
+  display: flex; flex-direction: column; gap: 4px; align-items: center; justify-content: center;
+}
+.mob-landing-avatar-icon span {
+  display: block; width: 14px; height: 1.5px; background: rgba(255,255,255,0.75); border-radius: 1px;
+}
+.mob-landing-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 220px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  z-index: 300;
+  animation: fadeUp 0.18s ease;
+}
+.mob-landing-avatar.open .mob-landing-dropdown { display: block; }
+.mob-landing-dd-section { padding: 4px 0; border-bottom: 1px solid var(--border); }
+.mob-landing-dd-section:last-child { border-bottom: none; }
+.mob-landing-dd-item {
+  display: block; width: 100%; padding: 13px 20px;
+  font-family: var(--sans); font-size: 14px; font-weight: 400; color: var(--black);
+  background: none; border: none; cursor: pointer; text-align: left;
+  transition: background 0.15s; white-space: nowrap;
+}
+.mob-landing-dd-item:hover { background: rgba(0,0,0,0.04); }
+.mob-landing-dd-item.primary { font-weight: 600; color: var(--black); }
+.mob-landing-dd-item.muted { color: #777; font-size: 12px; }
 
 .mob-landing-hero {
   position: relative; z-index: 10;
-  display: flex; flex-direction: column; align-items: center;
+  display: flex; flex-direction: column; align-items: stretch;
   justify-content: center;
-  min-height: calc(100vh - 60px); min-height: calc(100dvh - 60px);
-  text-align: center; padding: 0 24px 96px;
+  min-height: 100vh; min-height: 100dvh;
+  padding: 0;
 }
-.mob-landing-center { display:flex; flex-direction:column; align-items:center; margin-top:-24px; }
-.mob-landing-nav-links { display: flex; gap: 24px; margin-bottom: 28px; }
-.mob-landing-nav-link { font-family:var(--sans); font-size:10px; font-weight:400; letter-spacing:0.14em; text-transform:uppercase; color:rgba(255,255,255,0.35); background:none; border:none; cursor:pointer; padding:0; }
-.mob-headline { font-family:var(--serif); font-size:48px; font-weight:300; color:var(--white); line-height:1.1; letter-spacing:-0.02em; margin-bottom:24px; }
-.mob-rule { width:28px; height:2px; background:var(--red); margin:0 auto 28px; }
-.mob-cta { display:flex; flex-direction:column; gap:10px; width:100%; max-width:280px; }
-.btn-mob-cta-main { background:var(--white); color:var(--black); border:none; padding:15px; font-family:var(--sans); font-size:11px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; cursor:pointer; }
-.btn-mob-cta-ghost { background:transparent; color:rgba(255,255,255,0.7); border:1px solid rgba(255,255,255,0.22); padding:14px; font-family:var(--sans); font-size:11px; font-weight:400; letter-spacing:0.12em; text-transform:uppercase; cursor:pointer; }
+.mob-hero-inner {
+  flex: 1;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+  padding: 100px 28px 180px;
+  text-align: center;
+}
+.mob-headline { font-family:var(--serif); font-size:58px; font-weight:300; color:var(--white); line-height:1.0; letter-spacing:-0.02em; margin-bottom:28px; text-align:center; }
+.mob-headline em { font-style:italic; color:rgba(255,255,255,0.7); }
+.mob-rule { width:28px; height:2px; background:var(--red); margin:0 auto 32px; }
+.mob-hero-cta { display:flex; flex-direction:column; gap:10px; width:100%; max-width:240px; }
+.btn-mob-cta-main { background:var(--white); color:var(--black); border:none; padding:14px; font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; cursor:pointer; text-align:center; }
+.btn-mob-cta-ghost { background:transparent; color:rgba(255,255,255,0.75); border:1px solid rgba(255,255,255,0.3); padding:13px; font-family:var(--sans); font-size:10px; font-weight:400; letter-spacing:0.12em; text-transform:uppercase; cursor:pointer; text-align:center; }
 
 /* Mobile partners strip */
 .mob-partners {
   position: absolute; bottom: 0; left: 0; right: 0;
   z-index: 10;
   border-top: 1px solid rgba(255,255,255,0.08);
-  padding: 16px 0 0; background: rgba(0,0,0,0.15); backdrop-filter: blur(4px);
+  padding: 18px 0 0; background: rgba(0,0,0,0.2); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
 }
-.mob-partners-eyebrow { font-family:var(--sans); font-size:9px; font-weight:500; letter-spacing:0.20em; text-transform:uppercase; color:rgba(255,255,255,0.22); text-align:center; margin-bottom:12px; }
+.mob-partners-eyebrow { font-family:var(--sans); font-size:9px; font-weight:500; letter-spacing:0.20em; text-transform:uppercase; color:rgba(255,255,255,0.22); text-align:center; margin-bottom:14px; }
 .mob-partners-wrap { overflow:hidden; mask-image:linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%); -webkit-mask-image:linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%); }
 .mob-partners-track { display:flex; align-items:center; width:max-content; animation:mob-marquee 40s linear infinite; }
 @keyframes mob-marquee { from { transform:translateX(0); } to { transform:translateX(-50%); } }
-.mob-partner-item { display:flex; align-items:center; padding:0 24px; border-right:1px solid rgba(255,255,255,0.07); color:rgba(255,255,255,0.28); height:48px; }
-.mob-partner-svg { height:32px; width:auto; display:block; overflow:visible; }
+.mob-partner-item { display:flex; align-items:center; padding:0 24px; border-right:1px solid rgba(255,255,255,0.07); color:rgba(255,255,255,0.28); height:52px; }
+.mob-partner-svg { height:34px; width:auto; display:block; overflow:visible; }
 
 /* ════════════════════════════
    MOBILE LANDING SCROLL SECTIONS
@@ -807,6 +857,8 @@ select.field { color:var(--black); }
   /* Marketing */
   .mkt-nav { padding:20px; }
   .mkt-nav-links { display:none; }
+  .mkt-nav-right { display:none; }
+  .mkt-nav-hamburger { display:flex; }
   .mkt-hero { padding:40px 24px; }
   .mkt-body { padding:0 24px 60px; }
   .mkt-step { grid-template-columns:40px 1fr; gap:16px; }
@@ -923,21 +975,33 @@ select.field { color:var(--black); }
   <!-- Mobile landing nav -->
   <nav class="mob-landing-nav mob-only">
     <div class="mob-landing-logo">Davincii</div>
-    <div class="mob-landing-nav-btns">
-      <button class="btn-mob-ghost" onclick="navigate('/signup')">Sign up</button>
-      <button class="btn-mob-white" onclick="navigate('/login')">Sign in</button>
+    <div class="mob-landing-avatar" id="landing-avatar" onclick="toggleLandingMenu()">
+      <div class="mob-landing-avatar-icon">
+        <span></span><span></span><span></span>
+      </div>
+      <div class="mob-landing-dropdown">
+        <div class="mob-landing-dd-section">
+          <button class="mob-landing-dd-item primary" onclick="navigate('/signup')">Get started free</button>
+          <button class="mob-landing-dd-item" onclick="navigate('/login')">Sign in</button>
+        </div>
+        <div class="mob-landing-dd-section">
+          <button class="mob-landing-dd-item" onclick="navigate('/howitworks')">How it works</button>
+          <button class="mob-landing-dd-item" onclick="navigate('/pricing')">Pricing</button>
+          <button class="mob-landing-dd-item" onclick="navigate('/about')">About</button>
+        </div>
+        <div class="mob-landing-dd-section">
+          <button class="mob-landing-dd-item muted" onclick="navigate('/terms')">Terms of Service</button>
+          <button class="mob-landing-dd-item muted" onclick="navigate('/privacy')">Privacy Policy</button>
+        </div>
+      </div>
     </div>
   </nav>
   <!-- Mobile landing hero -->
   <div class="mob-landing-hero mob-only">
-    <div class="mob-landing-center">
-      <div class="mob-landing-nav-links">
-        <button class="mob-landing-nav-link" onclick="navigate('/howitworks')">How it works</button>
-        <button class="mob-landing-nav-link" onclick="navigate('/about')">About</button>
-      </div>
+    <div class="mob-hero-inner">
       <h1 class="mob-headline">Collect royalties.</h1>
       <div class="mob-rule"></div>
-      <div class="mob-cta">
+      <div class="mob-hero-cta">
         <button class="btn-mob-cta-main" onclick="navigate('/signup')">Get started &rarr;</button>
         <button class="btn-mob-cta-ghost" onclick="navigate('/login')">Sign in to portal</button>
       </div>
@@ -1458,6 +1522,20 @@ select.field { color:var(--black); }
       <button class="btn-mkt-ghost" onclick="navigate('/login')">Sign in</button>
       <button class="btn-mkt-solid" onclick="navigate('/signup')">Get started</button>
     </div>
+    <div class="mkt-nav-hamburger" onclick="toggleMktMenu(this)">
+      <div class="mkt-nav-hamburger-icon"><span></span><span></span><span></span></div>
+      <div class="mkt-nav-dropdown">
+        <div class="mkt-nav-dd-section">
+          <button class="mkt-nav-dd-item primary" onclick="navigate('/signup')">Get started free</button>
+          <button class="mkt-nav-dd-item" onclick="navigate('/login')">Sign in</button>
+        </div>
+        <div class="mkt-nav-dd-section">
+          <button class="mkt-nav-dd-item" onclick="navigate('/howitworks')">How it works</button>
+          <button class="mkt-nav-dd-item" onclick="navigate('/pricing')">Pricing</button>
+          <button class="mkt-nav-dd-item" onclick="navigate('/about')">About</button>
+        </div>
+      </div>
+    </div>
   </nav>
   <div class="mkt-hero">
     <div class="mkt-hero-eyebrow">The process</div>
@@ -1511,6 +1589,20 @@ select.field { color:var(--black); }
       <button class="btn-mkt-ghost" onclick="navigate('/login')">Sign in</button>
       <button class="btn-mkt-solid" onclick="navigate('/signup')">Get started</button>
     </div>
+    <div class="mkt-nav-hamburger" onclick="toggleMktMenu(this)">
+      <div class="mkt-nav-hamburger-icon"><span></span><span></span><span></span></div>
+      <div class="mkt-nav-dropdown">
+        <div class="mkt-nav-dd-section">
+          <button class="mkt-nav-dd-item primary" onclick="navigate('/signup')">Get started free</button>
+          <button class="mkt-nav-dd-item" onclick="navigate('/login')">Sign in</button>
+        </div>
+        <div class="mkt-nav-dd-section">
+          <button class="mkt-nav-dd-item" onclick="navigate('/howitworks')">How it works</button>
+          <button class="mkt-nav-dd-item" onclick="navigate('/pricing')">Pricing</button>
+          <button class="mkt-nav-dd-item" onclick="navigate('/about')">About</button>
+        </div>
+      </div>
+    </div>
   </nav>
   <div class="mkt-hero">
     <div class="mkt-hero-eyebrow">Transparent pricing</div>
@@ -1556,6 +1648,20 @@ select.field { color:var(--black); }
     <div class="mkt-nav-right">
       <button class="btn-mkt-ghost" onclick="navigate('/login')">Sign in</button>
       <button class="btn-mkt-solid" onclick="navigate('/signup')">Get started</button>
+    </div>
+    <div class="mkt-nav-hamburger" onclick="toggleMktMenu(this)">
+      <div class="mkt-nav-hamburger-icon"><span></span><span></span><span></span></div>
+      <div class="mkt-nav-dropdown">
+        <div class="mkt-nav-dd-section">
+          <button class="mkt-nav-dd-item primary" onclick="navigate('/signup')">Get started free</button>
+          <button class="mkt-nav-dd-item" onclick="navigate('/login')">Sign in</button>
+        </div>
+        <div class="mkt-nav-dd-section">
+          <button class="mkt-nav-dd-item" onclick="navigate('/howitworks')">How it works</button>
+          <button class="mkt-nav-dd-item" onclick="navigate('/pricing')">Pricing</button>
+          <button class="mkt-nav-dd-item" onclick="navigate('/about')">About</button>
+        </div>
+      </div>
     </div>
   </nav>
   <div class="mkt-hero">
@@ -2095,11 +2201,29 @@ select.field { color:var(--black); }
     var wrap = document.getElementById('mob-avatar-wrap');
     if (wrap) wrap.classList.remove('open');
   }
+  // Landing hamburger menu
+  function toggleLandingMenu() {
+    var el = document.getElementById('landing-avatar');
+    if (el) el.classList.toggle('open');
+  }
+  function closeLandingMenu() {
+    var el = document.getElementById('landing-avatar');
+    if (el) el.classList.remove('open');
+  }
+  function toggleMktMenu(el) {
+    el.classList.toggle('open');
+  }
+  function closeMktMenus() {
+    document.querySelectorAll('.mkt-nav-hamburger.open').forEach(function(el) { el.classList.remove('open'); });
+  }
   document.addEventListener('click', function(e) {
     var wrap = document.getElementById('avatar-wrap');
     if (wrap && !wrap.contains(e.target)) closeAvatarMenu();
     var mobWrap = document.getElementById('mob-avatar-wrap');
     if (mobWrap && !mobWrap.contains(e.target)) closeMobAvatarMenu();
+    var landingAvatar = document.getElementById('landing-avatar');
+    if (landingAvatar && !landingAvatar.contains(e.target)) closeLandingMenu();
+    if (!e.target.closest('.mkt-nav-hamburger')) closeMktMenus();
   });
 
   // -- Auth helpers ------------------------------------------
