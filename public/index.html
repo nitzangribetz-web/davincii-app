@@ -156,10 +156,10 @@ select.field { color:var(--black); }
 
 /* ── DASHBOARD NAV ── */
 .top-nav { height:62px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; padding:0 40px; position:sticky; top:0; background:rgba(255,255,255,0.97); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); z-index:50; flex-shrink:0; }
-.top-nav-logo { line-height:1; cursor:pointer; }
-.top-nav-logo img { height:24px; width:auto; display:block; }
-.top-nav-right { display:flex; align-items:center; gap:20px; }
-.top-nav-name, .top-nav-artist { font-family:var(--sans); font-size:12px; font-weight:400; color:var(--muted); letter-spacing:0.03em; }
+.top-nav-logo { line-height:1; cursor:pointer; margin-top:4px; }
+.top-nav-logo img { height:22px; width:auto; display:block; }
+.top-nav-right { display:flex; align-items:center; gap:16px; }
+.top-nav-name, .top-nav-artist { font-family:var(--sans); font-size:13px; font-weight:500; color:var(--black); letter-spacing:0.02em; }
 .top-nav-signout, .top-nav-out { font-family:var(--sans); font-size:11px; font-weight:400; letter-spacing:0.10em; text-transform:uppercase; color:var(--muted); background:none; border:none; cursor:pointer; transition:color 0.18s; }
 .top-nav-signout:hover, .top-nav-out:hover { color:var(--black); }
 
@@ -672,10 +672,10 @@ select.field { color:var(--black); }
   padding: 0 20px; position: sticky; top: 0;
   background: rgba(255,255,255,0.97); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 50; flex-shrink: 0;
 }
-.mob-nav-logo { line-height:1; cursor:pointer; margin-top:4px; }
-.mob-nav-logo img { height:22px; width:auto; display:block; }
-.mob-nav-right { display:flex; align-items:center; gap:10px; }
-.mob-nav-artist-name { font-family:var(--sans); font-size:12px; font-weight:400; color:var(--muted); letter-spacing:0.02em; }
+.mob-nav-logo { line-height:1; cursor:pointer; margin-top:6px; }
+.mob-nav-logo img { height:20px; width:auto; display:block; }
+.mob-nav-right { display:flex; align-items:center; gap:12px; }
+.mob-nav-artist-name { font-family:var(--sans); font-size:12px; font-weight:500; color:var(--black); letter-spacing:0.02em; }
 .mob-avatar { width:32px; height:32px; background:var(--black); border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:var(--sans); font-size:11px; font-weight:600; color:var(--white); cursor:pointer; flex-shrink:0; }
 
 /* Bottom tab bar */
@@ -816,7 +816,7 @@ select.field { color:var(--black); }
   .desk-only { display:none !important; }
   .mob-only { display:block !important; }
   .mob-only.mob-flex { display:flex !important; }
-  nav.mob-only { display:flex !important; }
+  nav.mob-only, .mob-top-nav.mob-only { display:flex !important; }
   .mob-tab-bar.mob-only { display:flex !important; }
   .mob-landing-hero.mob-only { display:flex !important; }
 
