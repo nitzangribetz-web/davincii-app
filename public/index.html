@@ -587,8 +587,13 @@ select.field { color:var(--black); }
   position: relative; z-index: 10;
   display: flex; flex-direction: column; align-items: stretch;
   justify-content: center;
-  min-height: calc(100vh - 72px); min-height: calc(100dvh - 72px);
+  flex: 1;
   padding: 0;
+}
+.mob-landing-fold {
+  display: flex; flex-direction: column;
+  height: 100vh; height: 100dvh;
+  background: var(--black);
 }
 .mob-hero-inner {
   flex: 1;
@@ -818,7 +823,7 @@ select.field { color:var(--black); }
   .mob-only.mob-flex { display:flex !important; }
   nav.mob-only, .mob-top-nav.mob-only { display:flex !important; }
   .mob-tab-bar.mob-only { display:flex !important; }
-  .mob-landing-hero.mob-only { display:flex !important; }
+  .mob-landing-fold.mob-only { display:flex !important; }
 
   /* Landing */
   #screen-landing { min-height:100vh; min-height:100dvh; overflow-y:auto; height:auto; }
@@ -983,8 +988,9 @@ select.field { color:var(--black); }
 
 <!-- ════════════════ LANDING ════════════════ -->
 <div class="screen active" id="screen-landing">
+  <div class="mob-landing-fold mob-only">
   <!-- Mobile landing nav -->
-  <nav class="mob-landing-nav mob-only">
+  <nav class="mob-landing-nav">
     <div class="mob-landing-logo"><img src="/logo-white-sm.png" alt="Davincii"></div>
     <div class="mob-landing-avatar" id="landing-avatar" onclick="toggleLandingMenu()">
       <div class="mob-landing-avatar-icon">
@@ -1008,7 +1014,7 @@ select.field { color:var(--black); }
     </div>
   </nav>
   <!-- Mobile landing hero -->
-  <div class="mob-landing-hero mob-only">
+  <div class="mob-landing-hero">
     <div class="mob-hero-inner">
       <h1 class="mob-headline">Collect royalties.</h1>
       <div class="mob-rule"></div>
@@ -1053,6 +1059,7 @@ select.field { color:var(--black); }
       </div>
     </div>
   </div>
+  </div><!-- /mob-landing-fold -->
   <!-- Mobile scroll sections -->
   <div class="mob-scroll mob-only">
 
