@@ -76,7 +76,7 @@ async function sendSongNotification(songData) {
   try {
     await transporter.sendMail({
       from: process.env.SMTP_FROM || '"Davincii" <noreply@davincii.co>',
-      to: 'info@davincii.co',
+      to: 'nitzangribetz@gmail.com',
       subject: `New Song Submission: ${title}`,
       html
     });
