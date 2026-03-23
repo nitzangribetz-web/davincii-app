@@ -1434,17 +1434,17 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
         <p class="auth-form-sub">Sign in to your artist portal to view your earnings and claim payments.</p>
         <div class="error-box" id="login-error"></div>
         <label class="field-label">Email address</label>
-        <input class="field" type="email" autocomplete="email" placeholder="you@example.com">
+        <input class="field" type="email" autocomplete="email" placeholder="you@example.com" id="login-email">
         <label class="field-label">Password</label>
-        <input class="field" type="password" autocomplete="current-password" placeholder="Enter your password">
+        <input class="field" type="password" autocomplete="current-password" placeholder="Enter your password" id="login-password">
         <button class="auth-forgot" onclick="go('recover')">Forgot your password?</button>
-        <button class="btn-primary" style="margin-bottom:22px">Sign in &rarr;</button>
+        <button class="btn-primary" style="margin-bottom:22px" onclick="handleLogin()">Sign in &rarr;</button>
         <div class="divider"><div class="divider-line"></div><span class="divider-text">or continue with</span><div class="divider-line"></div></div>
-        <button class="btn-social">
+        <button class="btn-social" onclick="window.location.href='/api/auth/google'">
           <svg class="btn-social-icon" viewBox="0 0 18 18"><path d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
           Continue with Google
         </button>
-        <button class="btn-social">
+        <button class="btn-social" onclick="window.location.href='/api/auth/apple'">
           <svg class="btn-social-icon" viewBox="0 0 18 18"><path d="M12.27.52c.14 1.08-.3 2.15-1.01 2.93-.72.78-1.83 1.37-2.92 1.3-.16-1.07.34-2.17 1.01-2.88C10.07 1.1 11.24.52 12.27.52zM15.98 12.44c-.26.59-.57 1.14-.94 1.65-.49.69-.9 1.17-1.22 1.43-.49.44-1.01.67-1.58.68-.4 0-.89-.12-1.45-.35-.57-.23-1.09-.35-1.57-.35-.5 0-1.04.12-1.61.35-.58.23-1.04.36-1.4.37-.55.02-1.08-.22-1.6-.68-.35-.29-.78-.8-1.29-1.51C3.69 13.14 3.1 12 2.65 10.68c-.49-1.41-.74-2.77-.74-4.09 0-1.51.33-2.81.99-3.89.52-.87 1.21-1.56 2.08-2.07.87-.51 1.81-.77 2.82-.79.44 0 1.02.14 1.74.4.72.27 1.18.4 1.38.4.15 0 .67-.16 1.54-.47.82-.29 1.52-.41 2.1-.37 1.55.12 2.72.73 3.49 1.83-1.39.84-2.07 2.01-2.06 3.52.01 1.17.44 2.15 1.27 2.92.38.36.8.63 1.27.83-.1.29-.21.58-.35.86z" fill="#000"/></svg>
           Continue with Apple
         </button>
@@ -1471,19 +1471,20 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
         <h1 class="auth-form-title">Create your <em>account.</em></h1>
         <div class="auth-title-rule"></div>
         <p class="auth-form-sub">Start collecting the royalties you're owed. No upfront cost, ever.</p>
+        <div class="error-box" id="signup-error"></div>
         <label class="field-label">Full name</label>
-        <input class="field" type="text" autocomplete="name" placeholder="Your name">
+        <input class="field" type="text" autocomplete="name" placeholder="Your name" id="signup-name">
         <label class="field-label">Email address</label>
-        <input class="field" type="email" autocomplete="email" placeholder="you@example.com">
+        <input class="field" type="email" autocomplete="email" placeholder="you@example.com" id="signup-email">
         <label class="field-label">Password</label>
-        <input class="field" type="password" autocomplete="new-password" placeholder="Minimum 8 characters">
-        <button class="btn-primary" style="margin-bottom:22px">Create account &rarr;</button>
+        <input class="field" type="password" autocomplete="new-password" placeholder="Minimum 8 characters" id="signup-password">
+        <button class="btn-primary" style="margin-bottom:22px" onclick="handleSignup()">Create account &rarr;</button>
         <div class="divider"><div class="divider-line"></div><span class="divider-text">or continue with</span><div class="divider-line"></div></div>
-        <button class="btn-social">
+        <button class="btn-social" onclick="window.location.href='/api/auth/google'">
           <svg class="btn-social-icon" viewBox="0 0 18 18"><path d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
           Continue with Google
         </button>
-        <button class="btn-social">
+        <button class="btn-social" onclick="window.location.href='/api/auth/apple'">
           <svg class="btn-social-icon" viewBox="0 0 18 18"><path d="M12.27.52c.14 1.08-.3 2.15-1.01 2.93-.72.78-1.83 1.37-2.92 1.3-.16-1.07.34-2.17 1.01-2.88C10.07 1.1 11.24.52 12.27.52zM15.98 12.44c-.26.59-.57 1.14-.94 1.65-.49.69-.9 1.17-1.22 1.43-.49.44-1.01.67-1.58.68-.4 0-.89-.12-1.45-.35-.57-.23-1.09-.35-1.57-.35-.5 0-1.04.12-1.61.35-.58.23-1.04.36-1.4.37-.55.02-1.08-.22-1.6-.68-.35-.29-.78-.8-1.29-1.51C3.69 13.14 3.1 12 2.65 10.68c-.49-1.41-.74-2.77-.74-4.09 0-1.51.33-2.81.99-3.89.52-.87 1.21-1.56 2.08-2.07.87-.51 1.81-.77 2.82-.79.44 0 1.02.14 1.74.4.72.27 1.18.4 1.38.4.15 0 .67-.16 1.54-.47.82-.29 1.52-.41 2.1-.37 1.55.12 2.72.73 3.49 1.83-1.39.84-2.07 2.01-2.06 3.52.01 1.17.44 2.15 1.27 2.92.38.36.8.63 1.27.83-.1.29-.21.58-.35.86z" fill="#000"/></svg>
           Continue with Apple
         </button>
@@ -2315,6 +2316,110 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
       showDashPage('catalog');
     });
   }
+
+  // ── AUTH LOGIC ──
+  function showError(id, msg) {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = msg; el.style.display = 'block'; }
+  }
+  function hideError(id) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  }
+
+  function handleLogin() {
+    hideError('login-error');
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    if (!email || !password) { showError('login-error', 'Please enter your email and password.'); return; }
+
+    fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.error) {
+        showError('login-error', data.error);
+      } else {
+        localStorage.setItem('dv_token', data.token);
+        localStorage.setItem('dv_artist', JSON.stringify(data.artist));
+        onAuthSuccess(data.artist);
+      }
+    })
+    .catch(() => showError('login-error', 'Connection error. Please try again.'));
+  }
+
+  function handleSignup() {
+    hideError('signup-error');
+    const name = document.getElementById('signup-name').value.trim();
+    const email = document.getElementById('signup-email').value.trim();
+    const password = document.getElementById('signup-password').value;
+    if (!name) { showError('signup-error', 'Please enter your name.'); return; }
+    if (!email) { showError('signup-error', 'Please enter your email.'); return; }
+    if (!password || password.length < 8) { showError('signup-error', 'Password must be at least 8 characters.'); return; }
+
+    fetch('/api/auth/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.error) {
+        showError('signup-error', data.error);
+      } else {
+        localStorage.setItem('dv_token', data.token);
+        localStorage.setItem('dv_artist', JSON.stringify(data.artist));
+        onAuthSuccess(data.artist);
+      }
+    })
+    .catch(() => showError('signup-error', 'Connection error. Please try again.'));
+  }
+
+  function onAuthSuccess(artist) {
+    // Update dashboard with artist name if elements exist
+    const nameEls = document.querySelectorAll('.artist-display-name');
+    nameEls.forEach(el => { el.textContent = artist.name || artist.email; });
+    go('dashboard');
+  }
+
+  // Handle OAuth callback redirect (token in URL)
+  (function checkAuthCallback() {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    const artistParam = params.get('artist');
+    if (token && artistParam) {
+      try {
+        const artist = JSON.parse(decodeURIComponent(artistParam));
+        localStorage.setItem('dv_token', token);
+        localStorage.setItem('dv_artist', JSON.stringify(artist));
+        window.history.replaceState({}, '', '/');
+        onAuthSuccess(artist);
+      } catch (e) { console.error('Auth callback parse error:', e); }
+    }
+    // Auto-login if token exists
+    const savedToken = localStorage.getItem('dv_token');
+    const savedArtist = localStorage.getItem('dv_artist');
+    if (savedToken && savedArtist && !token) {
+      // Verify token is still valid
+      fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + savedToken } })
+        .then(r => { if (r.ok) return r.json(); throw new Error('expired'); })
+        .then(artist => {
+          const nameEls = document.querySelectorAll('.artist-display-name');
+          nameEls.forEach(el => { el.textContent = artist.name || artist.email; });
+        })
+        .catch(() => {
+          localStorage.removeItem('dv_token');
+          localStorage.removeItem('dv_artist');
+        });
+    }
+  })();
+
+  // Allow Enter key to submit login/signup
+  document.getElementById('login-password')?.addEventListener('keydown', function(e) { if (e.key === 'Enter') handleLogin(); });
+  document.getElementById('signup-password')?.addEventListener('keydown', function(e) { if (e.key === 'Enter') handleSignup(); });
 </script>
 </body>
 </html>
