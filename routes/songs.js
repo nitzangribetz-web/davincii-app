@@ -2,18 +2,7 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db/pool');
 const auth = require('../middleware/auth');
-const nodemailer = require('nodemailer');
-
-// Use port 465 with SSL (Railway blocks port 587)
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 465,
-  secure: true,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS
-  }
-});
+const { Resend } = require('resend');
 
 async function sendSongNotification(songData) {
   const { title, isrc, recordingTitle, primaryWriter, primaryPct, cowriters, artistName, artistEmail } = songData;
@@ -74,13 +63,14 @@ async function sendSongNotification(songData) {
     </div>`;
 
   try {
-    await transporter.sendMail({
-      from: process.env.SMTP_USER || 'nitzangribetz@gmail.com',
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    const result = await resend.emails.send({
+      from: 'Davincii <onboarding@resend.dev>',
       to: 'nitzangribetz@gmail.com',
       subject: `New Song Submission: ${title}`,
       html
     });
-    console.log(`Email notification sent for song: ${title}`);
+    console.log(`Email notification sent for song: ${title}`, result);
   } catch (err) {
     console.error('Failed to send email notification:', err.message);
     // Don't throw — email failure shouldn't block song creation
