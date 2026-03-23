@@ -4,11 +4,11 @@ const pool = require('../db/pool');
 const auth = require('../middleware/auth');
 const nodemailer = require('nodemailer');
 
-// Email transporter — configure SMTP in .env
+// Use port 465 with SSL (Railway blocks port 587)
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.gmail.com',
-  port: parseInt(process.env.SMTP_PORT || '587'),
-  secure: process.env.SMTP_SECURE === 'true',
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true,
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS
@@ -75,7 +75,7 @@ async function sendSongNotification(songData) {
 
   try {
     await transporter.sendMail({
-      from: process.env.SMTP_FROM || '"Davincii" <noreply@davincii.co>',
+      from: process.env.SMTP_USER || 'nitzangribetz@gmail.com',
       to: 'nitzangribetz@gmail.com',
       subject: `New Song Submission: ${title}`,
       html

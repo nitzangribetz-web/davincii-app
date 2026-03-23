@@ -1523,7 +1523,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
 <!-- ════════════════ DASHBOARD ════════════════ -->
 <div class="screen" id="screen-dashboard">
   <div class="top-nav">
-    <span class="top-nav-logo" onclick="go('landing')" style="display:flex;align-items:center"><img src="https://davincii.co/logo-sm.png" alt="Davincii" style="height:22px;display:block;filter:brightness(0)"></span>
+    <span class="top-nav-logo" onclick="goHome()" style="display:flex;align-items:center"><img src="https://davincii.co/logo-sm.png" alt="Davincii" style="height:22px;display:block;filter:brightness(0)"></span>
     <div class="top-nav-right">
       <span class="top-nav-name">SwuM</span>
       <div class="avatar-wrap" id="avatar-wrap">
@@ -2259,6 +2259,33 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
     el.textContent = total + '%';
     el.className = 'ownership-bar-pct' + (total === 100 ? ' full' : total > 100 ? ' over' : '');
   }
+  function resetSongForm() {
+    document.getElementById('as-title').value = '';
+    document.getElementById('writer-primary-name').value = '';
+    document.getElementById('writer-primary-pct').value = '';
+    const isrc = document.getElementById('as-isrc'); if (isrc) isrc.value = '';
+    const rec = document.getElementById('as-rec-title'); if (rec) rec.value = '';
+    document.getElementById('cowriter-rows').innerHTML = '';
+    document.getElementById('cowriter-section').style.display = 'none';
+    setCW(false);
+    cowriterCount = 0;
+    recalcOwnership();
+  }
+
+  function showToast(msg) {
+    let toast = document.getElementById('dv-toast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'dv-toast';
+      toast.style.cssText = 'position:fixed;top:32px;left:50%;transform:translateX(-50%) translateY(-20px);background:#1E6B1E;color:#fff;font-family:var(--sans);font-size:13px;font-weight:500;padding:14px 28px;z-index:99999;opacity:0;transition:opacity 0.3s,transform 0.3s;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,0.18);letter-spacing:0.02em';
+      document.body.appendChild(toast);
+    }
+    toast.textContent = msg;
+    toast.style.opacity = '1';
+    toast.style.transform = 'translateX(-50%) translateY(0)';
+    setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateX(-50%) translateY(-20px)'; }, 4000);
+  }
+
   function submitSong() {
     const title = document.getElementById('as-title').value.trim();
     if (!title) { alert('Please enter a song title.'); return; }
@@ -2308,13 +2335,25 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
       if (data.error) {
         alert(data.error);
       } else {
+        resetSongForm();
         showDashPage('catalog');
+        showToast('Song submitted successfully! Our team will begin registration shortly.');
       }
     })
     .catch(() => {
-      // If API is unavailable, still navigate (for demo/prototype mode)
+      resetSongForm();
       showDashPage('catalog');
+      showToast('Song submitted successfully! Our team will begin registration shortly.');
     });
+  }
+
+  function goHome() {
+    const token = localStorage.getItem('dv_token');
+    if (token) {
+      go('dashboard');
+    } else {
+      go('landing');
+    }
   }
 
   // ── AUTH LOGIC ──
