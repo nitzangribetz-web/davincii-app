@@ -725,13 +725,13 @@ html, body {
   <div class="mob-top-nav">
     <span class="mob-nav-logo" onclick="goHome()" style="display:flex;align-items:center"><img src="https://davincii.co/logo-sm.png" alt="Davincii" style="height:28px;display:block"></span>
     <div class="mob-nav-right">
-      <span style="font-family:var(--sans);font-size:12px;color:var(--muted)">SwuM</span>
+      <span style="font-family:var(--sans);font-size:12px;color:var(--muted)" id="mob-nav-artist-name"></span>
       <div class="avatar-wrap" id="avatar-wrap">
-        <div class="mob-avatar" onclick="toggleMenu()">SW</div>
+        <div class="mob-avatar" onclick="toggleMenu()" id="mob-avatar-initials">—</div>
         <div class="mob-avatar-dropdown" id="avatar-dd">
           <div class="mob-dd-header">
-            <div class="mob-dd-name">SwuM</div>
-            <div class="mob-dd-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="e19296948c8384809592a1868c80888dcf828e8c">[email&#160;protected]</a></div>
+            <div class="mob-dd-name" id="mob-dropdown-artist-name"></div>
+            <div class="mob-dd-email" id="mob-dropdown-artist-email"></div>
           </div>
           <div class="mob-dd-section">
             <button class="mob-dd-item" onclick="showDashPage('overview');closeMenu()"><span class="mob-dd-icon">&#8862;</span>Overview</button>
@@ -758,16 +758,15 @@ html, body {
 
   <!-- OVERVIEW -->
   <div class="dash-page mob-dash-content" id="dp-overview">
-    <div class="mob-page-title">Good <em>morning</em>, <em>SwuM</em></div>
-    <div class="mob-page-sub">Here's your royalty summary.</div>
+    <div class="mob-page-title">Welcome to <em>Davincii</em></div>
+    <div class="mob-page-sub" id="mob-overview-sub">Your artist dashboard — submit songs, track royalties, and manage payouts.</div>
     <div class="mob-page-rule"></div>
     <div class="mob-bal-card">
       <div class="mob-bal-label">Total royalties collected</div>
-      <div class="mob-bal-amount">$2,841.00</div>
-      <div class="mob-bal-note">Across 47 registered songs</div>
+      <div class="mob-bal-amount" id="mob-overview-total">$0.00</div>
+      <div class="mob-bal-note" id="mob-overview-songs-note">No songs submitted yet</div>
       <div class="mob-bal-actions">
-        <button class="mob-bal-btn mob-bal-btn-white">Claim payment</button>
-        <button class="mob-bal-btn mob-bal-btn-ghost">Catalog</button>
+        <button class="mob-bal-btn mob-bal-btn-ghost" onclick="showDashPage('add-song')">Submit your first song &rarr;</button>
       </div>
     </div>
     <div class="mob-sbox">
@@ -775,11 +774,8 @@ html, body {
         <div><div class="mob-sbox-title">Recent Royalties</div><div class="mob-sbox-sub">Latest payments</div></div>
         <button class="mob-sbox-link" onclick="showDashPage('royalties')">See all</button>
       </div>
-      <div class="mob-sbox-body">
-        <div class="mob-row"><div><div class="mob-row-song">With U</div><div class="mob-row-meta">SoundExchange · Q1 2024</div></div><div class="mob-row-right"><div class="mob-row-amount">$312.40</div><div><span class="badge badge-ok">Collected</span></div></div></div>
-        <div class="mob-row"><div><div class="mob-row-song">Midnight Bloom</div><div class="mob-row-meta">ASCAP · Q4 2023</div></div><div class="mob-row-right"><div class="mob-row-amount">$198.75</div><div><span class="badge badge-ok">Collected</span></div></div></div>
-        <div class="mob-row"><div><div class="mob-row-song">Fade Out</div><div class="mob-row-meta">MLC · Q1 2024</div></div><div class="mob-row-right"><div class="mob-row-amount">$87.20</div><div><span class="badge badge-pend">Pending</span></div></div></div>
-        <div class="mob-row"><div><div class="mob-row-song">Still Here</div><div class="mob-row-meta">BMI · Q3 2023</div></div><div class="mob-row-right"><div class="mob-row-amount">$144.00</div><div><span class="badge badge-ok">Collected</span></div></div></div>
+      <div class="mob-sbox-body" id="mob-overview-royalties-body">
+        <div style="padding:32px 16px;text-align:center;font-family:var(--sans);font-size:13px;color:var(--muted)">No royalties yet. Once your songs are registered and earning, they'll appear here.</div>
       </div>
     </div>
     <div class="mob-sbox">
@@ -787,10 +783,8 @@ html, body {
         <div><div class="mob-sbox-title">Your Catalog</div><div class="mob-sbox-sub">Registered songs</div></div>
         <button class="mob-sbox-link" onclick="showDashPage('catalog')">See all</button>
       </div>
-      <div class="mob-sbox-body">
-        <div class="mob-row"><div><div class="mob-row-song">With U</div><div class="mob-row-meta">2023 · Hip-Hop</div></div><div class="mob-row-right"><div class="mob-row-amount">$680.40</div><div><span class="badge badge-blue">ASCAP · BMI</span></div></div></div>
-        <div class="mob-row"><div><div class="mob-row-song">Midnight Bloom</div><div class="mob-row-meta">2022 · R&amp;B</div></div><div class="mob-row-right"><div class="mob-row-amount">$431.15</div><div><span class="badge badge-blue">ASCAP</span></div></div></div>
-        <div class="mob-row"><div><div class="mob-row-song">Fade Out</div><div class="mob-row-meta">2023 · Lo-fi</div></div><div class="mob-row-right"><div class="mob-row-amount">$212.00</div><div><span class="badge badge-blue">BMI · MLC</span></div></div></div>
+      <div class="mob-sbox-body" id="mob-overview-catalog-body">
+        <div style="padding:32px 16px;text-align:center;font-family:var(--sans);font-size:13px;color:var(--muted)">No songs in your catalog yet. <a style="color:var(--black);font-weight:500;text-decoration:underline;cursor:pointer" onclick="showDashPage('add-song')">Add your first song</a></div>
       </div>
     </div>
   </div>
@@ -804,19 +798,13 @@ html, body {
     <div class="mob-page-sub">All submitted songs and their status.</div>
     <div class="mob-page-rule"></div>
     <div class="mob-stat-row">
-      <div class="mob-stat-card"><div class="mob-stat-num">47</div><div class="mob-stat-lbl">Songs</div></div>
-      <div class="mob-stat-card mob-stat-card-red"><div class="mob-stat-num">$2,841</div><div class="mob-stat-lbl">Collected</div></div>
+      <div class="mob-stat-card"><div class="mob-stat-num" id="mob-catalog-song-count">0</div><div class="mob-stat-lbl">Songs</div></div>
+      <div class="mob-stat-card mob-stat-card-red"><div class="mob-stat-num" id="mob-catalog-total-collected">$0</div><div class="mob-stat-lbl">Collected</div></div>
     </div>
     <div class="mob-sbox">
-      <div class="mob-sbox-head"><div><div class="mob-sbox-title">All Songs</div><div class="mob-sbox-sub">47 submitted tracks</div></div></div>
-      <div class="mob-sbox-body">
-        <div class="mob-row"><div><div class="mob-row-song">With U</div><div class="mob-row-meta">SwuM 100% · US-AB3-24-00142</div></div><div class="mob-row-right"><span style="background:rgba(26,58,107,0.08);color:#1a3a6b;font-family:var(--sans);font-size:9px;font-weight:600;letter-spacing:0.10em;text-transform:uppercase;padding:3px 8px">Monitoring</span></div></div>
-        <div class="mob-row"><div><div class="mob-row-song">Midnight Bloom</div><div class="mob-row-meta">SwuM 100% · US-AB3-23-00091</div></div><div class="mob-row-right"><span style="background:rgba(26,58,107,0.08);color:#1a3a6b;font-family:var(--sans);font-size:9px;font-weight:600;letter-spacing:0.10em;text-transform:uppercase;padding:3px 8px">Monitoring</span></div></div>
-        <div class="mob-row"><div><div class="mob-row-song">Fade Out</div><div class="mob-row-meta">SwuM 70% · Kira 30% · US-AB3-24-00307</div></div><div class="mob-row-right"><span style="background:rgba(26,58,107,0.08);color:#1a3a6b;font-family:var(--sans);font-size:9px;font-weight:600;letter-spacing:0.10em;text-transform:uppercase;padding:3px 8px">Monitoring</span></div></div>
-        <div class="mob-row"><div><div class="mob-row-song">Still Here</div><div class="mob-row-meta">SwuM 100% · US-AB3-23-00188</div></div><div class="mob-row-right"><span style="background:#e6f2e6;color:#1a5c1a;font-family:var(--sans);font-size:9px;font-weight:600;letter-spacing:0.10em;text-transform:uppercase;padding:3px 8px">Registered</span></div></div>
-        <div class="mob-row"><div><div class="mob-row-song">Lately</div><div class="mob-row-meta">SwuM 60% · Alec L. 40% · US-AB3-24-00421</div></div><div class="mob-row-right"><span style="background:#fef6e6;color:#8a5a00;font-family:var(--sans);font-size:9px;font-weight:600;letter-spacing:0.10em;text-transform:uppercase;padding:3px 8px">Processing</span></div></div>
-        <div class="mob-row"><div><div class="mob-row-song">Drifting</div><div class="mob-row-meta">SwuM 100% · US-AB3-22-00044</div></div><div class="mob-row-right"><span style="background:#e6f2e6;color:#1a5c1a;font-family:var(--sans);font-size:9px;font-weight:600;letter-spacing:0.10em;text-transform:uppercase;padding:3px 8px">Registered</span></div></div>
-        <div class="mob-row"><div><div class="mob-row-song">Into The Forest</div><div class="mob-row-meta">SwuM 100% · US-AB3-22-00017</div></div><div class="mob-row-right"><span style="background:rgba(0,0,0,0.06);color:#555;font-family:var(--sans);font-size:9px;font-weight:600;letter-spacing:0.10em;text-transform:uppercase;padding:3px 8px">Queued</span></div></div>
+      <div class="mob-sbox-head"><div><div class="mob-sbox-title">All Songs</div><div class="mob-sbox-sub" id="mob-catalog-songs-sub">0 submitted tracks</div></div></div>
+      <div class="mob-sbox-body" id="mob-catalog-songs-body">
+        <div style="padding:32px 16px;text-align:center;font-family:var(--sans);font-size:13px;color:var(--muted)">No songs submitted yet. <a style="color:var(--black);font-weight:500;text-decoration:underline;cursor:pointer" onclick="showDashPage('add-song')">Add your first song</a></div>
       </div>
     </div>
   </div>
@@ -882,18 +870,13 @@ html, body {
     <div class="mob-page-sub">All payments collected.</div>
     <div class="mob-page-rule"></div>
     <div class="mob-stat-row">
-      <div class="mob-stat-card mob-stat-card-red"><div class="mob-stat-num">$2,841</div><div class="mob-stat-lbl">Collected</div></div>
-      <div class="mob-stat-card"><div class="mob-stat-num">$87</div><div class="mob-stat-lbl">Pending</div></div>
+      <div class="mob-stat-card mob-stat-card-red"><div class="mob-stat-num" id="mob-royalties-total">$0</div><div class="mob-stat-lbl">Collected</div></div>
+      <div class="mob-stat-card"><div class="mob-stat-num" id="mob-royalties-pending">$0</div><div class="mob-stat-lbl">Pending</div></div>
     </div>
     <div class="mob-sbox">
       <div class="mob-sbox-head"><div><div class="mob-sbox-title">All Royalty Payments</div><div class="mob-sbox-sub">Most recent first</div></div></div>
-      <div class="mob-sbox-body">
-        <div class="mob-row"><div><div class="mob-row-song">With U</div><div class="mob-row-meta">SoundExchange · Q1 2024</div></div><div class="mob-row-right"><div class="mob-row-amount">$312.40</div><div><span class="badge badge-ok">Collected</span></div></div></div>
-        <div class="mob-row"><div><div class="mob-row-song">Midnight Bloom</div><div class="mob-row-meta">ASCAP · Q4 2023</div></div><div class="mob-row-right"><div class="mob-row-amount">$198.75</div><div><span class="badge badge-ok">Collected</span></div></div></div>
-        <div class="mob-row"><div><div class="mob-row-song">Fade Out</div><div class="mob-row-meta">MLC / Songtrust · Q1 2024</div></div><div class="mob-row-right"><div class="mob-row-amount">$87.20</div><div><span class="badge badge-pend">Pending</span></div></div></div>
-        <div class="mob-row"><div><div class="mob-row-song">Still Here</div><div class="mob-row-meta">BMI · Q3 2023</div></div><div class="mob-row-right"><div class="mob-row-amount">$144.00</div><div><span class="badge badge-ok">Collected</span></div></div></div>
-        <div class="mob-row"><div><div class="mob-row-song">With U</div><div class="mob-row-meta">BMI · Q3 2023</div></div><div class="mob-row-right"><div class="mob-row-amount">$221.80</div><div><span class="badge badge-ok">Collected</span></div></div></div>
-        <div class="mob-row"><div><div class="mob-row-song">Drifting</div><div class="mob-row-meta">ASCAP · Q2 2023</div></div><div class="mob-row-right"><div class="mob-row-amount">$98.30</div><div><span class="badge badge-ok">Collected</span></div></div></div>
+      <div class="mob-sbox-body" id="mob-royalties-body">
+        <div style="padding:32px 16px;text-align:center;font-family:var(--sans);font-size:13px;color:var(--muted)">No royalties collected yet. Once your songs start earning, payments will appear here.</div>
       </div>
     </div>
   </div>
@@ -904,24 +887,21 @@ html, body {
     <div class="mob-page-sub">Payments sent to your account.</div>
     <div class="mob-page-rule"></div>
     <div class="mob-stat-row">
-      <div class="mob-stat-card"><div class="mob-stat-num">$1,200</div><div class="mob-stat-lbl">Paid out</div></div>
-      <div class="mob-stat-card mob-stat-card-red"><div class="mob-stat-num">$1,641</div><div class="mob-stat-lbl">Available</div></div>
+      <div class="mob-stat-card"><div class="mob-stat-num" id="mob-payouts-total">$0</div><div class="mob-stat-lbl">Paid out</div></div>
+      <div class="mob-stat-card mob-stat-card-red"><div class="mob-stat-num" id="mob-payouts-available">$0</div><div class="mob-stat-lbl">Available</div></div>
     </div>
     <!-- Claim bar -->
     <div style="border:1px solid var(--border);padding:20px;margin-bottom:16px;background:var(--off-white)">
       <div style="font-family:var(--sans);font-size:10px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Available balance</div>
-      <div style="font-family:var(--serif);font-size:38px;font-weight:400;letter-spacing:-0.02em;margin-bottom:4px">$1,641.00</div>
+      <div style="font-family:var(--serif);font-size:38px;font-weight:400;letter-spacing:-0.02em;margin-bottom:4px" id="mob-payouts-balance">$0.00</div>
       <div style="font-family:var(--sans);font-size:12px;color:var(--muted);margin-bottom:16px">Ready to claim</div>
       <button class="btn-primary" style="padding:14px">Claim payment &rarr;</button>
       <div style="font-family:var(--sans);font-size:11px;color:var(--muted-light);margin-top:8px;text-align:center">Via ACH, PayPal, or Stripe</div>
     </div>
     <div class="mob-sbox">
       <div class="mob-sbox-head"><div><div class="mob-sbox-title">Payout History</div></div></div>
-      <div class="mob-sbox-body">
-        <div class="mob-row"><div><div class="mob-row-song" style="font-size:14px">Feb 14, 2024</div><div class="mob-row-meta">ACH · #DV-2402-0041</div></div><div class="mob-row-right"><div class="mob-row-amount">$400.00</div><div><span class="badge badge-ok">Paid</span></div></div></div>
-        <div class="mob-row"><div><div class="mob-row-song" style="font-size:14px">Nov 3, 2023</div><div class="mob-row-meta">PayPal · #DV-2311-0029</div></div><div class="mob-row-right"><div class="mob-row-amount">$350.00</div><div><span class="badge badge-ok">Paid</span></div></div></div>
-        <div class="mob-row"><div><div class="mob-row-song" style="font-size:14px">Aug 19, 2023</div><div class="mob-row-meta">ACH · #DV-2308-0017</div></div><div class="mob-row-right"><div class="mob-row-amount">$280.00</div><div><span class="badge badge-ok">Paid</span></div></div></div>
-        <div class="mob-row"><div><div class="mob-row-song" style="font-size:14px">May 7, 2023</div><div class="mob-row-meta">Stripe · #DV-2305-0008</div></div><div class="mob-row-right"><div class="mob-row-amount">$170.00</div><div><span class="badge badge-ok">Paid</span></div></div></div>
+      <div class="mob-sbox-body" id="mob-payouts-body">
+        <div style="padding:32px 16px;text-align:center;font-family:var(--sans);font-size:13px;color:var(--muted)">No payouts yet. Once your royalty balance exceeds $50, you can claim a payment.</div>
       </div>
     </div>
   </div>
@@ -1356,6 +1336,7 @@ html, body {
       } else {
         localStorage.setItem('dv_token', data.token);
         localStorage.setItem('dv_artist', JSON.stringify(data.artist));
+        mobSetArtistNav(data.artist);
         go('dashboard');
       }
     })
@@ -1383,10 +1364,24 @@ html, body {
       } else {
         localStorage.setItem('dv_token', data.token);
         localStorage.setItem('dv_artist', JSON.stringify(data.artist));
+        mobSetArtistNav(data.artist);
         go('dashboard');
       }
     })
     .catch(() => mobShowError('mob-signup-error', 'Connection error. Please try again.'));
+  }
+
+  function mobSetArtistNav(artist) {
+    const name = artist.name || artist.email;
+    const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+    const navName = document.getElementById('mob-nav-artist-name');
+    if (navName) navName.textContent = name;
+    const ddName = document.getElementById('mob-dropdown-artist-name');
+    if (ddName) ddName.textContent = name;
+    const ddEmail = document.getElementById('mob-dropdown-artist-email');
+    if (ddEmail) ddEmail.textContent = artist.email || '';
+    const avatar = document.getElementById('mob-avatar-initials');
+    if (avatar) avatar.textContent = initials || '—';
   }
 
   // Handle OAuth callback redirect
@@ -1400,8 +1395,17 @@ html, body {
         localStorage.setItem('dv_token', token);
         localStorage.setItem('dv_artist', JSON.stringify(artist));
         window.history.replaceState({}, '', '/mobile.html');
+        mobSetArtistNav(artist);
         go('dashboard');
       } catch (e) { console.error('Auth callback parse error:', e); }
+    }
+  })();
+
+  // Auto-populate nav if already logged in
+  (function() {
+    const savedArtist = localStorage.getItem('dv_artist');
+    if (savedArtist) {
+      try { mobSetArtistNav(JSON.parse(savedArtist)); } catch(e) {}
     }
   })();
 

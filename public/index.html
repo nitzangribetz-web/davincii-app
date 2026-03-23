@@ -1525,13 +1525,13 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
   <div class="top-nav">
     <span class="top-nav-logo" onclick="goHome()" style="display:flex;align-items:center"><img src="https://davincii.co/logo-sm.png" alt="Davincii" style="height:22px;display:block;filter:brightness(0)"></span>
     <div class="top-nav-right">
-      <span class="top-nav-name">SwuM</span>
+      <span class="top-nav-name" id="nav-artist-name"></span>
       <div class="avatar-wrap" id="avatar-wrap">
-        <div class="avatar" onclick="toggleAvatarMenu()">SW</div>
+        <div class="avatar" onclick="toggleAvatarMenu()" id="avatar-initials">—</div>
         <div class="avatar-dropdown" id="avatar-dropdown">
           <div class="avatar-dropdown-header">
-            <div class="avatar-dropdown-name">SwuM</div>
-            <div class="avatar-dropdown-email">swumbeats@gmail.com</div>
+            <div class="avatar-dropdown-name" id="dropdown-artist-name"></div>
+            <div class="avatar-dropdown-email" id="dropdown-artist-email"></div>
           </div>
           <div class="avatar-dropdown-section">
             <button class="avatar-menu-item" onclick="showDashPage('overview');closeAvatarMenu()">
@@ -1600,23 +1600,22 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
 
       <!-- OVERVIEW -->
       <div class="dash-page" id="dp-overview">
-        <div class="page-title">Good <em>morning</em>, <em>SwuM</em></div>
-        <div class="page-sub">Here's a summary of your royalty activity.</div>
+        <div class="page-title">Welcome to <em>Davincii</em></div>
+        <div class="page-sub" id="overview-sub">Your artist dashboard — submit songs, track royalties, and manage payouts.</div>
         <div class="page-rule"></div>
         <div class="bal-card">
           <div>
             <div class="bal-label">Total royalties collected</div>
-            <div class="bal-amount">$2,841.00</div>
-            <div class="bal-note">Across 47 registered songs</div>
+            <div class="bal-amount" id="overview-total">$0.00</div>
+            <div class="bal-note" id="overview-songs-note">No songs submitted yet</div>
           </div>
           <div>
             <div class="bal-label">Total paid out</div>
-            <div class="bal-amount-sm">$1,200.00</div>
-            <div class="bal-note">$1,641.00 available to claim</div>
+            <div class="bal-amount-sm" id="overview-paid">$0.00</div>
+            <div class="bal-note" id="overview-available">$0.00 available to claim</div>
           </div>
           <div class="bal-actions">
-            <button class="bal-btn bal-btn-white">Claim payment</button>
-            <button class="bal-btn bal-btn-ghost" onclick="showDashPage('catalog')">View catalog</button>
+            <button class="bal-btn bal-btn-ghost" onclick="showDashPage('add-song')">Submit your first song &rarr;</button>
           </div>
         </div>
         <div class="sbox">
@@ -1624,12 +1623,8 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
             <div><div class="sbox-title">Recent Royalties</div><div class="sbox-sub">Latest payments recovered</div></div>
             <button class="sbox-link" onclick="showDashPage('royalties')">See all &rarr;</button>
           </div>
-          <div class="sbox-body">
-            <div class="t-head col-5"><div class="t-th">Song</div><div class="t-th">Platform</div><div class="t-th">Quarter</div><div class="t-th">Status</div><div class="t-th" style="text-align:right">Amount</div></div>
-            <div class="t-row col-5"><div><div class="t-song">With U</div><div class="t-meta">Feat. Elsewhere</div></div><div class="t-cell">SoundExchange</div><div class="t-cell">Q1 2024</div><div><span class="badge badge-ok">Collected</span></div><div class="t-amount">$312.40</div></div>
-            <div class="t-row col-5"><div><div class="t-song">Midnight Bloom</div><div class="t-meta"></div></div><div class="t-cell">ASCAP</div><div class="t-cell">Q4 2023</div><div><span class="badge badge-ok">Collected</span></div><div class="t-amount">$198.75</div></div>
-            <div class="t-row col-5"><div><div class="t-song">Fade Out</div><div class="t-meta">Feat. Kira</div></div><div class="t-cell">MLC / Songtrust</div><div class="t-cell">Q1 2024</div><div><span class="badge badge-pend">Pending</span></div><div class="t-amount">$87.20</div></div>
-            <div class="t-row col-5"><div><div class="t-song">Still Here</div><div class="t-meta"></div></div><div class="t-cell">BMI</div><div class="t-cell">Q3 2023</div><div><span class="badge badge-ok">Collected</span></div><div class="t-amount">$144.00</div></div>
+          <div class="sbox-body" id="overview-royalties-body">
+            <div style="padding:40px 20px;text-align:center;font-family:var(--sans);font-size:13px;color:var(--muted)">No royalties yet. Once your songs are registered and earning, they'll appear here.</div>
           </div>
         </div>
         <div class="sbox">
@@ -1637,11 +1632,8 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
             <div><div class="sbox-title">Your Catalog</div><div class="sbox-sub">Songs registered across platforms</div></div>
             <button class="sbox-link" onclick="showDashPage('catalog')">See all &rarr;</button>
           </div>
-          <div class="sbox-body">
-            <div class="t-head col-4"><div class="t-th">Song</div><div class="t-th">ISRC</div><div class="t-th">Registrations</div><div class="t-th" style="text-align:right">Earned</div></div>
-            <div class="t-row col-4"><div><div class="t-song">With U</div><div class="t-meta">2023 · Hip-Hop</div></div><div class="t-cell" style="font-family:monospace;font-size:11px;color:#999">US-AB3-24-00142</div><div><span class="badge badge-blue">ASCAP · BMI · MLC</span></div><div class="t-amount">$680.40</div></div>
-            <div class="t-row col-4"><div><div class="t-song">Midnight Bloom</div><div class="t-meta">2022 · R&amp;B</div></div><div class="t-cell" style="font-family:monospace;font-size:11px;color:#999">US-AB3-23-00091</div><div><span class="badge badge-blue">ASCAP · SoundEx</span></div><div class="t-amount">$431.15</div></div>
-            <div class="t-row col-4"><div><div class="t-song">Fade Out</div><div class="t-meta">2023 · Lo-fi</div></div><div class="t-cell" style="font-family:monospace;font-size:11px;color:#999">US-AB3-24-00307</div><div><span class="badge badge-blue">BMI · MLC</span></div><div class="t-amount">$212.00</div></div>
+          <div class="sbox-body" id="overview-catalog-body">
+            <div style="padding:40px 20px;text-align:center;font-family:var(--sans);font-size:13px;color:var(--muted)">No songs in your catalog yet. <a style="color:var(--black);font-weight:500;text-decoration:underline;cursor:pointer" onclick="showDashPage('add-song')">Add your first song</a></div>
           </div>
         </div>
       </div>
@@ -1655,77 +1647,16 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
         <div class="page-sub">All submitted songs and their registration status.</div>
         <div class="page-rule"></div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px">
-          <div class="stat-card"><div class="stat-num">47</div><div class="stat-lbl">Songs submitted</div></div>
+          <div class="stat-card"><div class="stat-num" id="catalog-song-count">0</div><div class="stat-lbl">Songs submitted</div></div>
           <div class="stat-card"><div class="stat-num">12+</div><div class="stat-lbl">Platforms covered</div></div>
-          <div class="stat-card stat-card-red"><div class="stat-num">$2,841</div><div class="stat-lbl">Total collected</div></div>
+          <div class="stat-card stat-card-red"><div class="stat-num" id="catalog-total-collected">$0</div><div class="stat-lbl">Total collected</div></div>
         </div>
         <div class="sbox">
           <div class="sbox-head">
-            <div><div class="sbox-title">All Songs</div><div class="sbox-sub">47 submitted tracks</div></div>
+            <div><div class="sbox-title">All Songs</div><div class="sbox-sub" id="catalog-songs-sub">0 submitted tracks</div></div>
           </div>
-          <div class="sbox-body" style="padding:0">
-            <table class="songs-table">
-              <thead>
-                <tr>
-                  <th class="songs-th">Song</th>
-                  <th class="songs-th">Writers &amp; Splits</th>
-                  <th class="songs-th">ISRC</th>
-                  <th class="songs-th">Status</th>
-                  <th class="songs-th" style="text-align:right">Earned</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr class="songs-tr">
-                  <td class="songs-td"><div class="songs-title">With U</div><div class="songs-meta">Hip-Hop · 2023</div></td>
-                  <td class="songs-td"><div class="songs-splits">SwuM <span style="color:#aaa">100%</span></div></td>
-                  <td class="songs-td"><span class="songs-isrc">US-AB3-24-00142</span></td>
-                  <td class="songs-td"><span class="badge-monitoring">Monitoring</span></td>
-                  <td class="songs-td" style="text-align:right;font-family:var(--sans);font-size:14px;font-weight:500">$680.40</td>
-                </tr>
-                <tr class="songs-tr">
-                  <td class="songs-td"><div class="songs-title">Midnight Bloom</div><div class="songs-meta">R&amp;B · 2022</div></td>
-                  <td class="songs-td"><div class="songs-splits">SwuM <span style="color:#aaa">100%</span></div></td>
-                  <td class="songs-td"><span class="songs-isrc">US-AB3-23-00091</span></td>
-                  <td class="songs-td"><span class="badge-monitoring">Monitoring</span></td>
-                  <td class="songs-td" style="text-align:right;font-family:var(--sans);font-size:14px;font-weight:500">$431.15</td>
-                </tr>
-                <tr class="songs-tr">
-                  <td class="songs-td"><div class="songs-title">Fade Out</div><div class="songs-meta">Lo-fi · 2023</div></td>
-                  <td class="songs-td"><div class="songs-splits">SwuM <span style="color:#aaa">70%</span><br><span class="co">Kira <span style="color:#bbb">30%</span></span></div></td>
-                  <td class="songs-td"><span class="songs-isrc">US-AB3-24-00307</span></td>
-                  <td class="songs-td"><span class="badge-monitoring">Monitoring</span></td>
-                  <td class="songs-td" style="text-align:right;font-family:var(--sans);font-size:14px;font-weight:500">$212.00</td>
-                </tr>
-                <tr class="songs-tr">
-                  <td class="songs-td"><div class="songs-title">Still Here</div><div class="songs-meta">R&amp;B · 2022</div></td>
-                  <td class="songs-td"><div class="songs-splits">SwuM <span style="color:#aaa">100%</span></div></td>
-                  <td class="songs-td"><span class="songs-isrc">US-AB3-23-00188</span></td>
-                  <td class="songs-td"><span class="badge-registered">Registered</span></td>
-                  <td class="songs-td" style="text-align:right;font-family:var(--sans);font-size:14px;font-weight:500">$144.00</td>
-                </tr>
-                <tr class="songs-tr">
-                  <td class="songs-td"><div class="songs-title">Lately</div><div class="songs-meta">Hip-Hop · 2024</div></td>
-                  <td class="songs-td"><div class="songs-splits">SwuM <span style="color:#aaa">60%</span><br><span class="co">Alec L. <span style="color:#bbb">40%</span></span></div></td>
-                  <td class="songs-td"><span class="songs-isrc">US-AB3-24-00421</span></td>
-                  <td class="songs-td"><span class="badge-processing">Processing</span></td>
-                  <td class="songs-td" style="text-align:right;font-family:var(--sans);font-size:14px;color:var(--muted)">—</td>
-                </tr>
-                <tr class="songs-tr">
-                  <td class="songs-td"><div class="songs-title">Drifting</div><div class="songs-meta">Lo-fi · 2022</div></td>
-                  <td class="songs-td"><div class="songs-splits">SwuM <span style="color:#aaa">100%</span></div></td>
-                  <td class="songs-td"><span class="songs-isrc">US-AB3-22-00044</span></td>
-                  <td class="songs-td"><span class="badge-registered">Registered</span></td>
-                  <td class="songs-td" style="text-align:right;font-family:var(--sans);font-size:14px;font-weight:500">$98.30</td>
-                </tr>
-                <tr class="songs-tr">
-                  <td class="songs-td"><div class="songs-title">Into The Forest</div><div class="songs-meta">Lo-fi · 2022</div></td>
-                  <td class="songs-td"><div class="songs-splits">SwuM <span style="color:#aaa">100%</span></div></td>
-                  <td class="songs-td"><span class="songs-isrc">US-AB3-22-00017</span></td>
-                  <td class="songs-td"><span class="badge-queued">Queued</span></td>
-                  <td class="songs-td" style="text-align:right;font-family:var(--sans);font-size:14px;color:var(--muted)">—</td>
-                </tr>
-              </tbody>
-            </table>
+          <div class="sbox-body" style="padding:0" id="catalog-songs-body">
+            <div style="padding:48px 20px;text-align:center;font-family:var(--sans);font-size:13px;color:var(--muted)">No songs submitted yet. <a style="color:var(--black);font-weight:500;text-decoration:underline;cursor:pointer" onclick="showDashPage('add-song')">Add your first song</a></div>
           </div>
         </div>
         <div style="font-family:var(--sans);font-size:11px;color:var(--muted-light);margin-top:16px;display:flex;gap:24px">
@@ -1818,23 +1749,15 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
         <div class="page-sub">All royalty payments collected and pending across platforms.</div>
         <div class="page-rule"></div>
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px">
-          <div class="stat-card stat-card-red"><div class="stat-num">$2,841</div><div class="stat-lbl">Total collected</div></div>
-          <div class="stat-card"><div class="stat-num">$312</div><div class="stat-lbl">This quarter</div></div>
-          <div class="stat-card"><div class="stat-num">$87</div><div class="stat-lbl">Pending</div></div>
-          <div class="stat-card"><div class="stat-num">23</div><div class="stat-lbl">Payments received</div></div>
+          <div class="stat-card stat-card-red"><div class="stat-num" id="royalties-total">$0</div><div class="stat-lbl">Total collected</div></div>
+          <div class="stat-card"><div class="stat-num" id="royalties-quarter">$0</div><div class="stat-lbl">This quarter</div></div>
+          <div class="stat-card"><div class="stat-num" id="royalties-pending">$0</div><div class="stat-lbl">Pending</div></div>
+          <div class="stat-card"><div class="stat-num" id="royalties-count">0</div><div class="stat-lbl">Payments received</div></div>
         </div>
         <div class="sbox">
           <div class="sbox-head"><div><div class="sbox-title">All Royalty Payments</div><div class="sbox-sub">Sorted by most recent</div></div></div>
-          <div class="sbox-body">
-            <div class="t-head col-5"><div class="t-th">Song</div><div class="t-th">Platform</div><div class="t-th">Quarter</div><div class="t-th">Status</div><div class="t-th" style="text-align:right">Amount</div></div>
-            <div class="t-row col-5"><div><div class="t-song">With U</div><div class="t-meta">Feat. Elsewhere</div></div><div class="t-cell">SoundExchange</div><div class="t-cell">Q1 2024</div><div><span class="badge badge-ok">Collected</span></div><div class="t-amount">$312.40</div></div>
-            <div class="t-row col-5"><div><div class="t-song">Midnight Bloom</div></div><div class="t-cell">ASCAP</div><div class="t-cell">Q4 2023</div><div><span class="badge badge-ok">Collected</span></div><div class="t-amount">$198.75</div></div>
-            <div class="t-row col-5"><div><div class="t-song">Fade Out</div><div class="t-meta">Feat. Kira</div></div><div class="t-cell">MLC / Songtrust</div><div class="t-cell">Q1 2024</div><div><span class="badge badge-pend">Pending</span></div><div class="t-amount">$87.20</div></div>
-            <div class="t-row col-5"><div><div class="t-song">Still Here</div></div><div class="t-cell">BMI</div><div class="t-cell">Q3 2023</div><div><span class="badge badge-ok">Collected</span></div><div class="t-amount">$144.00</div></div>
-            <div class="t-row col-5"><div><div class="t-song">With U</div></div><div class="t-cell">BMI</div><div class="t-cell">Q3 2023</div><div><span class="badge badge-ok">Collected</span></div><div class="t-amount">$221.80</div></div>
-            <div class="t-row col-5"><div><div class="t-song">Drifting</div></div><div class="t-cell">ASCAP</div><div class="t-cell">Q2 2023</div><div><span class="badge badge-ok">Collected</span></div><div class="t-amount">$98.30</div></div>
-            <div class="t-row col-5"><div><div class="t-song">Midnight Bloom</div></div><div class="t-cell">SoundExchange</div><div class="t-cell">Q2 2023</div><div><span class="badge badge-ok">Collected</span></div><div class="t-amount">$232.40</div></div>
-            <div class="t-row col-5"><div><div class="t-song">Still Here</div></div><div class="t-cell">MLC</div><div class="t-cell">Q1 2023</div><div><span class="badge badge-ok">Collected</span></div><div class="t-amount">$76.55</div></div>
+          <div class="sbox-body" id="royalties-body">
+            <div style="padding:48px 20px;text-align:center;font-family:var(--sans);font-size:13px;color:var(--muted)">No royalties collected yet. Once your songs start earning, payments will appear here.</div>
           </div>
         </div>
       </div>
@@ -1845,14 +1768,14 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
         <div class="page-sub">Payments sent to your account.</div>
         <div class="page-rule"></div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px">
-          <div class="stat-card"><div class="stat-num">$1,200</div><div class="stat-lbl">Total paid out</div></div>
-          <div class="stat-card stat-card-red"><div class="stat-num">$1,641</div><div class="stat-lbl">Available to claim</div></div>
-          <div class="stat-card"><div class="stat-num">4</div><div class="stat-lbl">Payments sent</div></div>
+          <div class="stat-card"><div class="stat-num" id="payouts-total">$0</div><div class="stat-lbl">Total paid out</div></div>
+          <div class="stat-card stat-card-red"><div class="stat-num" id="payouts-available">$0</div><div class="stat-lbl">Available to claim</div></div>
+          <div class="stat-card"><div class="stat-num" id="payouts-count">0</div><div class="stat-lbl">Payments sent</div></div>
         </div>
         <div style="border:1px solid var(--border);padding:28px 32px;margin-bottom:28px;display:flex;justify-content:space-between;align-items:center;background:var(--off-white)">
           <div>
             <div style="font-family:var(--sans);font-size:10px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Available balance</div>
-            <div style="font-family:var(--serif);font-size:44px;font-weight:400;letter-spacing:-0.02em;line-height:1">$1,641.00</div>
+            <div style="font-family:var(--serif);font-size:44px;font-weight:400;letter-spacing:-0.02em;line-height:1" id="payouts-balance">$0.00</div>
             <div style="font-family:var(--sans);font-size:12px;color:var(--muted);margin-top:4px">Ready to claim</div>
           </div>
           <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
@@ -1862,12 +1785,8 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
         </div>
         <div class="sbox">
           <div class="sbox-head"><div><div class="sbox-title">Payout History</div><div class="sbox-sub">All payments sent to your account</div></div></div>
-          <div class="sbox-body">
-            <div class="t-head" style="display:grid;grid-template-columns:1fr 140px 140px 120px;gap:12px"><div class="t-th">Date</div><div class="t-th">Method</div><div class="t-th">Status</div><div class="t-th" style="text-align:right">Amount</div></div>
-            <div class="t-row" style="display:grid;grid-template-columns:1fr 140px 140px 120px;gap:12px;align-items:center"><div><div class="t-song" style="font-size:15px">Feb 14, 2024</div><div class="t-meta">Ref #DV-2402-0041</div></div><div class="t-cell">ACH Transfer</div><div><span class="badge badge-ok">Paid</span></div><div class="t-amount">$400.00</div></div>
-            <div class="t-row" style="display:grid;grid-template-columns:1fr 140px 140px 120px;gap:12px;align-items:center"><div><div class="t-song" style="font-size:15px">Nov 3, 2023</div><div class="t-meta">Ref #DV-2311-0029</div></div><div class="t-cell">PayPal</div><div><span class="badge badge-ok">Paid</span></div><div class="t-amount">$350.00</div></div>
-            <div class="t-row" style="display:grid;grid-template-columns:1fr 140px 140px 120px;gap:12px;align-items:center"><div><div class="t-song" style="font-size:15px">Aug 19, 2023</div><div class="t-meta">Ref #DV-2308-0017</div></div><div class="t-cell">ACH Transfer</div><div><span class="badge badge-ok">Paid</span></div><div class="t-amount">$280.00</div></div>
-            <div class="t-row" style="display:grid;grid-template-columns:1fr 140px 140px 120px;gap:12px;align-items:center"><div><div class="t-song" style="font-size:15px">May 7, 2023</div><div class="t-meta">Ref #DV-2305-0008</div></div><div class="t-cell">Stripe</div><div><span class="badge badge-ok">Paid</span></div><div class="t-amount">$170.00</div></div>
+          <div class="sbox-body" id="payouts-body">
+            <div style="padding:48px 20px;text-align:center;font-family:var(--sans);font-size:13px;color:var(--muted)">No payouts yet. Once your royalty balance exceeds $50, you can claim a payment.</div>
           </div>
         </div>
       </div>
@@ -2418,9 +2337,18 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
   }
 
   function onAuthSuccess(artist) {
-    // Update dashboard with artist name if elements exist
+    const name = artist.name || artist.email;
+    const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
     const nameEls = document.querySelectorAll('.artist-display-name');
-    nameEls.forEach(el => { el.textContent = artist.name || artist.email; });
+    nameEls.forEach(el => { el.textContent = name; });
+    const navName = document.getElementById('nav-artist-name');
+    if (navName) navName.textContent = name;
+    const ddName = document.getElementById('dropdown-artist-name');
+    if (ddName) ddName.textContent = name;
+    const ddEmail = document.getElementById('dropdown-artist-email');
+    if (ddEmail) ddEmail.textContent = artist.email || '';
+    const avatar = document.getElementById('avatar-initials');
+    if (avatar) avatar.textContent = initials || '—';
     go('dashboard');
   }
 
@@ -2446,8 +2374,18 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
       fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + savedToken } })
         .then(r => { if (r.ok) return r.json(); throw new Error('expired'); })
         .then(artist => {
+          const name = artist.name || artist.email;
+          const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
           const nameEls = document.querySelectorAll('.artist-display-name');
-          nameEls.forEach(el => { el.textContent = artist.name || artist.email; });
+          nameEls.forEach(el => { el.textContent = name; });
+          const navName = document.getElementById('nav-artist-name');
+          if (navName) navName.textContent = name;
+          const ddName = document.getElementById('dropdown-artist-name');
+          if (ddName) ddName.textContent = name;
+          const ddEmail = document.getElementById('dropdown-artist-email');
+          if (ddEmail) ddEmail.textContent = artist.email || '';
+          const avatar = document.getElementById('avatar-initials');
+          if (avatar) avatar.textContent = initials || '—';
         })
         .catch(() => {
           localStorage.removeItem('dv_token');
