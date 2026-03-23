@@ -451,11 +451,139 @@ html, body {
 .mob-ls-cta-sub { font-family:var(--sans); font-size:13px; font-weight:300; color:rgba(255,255,255,0.45); line-height:1.6; margin-bottom:24px; position:relative; z-index:1; }
 .mob-ls-cta .btn-primary { position:relative; z-index:1; background:var(--white); color:var(--black); }
 
+/* ── AUTH TRANSITION OVERLAY ── */
+.auth-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: var(--black);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  transition: opacity 0.5s ease;
+}
+.auth-overlay.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+.auth-overlay-logo {
+  height: 28px;
+  opacity: 0;
+  transform: scale(0.9);
+  animation: authLogoIn 0.6s ease 0.1s forwards;
+}
+@keyframes authLogoIn {
+  to { opacity: 1; transform: scale(1); }
+}
+.auth-overlay-welcome {
+  font-family: var(--serif);
+  font-size: 20px;
+  font-weight: 300;
+  color: rgba(255,255,255,0.7);
+  margin-top: 20px;
+  opacity: 0;
+  animation: authTextIn 0.5s ease 0.4s forwards;
+}
+@keyframes authTextIn {
+  to { opacity: 1; }
+}
+.auth-overlay-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: var(--red);
+  width: 0;
+  animation: authBarFill 1.2s ease 0.3s forwards;
+}
+@keyframes authBarFill {
+  to { width: 100%; }
+}
+
+/* ── SONG SUCCESS OVERLAY ── */
+.song-success-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99998;
+  background: rgba(255,255,255,0.97);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.song-success-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+.song-success-check {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 18px;
+}
+.song-success-circle {
+  fill: none;
+  stroke: #1E6B1E;
+  stroke-width: 2;
+  stroke-dasharray: 166;
+  stroke-dashoffset: 166;
+  animation: songCircleDraw 0.6s ease forwards;
+}
+@keyframes songCircleDraw {
+  to { stroke-dashoffset: 0; }
+}
+.song-success-tick {
+  fill: none;
+  stroke: #1E6B1E;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 36;
+  stroke-dashoffset: 36;
+  animation: songTickDraw 0.4s ease 0.4s forwards;
+}
+@keyframes songTickDraw {
+  to { stroke-dashoffset: 0; }
+}
+.song-success-title {
+  font-family: var(--serif);
+  font-size: 24px;
+  font-weight: 400;
+  color: var(--black);
+  margin-bottom: 6px;
+  opacity: 0;
+  animation: authTextIn 0.4s ease 0.5s forwards;
+}
+.song-success-sub {
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 300;
+  color: var(--muted);
+  opacity: 0;
+  animation: authTextIn 0.4s ease 0.7s forwards;
+}
 
 </style>
 </head>
 <body>
 
+<div class="auth-overlay" id="mob-auth-overlay" style="display:none">
+  <img src="https://davincii.co/logo-white-sm.png" alt="Davincii" class="auth-overlay-logo">
+  <div class="auth-overlay-welcome" id="mob-auth-overlay-text"></div>
+  <div class="auth-overlay-bar"></div>
+</div>
+<div class="song-success-overlay" id="mob-song-success-overlay">
+  <svg class="song-success-check" viewBox="0 0 52 52">
+    <circle class="song-success-circle" cx="26" cy="26" r="25"/>
+    <path class="song-success-tick" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+  </svg>
+  <div class="song-success-title">Song Submitted</div>
+  <div class="song-success-sub">Our team will begin registration shortly.</div>
+</div>
 
 <!-- ════════════════ FOOTER TEMPLATE ════════════════ -->
 <template id="footer-tpl">
@@ -1082,6 +1210,25 @@ html, body {
     pricing:'Pricing', terms:'Terms', privacy:'Privacy',
     catalog:'→ Catalog', royalties:'→ Royalties', payouts:'→ Payouts'
   };
+  const screenRoutes = {
+    landing: '/mobile.html',
+    login: '/mobile.html/login',
+    signup: '/mobile.html/signup',
+    recover: '/mobile.html/recover',
+    dashboard: '/mobile.html/dashboard',
+    howitworks: '/mobile.html/how-it-works',
+    about: '/mobile.html/about',
+    pricing: '/mobile.html/pricing',
+    terms: '/mobile.html/terms',
+    privacy: '/mobile.html/privacy'
+  };
+  const dashRoutes = {
+    overview: '/mobile.html/dashboard',
+    catalog: '/mobile.html/dashboard/catalog',
+    'add-song': '/mobile.html/dashboard/add-song',
+    royalties: '/mobile.html/dashboard/royalties',
+    payouts: '/mobile.html/dashboard/payouts'
+  };
 
   function toggleLandingMenu() {
     const el = document.getElementById('landing-avatar');
@@ -1105,6 +1252,8 @@ html, body {
         const label = name === 'catalog' ? '→ Catalog' : name === 'royalties' ? '→ Royalties' : name === 'payouts' ? '→ Payouts' : '';
         if (b.textContent.trim() === label) b.classList.add('active');
       });
+      const dRoute = dashRoutes[name] || '/mobile.html/dashboard';
+      history.pushState({ screen: name, dash: true }, '', dRoute);
       return;
     }
 
@@ -1113,6 +1262,8 @@ html, body {
     document.querySelectorAll('.snav-btn').forEach(b => {
       if (b.textContent.trim() === (screenLabels[name] || '')) b.classList.add('active');
     });
+    const route = screenRoutes[name] || '/mobile.html';
+    history.pushState({ screen: name }, '', route);
   }
 
   function showDashPage(page) {
@@ -1123,6 +1274,49 @@ html, body {
     document.querySelectorAll('.mob-tab').forEach(b => b.classList.remove('active'));
     const tab = document.getElementById('tab-' + page);
     if (tab) tab.classList.add('active');
+    if (dashRoutes[page]) {
+      history.pushState({ screen: page, dash: true }, '', dashRoutes[page]);
+    }
+  }
+
+  window.addEventListener('popstate', function(e) {
+    if (e.state && e.state.screen) {
+      if (e.state.dash) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('screen-dashboard').classList.add('active');
+        document.querySelectorAll('.dash-page').forEach(p => p.style.display = 'none');
+        const el = document.getElementById('dp-' + e.state.screen);
+        if (el) el.style.display = 'block';
+        document.querySelectorAll('.mob-tab').forEach(b => b.classList.remove('active'));
+        const tab = document.getElementById('tab-' + e.state.screen);
+        if (tab) tab.classList.add('active');
+      } else {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        const el = document.getElementById(screenIds[e.state.screen]);
+        if (el) { el.classList.add('active'); window.scrollTo(0,0); }
+      }
+    }
+  });
+
+  function routeFromURL() {
+    const path = window.location.pathname;
+    for (const [name, route] of Object.entries(dashRoutes)) {
+      if (path === route && name !== 'overview') {
+        go(name);
+        return;
+      }
+    }
+    for (const [name, route] of Object.entries(screenRoutes)) {
+      if (path === route) {
+        go(name);
+        return;
+      }
+    }
+    if (localStorage.getItem('dv_token')) {
+      go('dashboard');
+    } else {
+      go('landing');
+    }
   }
 
   function toggleFaq(el) {
@@ -1293,13 +1487,13 @@ html, body {
       } else {
         mobResetSongForm();
         showDashPage('catalog');
-        mobShowToast('Song submitted! Registration will begin shortly.');
+        mobShowSongSuccess();
       }
     })
     .catch(() => {
       mobResetSongForm();
       showDashPage('catalog');
-      mobShowToast('Song submitted! Registration will begin shortly.');
+      mobShowSongSuccess();
     });
   }
 
@@ -1337,7 +1531,7 @@ html, body {
         localStorage.setItem('dv_token', data.token);
         localStorage.setItem('dv_artist', JSON.stringify(data.artist));
         mobSetArtistNav(data.artist);
-        go('dashboard');
+        mobShowAuthOverlay(data.artist.name || data.artist.email, false);
       }
     })
     .catch(() => mobShowError('mob-login-error', 'Connection error. Please try again.'));
@@ -1365,7 +1559,7 @@ html, body {
         localStorage.setItem('dv_token', data.token);
         localStorage.setItem('dv_artist', JSON.stringify(data.artist));
         mobSetArtistNav(data.artist);
-        go('dashboard');
+        mobShowAuthOverlay(data.artist.name || data.artist.email, true);
       }
     })
     .catch(() => mobShowError('mob-signup-error', 'Connection error. Please try again.'));
@@ -1382,6 +1576,34 @@ html, body {
     if (ddEmail) ddEmail.textContent = artist.email || '';
     const avatar = document.getElementById('mob-avatar-initials');
     if (avatar) avatar.textContent = initials || '—';
+  }
+
+  function mobShowAuthOverlay(name, isSignup) {
+    const overlay = document.getElementById('mob-auth-overlay');
+    const text = document.getElementById('mob-auth-overlay-text');
+    if (overlay) {
+      const firstName = (name || '').split(' ')[0];
+      text.textContent = isSignup ? 'Welcome, ' + firstName : 'Welcome back, ' + firstName;
+      overlay.style.display = 'flex';
+      overlay.classList.remove('fade-out');
+      overlay.offsetHeight;
+      setTimeout(() => {
+        overlay.classList.add('fade-out');
+        go('dashboard');
+        setTimeout(() => { overlay.style.display = 'none'; }, 500);
+      }, 1500);
+    } else {
+      go('dashboard');
+    }
+  }
+
+  function mobShowSongSuccess() {
+    const overlay = document.getElementById('mob-song-success-overlay');
+    if (!overlay) return;
+    const clone = overlay.cloneNode(true);
+    overlay.parentNode.replaceChild(clone, overlay);
+    clone.classList.add('show');
+    setTimeout(() => { clone.classList.remove('show'); }, 2500);
   }
 
   // Handle OAuth callback redirect
@@ -1412,6 +1634,9 @@ html, body {
   // Enter key support
   document.getElementById('mob-login-password')?.addEventListener('keydown', function(e) { if (e.key === 'Enter') mobHandleLogin(); });
   document.getElementById('mob-signup-password')?.addEventListener('keydown', function(e) { if (e.key === 'Enter') mobHandleSignup(); });
+
+  // Route based on URL
+  setTimeout(routeFromURL, 100);
 </script>
 </body>
 </html>

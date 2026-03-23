@@ -945,10 +945,140 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
 .pricing-features li:last-child { border-bottom:none; }
 .feat-check { color:var(--red); font-weight:600; flex-shrink:0; }
 
+/* ── AUTH TRANSITION OVERLAY ── */
+.auth-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: var(--black);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  transition: opacity 0.5s ease;
+}
+.auth-overlay.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+.auth-overlay-logo {
+  height: 32px;
+  opacity: 0;
+  transform: scale(0.9);
+  animation: authLogoIn 0.6s ease 0.1s forwards;
+}
+@keyframes authLogoIn {
+  to { opacity: 1; transform: scale(1); }
+}
+.auth-overlay-welcome {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 300;
+  color: rgba(255,255,255,0.7);
+  margin-top: 24px;
+  opacity: 0;
+  animation: authTextIn 0.5s ease 0.4s forwards;
+}
+@keyframes authTextIn {
+  to { opacity: 1; }
+}
+.auth-overlay-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: var(--red);
+  width: 0;
+  animation: authBarFill 1.2s ease 0.3s forwards;
+}
+@keyframes authBarFill {
+  to { width: 100%; }
+}
+
+/* ── SONG SUCCESS OVERLAY ── */
+.song-success-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99998;
+  background: rgba(255,255,255,0.97);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.song-success-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+.song-success-check {
+  width: 72px;
+  height: 72px;
+  margin-bottom: 20px;
+}
+.song-success-circle {
+  fill: none;
+  stroke: #1E6B1E;
+  stroke-width: 2;
+  stroke-dasharray: 166;
+  stroke-dashoffset: 166;
+  animation: songCircleDraw 0.6s ease forwards;
+}
+@keyframes songCircleDraw {
+  to { stroke-dashoffset: 0; }
+}
+.song-success-tick {
+  fill: none;
+  stroke: #1E6B1E;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 36;
+  stroke-dashoffset: 36;
+  animation: songTickDraw 0.4s ease 0.4s forwards;
+}
+@keyframes songTickDraw {
+  to { stroke-dashoffset: 0; }
+}
+.song-success-title {
+  font-family: var(--serif);
+  font-size: 26px;
+  font-weight: 400;
+  color: var(--black);
+  margin-bottom: 6px;
+  opacity: 0;
+  animation: authTextIn 0.4s ease 0.5s forwards;
+}
+.song-success-sub {
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 300;
+  color: var(--muted);
+  opacity: 0;
+  animation: authTextIn 0.4s ease 0.7s forwards;
+}
+
 </style>
 </head>
 <body>
 
+<div class="auth-overlay" id="auth-overlay" style="display:none">
+  <img src="https://davincii.co/logo-white-sm.png" alt="Davincii" class="auth-overlay-logo">
+  <div class="auth-overlay-welcome" id="auth-overlay-text"></div>
+  <div class="auth-overlay-bar"></div>
+</div>
+
+<div class="song-success-overlay" id="song-success-overlay">
+  <svg class="song-success-check" viewBox="0 0 52 52">
+    <circle class="song-success-circle" cx="26" cy="26" r="25"/>
+    <path class="song-success-tick" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+  </svg>
+  <div class="song-success-title">Song Submitted</div>
+  <div class="song-success-sub">Our team will begin registration shortly.</div>
+</div>
 
 <!-- ════════════════ FOOTER TEMPLATE (reused) ════════════════ -->
 <template id="footer-tpl">
@@ -2047,6 +2177,25 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
     pricing:'Pricing', terms:'Terms', privacy:'Privacy',
     catalog:'→ Catalog', royalties:'→ Royalties', payouts:'→ Payouts'
   };
+  const screenRoutes = {
+    landing: '/',
+    login: '/login',
+    signup: '/signup',
+    recover: '/recover',
+    dashboard: '/dashboard',
+    howitworks: '/how-it-works',
+    about: '/about',
+    pricing: '/pricing',
+    terms: '/terms',
+    privacy: '/privacy'
+  };
+  const dashRoutes = {
+    overview: '/dashboard',
+    catalog: '/dashboard/catalog',
+    'add-song': '/dashboard/add-song',
+    royalties: '/dashboard/royalties',
+    payouts: '/dashboard/payouts'
+  };
 
   function toggleAvatarMenu() {
     document.getElementById('avatar-wrap').classList.toggle('open');
@@ -2084,6 +2233,8 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
       document.querySelectorAll('.snav-btn').forEach(b => {
         if (b.textContent.trim() === screenLabels[name]) b.classList.add('active');
       });
+      const dRoute = dashRoutes[name] || '/dashboard';
+      history.pushState({ screen: name, dash: true }, '', dRoute);
       return;
     }
 
@@ -2092,6 +2243,8 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
     document.querySelectorAll('.snav-btn').forEach(b => {
       if (b.textContent.trim() === screenLabels[name]) b.classList.add('active');
     });
+    const route = screenRoutes[name] || '/';
+    history.pushState({ screen: name }, '', route);
   }
 
   function showDashPage(page) {
@@ -2101,6 +2254,51 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
     document.querySelectorAll('.nav-lnk').forEach(b => b.classList.remove('active'));
     const active = document.getElementById('nl-' + page);
     if (active) active.classList.add('active');
+    if (dashRoutes[page]) {
+      history.pushState({ screen: page, dash: true }, '', dashRoutes[page]);
+    }
+  }
+
+  window.addEventListener('popstate', function(e) {
+    if (e.state && e.state.screen) {
+      if (e.state.dash) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('screen-dashboard').classList.add('active');
+        document.querySelectorAll('.dash-page').forEach(p => p.style.display = 'none');
+        const el = document.getElementById('dp-' + e.state.screen);
+        if (el) el.style.display = 'block';
+        document.querySelectorAll('.nav-lnk').forEach(b => b.classList.remove('active'));
+        const active = document.getElementById('nl-' + e.state.screen);
+        if (active) active.classList.add('active');
+      } else {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        const el = document.getElementById(screenIds[e.state.screen]);
+        if (el) { el.classList.add('active'); window.scrollTo(0,0); }
+      }
+    }
+  });
+
+  function routeFromURL() {
+    const path = window.location.pathname;
+    // Reverse lookup
+    for (const [name, route] of Object.entries(dashRoutes)) {
+      if (path === route && name !== 'overview') {
+        go(name);
+        return;
+      }
+    }
+    for (const [name, route] of Object.entries(screenRoutes)) {
+      if (path === route) {
+        go(name);
+        return;
+      }
+    }
+    // Default: if logged in go to dashboard, else landing
+    if (localStorage.getItem('dv_token')) {
+      go('dashboard');
+    } else {
+      go('landing');
+    }
   }
 
   // ── ADD SONG LOGIC ──
@@ -2205,6 +2403,18 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
     setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateX(-50%) translateY(-20px)'; }, 4000);
   }
 
+  function showSongSuccess() {
+    const overlay = document.getElementById('song-success-overlay');
+    if (!overlay) return;
+    // Reset animations by re-inserting
+    const clone = overlay.cloneNode(true);
+    overlay.parentNode.replaceChild(clone, overlay);
+    clone.classList.add('show');
+    setTimeout(() => {
+      clone.classList.remove('show');
+    }, 2500);
+  }
+
   function submitSong() {
     const title = document.getElementById('as-title').value.trim();
     if (!title) { alert('Please enter a song title.'); return; }
@@ -2256,13 +2466,13 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
       } else {
         resetSongForm();
         showDashPage('catalog');
-        showToast('Song submitted successfully! Our team will begin registration shortly.');
+        showSongSuccess();
       }
     })
     .catch(() => {
       resetSongForm();
       showDashPage('catalog');
-      showToast('Song submitted successfully! Our team will begin registration shortly.');
+      showSongSuccess();
     });
   }
 
@@ -2303,7 +2513,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
       } else {
         localStorage.setItem('dv_token', data.token);
         localStorage.setItem('dv_artist', JSON.stringify(data.artist));
-        onAuthSuccess(data.artist);
+        onAuthSuccess(data.artist, false);
       }
     })
     .catch(() => showError('login-error', 'Connection error. Please try again.'));
@@ -2330,13 +2540,13 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
       } else {
         localStorage.setItem('dv_token', data.token);
         localStorage.setItem('dv_artist', JSON.stringify(data.artist));
-        onAuthSuccess(data.artist);
+        onAuthSuccess(data.artist, true);
       }
     })
     .catch(() => showError('signup-error', 'Connection error. Please try again.'));
   }
 
-  function onAuthSuccess(artist) {
+  function onAuthSuccess(artist, isSignup) {
     const name = artist.name || artist.email;
     const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
     const nameEls = document.querySelectorAll('.artist-display-name');
@@ -2349,7 +2559,24 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
     if (ddEmail) ddEmail.textContent = artist.email || '';
     const avatar = document.getElementById('avatar-initials');
     if (avatar) avatar.textContent = initials || '—';
-    go('dashboard');
+
+    // Show branded transition overlay
+    const overlay = document.getElementById('auth-overlay');
+    const text = document.getElementById('auth-overlay-text');
+    if (overlay) {
+      text.textContent = isSignup ? 'Welcome, ' + name.split(' ')[0] : 'Welcome back, ' + name.split(' ')[0];
+      overlay.style.display = 'flex';
+      overlay.classList.remove('fade-out');
+      // Force re-trigger animations
+      overlay.offsetHeight;
+      setTimeout(() => {
+        overlay.classList.add('fade-out');
+        go('dashboard');
+        setTimeout(() => { overlay.style.display = 'none'; }, 500);
+      }, 1500);
+    } else {
+      go('dashboard');
+    }
   }
 
   // Handle OAuth callback redirect (token in URL)
@@ -2391,6 +2618,11 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
           localStorage.removeItem('dv_token');
           localStorage.removeItem('dv_artist');
         });
+    }
+    // Route based on URL path
+    if (!token) {
+      // Small delay to let auto-login complete first
+      setTimeout(routeFromURL, 100);
     }
   })();
 
