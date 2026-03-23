@@ -43,6 +43,9 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
 .field::placeholder { color:#c0c0c0; }
 .btn-primary { width:100%; background:var(--black); color:var(--white); border:none; padding:15px 32px; font-family:var(--sans); font-size:12px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; cursor:pointer; transition:background 0.18s; }
 .btn-primary:hover { background:#222; }
+.btn-primary.loading { pointer-events:none; opacity:0.85; display:flex; align-items:center; justify-content:center; gap:10px; }
+.btn-spinner { width:16px; height:16px; border:2px solid rgba(255,255,255,0.3); border-top-color:#fff; border-radius:50%; animation:btnSpin 0.6s linear infinite; display:inline-block; }
+@keyframes btnSpin { to { transform:rotate(360deg); } }
 .btn-social { width:100%; background:transparent; color:var(--black); border:1px solid rgba(0,0,0,0.16); padding:13px 20px; font-family:var(--sans); font-size:13px; font-weight:400; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:11px; margin-bottom:10px; transition:border-color 0.18s,background 0.18s; }
 .btn-social:hover { border-color:rgba(0,0,0,0.38); background:rgba(0,0,0,0.02); }
 .btn-social-icon { width:17px; height:17px; flex-shrink:0; }
@@ -945,57 +948,6 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
 .pricing-features li:last-child { border-bottom:none; }
 .feat-check { color:var(--red); font-weight:600; flex-shrink:0; }
 
-/* ── AUTH TRANSITION OVERLAY ── */
-.auth-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 99999;
-  background: var(--black);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  opacity: 1;
-  transition: opacity 0.5s ease;
-}
-.auth-overlay.fade-out {
-  opacity: 0;
-  pointer-events: none;
-}
-.auth-overlay-logo {
-  height: 32px;
-  opacity: 0;
-  transform: scale(0.9);
-  animation: authLogoIn 0.6s ease 0.1s forwards;
-}
-@keyframes authLogoIn {
-  to { opacity: 1; transform: scale(1); }
-}
-.auth-overlay-welcome {
-  font-family: var(--serif);
-  font-size: 22px;
-  font-weight: 300;
-  color: rgba(255,255,255,0.7);
-  margin-top: 24px;
-  opacity: 0;
-  animation: authTextIn 0.5s ease 0.4s forwards;
-}
-@keyframes authTextIn {
-  to { opacity: 1; }
-}
-.auth-overlay-bar {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  height: 2px;
-  background: var(--red);
-  width: 0;
-  animation: authBarFill 1.2s ease 0.3s forwards;
-}
-@keyframes authBarFill {
-  to { width: 100%; }
-}
-
 /* ── SONG SUCCESS OVERLAY ── */
 .song-success-overlay {
   position: fixed;
@@ -1065,11 +1017,6 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
 </head>
 <body>
 
-<div class="auth-overlay" id="auth-overlay" style="display:none">
-  <img src="https://davincii.co/logo-white-sm.png" alt="Davincii" class="auth-overlay-logo">
-  <div class="auth-overlay-welcome" id="auth-overlay-text"></div>
-  <div class="auth-overlay-bar"></div>
-</div>
 
 <div class="song-success-overlay" id="song-success-overlay">
   <svg class="song-success-check" viewBox="0 0 52 52">
@@ -1568,7 +1515,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
         <label class="field-label">Password</label>
         <input class="field" type="password" autocomplete="current-password" placeholder="Enter your password" id="login-password">
         <button class="auth-forgot" onclick="go('recover')">Forgot your password?</button>
-        <button class="btn-primary" style="margin-bottom:22px" onclick="handleLogin()">Sign in &rarr;</button>
+        <button class="btn-primary" id="btn-login" style="margin-bottom:22px" onclick="handleLogin()">Sign in &rarr;</button>
         <div class="divider"><div class="divider-line"></div><span class="divider-text">or continue with</span><div class="divider-line"></div></div>
         <button class="btn-social" onclick="window.location.href='/api/auth/google'">
           <svg class="btn-social-icon" viewBox="0 0 18 18"><path d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
@@ -1608,7 +1555,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
         <input class="field" type="email" autocomplete="email" placeholder="you@example.com" id="signup-email">
         <label class="field-label">Password</label>
         <input class="field" type="password" autocomplete="new-password" placeholder="Minimum 8 characters" id="signup-password">
-        <button class="btn-primary" style="margin-bottom:22px" onclick="handleSignup()">Create account &rarr;</button>
+        <button class="btn-primary" id="btn-signup" style="margin-bottom:22px" onclick="handleSignup()">Create account &rarr;</button>
         <div class="divider"><div class="divider-line"></div><span class="divider-text">or continue with</span><div class="divider-line"></div></div>
         <button class="btn-social" onclick="window.location.href='/api/auth/google'">
           <svg class="btn-social-icon" viewBox="0 0 18 18"><path d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
@@ -2501,6 +2448,11 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
     const password = document.getElementById('login-password').value;
     if (!email || !password) { showError('login-error', 'Please enter your email and password.'); return; }
 
+    const btn = document.getElementById('btn-login');
+    const origText = btn.innerHTML;
+    btn.classList.add('loading');
+    btn.innerHTML = '<span class="btn-spinner"></span> Signing in...';
+
     fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -2509,14 +2461,17 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
     .then(r => r.json())
     .then(data => {
       if (data.error) {
+        btn.classList.remove('loading');
+        btn.innerHTML = origText;
         showError('login-error', data.error);
       } else {
         localStorage.setItem('dv_token', data.token);
         localStorage.setItem('dv_artist', JSON.stringify(data.artist));
-        onAuthSuccess(data.artist, false);
+        btn.innerHTML = '<span style="color:#4ade80">&#10003;</span> Success';
+        setTimeout(() => { btn.classList.remove('loading'); btn.innerHTML = origText; onAuthSuccess(data.artist, false); }, 600);
       }
     })
-    .catch(() => showError('login-error', 'Connection error. Please try again.'));
+    .catch(() => { btn.classList.remove('loading'); btn.innerHTML = origText; showError('login-error', 'Connection error. Please try again.'); });
   }
 
   function handleSignup() {
@@ -2528,6 +2483,11 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
     if (!email) { showError('signup-error', 'Please enter your email.'); return; }
     if (!password || password.length < 8) { showError('signup-error', 'Password must be at least 8 characters.'); return; }
 
+    const btn = document.getElementById('btn-signup');
+    const origText = btn.innerHTML;
+    btn.classList.add('loading');
+    btn.innerHTML = '<span class="btn-spinner"></span> Creating account...';
+
     fetch('/api/auth/signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -2536,14 +2496,17 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
     .then(r => r.json())
     .then(data => {
       if (data.error) {
+        btn.classList.remove('loading');
+        btn.innerHTML = origText;
         showError('signup-error', data.error);
       } else {
         localStorage.setItem('dv_token', data.token);
         localStorage.setItem('dv_artist', JSON.stringify(data.artist));
-        onAuthSuccess(data.artist, true);
+        btn.innerHTML = '<span style="color:#4ade80">&#10003;</span> Success';
+        setTimeout(() => { btn.classList.remove('loading'); btn.innerHTML = origText; onAuthSuccess(data.artist, true); }, 600);
       }
     })
-    .catch(() => showError('signup-error', 'Connection error. Please try again.'));
+    .catch(() => { btn.classList.remove('loading'); btn.innerHTML = origText; showError('signup-error', 'Connection error. Please try again.'); });
   }
 
   function onAuthSuccess(artist, isSignup) {
@@ -2560,23 +2523,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
     const avatar = document.getElementById('avatar-initials');
     if (avatar) avatar.textContent = initials || '—';
 
-    // Show branded transition overlay
-    const overlay = document.getElementById('auth-overlay');
-    const text = document.getElementById('auth-overlay-text');
-    if (overlay) {
-      text.textContent = isSignup ? 'Welcome, ' + name.split(' ')[0] : 'Welcome back, ' + name.split(' ')[0];
-      overlay.style.display = 'flex';
-      overlay.classList.remove('fade-out');
-      // Force re-trigger animations
-      overlay.offsetHeight;
-      setTimeout(() => {
-        overlay.classList.add('fade-out');
-        go('dashboard');
-        setTimeout(() => { overlay.style.display = 'none'; }, 500);
-      }, 1500);
-    } else {
-      go('dashboard');
-    }
+    go('dashboard');
   }
 
   // Handle OAuth callback redirect (token in URL)
