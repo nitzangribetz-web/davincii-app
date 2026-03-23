@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Davincii — Artist Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500;600&family=Pinyon+Script&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+  --black: #080808;
+  --white: #FFFFFF;
+  --off-white: #F9F8F6;
+  --red: #B80000;
+  --red-soft: rgba(184,0,0,0.07);
+  --muted: #555;
+  --muted-light: #888;
+  --border: rgba(0,0,0,0.10);
+  --green: #1E6B1E;
+  --green-bg: rgba(30,107,30,0.08);
+  --blue: #1a3a6b;
+  --serif: 'Cormorant Garamond', Georgia, serif;
+  --sans: 'Inter', system-ui, sans-serif;
+  --script: 'Pinyon Script', cursive;
+  --noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+}
+
+html, body {
+  width: 100%;
+  min-height: 100vh;
+  background: var(--white);
+  font-family: var(--sans);
+  color: var(--black);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+.screen { display:none; min-height:100vh; flex-direction:column; background:var(--white); }
+.screen.active { display:flex; animation:fadeUp 0.28s ease; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+/* ── SHARED ── */
+.field-label { font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.13em; text-transform:uppercase; color:#2a2a2a; margin-bottom:7px; display:block; }
+.field { width:100%; border:1px solid rgba(0,0,0,0.16); padding:14px 16px; font-family:var(--sans); font-size:16px; font-weight:400; color:var(--black); background:transparent; outline:none; margin-bottom:16px; transition:border-color 0.18s; border-radius:0; -webkit-appearance:none; }
+.field:focus { border-color:var(--red); }
+.field::placeholder { color:#c0c0c0; }
+.btn-primary { width:100%; background:var(--black); color:var(--white); border:none; padding:16px; font-family:var(--sans); font-size:12px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; cursor:pointer; }
+.btn-social { width:100%; background:transparent; color:var(--black); border:1px solid rgba(0,0,0,0.16); padding:14px 16px; font-family:var(--sans); font-size:14px; font-weight:400; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:10px; }
+.btn-social-icon { width:18px; height:18px; flex-shrink:0; }
+.divider { display:flex; align-items:center; gap:12px; margin:20px 0; }
+.divider-line { flex:1; height:1px; background:var(--border); }
+.divider-text { font-family:var(--sans); font-size:10px; font-weight:500; letter-spacing:0.12em; text-transform:uppercase; color:#aaa; white-space:nowrap; }
+.auth-link { font-family:var(--sans); font-size:13px; color:var(--muted); text-align:center; margin-top:18px; line-height:1.6; }
+.auth-link a { color:var(--black); font-weight:500; text-decoration:underline; cursor:pointer; background:none; border:none; font-family:var(--sans); font-size:13px; padding:0; }
+.auth-forgot { font-family:var(--sans); font-size:12px; color:var(--muted-light); text-decoration:underline; cursor:pointer; background:none; border:none; display:block; margin-top:-8px; margin-bottom:18px; text-align:right; padding:0; }
+.error-box { background:var(--red-soft); border-left:2px solid var(--red); padding:11px 14px; margin-bottom:14px; font-size:13px; color:var(--red); display:none; }
+.badge { font-family:var(--sans); font-size:9px; font-weight:600; letter-spacing:0.10em; text-transform:uppercase; padding:3px 7px; display:inline-block; }
+.badge-ok { background:var(--green-bg); color:var(--green); }
+.badge-pend { background:rgba(0,0,0,0.05); color:#888; }
+.badge-blue { background:rgba(26,58,107,0.08); color:var(--blue); }
+
+/* ════════════════════════════
+   MOBILE FOOTER
+════════════════════════════ */
+.mob-footer {
+  background: var(--black);
+  padding: 44px 24px 32px;
+  position: relative;
+  overflow: hidden;
+}
+.mob-footer::before { content:''; position:absolute; inset:0; background-image:var(--noise); opacity:0.04; pointer-events:none; }
+.mob-footer-logo { font-family:var(--script); font-size:34px; color:var(--white); display:block; margin-bottom:8px; position:relative; z-index:1; }
+.mob-footer-rule { width:24px; height:2px; background:var(--red); margin-bottom:16px; position:relative; z-index:1; }
+.mob-footer-desc { font-family:var(--sans); font-size:13px; font-weight:300; color:rgba(255,255,255,0.38); line-height:1.7; margin-bottom:32px; position:relative; z-index:1; }
+.mob-footer-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px 16px; margin-bottom:32px; position:relative; z-index:1; }
+.mob-footer-col-title { font-family:var(--sans); font-size:9px; font-weight:600; letter-spacing:0.18em; text-transform:uppercase; color:rgba(255,255,255,0.28); margin-bottom:12px; }
+.mob-footer-links { display:flex; flex-direction:column; gap:10px; }
+.mob-footer-link { font-family:var(--sans); font-size:13px; font-weight:300; color:rgba(255,255,255,0.5); background:none; border:none; text-align:left; padding:0; cursor:pointer; text-decoration:none; }
+.mob-footer-email { font-family:var(--sans); font-size:13px; font-weight:400; color:rgba(255,255,255,0.65); text-decoration:none; }
+.mob-footer-bottom { border-top:1px solid rgba(255,255,255,0.08); padding-top:20px; display:flex; flex-direction:column; gap:12px; position:relative; z-index:1; }
+.mob-footer-legal { display:flex; gap:16px; flex-wrap:wrap; }
+.mob-footer-legal-link { font-family:var(--sans); font-size:12px; font-weight:300; color:rgba(255,255,255,0.5); background:none; border:none; padding:0; cursor:pointer; text-decoration:none; }
+.mob-footer-copy { font-family:var(--sans); font-size:11px; font-weight:300; color:rgba(255,255,255,0.22); }
+
+/* ════════════════════════════
+   LANDING
+════════════════════════════ */
+#screen-landing { background:var(--black); position:relative; overflow:hidden; }
+#screen-landing::before { content:''; position:absolute; inset:0; background-image:var(--noise); opacity:0.05; pointer-events:none; z-index:0; }
+#screen-landing::after { content:''; position:absolute; top:-10%; left:50%; transform:translateX(-50%); width:500px; height:400px; background:radial-gradient(ellipse, rgba(184,0,0,0.09) 0%, transparent 70%); pointer-events:none; z-index:0; }
+
+.mob-landing-nav {
+  position: relative;
+  z-index: 100;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px 16px;
+  overflow: visible;
+}
+.mob-landing-logo { font-family:var(--script); font-size:32px; color:var(--white); line-height:1; }
+.mob-landing-avatar {
+  width: 36px; height: 36px;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  position: relative;
+}
+.mob-landing-avatar-icon {
+  display: flex; flex-direction: column; gap: 4px; align-items: center; justify-content: center;
+}
+.mob-landing-avatar-icon span {
+  display: block; width: 14px; height: 1.5px; background: rgba(255,255,255,0.75); border-radius: 1px;
+}
+.mob-landing-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 220px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  z-index: 300;
+  animation: fadeUp 0.18s ease;
+}
+.mob-landing-avatar.open .mob-landing-dropdown { display: block; }
+.mob-landing-dd-section { padding: 4px 0; border-bottom: 1px solid var(--border); }
+.mob-landing-dd-section:last-child { border-bottom: none; }
+.mob-landing-dd-item {
+  display: block; width: 100%; padding: 13px 20px;
+  font-family: var(--sans); font-size: 14px; font-weight: 400; color: var(--black);
+  background: none; border: none; cursor: pointer; text-align: left;
+  transition: background 0.15s; white-space: nowrap;
+}
+.mob-landing-dd-item:hover { background: rgba(0,0,0,0.04); }
+.mob-landing-dd-item.primary { font-weight: 600; color: var(--black); }
+.mob-landing-dd-item.muted { color: #777; font-size: 12px; }
+
+.mob-landing-hero {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 0;
+}
+.mob-hero-inner {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 100px 28px 180px;
+  text-align: center;
+}
+.mob-hero-eyebrow { display:none; }
+.mob-landing-nav-links { display:none; }
+.mob-headline { font-family:var(--serif); font-size:58px; font-weight:300; color:var(--white); line-height:1.0; letter-spacing:-0.02em; margin-bottom:28px; text-align:center; }
+.mob-headline em { font-style:italic; color:rgba(255,255,255,0.7); }
+.mob-rule { width:28px; height:2px; background:var(--red); margin:0 auto 32px; }
+.mob-hero-sub { display:none; }
+.mob-hero-cta { display:flex; flex-direction:column; gap:10px; width:100%; max-width:240px; }
+.btn-mob-cta-main { background:var(--white); color:var(--black); border:none; padding:14px; font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; cursor:pointer; text-align:center; }
+.btn-mob-cta-ghost { background:transparent; color:rgba(255,255,255,0.75); border:1px solid rgba(255,255,255,0.3); padding:13px; font-family:var(--sans); font-size:10px; font-weight:400; letter-spacing:0.12em; text-transform:uppercase; cursor:pointer; text-align:center; }
+
+/* Steps */
+.mob-steps-list { display:flex; flex-direction:column; gap:0; margin-bottom:24px; }
+.mob-step-row { display:flex; gap:16px; align-items:flex-start; padding:16px 0; border-bottom:1px solid var(--border); }
+.mob-step-row:last-child { border-bottom:none; }
+.mob-step-n { font-family:var(--serif); font-size:28px; font-weight:400; color:var(--red); opacity:0.5; line-height:1; flex-shrink:0; width:36px; }
+.mob-step-t { font-family:var(--sans); font-size:13px; font-weight:600; color:var(--black); margin-bottom:4px; }
+.mob-step-b { font-family:var(--sans); font-size:12px; font-weight:300; color:var(--muted); line-height:1.65; }
+.mob-ls-link-btn { font-family:var(--sans); font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--black); background:none; border:none; border-bottom:1px solid var(--black); padding-bottom:2px; cursor:pointer; }
+
+/* Partners strip */
+.mob-partners {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  z-index: 10;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding: 18px 0 0;
+  background: rgba(0,0,0,0.2);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.mob-partners-eyebrow { font-family:var(--sans); font-size:9px; font-weight:500; letter-spacing:0.20em; text-transform:uppercase; color:rgba(255,255,255,0.22); text-align:center; margin-bottom:14px; }
+.mob-partners-wrap { overflow:hidden; mask-image:linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%); -webkit-mask-image:linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%); }
+.mob-partners-track { display:flex; align-items:center; width:max-content; animation:marquee 40s linear infinite; }
+@keyframes marquee { from { transform:translateX(0); } to { transform:translateX(-50%); } }
+.mob-partner-item { display:flex; align-items:center; padding:0 24px; border-right:1px solid rgba(255,255,255,0.07); color:rgba(255,255,255,0.28); height:52px; }
+.mob-partner-svg { height:34px; width:auto; display:block; overflow:visible; }
+
+/* ════════════════════════════
+   AUTH PAGES
+════════════════════════════ */
+#screen-login, #screen-signup, #screen-recover { background:var(--white); }
+
+.mob-auth-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+}
+.mob-auth-logo { font-family:var(--script); font-size:28px; color:var(--black); line-height:1; }
+.mob-back-btn { font-family:var(--sans); font-size:11px; font-weight:400; letter-spacing:0.10em; text-transform:uppercase; color:var(--muted); background:none; border:none; cursor:pointer; padding:0; }
+
+.mob-auth-hero {
+  background: var(--black);
+  padding: 32px 24px 28px;
+  position: relative;
+  overflow: hidden;
+}
+.mob-auth-hero::before { content:''; position:absolute; inset:0; background-image:var(--noise); opacity:0.04; pointer-events:none; }
+.mob-auth-hero::after { content:''; position:absolute; bottom:-80px; left:-60px; width:260px; height:260px; background:radial-gradient(ellipse, rgba(184,0,0,0.08) 0%, transparent 70%); pointer-events:none; }
+.mob-auth-rule { width:20px; height:2px; background:var(--red); margin-bottom:14px; position:relative; z-index:1; }
+.mob-auth-tagline { font-family:var(--serif); font-size:28px; font-weight:300; color:var(--white); line-height:1.2; position:relative; z-index:1; }
+.mob-auth-tagline em { font-style:italic; color:rgba(255,255,255,0.6); }
+
+.mob-auth-form { padding:28px 24px 40px; flex:1; }
+.mob-auth-title { font-family:var(--serif); font-size:36px; font-weight:400; letter-spacing:-0.02em; line-height:1.1; margin-bottom:6px; }
+.mob-auth-title em { font-style:italic; }
+.mob-auth-title-rule { width:20px; height:2px; background:var(--red); margin-bottom:14px; }
+.mob-auth-sub { font-family:var(--sans); font-size:13px; font-weight:300; color:var(--muted); margin-bottom:24px; line-height:1.6; }
+
+/* ════════════════════════════
+   DASHBOARD
+════════════════════════════ */
+.mob-top-nav {
+  height: 56px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  position: sticky;
+  top: 0;
+  background: rgba(255,255,255,0.97);
+  backdrop-filter: blur(8px);
+  z-index: 50;
+  flex-shrink: 0;
+}
+.mob-nav-logo { font-family:var(--script); font-size:26px; color:var(--black); line-height:1; cursor:pointer; }
+.mob-nav-right { display:flex; align-items:center; gap:12px; }
+.mob-avatar { width:32px; height:32px; background:var(--black); border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:var(--sans); font-size:11px; font-weight:600; color:var(--white); cursor:pointer; }
+
+/* Bottom tab bar */
+.mob-tab-bar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 64px;
+  background: rgba(255,255,255,0.97);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 100;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+.mob-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 6px 12px;
+  flex: 1;
+  transition: opacity 0.15s;
+}
+.mob-tab-icon { font-size: 18px; color: #bbb; transition: color 0.15s; }
+.mob-tab-label { font-family:var(--sans); font-size:9px; font-weight:500; letter-spacing:0.08em; text-transform:uppercase; color:#bbb; transition:color 0.15s; }
+.mob-tab.active .mob-tab-icon { color:var(--black); }
+.mob-tab.active .mob-tab-label { color:var(--red); }
+
+.mob-dash-content { padding:24px 20px 80px; flex:1; overflow-y:auto; background:var(--white); }
+
+/* Page title */
+.mob-page-title { font-family:var(--serif); font-size:30px; font-weight:400; letter-spacing:-0.02em; margin-bottom:3px; }
+.mob-page-title em { font-style:italic; }
+.mob-page-sub { font-family:var(--sans); font-size:13px; font-weight:300; color:var(--muted); margin-bottom:20px; }
+.mob-page-rule { width:20px; height:2px; background:var(--red); margin-bottom:20px; }
+
+/* Balance card */
+.mob-bal-card {
+  background: var(--black);
+  padding: 24px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.mob-bal-card::before { content:''; position:absolute; top:0; left:0; width:3px; height:100%; background:var(--red); }
+.mob-bal-card::after { content:''; position:absolute; inset:0; background-image:var(--noise); opacity:0.03; pointer-events:none; }
+.mob-bal-label { font-family:var(--sans); font-size:9px; font-weight:500; letter-spacing:0.16em; text-transform:uppercase; color:rgba(255,255,255,0.3); margin-bottom:8px; }
+.mob-bal-amount { font-family:var(--serif); font-size:44px; font-weight:300; color:var(--white); letter-spacing:-0.03em; line-height:1; margin-bottom:4px; position:relative; z-index:1; }
+.mob-bal-note { font-family:var(--sans); font-size:11px; font-weight:300; color:rgba(255,255,255,0.25); margin-bottom:20px; position:relative; z-index:1; }
+.mob-bal-actions { display:flex; gap:8px; position:relative; z-index:1; }
+.mob-bal-btn { flex:1; padding:12px; font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.10em; text-transform:uppercase; border:none; cursor:pointer; }
+.mob-bal-btn-white { background:var(--white); color:var(--black); }
+.mob-bal-btn-ghost { background:rgba(255,255,255,0.07); color:rgba(255,255,255,0.5); border:1px solid rgba(255,255,255,0.12); }
+
+/* Stat cards */
+.mob-stat-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px; }
+.mob-stat-card { border:1px solid var(--border); padding:16px; background:var(--white); }
+.mob-stat-card-red { border-left:3px solid var(--red); }
+.mob-stat-num { font-family:var(--serif); font-size:26px; font-weight:400; letter-spacing:-0.02em; color:var(--black); line-height:1; margin-bottom:4px; }
+.mob-stat-lbl { font-family:var(--sans); font-size:10px; font-weight:400; letter-spacing:0.06em; color:var(--muted); text-transform:uppercase; }
+
+/* Section boxes */
+.mob-sbox { border:1px solid var(--border); margin-bottom:16px; background:var(--white); }
+.mob-sbox-head { display:flex; justify-content:space-between; align-items:center; padding:14px 16px; border-bottom:1px solid var(--border); }
+.mob-sbox-title { font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--black); margin-bottom:2px; }
+.mob-sbox-sub { font-family:var(--sans); font-size:11px; font-weight:300; color:var(--muted); }
+.mob-sbox-link { font-family:var(--sans); font-size:10px; font-weight:500; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); background:none; border:none; cursor:pointer; white-space:nowrap; }
+.mob-sbox-body { padding:0 16px; }
+
+/* Rows */
+.mob-row { display:flex; justify-content:space-between; align-items:center; padding:14px 0; border-bottom:1px solid rgba(0,0,0,0.06); }
+.mob-row:last-child { border-bottom:none; }
+.mob-row-song { font-family:var(--serif); font-size:16px; font-weight:400; color:var(--black); }
+.mob-row-meta { font-family:var(--sans); font-size:11px; font-weight:300; color:var(--muted); margin-top:1px; }
+.mob-row-right { text-align:right; flex-shrink:0; margin-left:12px; }
+.mob-row-amount { font-family:var(--sans); font-size:13px; font-weight:600; color:var(--black); }
+.mob-row-platform { font-family:var(--sans); font-size:11px; font-weight:300; color:var(--muted); margin-top:2px; }
+
+/* ════════════════════════════
+   MARKETING PAGES
+════════════════════════════ */
+.mob-mkt-nav { display:flex; justify-content:space-between; align-items:center; padding:20px 24px; border-bottom:1px solid var(--border); }
+.mob-mkt-logo { font-family:var(--script); font-size:28px; color:var(--black); cursor:pointer; }
+.mob-mkt-btns { display:flex; gap:8px; }
+.btn-mob-mkt-ghost { font-family:var(--sans); font-size:10px; font-weight:500; letter-spacing:0.10em; text-transform:uppercase; color:var(--black); background:transparent; border:1px solid rgba(0,0,0,0.2); padding:8px 14px; cursor:pointer; }
+.btn-mob-mkt-solid { font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.10em; text-transform:uppercase; color:var(--white); background:var(--black); border:none; padding:8px 14px; cursor:pointer; }
+
+.mob-mkt-hero { padding:36px 24px 28px; }
+.mob-mkt-eyebrow { font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.22em; text-transform:uppercase; color:var(--red); margin-bottom:14px; }
+.mob-mkt-title { font-family:var(--serif); font-size:36px; font-weight:400; letter-spacing:-0.02em; line-height:1.1; color:var(--black); margin-bottom:14px; }
+.mob-mkt-title em { font-style:italic; }
+.mob-mkt-rule { width:24px; height:2px; background:var(--red); margin-bottom:16px; }
+.mob-mkt-sub { font-family:var(--sans); font-size:14px; font-weight:300; color:var(--muted); line-height:1.7; }
+
+.mob-mkt-body { padding:0 24px 48px; }
+.mob-step { padding:24px 0; border-bottom:1px solid var(--border); display:flex; gap:20px; }
+.mob-step:last-child { border-bottom:none; }
+.mob-step-num { font-family:var(--serif); font-size:36px; font-weight:400; color:var(--red); line-height:1; opacity:0.65; flex-shrink:0; }
+.mob-step-title { font-family:var(--serif); font-size:20px; font-weight:400; color:var(--black); margin-bottom:8px; }
+.mob-step-title em { font-style:italic; }
+.mob-step-body { font-family:var(--sans); font-size:13px; font-weight:300; color:var(--muted); line-height:1.75; }
+
+/* About stats */
+.mob-stat-trio { display:grid; grid-template-columns:1fr 1fr 1fr; gap:1px; background:var(--border); border:1px solid var(--border); margin-bottom:28px; }
+.mob-trio-item { background:var(--white); padding:20px 12px; text-align:center; }
+.mob-trio-num { font-family:var(--serif); font-size:30px; font-weight:400; letter-spacing:-0.02em; color:var(--black); line-height:1; margin-bottom:4px; }
+.mob-trio-lbl { font-family:var(--sans); font-size:9px; font-weight:400; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); }
+
+.mob-about-dark { background:var(--black); padding:28px 24px; margin:0 -24px; position:relative; overflow:hidden; }
+.mob-about-dark::before { content:''; position:absolute; inset:0; background-image:var(--noise); opacity:0.04; pointer-events:none; }
+.mob-about-quote { font-family:var(--serif); font-size:22px; font-weight:300; color:rgba(255,255,255,0.88); line-height:1.3; margin-bottom:20px; position:relative; z-index:1; }
+.mob-about-quote em { font-style:italic; color:var(--white); }
+
+/* Legal */
+.mob-legal-body { padding:28px 24px 48px; }
+.mob-legal-eyebrow { font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.22em; text-transform:uppercase; color:var(--red); margin-bottom:12px; }
+.mob-legal-title { font-family:var(--serif); font-size:34px; font-weight:400; letter-spacing:-0.02em; line-height:1.1; color:var(--black); margin-bottom:10px; }
+.mob-legal-title em { font-style:italic; }
+.mob-legal-meta { font-family:var(--sans); font-size:12px; font-weight:300; color:var(--muted-light); margin-bottom:28px; padding-bottom:20px; border-bottom:1px solid var(--border); line-height:1.6; }
+.mob-legal-section { margin-bottom:32px; }
+.mob-legal-section-title { font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; color:var(--black); margin-bottom:10px; padding-bottom:8px; border-bottom:1px solid var(--border); }
+.mob-legal-p { font-family:var(--sans); font-size:14px; font-weight:300; color:var(--muted); line-height:1.85; margin-bottom:12px; }
+.mob-legal-list { list-style:none; margin:10px 0 12px 0; }
+.mob-legal-list li { font-family:var(--sans); font-size:13px; font-weight:300; color:var(--muted); line-height:1.75; padding:6px 0 6px 16px; position:relative; border-bottom:1px solid rgba(0,0,0,0.06); }
+.mob-legal-list li:last-child { border-bottom:none; }
+.mob-legal-list li::before { content:'–'; position:absolute; left:0; color:var(--red); }
+.mob-legal-highlight { background:rgba(184,0,0,0.05); border-left:2px solid var(--red); padding:14px 16px; margin:16px 0; }
+.mob-legal-highlight p { font-family:var(--sans); font-size:13px; font-weight:400; color:var(--black); line-height:1.7; margin:0; }
+
+/* Avatar dropdown */
+.avatar-wrap { position:relative; }
+.mob-avatar-dropdown {
+  display:none;
+  position:absolute;
+  top:calc(100% + 8px);
+  right:0;
+  width:200px;
+  background:var(--white);
+  border:1px solid var(--border);
+  box-shadow:0 8px 32px rgba(0,0,0,0.14);
+  z-index:200;
+  animation:fadeUp 0.18s ease;
+}
+.avatar-wrap.open .mob-avatar-dropdown { display:block; }
+.mob-dd-header { padding:14px 16px 12px; border-bottom:1px solid var(--border); }
+.mob-dd-name { font-family:var(--sans); font-size:13px; font-weight:600; color:var(--black); margin-bottom:2px; }
+.mob-dd-email { font-family:var(--sans); font-size:11px; font-weight:300; color:var(--muted); }
+.mob-dd-section { padding:4px 0; border-bottom:1px solid var(--border); }
+.mob-dd-section:last-child { border-bottom:none; }
+.mob-dd-item { display:flex; align-items:center; gap:10px; width:100%; padding:10px 16px; font-family:var(--sans); font-size:13px; font-weight:400; color:#444; background:none; border:none; cursor:pointer; text-align:left; }
+.mob-dd-item:hover { background:rgba(0,0,0,0.04); }
+.mob-dd-item.danger { color:var(--red); }
+.mob-dd-icon { font-size:14px; opacity:0.6; width:16px; text-align:center; flex-shrink:0; }
+
+/* ── MOBILE SCROLL SECTIONS ── */
+.mob-scroll { background:var(--white); }
+.mob-ls-stats { display:flex; align-items:center; justify-content:space-around; padding:32px 24px; border-bottom:1px solid var(--border); }
+.mob-ls-stat { text-align:center; }
+.mob-ls-stat-num { font-family:var(--serif); font-size:32px; font-weight:400; letter-spacing:-0.02em; color:var(--black); line-height:1; margin-bottom:6px; }
+.mob-ls-stat-lbl { font-family:var(--sans); font-size:9px; font-weight:400; letter-spacing:0.10em; text-transform:uppercase; color:var(--muted); }
+.mob-ls-stat-div { width:1px; height:36px; background:var(--border); }
+.mob-ls-section { padding:40px 24px; border-bottom:1px solid var(--border); }
+.mob-ls-eyebrow { font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.22em; text-transform:uppercase; color:var(--red); margin-bottom:14px; }
+.mob-ls-title { font-family:var(--serif); font-size:28px; font-weight:400; letter-spacing:-0.01em; line-height:1.15; color:var(--black); margin-bottom:14px; }
+.mob-ls-title em { font-style:italic; }
+.mob-ls-body { font-family:var(--sans); font-size:14px; font-weight:300; color:var(--muted); line-height:1.75; margin-bottom:24px; }
+.mob-ls-cards { display:flex; flex-direction:column; gap:0; }
+.mob-ls-card { display:flex; gap:14px; align-items:flex-start; padding:16px 0; border-bottom:1px solid var(--border); }
+.mob-ls-card:last-child { border-bottom:none; }
+.mob-ls-check { color:var(--red); font-size:15px; flex-shrink:0; font-weight:600; margin-top:1px; }
+.mob-ls-card-title { font-family:var(--sans); font-size:13px; font-weight:600; color:var(--black); margin-bottom:3px; }
+.mob-ls-card-sub { font-family:var(--sans); font-size:12px; font-weight:300; color:var(--muted); line-height:1.6; }
+.mob-ls-testi { display:flex; flex-direction:column; gap:16px; }
+.mob-ls-testi-card { border:1px solid var(--border); padding:20px; background:var(--white); }
+.mob-ls-testi-quote { font-family:var(--serif); font-size:16px; font-weight:400; color:var(--black); line-height:1.5; font-style:italic; margin-bottom:16px; }
+.mob-ls-testi-author { display:flex; align-items:center; gap:10px; }
+.mob-ls-testi-av { width:32px; height:32px; background:var(--black); border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:var(--sans); font-size:11px; font-weight:600; color:var(--white); flex-shrink:0; }
+.mob-ls-testi-name { font-family:var(--sans); font-size:12px; font-weight:600; color:var(--black); }
+.mob-ls-testi-genre { font-family:var(--sans); font-size:11px; font-weight:300; color:var(--muted); }
+.mob-pricing-card { border:1px solid var(--red); padding:24px; background:var(--white); }
+.mob-pricing-plan { font-family:var(--sans); font-size:9px; font-weight:600; letter-spacing:0.18em; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
+.mob-pricing-amount { font-family:var(--serif); font-size:24px; font-weight:400; color:var(--black); margin-bottom:8px; }
+.mob-pricing-note { font-family:var(--sans); font-size:13px; font-weight:300; color:var(--muted); line-height:1.65; }
+.mob-pricing-feature { font-family:var(--sans); font-size:13px; font-weight:400; color:#333; padding:9px 0; border-bottom:1px solid var(--border); }
+.mob-pricing-feature:last-of-type { border-bottom:none; }
+.mob-faq-list { display:flex; flex-direction:column; }
+.mob-faq-item { border-bottom:1px solid var(--border); cursor:pointer; }
+.mob-faq-q { font-family:var(--sans); font-size:14px; font-weight:500; color:var(--black); padding:16px 0; display:flex; justify-content:space-between; align-items:center; gap:12px; user-select:none; }
+.mob-faq-icon { font-size:18px; font-weight:300; color:var(--red); flex-shrink:0; transition:transform 0.2s; }
+.mob-faq-item.open .mob-faq-icon { transform:rotate(45deg); }
+.mob-faq-a { font-family:var(--sans); font-size:13px; font-weight:300; color:var(--muted); line-height:1.75; max-height:0; overflow:hidden; transition:max-height 0.28s ease, padding 0.2s; }
+.mob-faq-item.open .mob-faq-a { max-height:200px; padding-bottom:16px; }
+.mob-ls-cta { background:var(--black); padding:40px 24px; position:relative; overflow:hidden; }
+.mob-ls-cta::before { content:''; position:absolute; inset:0; background-image:var(--noise); opacity:0.04; pointer-events:none; }
+.mob-ls-cta-title { font-family:var(--serif); font-size:26px; font-weight:400; color:var(--white); line-height:1.2; margin-bottom:10px; position:relative; z-index:1; }
+.mob-ls-cta-sub { font-family:var(--sans); font-size:13px; font-weight:300; color:rgba(255,255,255,0.45); line-height:1.6; margin-bottom:24px; position:relative; z-index:1; }
+.mob-ls-cta .btn-primary { position:relative; z-index:1; background:var(--white); color:var(--black); }
+
+/* Prototype switcher */
+.screen-nav { position:fixed; bottom:72px; right:12px; z-index:9999; background:var(--white); border:1px solid var(--border); padding:10px 12px; box-shadow:0 4px 20px rgba(0,0,0,0.14); display:flex; flex-direction:column; gap:4px; max-height:60vh; overflow-y:auto; }
+.screen-nav-label { font-family:var(--sans); font-size:9px; font-weight:600; letter-spacing:0.16em; text-transform:uppercase; color:#aaa; margin-bottom:2px; }
+.snav-btn { background:none; border:1px solid var(--border); padding:5px 10px; font-family:var(--sans); font-size:10px; cursor:pointer; text-align:left; color:var(--black); }
+.snav-btn.active { background:var(--black); color:var(--white); }
+
+</style>
+</head>
+<body>
+
+<!-- PROTOTYPE SWITCHER -->
+<div class="screen-nav">
+  <div class="screen-nav-label">Screens</div>
+  <button class="snav-btn active" onclick="go('landing')">Landing</button>
+  <button class="snav-btn" onclick="go('login')">Login</button>
+  <button class="snav-btn" onclick="go('signup')">Sign Up</button>
+  <button class="snav-btn" onclick="go('dashboard')">Dashboard</button>
+  <button class="snav-btn" onclick="go('catalog')">→ Songs</button>
+  <button class="snav-btn" onclick="go('add-song')">→ Add Song</button>
+  <button class="snav-btn" onclick="go('royalties')">→ Royalties</button>
+  <button class="snav-btn" onclick="go('payouts')">→ Payouts</button>
+  <button class="snav-btn" onclick="go('howitworks')">How It Works</button>
+  <button class="snav-btn" onclick="go('pricing')">Pricing</button>
+  <button class="snav-btn" onclick="go('about')">About</button>
+  <button class="snav-btn" onclick="go('terms')">Terms</button>
+  <button class="snav-btn" onclick="go('privacy')">Privacy</button>
+</div>
+
+<!-- ════════════════ FOOTER TEMPLATE ════════════════ -->
+<template id="footer-tpl">
+  <div class="mob-footer">
+    <span class="mob-footer-logo"><img src="https://davincii.co/logo-white-sm.png" alt="Davincii" style="height:30px;display:block;margin-bottom:8px"></span>
+    <div class="mob-footer-rule"></div>
+    <p class="mob-footer-desc">Music publishing administration — we register, track, and collect every royalty you're owed.</p>
+    <div class="mob-footer-grid">
+      <div>
+        <div class="mob-footer-col-title">Navigate</div>
+        <div class="mob-footer-links">
+          <button class="mob-footer-link" onclick="go('landing')">Home</button>
+          <button class="mob-footer-link" onclick="go('howitworks')">How it works</button>
+          <button class="mob-footer-link" onclick="go('about')">About</button>
+          <button class="mob-footer-link" onclick="go('login')">Sign in</button>
+          <button class="mob-footer-link" onclick="go('signup')">Get started</button>
+        </div>
+      </div>
+      <div>
+        <div class="mob-footer-col-title">Contact</div>
+        <div class="mob-footer-links">
+          <a class="mob-footer-email" href="/cdn-cgi/l/email-protection#9cf5f2faf3dcf8fdeaf5f2fff5f5b2fff3"><span class="__cf_email__" data-cfemail="4a23242c250a2e2b3c2324292323642925">[email&#160;protected]</span></a>
+          <span class="mob-footer-link" style="cursor:default;color:rgba(255,255,255,0.3)">For artists &amp; inquiries</span>
+        </div>
+      </div>
+    </div>
+    <div class="mob-footer-bottom">
+      <div class="mob-footer-legal">
+        <button class="mob-footer-legal-link" onclick="go('terms')">Terms of Service</button>
+        <button class="mob-footer-legal-link" onclick="go('privacy')">Privacy Policy</button>
+      </div>
+      <div class="mob-footer-copy">&copy; 2026 Davincii LLC · davincii.co</div>
+    </div>
+  </div>
+</template>
+
+<!-- ════════════════ LANDING ════════════════ -->
+<div class="screen active" id="screen-landing">
+
+  <!-- NAV -->
+  <nav class="mob-landing-nav">
+    <div class="mob-landing-logo"><img src="https://davincii.co/logo-white-sm.png" alt="Davincii" style="height:30px;display:block"></div>
+    <div class="mob-landing-avatar" id="landing-avatar" onclick="toggleLandingMenu()">
+      <div class="mob-landing-avatar-icon">
+        <span></span><span></span><span></span>
+      </div>
+      <div class="mob-landing-dropdown">
+        <div class="mob-landing-dd-section">
+          <button class="mob-landing-dd-item primary" onclick="go('signup')">Get started free</button>
+          <button class="mob-landing-dd-item" onclick="go('login')">Sign in</button>
+        </div>
+        <div class="mob-landing-dd-section">
+          <button class="mob-landing-dd-item" onclick="go('howitworks')">How it works</button>
+          <button class="mob-landing-dd-item" onclick="go('pricing')">Pricing</button>
+          <button class="mob-landing-dd-item" onclick="go('about')">About</button>
+        </div>
+        <div class="mob-landing-dd-section">
+          <button class="mob-landing-dd-item muted" onclick="go('terms')">Terms of Service</button>
+          <button class="mob-landing-dd-item muted" onclick="go('privacy')">Privacy Policy</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO — full dark screen -->
+  <div class="mob-landing-hero">
+    <div class="mob-hero-inner">
+      <h1 class="mob-headline">Collect royalties.</h1>
+      <div class="mob-rule"></div>
+      <div class="mob-hero-cta">
+        <button class="btn-mob-cta-main" onclick="go('signup')">Get started &rarr;</button>
+        <button class="btn-mob-cta-ghost" onclick="go('login')">Sign in to portal</button>
+      </div>
+    </div>
+
+    <!-- Partners strip pinned to bottom -->
+    <div class="mob-partners">
+      <div class="mob-partners-eyebrow">Registered &amp; collected across 12+ platforms worldwide</div>
+      <div class="mob-partners-wrap">
+        <div class="mob-partners-track">
+          <div class="mob-partner-item"><svg viewBox="0 0 110 44" class="mob-partner-svg"><rect x="0" y="0" width="110" height="44" rx="4" fill="currentColor" opacity="0.06"/><text x="55" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="2" text-anchor="middle">ASCAP</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 80 44" class="mob-partner-svg"><circle cx="40" cy="22" r="20" fill="currentColor" opacity="0.08"/><text x="40" y="28" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="1.5" text-anchor="middle">BMI</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 105 44" class="mob-partner-svg"><line x1="0" y1="42" x2="105" y2="42" stroke="currentColor" stroke-width="1.5" opacity="0.3"/><text x="52" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="2" text-anchor="middle">SESAC</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 90 44" class="mob-partner-svg"><rect x="2" y="6" width="86" height="32" rx="3" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"/><text x="45" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="18" fill="currentColor" letter-spacing="2" text-anchor="middle">MLC</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 140 44" class="mob-partner-svg"><circle cx="12" cy="22" r="8" fill="currentColor" opacity="0.5"/><circle cx="12" cy="22" r="4" fill="currentColor" opacity="0.8"/><text x="28" y="28" font-family="Georgia,serif" font-weight="400" font-size="17" fill="currentColor" letter-spacing="0.3">Songtrust</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 155 44" class="mob-partner-svg"><text x="0" y="18" font-family="Arial Black,sans-serif" font-weight="900" font-size="13" fill="currentColor" letter-spacing="1.5">HARRY FOX</text><text x="0" y="36" font-family="Arial,sans-serif" font-weight="300" font-size="11" fill="currentColor" letter-spacing="4" opacity="0.7">AGENCY</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 82 44" class="mob-partner-svg"><rect x="0" y="8" width="4" height="28" fill="currentColor" opacity="0.6"/><text x="12" y="30" font-family="Arial Black,sans-serif" font-weight="900" font-size="22" fill="currentColor" letter-spacing="3">PPL</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 155 44" class="mob-partner-svg"><text x="0" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="22" fill="currentColor">PRS</text><text x="52" y="29" font-family="Arial,sans-serif" font-weight="300" font-size="14" fill="currentColor" letter-spacing="0.5" opacity="0.75">for Music</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 115 44" class="mob-partner-svg"><path d="M 0 38 Q 57 8 115 38" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.25"/><text x="57" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="1.5" text-anchor="middle">SOCAN</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 110 44" class="mob-partner-svg"><line x1="0" y1="4" x2="0" y2="40" stroke="currentColor" stroke-width="2" opacity="0.35"/><text x="10" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="1.5">SACEM</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 100 44" class="mob-partner-svg"><rect x="0" y="0" width="100" height="44" rx="22" fill="currentColor" opacity="0.07"/><text x="50" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="2" text-anchor="middle">GEMA</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 85 44" class="mob-partner-svg"><line x1="0" y1="42" x2="85" y2="42" stroke="currentColor" stroke-width="1.5" opacity="0.3"/><line x1="0" y1="2" x2="85" y2="2" stroke="currentColor" stroke-width="1.5" opacity="0.3"/><text x="42" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="22" fill="currentColor" letter-spacing="2" text-anchor="middle">SIAE</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 160 44" class="mob-partner-svg"><text x="0" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="1">APRA</text><line x1="82" y1="8" x2="82" y2="36" stroke="currentColor" stroke-width="1.5" opacity="0.3"/><text x="90" y="29" font-family="Arial,sans-serif" font-weight="300" font-size="18" fill="currentColor" letter-spacing="1" opacity="0.8">AMCOS</text></svg></div>
+          <!-- duplicate -->
+          <div class="mob-partner-item"><svg viewBox="0 0 110 44" class="mob-partner-svg"><rect x="0" y="0" width="110" height="44" rx="4" fill="currentColor" opacity="0.06"/><text x="55" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="2" text-anchor="middle">ASCAP</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 80 44" class="mob-partner-svg"><circle cx="40" cy="22" r="20" fill="currentColor" opacity="0.08"/><text x="40" y="28" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="1.5" text-anchor="middle">BMI</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 105 44" class="mob-partner-svg"><line x1="0" y1="42" x2="105" y2="42" stroke="currentColor" stroke-width="1.5" opacity="0.3"/><text x="52" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="2" text-anchor="middle">SESAC</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 90 44" class="mob-partner-svg"><rect x="2" y="6" width="86" height="32" rx="3" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"/><text x="45" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="18" fill="currentColor" letter-spacing="2" text-anchor="middle">MLC</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 140 44" class="mob-partner-svg"><circle cx="12" cy="22" r="8" fill="currentColor" opacity="0.5"/><circle cx="12" cy="22" r="4" fill="currentColor" opacity="0.8"/><text x="28" y="28" font-family="Georgia,serif" font-weight="400" font-size="17" fill="currentColor" letter-spacing="0.3">Songtrust</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 155 44" class="mob-partner-svg"><text x="0" y="18" font-family="Arial Black,sans-serif" font-weight="900" font-size="13" fill="currentColor" letter-spacing="1.5">HARRY FOX</text><text x="0" y="36" font-family="Arial,sans-serif" font-weight="300" font-size="11" fill="currentColor" letter-spacing="4" opacity="0.7">AGENCY</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 82 44" class="mob-partner-svg"><rect x="0" y="8" width="4" height="28" fill="currentColor" opacity="0.6"/><text x="12" y="30" font-family="Arial Black,sans-serif" font-weight="900" font-size="22" fill="currentColor" letter-spacing="3">PPL</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 155 44" class="mob-partner-svg"><text x="0" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="22" fill="currentColor">PRS</text><text x="52" y="29" font-family="Arial,sans-serif" font-weight="300" font-size="14" fill="currentColor" letter-spacing="0.5" opacity="0.75">for Music</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 115 44" class="mob-partner-svg"><path d="M 0 38 Q 57 8 115 38" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.25"/><text x="57" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="1.5" text-anchor="middle">SOCAN</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 110 44" class="mob-partner-svg"><line x1="0" y1="4" x2="0" y2="40" stroke="currentColor" stroke-width="2" opacity="0.35"/><text x="10" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="1.5">SACEM</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 100 44" class="mob-partner-svg"><rect x="0" y="0" width="100" height="44" rx="22" fill="currentColor" opacity="0.07"/><text x="50" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="2" text-anchor="middle">GEMA</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 85 44" class="mob-partner-svg"><line x1="0" y1="42" x2="85" y2="42" stroke="currentColor" stroke-width="1.5" opacity="0.3"/><line x1="0" y1="2" x2="85" y2="2" stroke="currentColor" stroke-width="1.5" opacity="0.3"/><text x="42" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="22" fill="currentColor" letter-spacing="2" text-anchor="middle">SIAE</text></svg></div>
+          <div class="mob-partner-item"><svg viewBox="0 0 160 44" class="mob-partner-svg"><text x="0" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="1">APRA</text><line x1="82" y1="8" x2="82" y2="36" stroke="currentColor" stroke-width="1.5" opacity="0.3"/><text x="90" y="29" font-family="Arial,sans-serif" font-weight="300" font-size="18" fill="currentColor" letter-spacing="1" opacity="0.8">AMCOS</text></svg></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCROLL CONTENT -->
+  <div class="mob-scroll">
+
+    <!-- WHY DAVINCII -->
+    <div class="mob-ls-section" style="background:var(--off-white)">
+      <div class="mob-ls-eyebrow">Why Davincii</div>
+      <h2 class="mob-ls-title">Most artists leave thousands on the table. <em>Not yours.</em></h2>
+      <div class="mob-ls-cards">
+        <div class="mob-ls-card"><span class="mob-ls-check">✓</span><div><div class="mob-ls-card-title">No upfront cost, ever</div><div class="mob-ls-card-sub">We only get paid when you do.</div></div></div>
+        <div class="mob-ls-card"><span class="mob-ls-check">✓</span><div><div class="mob-ls-card-title">Full catalog coverage</div><div class="mob-ls-card-sub">Every song, every platform, every quarter.</div></div></div>
+        <div class="mob-ls-card"><span class="mob-ls-check">✓</span><div><div class="mob-ls-card-title">You keep your rights</div><div class="mob-ls-card-sub">100% copyright — we administer, we never own.</div></div></div>
+        <div class="mob-ls-card"><span class="mob-ls-check">✓</span><div><div class="mob-ls-card-title">Complete transparency</div><div class="mob-ls-card-sub">Your portal shows exactly what was collected.</div></div></div>
+      </div>
+    </div>
+
+    <!-- FAQ -->
+    <div class="mob-ls-section">
+      <div class="mob-ls-eyebrow">Common questions</div>
+      <h2 class="mob-ls-title">Everything you <em>need to know.</em></h2>
+      <div class="mob-faq-list">
+        <div class="mob-faq-item" onclick="this.classList.toggle('open')">
+          <div class="mob-faq-q">Do I keep my copyrights?<span class="mob-faq-icon">+</span></div>
+          <div class="mob-faq-a">Yes, always. Davincii administers your rights — we never acquire or own them. You retain 100% copyright ownership at all times.</div>
+        </div>
+        <div class="mob-faq-item" onclick="this.classList.toggle('open')">
+          <div class="mob-faq-q">How do I get paid?<span class="mob-faq-icon">+</span></div>
+          <div class="mob-faq-a">We render quarterly statements and send payouts via ACH, PayPal, or Stripe directly from your artist portal once your balance exceeds $50.</div>
+        </div>
+        <div class="mob-faq-item" onclick="this.classList.toggle('open')">
+          <div class="mob-faq-q">I'm already with ASCAP or BMI — do I need this?<span class="mob-faq-icon">+</span></div>
+          <div class="mob-faq-a">Yes. Davincii works alongside your PRO. We cover the publishing side — mechanical, digital performance, and neighboring rights that your PRO doesn't handle.</div>
+        </div>
+        <div class="mob-faq-item" onclick="this.classList.toggle('open')">
+          <div class="mob-faq-q">What royalties do you collect?<span class="mob-faq-icon">+</span></div>
+          <div class="mob-faq-a">Performing rights (ASCAP, BMI, SESAC), mechanical royalties (MLC, Songtrust), digital performance (SoundExchange), and neighboring rights across 12+ international territories.</div>
+        </div>
+        <div class="mob-faq-item" onclick="this.classList.toggle('open')">
+          <div class="mob-faq-q">Can I leave at any time?<span class="mob-faq-icon">+</span></div>
+          <div class="mob-faq-a">Yes, 30 days written notice. We'll collect royalties generated during your term for 12 months after, then remit your final balance.</div>
+        </div>
+        <div class="mob-faq-item" onclick="this.classList.toggle('open')">
+          <div class="mob-faq-q">Is there a minimum catalog size?<span class="mob-faq-icon">+</span></div>
+          <div class="mob-faq-a">No. We work with artists at any stage — whether you have 1 song or 100. Every release deserves to be fully registered and earning.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA BAND -->
+    <div class="mob-ls-cta">
+      <div class="mob-ls-cta-title">Ready to collect what you're owed?</div>
+      <div class="mob-ls-cta-sub">Join free. No upfront cost. We only get paid when you do.</div>
+      <button class="btn-primary" onclick="go('signup')">Get started &rarr;</button>
+      <div style="margin-top:16px;position:relative;z-index:1;text-align:center">
+        <button onclick="go('pricing')" style="font-family:var(--sans);font-size:12px;font-weight:400;color:rgba(255,255,255,0.45);background:none;border:none;cursor:pointer;text-decoration:underline">View pricing &rarr;</button>
+      </div>
+    </div>
+
+  </div><!-- /mob-scroll -->
+
+  <div id="landing-footer"></div>
+</div>
+
+<!-- ════════════════ LOGIN ════════════════ -->
+<div class="screen" id="screen-login">
+  <nav class="mob-auth-nav">
+    <span class="mob-auth-logo"><img src="https://davincii.co/logo-sm.png" alt="Davincii" style="height:26px;display:block"></span>
+    <button class="mob-back-btn" onclick="go('landing')">&larr; Back</button>
+  </nav>
+  <div class="mob-auth-hero">
+    <div class="mob-auth-rule"></div>
+    <div class="mob-auth-tagline">Every stream,<br>every spin,<br><em>every dollar.</em></div>
+  </div>
+  <div class="mob-auth-form">
+    <h1 class="mob-auth-title">Welcome <em>back.</em></h1>
+    <div class="mob-auth-title-rule"></div>
+    <p class="mob-auth-sub">Sign in to your artist portal to view your earnings and claim payments.</p>
+    <div class="error-box"></div>
+    <label class="field-label">Email address</label>
+    <input class="field" type="email" autocomplete="email" placeholder="you@example.com">
+    <label class="field-label">Password</label>
+    <input class="field" type="password" autocomplete="current-password" placeholder="Enter your password">
+    <button class="auth-forgot" onclick="go('recover')">Forgot your password?</button>
+    <button class="btn-primary" style="margin-bottom:20px">Sign in &rarr;</button>
+    <div class="divider"><div class="divider-line"></div><span class="divider-text">or continue with</span><div class="divider-line"></div></div>
+    <button class="btn-social">
+      <svg class="btn-social-icon" viewBox="0 0 18 18"><path d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
+      Continue with Google
+    </button>
+    <button class="btn-social">
+      <svg class="btn-social-icon" viewBox="0 0 18 18"><path d="M12.27.52c.14 1.08-.3 2.15-1.01 2.93-.72.78-1.83 1.37-2.92 1.3-.16-1.07.34-2.17 1.01-2.88C10.07 1.1 11.24.52 12.27.52zM15.98 12.44c-.26.59-.57 1.14-.94 1.65-.49.69-.9 1.17-1.22 1.43-.49.44-1.01.67-1.58.68-.4 0-.89-.12-1.45-.35-.57-.23-1.09-.35-1.57-.35-.5 0-1.04.12-1.61.35-.58.23-1.04.36-1.4.37-.55.02-1.08-.22-1.6-.68-.35-.29-.78-.8-1.29-1.51C3.69 13.14 3.1 12 2.65 10.68c-.49-1.41-.74-2.77-.74-4.09 0-1.51.33-2.81.99-3.89.52-.87 1.21-1.56 2.08-2.07.87-.51 1.81-.77 2.82-.79.44 0 1.02.14 1.74.4.72.27 1.18.4 1.38.4.15 0 .67-.16 1.54-.47.82-.29 1.52-.41 2.1-.37 1.55.12 2.72.73 3.49 1.83-1.39.84-2.07 2.01-2.06 3.52.01 1.17.44 2.15 1.27 2.92.38.36.8.63 1.27.83-.1.29-.21.58-.35.86z" fill="#000"/></svg>
+      Continue with Apple
+    </button>
+    <div class="auth-link">Don't have an account? <a onclick="go('signup')">Create one</a></div>
+  </div>
+</div>
+
+<!-- ════════════════ SIGN UP ════════════════ -->
+<div class="screen" id="screen-signup">
+  <nav class="mob-auth-nav">
+    <span class="mob-auth-logo"><img src="https://davincii.co/logo-sm.png" alt="Davincii" style="height:26px;display:block"></span>
+    <button class="mob-back-btn" onclick="go('landing')">&larr; Back</button>
+  </nav>
+  <div class="mob-auth-hero">
+    <div class="mob-auth-rule"></div>
+    <div class="mob-auth-tagline">Your music<br>earns more<br><em>than you know.</em></div>
+  </div>
+  <div class="mob-auth-form">
+    <h1 class="mob-auth-title">Create your <em>account.</em></h1>
+    <div class="mob-auth-title-rule"></div>
+    <p class="mob-auth-sub">Start collecting the royalties you're owed. No upfront cost, ever.</p>
+    <label class="field-label">Full name</label>
+    <input class="field" type="text" autocomplete="name" placeholder="Your name">
+    <label class="field-label">Email address</label>
+    <input class="field" type="email" autocomplete="email" placeholder="you@example.com">
+    <label class="field-label">Password</label>
+    <input class="field" type="password" autocomplete="new-password" placeholder="Minimum 8 characters">
+    <button class="btn-primary" style="margin-bottom:20px">Create account &rarr;</button>
+    <div class="divider"><div class="divider-line"></div><span class="divider-text">or continue with</span><div class="divider-line"></div></div>
+    <button class="btn-social">
+      <svg class="btn-social-icon" viewBox="0 0 18 18"><path d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
+      Continue with Google
+    </button>
+    <button class="btn-social">
+      <svg class="btn-social-icon" viewBox="0 0 18 18"><path d="M12.27.52c.14 1.08-.3 2.15-1.01 2.93-.72.78-1.83 1.37-2.92 1.3-.16-1.07.34-2.17 1.01-2.88C10.07 1.1 11.24.52 12.27.52zM15.98 12.44c-.26.59-.57 1.14-.94 1.65-.49.69-.9 1.17-1.22 1.43-.49.44-1.01.67-1.58.68-.4 0-.89-.12-1.45-.35-.57-.23-1.09-.35-1.57-.35-.5 0-1.04.12-1.61.35-.58.23-1.04.36-1.4.37-.55.02-1.08-.22-1.6-.68-.35-.29-.78-.8-1.29-1.51C3.69 13.14 3.1 12 2.65 10.68c-.49-1.41-.74-2.77-.74-4.09 0-1.51.33-2.81.99-3.89.52-.87 1.21-1.56 2.08-2.07.87-.51 1.81-.77 2.82-.79.44 0 1.02.14 1.74.4.72.27 1.18.4 1.38.4.15 0 .67-.16 1.54-.47.82-.29 1.52-.41 2.1-.37 1.55.12 2.72.73 3.49 1.83-1.39.84-2.07 2.01-2.06 3.52.01 1.17.44 2.15 1.27 2.92.38.36.8.63 1.27.83-.1.29-.21.58-.35.86z" fill="#000"/></svg>
+      Continue with Apple
+    </button>
+    <div class="auth-link">Already have an account? <a onclick="go('login')">Sign in</a></div>
+  </div>
+</div>
+
+<!-- ════════════════ RECOVER ════════════════ -->
+<div class="screen" id="screen-recover">
+  <nav class="mob-auth-nav">
+    <span class="mob-auth-logo"><img src="https://davincii.co/logo-sm.png" alt="Davincii" style="height:26px;display:block"></span>
+    <button class="mob-back-btn" onclick="go('login')">&larr; Back</button>
+  </nav>
+  <div class="mob-auth-hero">
+    <div class="mob-auth-rule"></div>
+    <div class="mob-auth-tagline">We'll get<br>you back<br><em>in.</em></div>
+  </div>
+  <div class="mob-auth-form">
+    <h1 class="mob-auth-title">Recover your <em>account.</em></h1>
+    <div class="mob-auth-title-rule"></div>
+    <p class="mob-auth-sub">Enter your email and we'll send you a reset link.</p>
+    <label class="field-label">Email address</label>
+    <input class="field" type="email" placeholder="you@example.com">
+    <button class="btn-primary">Send reset link &rarr;</button>
+    <div class="auth-link" style="margin-top:16px"><a onclick="go('login')">&larr; Back to sign in</a></div>
+  </div>
+</div>
+
+<!-- ════════════════ DASHBOARD ════════════════ -->
+<div class="screen" id="screen-dashboard">
+  <div class="mob-top-nav">
+    <span class="mob-nav-logo" onclick="go('landing')" style="display:flex;align-items:center"><img src="https://davincii.co/logo-sm.png" alt="Davincii" style="height:28px;display:block"></span>
+    <div class="mob-nav-right">
+      <span style="font-family:var(--sans);font-size:12px;color:var(--muted)">SwuM</span>
+      <div class="avatar-wrap" id="avatar-wrap">
+        <div class="mob-avatar" onclick="toggleMenu()">SW</div>
+        <div class="mob-avatar-dropdown" id="avatar-dd">
+          <div class="mob-dd-header">
+            <div class="mob-dd-name">SwuM</div>
+            <div class="mob-dd-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="e19296948c8384809592a1868c80888dcf828e8c">[email&#160;protected]</a></div>
+          </div>
+          <div class="mob-dd-section">
+            <button class="mob-dd-item" onclick="showDashPage('overview');closeMenu()"><span class="mob-dd-icon">&#8862;</span>Overview</button>
+            <button class="mob-dd-item" onclick="showDashPage('catalog');closeMenu()"><span class="mob-dd-icon">&#9833;</span>Manage Songs</button>
+            <button class="mob-dd-item" onclick="showDashPage('add-song');closeMenu()"><span class="mob-dd-icon">+</span>Add Song</button>
+            <button class="mob-dd-item" onclick="showDashPage('royalties');closeMenu()"><span class="mob-dd-icon">&#9678;</span>Royalties</button>
+            <button class="mob-dd-item" onclick="showDashPage('payouts');closeMenu()"><span class="mob-dd-icon">&#8593;</span>Payouts</button>
+          </div>
+          <div class="mob-dd-section">
+            <button class="mob-dd-item" onclick="closeMenu()"><span class="mob-dd-icon">&#9881;</span>Settings</button>
+            <button class="mob-dd-item" onclick="closeMenu()"><span class="mob-dd-icon">&#128179;</span>Payout method</button>
+          </div>
+          <div class="mob-dd-section">
+            <button class="mob-dd-item" onclick="go('terms');closeMenu()"><span class="mob-dd-icon">&#128196;</span>Terms</button>
+            <button class="mob-dd-item" onclick="go('privacy');closeMenu()"><span class="mob-dd-icon">&#128274;</span>Privacy</button>
+          </div>
+          <div class="mob-dd-section">
+            <button class="mob-dd-item danger" onclick="go('landing');closeMenu()"><span class="mob-dd-icon">&#8594;</span>Sign out</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OVERVIEW -->
+  <div class="dash-page mob-dash-content" id="dp-overview">
+    <div class="mob-page-title">Good <em>morning</em>, <em>SwuM</em></div>
+    <div class="mob-page-sub">Here's your royalty summary.</div>
+    <div class="mob-page-rule"></div>
+    <div class="mob-bal-card">
+      <div class="mob-bal-label">Total royalties collected</div>
+      <div class="mob-bal-amount">$2,841.00</div>
+      <div class="mob-bal-note">Across 47 registered songs</div>
+      <div class="mob-bal-actions">
+        <button class="mob-bal-btn mob-bal-btn-white">Claim payment</button>
+        <button class="mob-bal-btn mob-bal-btn-ghost">Catalog</button>
+      </div>
+    </div>
+    <div class="mob-sbox">
+      <div class="mob-sbox-head">
+        <div><div class="mob-sbox-title">Recent Royalties</div><div class="mob-sbox-sub">Latest payments</div></div>
+        <button class="mob-sbox-link" onclick="showDashPage('royalties')">See all</button>
+      </div>
+      <div class="mob-sbox-body">
+        <div class="mob-row"><div><div class="mob-row-song">With U</div><div class="mob-row-meta">SoundExchange · Q1 2024</div></div><div class="mob-row-right"><div class="mob-row-amount">$312.40</div><div><span class="badge badge-ok">Collected</span></div></div></div>
+        <div class="mob-row"><div><div class="mob-row-song">Midnight Bloom</div><div class="mob-row-meta">ASCAP · Q4 2023</div></div><div class="mob-row-right"><div class="mob-row-amount">$198.75</div><div><span class="badge badge-ok">Collected</span></div></div></div>
+        <div class="mob-row"><div><div class="mob-row-song">Fade Out</div><div class="mob-row-meta">MLC · Q1 2024</div></div><div class="mob-row-right"><div class="mob-row-amount">$87.20</div><div><span class="badge badge-pend">Pending</span></div></div></div>
+        <div class="mob-row"><div><div class="mob-row-song">Still Here</div><div class="mob-row-meta">BMI · Q3 2023</div></div><div class="mob-row-right"><div class="mob-row-amount">$144.00</div><div><span class="badge badge-ok">Collected</span></div></div></div>
+      </div>
+    </div>
+    <div class="mob-sbox">
+      <div class="mob-sbox-head">
+        <div><div class="mob-sbox-title">Your Catalog</div><div class="mob-sbox-sub">Registered songs</div></div>
+        <button class="mob-sbox-link" onclick="showDashPage('catalog')">See all</button>
+      </div>
+      <div class="mob-sbox-body">
+        <div class="mob-row"><div><div class="mob-row-song">With U</div><div class="mob-row-meta">2023 · Hip-Hop</div></div><div class="mob-row-right"><div class="mob-row-amount">$680.40</div><div><span class="badge badge-blue">ASCAP · BMI</span></div></div></div>
+        <div class="mob-row"><div><div class="mob-row-song">Midnight Bloom</div><div class="mob-row-meta">2022 · R&amp;B</div></div><div class="mob-row-right"><div class="mob-row-amount">$431.15</div><div><span class="badge badge-blue">ASCAP</span></div></div></div>
+        <div class="mob-row"><div><div class="mob-row-song">Fade Out</div><div class="mob-row-meta">2023 · Lo-fi</div></div><div class="mob-row-right"><div class="mob-row-amount">$212.00</div><div><span class="badge badge-blue">BMI · MLC</span></div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CATALOG -->
+  <div class="dash-page mob-dash-content" id="dp-catalog" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">
+      <div class="mob-page-title">Manage <em>Songs</em></div>
+      <button onclick="showDashPage('add-song')" style="background:var(--black);color:var(--white);border:none;padding:8px 14px;font-family:var(--sans);font-size:10px;font-weight:600;letter-spacing:0.10em;text-transform:uppercase;cursor:pointer">+ Add</button>
+    </div>
+    <div class="mob-page-sub">All submitted songs and their status.</div>
+    <div class="mob-page-rule"></div>
+    <div class="mob-stat-row">
+      <div class="mob-stat-card"><div class="mob-stat-num">47</div><div class="mob-stat-lbl">Songs</div></div>
+      <div class="mob-stat-card mob-stat-card-red"><div class="mob-stat-num">$2,841</div><div class="mob-stat-lbl">Collected</div></div>
+    </div>
+    <div class="mob-sbox">
+      <div class="mob-sbox-head"><div><div class="mob-sbox-title">All Songs</div><div class="mob-sbox-sub">47 submitted tracks</div></div></div>
+      <div class="mob-sbox-body">
+        <div class="mob-row"><div><div class="mob-row-song">With U</div><div class="mob-row-meta">SwuM 100% · US-AB3-24-00142</div></div><div class="mob-row-right"><span style="background:rgba(26,58,107,0.08);color:#1a3a6b;font-family:var(--sans);font-size:9px;font-weight:600;letter-spacing:0.10em;text-transform:uppercase;padding:3px 8px">Monitoring</span></div></div>
+        <div class="mob-row"><div><div class="mob-row-song">Midnight Bloom</div><div class="mob-row-meta">SwuM 100% · US-AB3-23-00091</div></div><div class="mob-row-right"><span style="background:rgba(26,58,107,0.08);color:#1a3a6b;font-family:var(--sans);font-size:9px;font-weight:600;letter-spacing:0.10em;text-transform:uppercase;padding:3px 8px">Monitoring</span></div></div>
+        <div class="mob-row"><div><div class="mob-row-song">Fade Out</div><div class="mob-row-meta">SwuM 70% · Kira 30% · US-AB3-24-00307</div></div><div class="mob-row-right"><span style="background:rgba(26,58,107,0.08);color:#1a3a6b;font-family:var(--sans);font-size:9px;font-weight:600;letter-spacing:0.10em;text-transform:uppercase;padding:3px 8px">Monitoring</span></div></div>
+        <div class="mob-row"><div><div class="mob-row-song">Still Here</div><div class="mob-row-meta">SwuM 100% · US-AB3-23-00188</div></div><div class="mob-row-right"><span style="background:#e6f2e6;color:#1a5c1a;font-family:var(--sans);font-size:9px;font-weight:600;letter-spacing:0.10em;text-transform:uppercase;padding:3px 8px">Registered</span></div></div>
+        <div class="mob-row"><div><div class="mob-row-song">Lately</div><div class="mob-row-meta">SwuM 60% · Alec L. 40% · US-AB3-24-00421</div></div><div class="mob-row-right"><span style="background:#fef6e6;color:#8a5a00;font-family:var(--sans);font-size:9px;font-weight:600;letter-spacing:0.10em;text-transform:uppercase;padding:3px 8px">Processing</span></div></div>
+        <div class="mob-row"><div><div class="mob-row-song">Drifting</div><div class="mob-row-meta">SwuM 100% · US-AB3-22-00044</div></div><div class="mob-row-right"><span style="background:#e6f2e6;color:#1a5c1a;font-family:var(--sans);font-size:9px;font-weight:600;letter-spacing:0.10em;text-transform:uppercase;padding:3px 8px">Registered</span></div></div>
+        <div class="mob-row"><div><div class="mob-row-song">Into The Forest</div><div class="mob-row-meta">SwuM 100% · US-AB3-22-00017</div></div><div class="mob-row-right"><span style="background:rgba(0,0,0,0.06);color:#555;font-family:var(--sans);font-size:9px;font-weight:600;letter-spacing:0.10em;text-transform:uppercase;padding:3px 8px">Queued</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD SONG (MOBILE) -->
+  <div class="dash-page mob-dash-content" id="dp-add-song" style="display:none">
+    <div class="mob-page-title">Add a <em>Song</em></div>
+    <div class="mob-page-sub">Submit a new composition for registration.</div>
+    <div class="mob-page-rule"></div>
+
+    <!-- Song Info -->
+    <div style="margin-bottom:28px;padding-bottom:28px;border-bottom:1px solid var(--border-light)">
+      <div style="font-family:var(--sans);font-size:9px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:16px">Song Information</div>
+      <div style="margin-bottom:0">
+        <label style="font-family:var(--sans);font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#2a2a2a;margin-bottom:6px;display:block">Song Title</label>
+        <input style="width:100%;border:1px solid rgba(0,0,0,0.16);padding:13px 14px;font-family:var(--sans);font-size:15px;color:var(--black);background:transparent;outline:none;border-radius:0;-webkit-appearance:none" type="text" placeholder="e.g. With U" id="mob-as-title">
+      </div>
+    </div>
+
+    <!-- Writers -->
+    <div style="margin-bottom:28px;padding-bottom:28px;border-bottom:1px solid var(--border-light)">
+      <div style="font-family:var(--sans);font-size:9px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:16px">Songwriter &amp; Splits</div>
+      <div style="border:1px solid var(--border);padding:12px 14px;background:var(--off-white);display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <span style="font-family:var(--sans);font-size:9px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)">Total ownership</span>
+        <span style="font-family:var(--serif);font-size:20px" id="mob-ownership-total">0%</span>
+      </div>
+      <label style="font-family:var(--sans);font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#2a2a2a;margin-bottom:6px;display:block">Primary Songwriter</label>
+      <div style="display:grid;grid-template-columns:1fr 80px;gap:10px;margin-bottom:20px">
+        <input style="border:1px solid rgba(0,0,0,0.16);padding:13px 14px;font-family:var(--sans);font-size:15px;color:var(--black);background:transparent;outline:none;border-radius:0;-webkit-appearance:none" type="text" placeholder="Full name" id="mob-writer-primary" oninput="mobRecalc()">
+        <div style="position:relative">
+          <input style="width:100%;border:1px solid rgba(0,0,0,0.16);padding:13px 10px;font-family:var(--sans);font-size:15px;color:var(--black);background:transparent;outline:none;border-radius:0;-webkit-appearance:none" type="number" placeholder="100" id="mob-writer-pct" oninput="mobRecalc()">
+          <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:13px;pointer-events:none">%</span>
+        </div>
+      </div>
+      <label style="font-family:var(--sans);font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#2a2a2a;margin-bottom:6px;display:block">Co-writers?</label>
+      <div style="display:flex;margin-bottom:14px">
+        <button id="mob-cw-no" onclick="mobSetCW(false)" style="flex:1;padding:12px;border:1px solid rgba(0,0,0,0.16);border-right:none;font-family:var(--sans);font-size:12px;font-weight:600;background:var(--black);color:var(--white);cursor:pointer">No</button>
+        <button id="mob-cw-yes" onclick="mobSetCW(true)" style="flex:1;padding:12px;border:1px solid rgba(0,0,0,0.16);font-family:var(--sans);font-size:12px;font-weight:400;background:transparent;color:var(--muted);cursor:pointer">Yes</button>
+      </div>
+      <div id="mob-cowriter-section" style="display:none">
+        <div id="mob-cowriter-rows"></div>
+        <button onclick="mobAddCW()" style="width:100%;border:1px dashed rgba(0,0,0,0.2);padding:12px;font-family:var(--sans);font-size:11px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);background:transparent;cursor:pointer;margin-bottom:4px">+ Add Co-writer</button>
+      </div>
+    </div>
+
+    <!-- ISRC -->
+    <div style="margin-bottom:28px;padding-bottom:28px;border-bottom:1px solid var(--border-light)">
+      <div style="font-family:var(--sans);font-size:9px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:16px">Recording &amp; ISRC</div>
+      <label style="font-family:var(--sans);font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#2a2a2a;margin-bottom:6px;display:block">ISRC Code</label>
+      <input style="width:100%;border:1px solid rgba(0,0,0,0.16);padding:13px 14px;font-family:var(--sans);font-size:15px;color:var(--black);background:transparent;outline:none;border-radius:0;-webkit-appearance:none;font-family:monospace;font-size:14px;letter-spacing:0.06em" type="text" placeholder="US-AB3-24-00142" maxlength="15" id="mob-as-isrc">
+      <div style="font-family:var(--sans);font-size:11px;color:var(--muted-light);margin-top:5px;margin-bottom:14px">Format: CC-XXX-YY-NNNNN · 12 characters</div>
+    </div>
+
+    <!-- Submit -->
+    <button onclick="mobSubmitSong()" style="width:100%;background:var(--black);color:var(--white);border:none;padding:16px;font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;cursor:pointer;margin-bottom:10px">Submit Song &rarr;</button>
+    <button onclick="showDashPage('catalog')" style="width:100%;background:transparent;color:var(--muted);border:1px solid rgba(0,0,0,0.14);padding:14px;font-family:var(--sans);font-size:11px;font-weight:500;letter-spacing:0.10em;text-transform:uppercase;cursor:pointer;margin-bottom:24px">Cancel</button>
+    <div style="font-family:var(--sans);font-size:11px;font-weight:300;color:var(--muted-light);line-height:1.7;margin-bottom:80px">After submission, our team will register your song across ASCAP, BMI, SoundExchange, the MLC, and Songtrust. Processing takes 3–7 business days.</div>
+  </div>
+
+  <!-- ROYALTIES -->
+  <div class="dash-page mob-dash-content" id="dp-royalties" style="display:none">
+    <div class="mob-page-title">Your <em>Royalties</em></div>
+    <div class="mob-page-sub">All payments collected.</div>
+    <div class="mob-page-rule"></div>
+    <div class="mob-stat-row">
+      <div class="mob-stat-card mob-stat-card-red"><div class="mob-stat-num">$2,841</div><div class="mob-stat-lbl">Collected</div></div>
+      <div class="mob-stat-card"><div class="mob-stat-num">$87</div><div class="mob-stat-lbl">Pending</div></div>
+    </div>
+    <div class="mob-sbox">
+      <div class="mob-sbox-head"><div><div class="mob-sbox-title">All Royalty Payments</div><div class="mob-sbox-sub">Most recent first</div></div></div>
+      <div class="mob-sbox-body">
+        <div class="mob-row"><div><div class="mob-row-song">With U</div><div class="mob-row-meta">SoundExchange · Q1 2024</div></div><div class="mob-row-right"><div class="mob-row-amount">$312.40</div><div><span class="badge badge-ok">Collected</span></div></div></div>
+        <div class="mob-row"><div><div class="mob-row-song">Midnight Bloom</div><div class="mob-row-meta">ASCAP · Q4 2023</div></div><div class="mob-row-right"><div class="mob-row-amount">$198.75</div><div><span class="badge badge-ok">Collected</span></div></div></div>
+        <div class="mob-row"><div><div class="mob-row-song">Fade Out</div><div class="mob-row-meta">MLC / Songtrust · Q1 2024</div></div><div class="mob-row-right"><div class="mob-row-amount">$87.20</div><div><span class="badge badge-pend">Pending</span></div></div></div>
+        <div class="mob-row"><div><div class="mob-row-song">Still Here</div><div class="mob-row-meta">BMI · Q3 2023</div></div><div class="mob-row-right"><div class="mob-row-amount">$144.00</div><div><span class="badge badge-ok">Collected</span></div></div></div>
+        <div class="mob-row"><div><div class="mob-row-song">With U</div><div class="mob-row-meta">BMI · Q3 2023</div></div><div class="mob-row-right"><div class="mob-row-amount">$221.80</div><div><span class="badge badge-ok">Collected</span></div></div></div>
+        <div class="mob-row"><div><div class="mob-row-song">Drifting</div><div class="mob-row-meta">ASCAP · Q2 2023</div></div><div class="mob-row-right"><div class="mob-row-amount">$98.30</div><div><span class="badge badge-ok">Collected</span></div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAYOUTS -->
+  <div class="dash-page mob-dash-content" id="dp-payouts" style="display:none">
+    <div class="mob-page-title">Your <em>Payouts</em></div>
+    <div class="mob-page-sub">Payments sent to your account.</div>
+    <div class="mob-page-rule"></div>
+    <div class="mob-stat-row">
+      <div class="mob-stat-card"><div class="mob-stat-num">$1,200</div><div class="mob-stat-lbl">Paid out</div></div>
+      <div class="mob-stat-card mob-stat-card-red"><div class="mob-stat-num">$1,641</div><div class="mob-stat-lbl">Available</div></div>
+    </div>
+    <!-- Claim bar -->
+    <div style="border:1px solid var(--border);padding:20px;margin-bottom:16px;background:var(--off-white)">
+      <div style="font-family:var(--sans);font-size:10px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Available balance</div>
+      <div style="font-family:var(--serif);font-size:38px;font-weight:400;letter-spacing:-0.02em;margin-bottom:4px">$1,641.00</div>
+      <div style="font-family:var(--sans);font-size:12px;color:var(--muted);margin-bottom:16px">Ready to claim</div>
+      <button class="btn-primary" style="padding:14px">Claim payment &rarr;</button>
+      <div style="font-family:var(--sans);font-size:11px;color:var(--muted-light);margin-top:8px;text-align:center">Via ACH, PayPal, or Stripe</div>
+    </div>
+    <div class="mob-sbox">
+      <div class="mob-sbox-head"><div><div class="mob-sbox-title">Payout History</div></div></div>
+      <div class="mob-sbox-body">
+        <div class="mob-row"><div><div class="mob-row-song" style="font-size:14px">Feb 14, 2024</div><div class="mob-row-meta">ACH · #DV-2402-0041</div></div><div class="mob-row-right"><div class="mob-row-amount">$400.00</div><div><span class="badge badge-ok">Paid</span></div></div></div>
+        <div class="mob-row"><div><div class="mob-row-song" style="font-size:14px">Nov 3, 2023</div><div class="mob-row-meta">PayPal · #DV-2311-0029</div></div><div class="mob-row-right"><div class="mob-row-amount">$350.00</div><div><span class="badge badge-ok">Paid</span></div></div></div>
+        <div class="mob-row"><div><div class="mob-row-song" style="font-size:14px">Aug 19, 2023</div><div class="mob-row-meta">ACH · #DV-2308-0017</div></div><div class="mob-row-right"><div class="mob-row-amount">$280.00</div><div><span class="badge badge-ok">Paid</span></div></div></div>
+        <div class="mob-row"><div><div class="mob-row-song" style="font-size:14px">May 7, 2023</div><div class="mob-row-meta">Stripe · #DV-2305-0008</div></div><div class="mob-row-right"><div class="mob-row-amount">$170.00</div><div><span class="badge badge-ok">Paid</span></div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM TAB BAR -->
+  <nav class="mob-tab-bar">
+    <button class="mob-tab active" id="tab-overview" onclick="showDashPage('overview')">
+      <span class="mob-tab-icon">&#8862;</span>
+      <span class="mob-tab-label">Overview</span>
+    </button>
+    <button class="mob-tab" id="tab-catalog" onclick="showDashPage('catalog')">
+      <span class="mob-tab-icon">&#9833;</span>
+      <span class="mob-tab-label">Songs</span>
+    </button>
+    <button class="mob-tab" id="tab-add-song" onclick="showDashPage('add-song')">
+      <span class="mob-tab-icon" style="font-size:22px;font-weight:300">+</span>
+      <span class="mob-tab-label">Add</span>
+    </button>
+    <button class="mob-tab" id="tab-royalties" onclick="showDashPage('royalties')">
+      <span class="mob-tab-icon">&#9678;</span>
+      <span class="mob-tab-label">Royalties</span>
+    </button>
+    <button class="mob-tab" id="tab-payouts" onclick="showDashPage('payouts')">
+      <span class="mob-tab-icon">&#8593;</span>
+      <span class="mob-tab-label">Payouts</span>
+    </button>
+  </nav>
+</div>
+
+<!-- ════════════════ HOW IT WORKS ════════════════ -->
+<div class="screen" id="screen-howitworks">
+  <nav class="mob-mkt-nav">
+    <span class="mob-mkt-logo" onclick="go('landing')" style="display:flex;align-items:center"><img src="https://davincii.co/logo-sm.png" alt="Davincii" style="height:28px;display:block"></span>
+    <div class="mob-mkt-btns">
+      <button class="btn-mob-mkt-ghost" onclick="go('login')">Sign in</button>
+      <button class="btn-mob-mkt-solid" onclick="go('signup')">Get started</button>
+    </div>
+  </nav>
+  <div class="mob-mkt-hero">
+    <div class="mob-mkt-eyebrow">The process</div>
+    <h1 class="mob-mkt-title">Collecting royalties should be <em>effortless.</em></h1>
+    <div class="mob-mkt-rule"></div>
+    <p class="mob-mkt-sub">We handle the entire publishing administration pipeline so you can focus on making music.</p>
+  </div>
+  <div class="mob-mkt-body">
+    <div class="mob-step"><div class="mob-step-num">01</div><div><div class="mob-step-title">You sign up &amp; <em>share your catalog</em></div><p class="mob-step-body">Create your free account and submit your songs. No upfront cost, no contracts that lock you in.</p></div></div>
+    <div class="mob-step"><div class="mob-step-num">02</div><div><div class="mob-step-title">We <em>register</em> your music everywhere</div><p class="mob-step-body">Davincii registers with ASCAP, BMI, SoundExchange, the MLC, Songtrust, and 12+ platforms worldwide.</p></div></div>
+    <div class="mob-step"><div class="mob-step-num">03</div><div><div class="mob-step-title">We <em>track &amp; collect</em> every quarter</div><p class="mob-step-body">We audit every platform every quarter and collect on your behalf. Nothing slips through.</p></div></div>
+    <div class="mob-step"><div class="mob-step-num">04</div><div><div class="mob-step-title">You <em>get paid</em> directly</div><p class="mob-step-body">Log in, see exactly what was collected, and claim your balance via ACH, PayPal, or Stripe. We take 15% — that's it. You keep 100% of your copyrights.</p></div></div>
+  </div>
+  <div id="howitworks-footer"></div>
+</div>
+
+<!-- ════════════════ ABOUT ════════════════ -->
+<div class="screen" id="screen-about">
+  <nav class="mob-mkt-nav">
+    <span class="mob-mkt-logo" onclick="go('landing')" style="display:flex;align-items:center"><img src="https://davincii.co/logo-sm.png" alt="Davincii" style="height:28px;display:block"></span>
+    <div class="mob-mkt-btns">
+      <button class="btn-mob-mkt-ghost" onclick="go('login')">Sign in</button>
+      <button class="btn-mob-mkt-solid" onclick="go('signup')">Get started</button>
+    </div>
+  </nav>
+  <div class="mob-mkt-hero">
+    <div class="mob-mkt-eyebrow">Our story</div>
+    <h1 class="mob-mkt-title">Built by artists, for <em>artists.</em></h1>
+    <div class="mob-mkt-rule"></div>
+    <p class="mob-mkt-sub">Every artist deserves to be paid for every play. We built the infrastructure to make that happen.</p>
+  </div>
+  <div class="mob-mkt-body">
+    <div class="mob-stat-trio">
+      <div class="mob-trio-item"><div class="mob-trio-num">$0</div><div class="mob-trio-lbl">Upfront</div></div>
+      <div class="mob-trio-item"><div class="mob-trio-num">12+</div><div class="mob-trio-lbl">Platforms</div></div>
+      <div class="mob-trio-item"><div class="mob-trio-num">100%</div><div class="mob-trio-lbl">Your IP</div></div>
+    </div>
+    <p style="font-family:var(--sans);font-size:14px;font-weight:300;color:var(--muted);line-height:1.8;margin-bottom:28px">Most artists never see the full value of their music because royalty collection is fragmented across dozens of platforms. A song can generate income from performing rights, digital performance rights, and mechanical rights — and miss out on all three simply because no one was watching.</p>
+    <div class="mob-about-dark">
+      <div class="mob-about-quote">"We built Davincii because we were tired of watching artists leave money on the table — not from lack of talent, but lack of infrastructure."</div>
+      <button class="btn-primary" style="margin-top:20px;position:relative;z-index:1" onclick="go('signup')">Join Davincii &rarr;</button>
+    </div>
+  </div>
+  <div id="about-footer"></div>
+</div>
+
+<!-- ════════════════ TERMS ════════════════ -->
+<!-- ════════════════ PRICING ════════════════ -->
+<div class="screen" id="screen-pricing">
+  <nav class="mob-auth-nav">
+    <span class="mob-auth-logo"><img src="https://davincii.co/logo-sm.png" alt="Davincii" style="height:26px;display:block"></span>
+    <button class="mob-back-btn" onclick="go('landing')">&larr; Back</button>
+  </nav>
+  <div class="mob-mkt-hero">
+    <div class="mob-mkt-eyebrow">Pricing</div>
+    <h1 class="mob-mkt-title">Simple. <em>Performance-based.</em></h1>
+    <div class="mob-mkt-rule"></div>
+    <p class="mob-mkt-sub">We don't charge you to work with us. Our fee is a small percentage of what we actually recover — we only succeed when you do. No collections, no charge.</p>
+  </div>
+  <div class="mob-mkt-body">
+    <div class="mob-pricing-card" style="border:1px solid var(--red);padding:24px;background:var(--white);margin-bottom:16px">
+      <div class="mob-pricing-plan">Standard</div>
+      <div class="mob-pricing-amount">Performance-based</div>
+      <div class="mob-pricing-note">A competitive share of royalties collected — only charged on what we recover for you.</div>
+      <div style="height:1px;background:var(--border);margin:20px 0"></div>
+      <div class="mob-pricing-feature">✓ &nbsp;Registration across 12+ global platforms</div>
+      <div class="mob-pricing-feature">✓ &nbsp;Quarterly royalty collection &amp; distribution</div>
+      <div class="mob-pricing-feature">✓ &nbsp;Full artist portal with earnings transparency</div>
+      <div class="mob-pricing-feature">✓ &nbsp;Back-catalog audit &amp; recovery</div>
+      <div class="mob-pricing-feature">✓ &nbsp;ACH, PayPal, or Stripe payouts</div>
+      <div class="mob-pricing-feature" style="border-bottom:none">✓ &nbsp;100% copyright ownership retained</div>
+      <button class="btn-primary" style="margin-top:20px" onclick="go('signup')">Get started free &rarr;</button>
+    </div>
+    <div style="background:var(--off-white);border:1px solid var(--border);padding:20px;text-align:center">
+      <div style="font-family:var(--serif);font-size:20px;font-weight:400;color:var(--black);margin-bottom:8px">No collections, <em>no charge.</em></div>
+      <div style="font-family:var(--sans);font-size:13px;font-weight:300;color:var(--muted);line-height:1.7">If we don't recover royalties for you, you pay nothing. Our fee only applies when money actually lands in your account.</div>
+    </div>
+    <div style="font-family:var(--sans);font-size:11px;font-weight:300;color:var(--muted-light);text-align:center;margin-top:20px;line-height:1.6;padding-bottom:40px">Fee details outlined in your publishing administration agreement.<br>Questions? <a href="/cdn-cgi/l/email-protection#264f484049664247504f48454f4f084549" style="color:var(--red);text-decoration:none"><span class="__cf_email__" data-cfemail="254c4b434a654144534c4b464c4c0b464a">[email&#160;protected]</span></a></div>
+  </div>
+  <div id="pricing-footer"></div>
+</div>
+
+<div class="screen" id="screen-terms">
+  <nav class="mob-auth-nav">
+    <span class="mob-auth-logo"><img src="https://davincii.co/logo-sm.png" alt="Davincii" style="height:26px;display:block"></span>
+    <button class="mob-back-btn" onclick="go('landing')">&larr; Back</button>
+  </nav>
+  <div class="mob-legal-body">
+    <div class="mob-legal-eyebrow">Legal</div>
+    <h1 class="mob-legal-title">Terms of <em>Service</em></h1>
+    <p class="mob-legal-meta">Effective March 2026 · New York, NY · <a href="/cdn-cgi/l/email-protection#a7cec9c1c8e7c3c6d1cec9c4cece89c4c8" style="color:var(--red);text-decoration:none"><span class="__cf_email__" data-cfemail="87eee9e1e8c7e3e6f1eee9e4eeeea9e4e8">[email&#160;protected]</span></a></p>
+    <div class="mob-legal-section"><div class="mob-legal-section-title">Overview</div><p class="mob-legal-p">These Terms govern your use of the Davincii platform, operated by Davincii LLC, organized under the laws of New York. Davincii provides music publishing administration — registering your compositions and collecting royalty income on your behalf. Artists retain 100% copyright ownership at all times.</p></div>
+    <div class="mob-legal-section"><div class="mob-legal-section-title">Publishing Administration</div><div class="mob-legal-highlight"><p>No upfront fees. We take 15% only of what we actually collect for you.</p></div><p class="mob-legal-p">Use of royalty collection services requires a separate Administration Agreement covering the 15% fee, quarterly accounting, exclusive admin rights during the term, and a 12-month collection tail period after termination.</p></div>
+    <div class="mob-legal-section"><div class="mob-legal-section-title">Artist Responsibilities</div><p class="mob-legal-p">You must provide accurate song metadata including titles, co-writer splits, ISRC/ISWC codes, and PRO affiliation. Davincii is not liable for missed royalties caused by inaccurate information.</p></div>
+    <div class="mob-legal-section"><div class="mob-legal-section-title">Payments</div><p class="mob-legal-p">Quarterly statements within 45 days of quarter close. Net Receipts paid when balance exceeds $50 via ACH, PayPal, or Stripe. Payment credentials are handled by Stripe — we never store bank or card numbers.</p></div>
+    <div class="mob-legal-section"><div class="mob-legal-section-title">Governing Law</div><p class="mob-legal-p">These Terms are governed by the laws of New York. Disputes go first to mediation, then binding arbitration in New York under AAA Commercial Rules.</p></div>
+    <div class="mob-legal-section"><div class="mob-legal-section-title">Contact</div><p class="mob-legal-p"><a href="/cdn-cgi/l/email-protection#abc2c5cdc4ebcfcaddc2c5c8c2c285c8c4" style="color:var(--red)"><span class="__cf_email__" data-cfemail="f59c9b939ab59194839c9b969c9cdb969a">[email&#160;protected]</span></a> · davincii.co · New York, NY</p></div>
+  </div>
+  <div id="terms-footer"></div>
+</div>
+
+<!-- ════════════════ PRIVACY ════════════════ -->
+<div class="screen" id="screen-privacy">
+  <nav class="mob-auth-nav">
+    <span class="mob-auth-logo"><img src="https://davincii.co/logo-sm.png" alt="Davincii" style="height:26px;display:block"></span>
+    <button class="mob-back-btn" onclick="go('landing')">&larr; Back</button>
+  </nav>
+  <div class="mob-legal-body">
+    <div class="mob-legal-eyebrow">Legal</div>
+    <h1 class="mob-legal-title">Privacy <em>Policy</em></h1>
+    <p class="mob-legal-meta">Effective March 2026 · <a href="/cdn-cgi/l/email-protection#a1c8cfc7cee1c5c0d7c8cfc2c8c88fc2ce" style="color:var(--red);text-decoration:none"><span class="__cf_email__" data-cfemail="c6afa8a0a986a2a7b0afa8a5afafe8a5a9">[email&#160;protected]</span></a></p>
+    <div class="mob-legal-section"><div class="mob-legal-section-title">What we collect</div><ul class="mob-legal-list"><li>Name, email, PRO affiliation</li><li>Song metadata: titles, splits, ISRC/ISWC codes</li><li>Payment info — processed by Stripe, not stored by us</li><li>Log data and usage analytics</li></ul></div>
+    <div class="mob-legal-section"><div class="mob-legal-section-title">How we use it</div><ul class="mob-legal-list"><li>Registering your songs with PROs and collection societies</li><li>Collecting and disbursing royalty income</li><li>Processing payouts via Stripe</li><li>Platform security and improvement</li></ul></div>
+    <div class="mob-legal-section"><div class="mob-legal-section-title">Who we share with</div><p class="mob-legal-p">We do not sell your data. We share only with Stripe (payments), PROs and collection societies (registration), and cloud infrastructure providers. Never with advertisers.</p><div class="mob-legal-highlight"><p>Davincii products are ad-free. We do not use advertising cookies.</p></div></div>
+    <div class="mob-legal-section"><div class="mob-legal-section-title">Your rights</div><p class="mob-legal-p">You may access, correct, or delete your data at any time by contacting <a href="/cdn-cgi/l/email-protection#563f383039163237203f38353f3f783539" style="color:var(--red)"><span class="__cf_email__" data-cfemail="2a43444c456a4e4b5c4344494343044945">[email&#160;protected]</span></a>. GDPR rights apply for EU/UK users.</p></div>
+    <div class="mob-legal-section"><div class="mob-legal-section-title">Contact</div><p class="mob-legal-p"><a href="/cdn-cgi/l/email-protection#751c1b131a351114031c1b161c1c5b161a" style="color:var(--red)"><span class="__cf_email__" data-cfemail="026b6c646d426663746b6c616b6b2c616d">[email&#160;protected]</span></a> · davincii.co · New York, NY</p></div>
+  </div>
+  <div id="privacy-footer"></div>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  // Inject footer
+  function injectFooters() {
+    const tpl = document.getElementById('footer-tpl').content;
+    ['landing-footer','howitworks-footer','about-footer','terms-footer','privacy-footer','pricing-footer'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.appendChild(tpl.cloneNode(true));
+    });
+  }
+  injectFooters();
+
+  const screenIds = {
+    landing:'screen-landing', login:'screen-login', signup:'screen-signup',
+    recover:'screen-recover', dashboard:'screen-dashboard',
+    howitworks:'screen-howitworks', about:'screen-about',
+    pricing:'screen-pricing', terms:'screen-terms', privacy:'screen-privacy'
+  };
+  const screenLabels = {
+    landing:'Landing', login:'Login', signup:'Sign Up', recover:'Recover',
+    dashboard:'Dashboard', howitworks:'How It Works', about:'About',
+    pricing:'Pricing', terms:'Terms', privacy:'Privacy',
+    catalog:'→ Catalog', royalties:'→ Royalties', payouts:'→ Payouts'
+  };
+
+  function toggleLandingMenu() {
+    const el = document.getElementById('landing-avatar');
+    el.classList.toggle('open');
+  }
+  document.addEventListener('click', function(e) {
+    const el = document.getElementById('landing-avatar');
+    if (el && !el.contains(e.target)) el.classList.remove('open');
+    const wrap = document.getElementById('avatar-wrap');
+    if (wrap && !wrap.contains(e.target)) closeMenu();
+  });
+
+  function go(name) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.snav-btn').forEach(b => b.classList.remove('active'));
+
+    if (['catalog','royalties','payouts','overview','add-song'].includes(name)) {
+      document.getElementById('screen-dashboard').classList.add('active');
+      showDashPage(name);
+      document.querySelectorAll('.snav-btn').forEach(b => {
+        const label = name === 'catalog' ? '→ Catalog' : name === 'royalties' ? '→ Royalties' : name === 'payouts' ? '→ Payouts' : '';
+        if (b.textContent.trim() === label) b.classList.add('active');
+      });
+      return;
+    }
+
+    const el = document.getElementById(screenIds[name]);
+    if (el) { el.classList.add('active'); window.scrollTo(0,0); }
+    document.querySelectorAll('.snav-btn').forEach(b => {
+      if (b.textContent.trim() === (screenLabels[name] || '')) b.classList.add('active');
+    });
+  }
+
+  function showDashPage(page) {
+    document.querySelectorAll('.dash-page').forEach(p => p.style.display = 'none');
+    const el = document.getElementById('dp-' + page);
+    if (el) el.style.display = 'block';
+    // Update tab bar
+    document.querySelectorAll('.mob-tab').forEach(b => b.classList.remove('active'));
+    const tab = document.getElementById('tab-' + page);
+    if (tab) tab.classList.add('active');
+  }
+
+  function toggleFaq(el) {
+    const isOpen = el.classList.contains('open');
+    document.querySelectorAll('.mob-faq-item').forEach(i => i.classList.remove('open'));
+    if (!isOpen) el.classList.add('open');
+  }
+
+  function scrollToPricing() {
+    go('landing');
+    setTimeout(() => {
+      const el = document.getElementById('ls-pricing-anchor');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+  }
+
+  // ── ADD SONG (MOBILE) ──
+  let mobCWCount = 0;
+  function toggleMenu() {
+    const wrap = document.getElementById('avatar-wrap');
+    if (wrap) wrap.classList.toggle('open');
+  }
+  function closeMenu() {
+    const wrap = document.getElementById('avatar-wrap');
+    if (wrap) wrap.classList.remove('open');
+  }
+  function mobSetCW(hasCowriters) {
+    document.getElementById('mob-cw-no').style.background = hasCowriters ? 'transparent' : 'var(--black)';
+    document.getElementById('mob-cw-no').style.color = hasCowriters ? 'var(--muted)' : 'var(--white)';
+    document.getElementById('mob-cw-yes').style.background = hasCowriters ? 'var(--black)' : 'transparent';
+    document.getElementById('mob-cw-yes').style.color = hasCowriters ? 'var(--white)' : 'var(--muted)';
+    document.getElementById('mob-cowriter-section').style.display = hasCowriters ? 'block' : 'none';
+    if (hasCowriters && mobCWCount === 0) mobAddCW();
+    mobRecalc();
+  }
+  function mobAddCW() {
+    mobCWCount++;
+    const id = mobCWCount;
+    const div = document.createElement('div');
+    div.id = 'mob-cw-row-' + id;
+    div.style.cssText = 'border:1px solid rgba(0,0,0,0.09);padding:18px 16px 14px;margin-bottom:14px;background:#fafafa;position:relative';
+    const inp = 'width:100%;border:1px solid rgba(0,0,0,0.16);padding:13px 14px;font-family:var(--sans);font-size:15px;color:var(--black);background:transparent;outline:none;border-radius:0;-webkit-appearance:none;margin-bottom:0';
+    const lbl = 'font-family:var(--sans);font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#2a2a2a;margin-bottom:7px;display:block';
+    div.innerHTML = `
+      <button onclick="mobRemoveCW(${id})" style="position:absolute;top:10px;right:12px;height:26px;width:26px;border:1px solid rgba(0,0,0,0.12);background:none;font-size:14px;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center">&#215;</button>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+        <div>
+          <label style="${lbl}">Artist Name</label>
+          <input style="${inp}" type="text" placeholder="Stage / artist name" id="mob-cw-artist-${id}">
+        </div>
+        <div>
+          <label style="${lbl}">Full Legal Name</label>
+          <input style="${inp}" type="text" placeholder="First and last name" id="mob-cw-name-${id}" oninput="mobRecalc()">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 88px;gap:12px">
+        <div>
+          <label style="${lbl}">PRO</label>
+          <select style="${inp};cursor:pointer" id="mob-cw-pro-${id}">
+            <option value="">Select PRO</option>
+            <option>ASCAP</option><option>BMI</option><option>SESAC</option>
+            <option>SOCAN</option><option>PRS</option><option>SACEM</option>
+            <option>GEMA</option><option>Other</option><option>None</option>
+          </select>
+        </div>
+        <div>
+          <label style="${lbl}">IPI Number</label>
+          <input style="${inp};font-family:monospace;font-size:13px;letter-spacing:0.04em" type="text" placeholder="00123456789" id="mob-cw-ipi-${id}" maxlength="11">
+        </div>
+        <div>
+          <label style="${lbl}">Share %</label>
+          <div style="position:relative">
+            <input style="${inp}" type="number" placeholder="%" id="mob-cw-pct-${id}" oninput="mobRecalc()">
+            <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:13px;pointer-events:none">%</span>
+          </div>
+        </div>
+      </div>`;
+    document.getElementById('mob-cowriter-rows').appendChild(div);
+    mobRecalc();
+  }
+  function mobRemoveCW(id) {
+    const el = document.getElementById('mob-cw-row-' + id);
+    if (el) el.remove();
+    mobRecalc();
+  }
+  function mobRecalc() {
+    let total = parseFloat(document.getElementById('mob-writer-pct')?.value) || 0;
+    document.querySelectorAll('[id^="mob-cw-pct-"]').forEach(inp => { total += parseFloat(inp.value) || 0; });
+    const el = document.getElementById('mob-ownership-total');
+    if (el) {
+      el.textContent = total + '%';
+      el.style.color = total === 100 ? 'var(--green)' : total > 100 ? 'var(--red)' : 'var(--black)';
+    }
+  }
+
+  function mobSubmitSong() {
+    const title = (document.getElementById('mob-as-title')?.value || '').trim();
+    if (!title) { alert('Please enter a song title.'); return; }
+    const primaryName = (document.getElementById('mob-writer-primary')?.value || '').trim();
+    if (!primaryName) { alert('Please enter the primary songwriter name.'); return; }
+    const primaryPct = parseFloat(document.getElementById('mob-writer-pct')?.value) || 0;
+
+    // Collect co-writers
+    const cowriters = [];
+    document.querySelectorAll('[id^="mob-cw-row-"]').forEach(row => {
+      const id = row.id.replace('mob-cw-row-', '');
+      const cwName = (document.getElementById('mob-cw-name-' + id)?.value || '').trim();
+      const cwArtist = (document.getElementById('mob-cw-artist-' + id)?.value || '').trim();
+      const cwPro = document.getElementById('mob-cw-pro-' + id)?.value || '';
+      const cwIpi = (document.getElementById('mob-cw-ipi-' + id)?.value || '').trim();
+      const cwPct = parseFloat(document.getElementById('mob-cw-pct-' + id)?.value) || 0;
+      cowriters.push({ name: cwName, artistName: cwArtist, pro: cwPro, ipi: cwIpi, pct: cwPct });
+    });
+
+    // Validate ownership totals 100%
+    let totalPct = primaryPct;
+    cowriters.forEach(cw => { totalPct += cw.pct; });
+    if (totalPct !== 100) {
+      alert('Ownership splits must total exactly 100%. Currently at ' + totalPct + '%.');
+      return;
+    }
+
+    const isrc = (document.getElementById('mob-as-isrc')?.value || '').trim();
+
+    // POST to backend API
+    const token = localStorage.getItem('dv_token');
+    fetch('/api/songs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...(token ? { 'Authorization': 'Bearer ' + token } : {}) },
+      body: JSON.stringify({
+        title,
+        isrc: isrc || null,
+        primary_writer: primaryName,
+        primary_pct: primaryPct,
+        cowriters: cowriters.length > 0 ? cowriters : []
+      })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.error) {
+        alert(data.error);
+      } else {
+        showDashPage('catalog');
+      }
+    })
+    .catch(() => {
+      showDashPage('catalog');
+    });
+  }
+</script>
+</body>
+</html>
