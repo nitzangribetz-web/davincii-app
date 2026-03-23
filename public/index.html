@@ -2426,7 +2426,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
   function goHome() {
     const token = localStorage.getItem('dv_token');
     if (token) {
-      go('dashboard');
+      go('overview');
     } else {
       go('landing');
     }
