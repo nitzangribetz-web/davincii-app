@@ -48,7 +48,7 @@ app.use('/api/passkeys/login', authLimiter);
 app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 
 // DB health check
 const pool = require('./db/pool');
@@ -69,9 +69,11 @@ app.use('/api/payouts', payoutRoutes);
 app.use('/api/stripe', stripeRoutes);
 app.use('/api/passkeys', passkeyRoutes);
 
-// Serve frontend for all non-API routes
+// Serve frontend for all non-API routes (detect mobile via user-agent)
+const mobileUA = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i;
 app.get('{*path}', (req, res) => {
-  if (req.path === '/m' || req.path.startsWith('/m/')) {
+  const ua = req.headers['user-agent'] || '';
+  if (mobileUA.test(ua)) {
     res.sendFile('mobile.html', { root: path.join(__dirname, 'public') });
   } else {
     res.sendFile('index.html', { root: path.join(__dirname, 'public') });
