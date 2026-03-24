@@ -1200,23 +1200,23 @@ html, body {
     catalog:'→ Catalog', royalties:'→ Royalties', payouts:'→ Payouts'
   };
   const screenRoutes = {
-    landing: '/mobile.html',
-    login: '/mobile.html/login',
-    signup: '/mobile.html/signup',
-    recover: '/mobile.html/recover',
-    dashboard: '/mobile.html/dashboard',
-    howitworks: '/mobile.html/how-it-works',
-    about: '/mobile.html/about',
-    pricing: '/mobile.html/pricing',
-    terms: '/mobile.html/terms',
-    privacy: '/mobile.html/privacy'
+    landing: '/m',
+    login: '/m/login',
+    signup: '/m/signup',
+    recover: '/m/recover',
+    dashboard: '/m/dashboard',
+    howitworks: '/m/how-it-works',
+    about: '/m/about',
+    pricing: '/m/pricing',
+    terms: '/m/terms',
+    privacy: '/m/privacy'
   };
   const dashRoutes = {
-    overview: '/mobile.html/dashboard',
-    catalog: '/mobile.html/dashboard/catalog',
-    'add-song': '/mobile.html/dashboard/add-song',
-    royalties: '/mobile.html/dashboard/royalties',
-    payouts: '/mobile.html/dashboard/payouts'
+    overview: '/m/dashboard',
+    catalog: '/m/dashboard/catalog',
+    'add-song': '/m/dashboard/add-song',
+    royalties: '/m/dashboard/royalties',
+    payouts: '/m/dashboard/payouts'
   };
 
   function toggleLandingMenu() {
@@ -1241,7 +1241,7 @@ html, body {
         const label = name === 'catalog' ? '→ Catalog' : name === 'royalties' ? '→ Royalties' : name === 'payouts' ? '→ Payouts' : '';
         if (b.textContent.trim() === label) b.classList.add('active');
       });
-      const dRoute = dashRoutes[name] || '/mobile.html/dashboard';
+      const dRoute = dashRoutes[name] || '/m/dashboard';
       history.pushState({ screen: name, dash: true }, '', dRoute);
       return;
     }
@@ -1251,7 +1251,7 @@ html, body {
     document.querySelectorAll('.snav-btn').forEach(b => {
       if (b.textContent.trim() === (screenLabels[name] || '')) b.classList.add('active');
     });
-    const route = screenRoutes[name] || '/mobile.html';
+    const route = screenRoutes[name] || '/m';
     history.pushState({ screen: name }, '', route);
   }
 
@@ -1288,7 +1288,7 @@ html, body {
   });
 
   function routeFromURL() {
-    const path = window.location.pathname.replace(/\/+$/, '') || '/mobile.html';
+    const path = window.location.pathname.replace(/\/+$/, '') || '/m';
     for (const [name, route] of Object.entries(dashRoutes)) {
       if (path === route && name !== 'overview') {
         go(name);
@@ -1674,7 +1674,7 @@ html, body {
         const artist = JSON.parse(decodeURIComponent(artistParam));
         localStorage.setItem('dv_token', token);
         localStorage.setItem('dv_artist', JSON.stringify(artist));
-        window.history.replaceState({}, '', '/mobile.html');
+        window.history.replaceState({}, '', '/m');
         mobSetArtistNav(artist);
         go('dashboard');
       } catch (e) { console.error('Auth callback parse error:', e); }

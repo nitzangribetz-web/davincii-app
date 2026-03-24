@@ -71,7 +71,7 @@ app.use('/api/passkeys', passkeyRoutes);
 
 // Serve frontend for all non-API routes
 app.get('{*path}', (req, res) => {
-  if (req.path.startsWith('/mobile.html')) {
+  if (req.path === '/m' || req.path.startsWith('/m/')) {
     res.sendFile('mobile.html', { root: path.join(__dirname, 'public') });
   } else {
     res.sendFile('index.html', { root: path.join(__dirname, 'public') });
