@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
 const migrate = require('./db/migrate');
@@ -13,7 +15,33 @@ const passkeyRoutes = require('./routes/passkeys');
 
 const app = express();
 
+// Security headers (allow inline scripts/styles for SPA, allow Google Fonts + CDN)
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://unpkg.com"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      imgSrc: ["'self'", "https://davincii.co", "data:"],
+      connectSrc: ["'self'"],
+    },
+  },
+}));
+
 app.use(cors());
+
+// Rate limiting on auth and passkey endpoints
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10,
+  message: { error: 'Too many attempts. Please try again in 15 minutes.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/signup', authLimiter);
+app.use('/api/passkeys/login', authLimiter);
 
 // Stripe webhook MUST receive raw body — register before express.json()
 app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
