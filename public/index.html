@@ -2601,7 +2601,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
   }
 
   function go(name) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active'); s.style.removeProperty('display'); });
     document.querySelectorAll('.snav-btn').forEach(b => b.classList.remove('active'));
 
     if (['catalog','royalties','payouts','overview'].includes(name)) {
@@ -2639,7 +2639,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
   window.addEventListener('popstate', function(e) {
     if (e.state && e.state.screen) {
       if (e.state.dash) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active'); s.style.removeProperty('display'); });
         document.getElementById('screen-dashboard').classList.add('active');
         document.querySelectorAll('.dash-page').forEach(p => p.style.display = 'none');
         const el = document.getElementById('dp-' + e.state.screen);
@@ -2648,7 +2648,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
         const active = document.getElementById('nl-' + e.state.screen);
         if (active) active.classList.add('active');
       } else {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active'); s.style.removeProperty('display'); });
         const el = document.getElementById(screenIds[e.state.screen]);
         if (el) { el.classList.add('active'); window.scrollTo(0,0); }
       }

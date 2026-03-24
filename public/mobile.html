@@ -1221,7 +1221,7 @@ html, body {
   });
 
   function go(name) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active'); s.style.removeProperty('display'); });
     document.querySelectorAll('.snav-btn').forEach(b => b.classList.remove('active'));
 
     if (['catalog','royalties','payouts','overview','add-song'].includes(name)) {
@@ -1261,7 +1261,7 @@ html, body {
   window.addEventListener('popstate', function(e) {
     if (e.state && e.state.screen) {
       if (e.state.dash) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active'); s.style.removeProperty('display'); });
         document.getElementById('screen-dashboard').classList.add('active');
         document.querySelectorAll('.dash-page').forEach(p => p.style.display = 'none');
         const el = document.getElementById('dp-' + e.state.screen);
@@ -1270,7 +1270,7 @@ html, body {
         const tab = document.getElementById('tab-' + e.state.screen);
         if (tab) tab.classList.add('active');
       } else {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active'); s.style.removeProperty('display'); });
         const el = document.getElementById(screenIds[e.state.screen]);
         if (el) { el.classList.add('active'); window.scrollTo(0,0); }
       }
