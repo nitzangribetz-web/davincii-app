@@ -41,8 +41,12 @@ app.use('/api/stripe', stripeRoutes);
 app.use('/api/passkeys', passkeyRoutes);
 
 // Serve frontend for all non-API routes
-app.get('*path', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+app.get('{*path}', (req, res) => {
+  if (req.path.startsWith('/mobile.html')) {
+    res.sendFile('mobile.html', { root: path.join(__dirname, 'public') });
+  } else {
+    res.sendFile('index.html', { root: path.join(__dirname, 'public') });
+  }
 });
 
 // Global error handler

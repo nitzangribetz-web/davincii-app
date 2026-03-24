@@ -43,7 +43,7 @@ html, body {
 /* ── SHARED ── */
 .field-label { font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.13em; text-transform:uppercase; color:#2a2a2a; margin-bottom:7px; display:block; }
 .field { width:100%; border:1px solid rgba(0,0,0,0.16); padding:14px 16px; font-family:var(--sans); font-size:16px; font-weight:400; color:var(--black); background:transparent; outline:none; margin-bottom:16px; transition:border-color 0.18s; border-radius:0; -webkit-appearance:none; }
-.field:focus { border-color:var(--red); }
+.field:focus { border-color:var(--black); }
 .field::placeholder { color:#c0c0c0; }
 .btn-primary { width:100%; background:var(--black); color:var(--white); border:none; padding:16px; font-family:var(--sans); font-size:12px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; cursor:pointer; }
 .btn-primary.loading { pointer-events:none; opacity:0.85; display:flex; align-items:center; justify-content:center; gap:10px; }
@@ -226,6 +226,7 @@ html, body {
   border-bottom: 1px solid var(--border);
 }
 .mob-auth-logo { font-family:var(--script); font-size:28px; color:var(--black); line-height:1; }
+.mob-auth-logo img, .mob-nav-logo img, .mob-mkt-logo img { filter:brightness(0); }
 .mob-back-btn { font-family:var(--sans); font-size:11px; font-weight:400; letter-spacing:0.10em; text-transform:uppercase; color:var(--muted); background:none; border:none; cursor:pointer; padding:0; }
 
 .mob-auth-hero {
@@ -235,15 +236,15 @@ html, body {
   overflow: hidden;
 }
 .mob-auth-hero::before { content:''; position:absolute; inset:0; background-image:var(--noise); opacity:0.04; pointer-events:none; }
-.mob-auth-hero::after { content:''; position:absolute; bottom:-80px; left:-60px; width:260px; height:260px; background:radial-gradient(ellipse, rgba(184,0,0,0.08) 0%, transparent 70%); pointer-events:none; }
-.mob-auth-rule { width:20px; height:2px; background:var(--red); margin-bottom:14px; position:relative; z-index:1; }
+.mob-auth-hero::after { content:''; position:absolute; bottom:-80px; left:-60px; width:260px; height:260px; background:radial-gradient(ellipse, rgba(8,8,8,0.08) 0%, transparent 70%); pointer-events:none; }
+.mob-auth-rule { width:20px; height:2px; background:var(--black); margin-bottom:14px; position:relative; z-index:1; }
 .mob-auth-tagline { font-family:var(--serif); font-size:28px; font-weight:300; color:var(--white); line-height:1.2; position:relative; z-index:1; }
 .mob-auth-tagline em { font-style:italic; color:rgba(255,255,255,0.6); }
 
 .mob-auth-form { padding:28px 24px 40px; flex:1; }
 .mob-auth-title { font-family:var(--serif); font-size:36px; font-weight:400; letter-spacing:-0.02em; line-height:1.1; margin-bottom:6px; }
 .mob-auth-title em { font-style:italic; }
-.mob-auth-title-rule { width:20px; height:2px; background:var(--red); margin-bottom:14px; }
+.mob-auth-title-rule { width:20px; height:2px; background:var(--black); margin-bottom:14px; }
 .mob-auth-sub { font-family:var(--sans); font-size:13px; font-weight:300; color:var(--muted); margin-bottom:24px; line-height:1.6; }
 
 /* ════════════════════════════
@@ -1273,7 +1274,7 @@ html, body {
   });
 
   function routeFromURL() {
-    const path = window.location.pathname;
+    const path = window.location.pathname.replace(/\/+$/, '') || '/mobile.html';
     for (const [name, route] of Object.entries(dashRoutes)) {
       if (path === route && name !== 'overview') {
         go(name);
@@ -1285,6 +1286,12 @@ html, body {
         go(name);
         return;
       }
+    }
+    // Fallback: extract screen name from URL path segment
+    const seg = path.split('/').pop();
+    if (seg && screenIds[seg]) {
+      go(seg);
+      return;
     }
     if (localStorage.getItem('dv_token')) {
       go('dashboard');
