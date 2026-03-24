@@ -1,4 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <rect width="512" height="512" fill="#080808"/>
-  <text x="252" y="420" font-family="cursive" font-size="490" fill="#ffffff" text-anchor="middle" font-style="italic">D</text>
+  <defs>
+    <style>@import url('https://fonts.googleapis.com/css2?family=Pinyon+Script&amp;display=swap');</style>
+  </defs>
+  <text x="256" y="415" font-family="'Pinyon Script', cursive" font-size="478" fill="#B80000" text-anchor="middle">D</text>
 </svg>
