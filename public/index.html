@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script>if(/Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)&&window.innerWidth<768&&!window.location.pathname.includes('mobile')){window.location.replace('/mobile.html'+window.location.search);}</script>
+<!-- Mobile detection handled server-side via user-agent -->
 <title>Davincii — Artist Portal</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20fill%3D%22%23fff%22/%3E%3Ctext%20x%3D%223%22%20y%3D%2228%22%20font-family%3D%22Georgia%2Cserif%22%20font-style%3D%22italic%22%20font-size%3D%2230%22%20fill%3D%22%23080808%22%3ED%3C/text%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Inter:wght@300;400;500;600&family=Pinyon+Script&display=swap" rel="stylesheet">
@@ -1940,6 +1940,10 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
         <button class="btn-primary" id="btn-login" type="submit" style="margin-bottom:22px">Sign in &rarr;</button>
         </form>
         <div class="divider"><div class="divider-line"></div><span class="divider-text">or continue with</span><div class="divider-line"></div></div>
+        <button class="btn-social" id="btn-passkey-login" onclick="handlePasskeyLogin()" style="display:none">
+          <svg class="btn-social-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1"/></svg>
+          Sign in with Passkey
+        </button>
         <button class="btn-social" onclick="alert('Coming soon!')">
           <svg class="btn-social-icon" viewBox="0 0 18 18"><path d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
           Continue with Google
@@ -2132,6 +2136,15 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
           </div>
           <div class="sbox-body" id="overview-catalog-body">
             <div style="padding:40px 20px;text-align:center;font-family:var(--sans);font-size:13px;color:var(--muted)">No songs in your catalog yet. <a style="color:var(--black);font-weight:500;text-decoration:underline;cursor:pointer" onclick="showDashPage('add-song')">Add your first song</a></div>
+          </div>
+        </div>
+        <div class="sbox" id="passkey-section" style="display:none">
+          <div class="sbox-head">
+            <div><div class="sbox-title">Security</div><div class="sbox-sub">Set up biometric login for faster access</div></div>
+          </div>
+          <div class="sbox-body" style="padding:20px">
+            <button class="btn-primary" id="btn-register-passkey" onclick="handleRegisterPasskey()" style="max-width:320px">Register Passkey (Face ID / Touch ID)</button>
+            <div style="font-family:var(--sans);font-size:12px;color:var(--muted);margin-top:10px">Once registered, you can sign in using your device's biometrics instead of typing your password.</div>
           </div>
         </div>
       </div>
@@ -2524,6 +2537,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
   <div id="privacy-footer"></div>
 </div>
 
+<script src="https://unpkg.com/@simplewebauthn/browser@11.0.0/dist/bundle/index.umd.min.js"></script>
 <script>
   function injectFooters() {
     const tpl = document.getElementById('footer-tpl').content;
@@ -2890,6 +2904,66 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
     }
   })();
 
+  // ── PASSKEY / BIOMETRIC AUTH ──
+  (function initPasskeyButton() {
+    if (window.PublicKeyCredential) {
+      var btn = document.getElementById('btn-passkey-login');
+      if (btn) btn.style.display = '';
+    }
+  })();
+
+  async function handlePasskeyLogin() {
+    hideError('login-error');
+    var btn = document.getElementById('btn-passkey-login');
+    var origText = btn.innerHTML;
+    btn.classList.add('loading');
+    btn.innerHTML = '<span class="btn-spinner"></span> Authenticating...';
+    try {
+      var optRes = await fetch('/api/passkeys/login/options', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+      var options = await optRes.json();
+      if (options.error) throw new Error(options.error);
+      var authResp = await SimpleWebAuthnBrowser.startAuthentication({ optionsJSON: options });
+      var verifyRes = await fetch('/api/passkeys/login/verify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(authResp) });
+      var data = await verifyRes.json();
+      if (data.error) throw new Error(data.error);
+      localStorage.setItem('dv_token', data.token);
+      localStorage.setItem('dv_artist', JSON.stringify(data.artist));
+      btn.innerHTML = '<span style="color:#4ade80">&#10003;</span> Success';
+      setTimeout(function() { btn.classList.remove('loading'); btn.innerHTML = origText; onAuthSuccess(data.artist, false); }, 600);
+    } catch (e) {
+      btn.classList.remove('loading');
+      btn.innerHTML = origText;
+      if (e.name === 'NotAllowedError') return;
+      showError('login-error', e.message || 'Passkey login failed. Try signing in with your password.');
+    }
+  }
+
+  async function handleRegisterPasskey() {
+    var token = localStorage.getItem('dv_token');
+    if (!token) { alert('Please sign in first.'); return; }
+    var btn = document.getElementById('btn-register-passkey');
+    if (!btn) return;
+    var origText = btn.innerHTML;
+    btn.classList.add('loading');
+    btn.innerHTML = '<span class="btn-spinner"></span> Registering...';
+    try {
+      var optRes = await fetch('/api/passkeys/register/options', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: '{}' });
+      var options = await optRes.json();
+      if (options.error) throw new Error(options.error);
+      var regResp = await SimpleWebAuthnBrowser.startRegistration({ optionsJSON: options });
+      var verifyRes = await fetch('/api/passkeys/register/verify', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify(regResp) });
+      var data = await verifyRes.json();
+      if (data.error) throw new Error(data.error);
+      btn.innerHTML = '<span style="color:#4ade80">&#10003;</span> Passkey registered';
+      setTimeout(function() { btn.classList.remove('loading'); btn.innerHTML = origText; }, 2000);
+    } catch (e) {
+      btn.classList.remove('loading');
+      btn.innerHTML = origText;
+      if (e.name === 'NotAllowedError') return;
+      alert(e.message || 'Failed to register passkey.');
+    }
+  }
+
   function onAuthSuccess(artist, isSignup) {
     const name = artist.name || artist.email;
     const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
@@ -2903,6 +2977,10 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
     if (ddEmail) ddEmail.textContent = artist.email || '';
     const avatar = document.getElementById('avatar-initials');
     if (avatar) avatar.textContent = initials || '—';
+    if (window.PublicKeyCredential) {
+      var pkSec = document.getElementById('passkey-section');
+      if (pkSec) pkSec.style.display = '';
+    }
 
     go('dashboard');
   }

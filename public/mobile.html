@@ -43,7 +43,7 @@ html, body {
 /* ── SHARED ── */
 .field-label { font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.13em; text-transform:uppercase; color:#2a2a2a; margin-bottom:7px; display:block; }
 .field { width:100%; border:1px solid rgba(0,0,0,0.16); padding:14px 16px; font-family:var(--sans); font-size:16px; font-weight:400; color:var(--black); background:transparent; outline:none; margin-bottom:16px; transition:border-color 0.18s; border-radius:0; -webkit-appearance:none; }
-.field:focus { border-color:var(--red); }
+.field:focus { border-color:var(--black); }
 .field::placeholder { color:#c0c0c0; }
 .btn-primary { width:100%; background:var(--black); color:var(--white); border:none; padding:16px; font-family:var(--sans); font-size:12px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; cursor:pointer; }
 .btn-primary.loading { pointer-events:none; opacity:0.85; display:flex; align-items:center; justify-content:center; gap:10px; }
@@ -226,6 +226,7 @@ html, body {
   border-bottom: 1px solid var(--border);
 }
 .mob-auth-logo { font-family:var(--script); font-size:28px; color:var(--black); line-height:1; }
+.mob-auth-logo img, .mob-nav-logo img, .mob-mkt-logo img { filter:brightness(0); }
 .mob-back-btn { font-family:var(--sans); font-size:11px; font-weight:400; letter-spacing:0.10em; text-transform:uppercase; color:var(--muted); background:none; border:none; cursor:pointer; padding:0; }
 
 .mob-auth-hero {
@@ -235,15 +236,15 @@ html, body {
   overflow: hidden;
 }
 .mob-auth-hero::before { content:''; position:absolute; inset:0; background-image:var(--noise); opacity:0.04; pointer-events:none; }
-.mob-auth-hero::after { content:''; position:absolute; bottom:-80px; left:-60px; width:260px; height:260px; background:radial-gradient(ellipse, rgba(184,0,0,0.08) 0%, transparent 70%); pointer-events:none; }
-.mob-auth-rule { width:20px; height:2px; background:var(--red); margin-bottom:14px; position:relative; z-index:1; }
+.mob-auth-hero::after { content:''; position:absolute; bottom:-80px; left:-60px; width:260px; height:260px; background:radial-gradient(ellipse, rgba(8,8,8,0.08) 0%, transparent 70%); pointer-events:none; }
+.mob-auth-rule { width:20px; height:2px; background:var(--black); margin-bottom:14px; position:relative; z-index:1; }
 .mob-auth-tagline { font-family:var(--serif); font-size:28px; font-weight:300; color:var(--white); line-height:1.2; position:relative; z-index:1; }
 .mob-auth-tagline em { font-style:italic; color:rgba(255,255,255,0.6); }
 
 .mob-auth-form { padding:28px 24px 40px; flex:1; }
 .mob-auth-title { font-family:var(--serif); font-size:36px; font-weight:400; letter-spacing:-0.02em; line-height:1.1; margin-bottom:6px; }
 .mob-auth-title em { font-style:italic; }
-.mob-auth-title-rule { width:20px; height:2px; background:var(--red); margin-bottom:14px; }
+.mob-auth-title-rule { width:20px; height:2px; background:var(--black); margin-bottom:14px; }
 .mob-auth-sub { font-family:var(--sans); font-size:13px; font-weight:300; color:var(--muted); margin-bottom:24px; line-height:1.6; }
 
 /* ════════════════════════════
@@ -752,6 +753,10 @@ html, body {
     <button class="btn-primary" id="mob-btn-login" type="submit" style="margin-bottom:20px">Sign in &rarr;</button>
     </form>
     <div class="divider"><div class="divider-line"></div><span class="divider-text">or continue with</span><div class="divider-line"></div></div>
+    <button class="btn-social" id="mob-btn-passkey-login" onclick="mobHandlePasskeyLogin()" style="display:none">
+      <svg class="btn-social-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1"/></svg>
+      Sign in with Passkey
+    </button>
     <button class="btn-social" onclick="alert('Coming soon!')">
       <svg class="btn-social-icon" viewBox="0 0 18 18"><path d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
       Continue with Google
@@ -886,6 +891,15 @@ html, body {
       </div>
       <div class="mob-sbox-body" id="mob-overview-catalog-body">
         <div style="padding:32px 16px;text-align:center;font-family:var(--sans);font-size:13px;color:var(--muted)">No songs in your catalog yet. <a style="color:var(--black);font-weight:500;text-decoration:underline;cursor:pointer" onclick="showDashPage('add-song')">Add your first song</a></div>
+      </div>
+    </div>
+    <div class="mob-sbox" id="mob-passkey-section" style="display:none">
+      <div class="mob-sbox-head">
+        <div><div class="mob-sbox-title">Security</div><div class="mob-sbox-sub">Biometric login</div></div>
+      </div>
+      <div class="mob-sbox-body" style="padding:16px">
+        <button class="btn-primary" id="mob-btn-register-passkey" onclick="mobHandleRegisterPasskey()">Register Passkey (Face ID / Touch ID)</button>
+        <div style="font-family:var(--sans);font-size:11px;color:var(--muted);margin-top:8px;line-height:1.5">Once registered, you can sign in using your device's biometrics instead of typing your password.</div>
       </div>
     </div>
   </div>
@@ -1161,6 +1175,7 @@ html, body {
   <div id="privacy-footer"></div>
 </div>
 
+<script src="https://unpkg.com/@simplewebauthn/browser@11.0.0/dist/bundle/index.umd.min.js"></script>
 <script>
   // Inject footer
   function injectFooters() {
@@ -1185,23 +1200,23 @@ html, body {
     catalog:'→ Catalog', royalties:'→ Royalties', payouts:'→ Payouts'
   };
   const screenRoutes = {
-    landing: '/mobile.html',
-    login: '/mobile.html/login',
-    signup: '/mobile.html/signup',
-    recover: '/mobile.html/recover',
-    dashboard: '/mobile.html/dashboard',
-    howitworks: '/mobile.html/how-it-works',
-    about: '/mobile.html/about',
-    pricing: '/mobile.html/pricing',
-    terms: '/mobile.html/terms',
-    privacy: '/mobile.html/privacy'
+    landing: '/',
+    login: '/login',
+    signup: '/signup',
+    recover: '/recover',
+    dashboard: '/dashboard',
+    howitworks: '/how-it-works',
+    about: '/about',
+    pricing: '/pricing',
+    terms: '/terms',
+    privacy: '/privacy'
   };
   const dashRoutes = {
-    overview: '/mobile.html/dashboard',
-    catalog: '/mobile.html/dashboard/catalog',
-    'add-song': '/mobile.html/dashboard/add-song',
-    royalties: '/mobile.html/dashboard/royalties',
-    payouts: '/mobile.html/dashboard/payouts'
+    overview: '/dashboard',
+    catalog: '/dashboard/catalog',
+    'add-song': '/dashboard/add-song',
+    royalties: '/dashboard/royalties',
+    payouts: '/dashboard/payouts'
   };
 
   function toggleLandingMenu() {
@@ -1230,7 +1245,7 @@ html, body {
         const label = name === 'catalog' ? '→ Catalog' : name === 'royalties' ? '→ Royalties' : name === 'payouts' ? '→ Payouts' : '';
         if (b.textContent.trim() === label) b.classList.add('active');
       });
-      const dRoute = dashRoutes[name] || '/mobile.html/dashboard';
+      const dRoute = dashRoutes[name] || '/dashboard';
       history.pushState({ screen: name, dash: true }, '', dRoute);
       return;
     }
@@ -1240,7 +1255,7 @@ html, body {
     document.querySelectorAll('.snav-btn').forEach(b => {
       if (b.textContent.trim() === (screenLabels[name] || '')) b.classList.add('active');
     });
-    const route = screenRoutes[name] || '/mobile.html';
+    const route = screenRoutes[name] || '/';
     history.pushState({ screen: name }, '', route);
   }
 
@@ -1277,7 +1292,7 @@ html, body {
   });
 
   function routeFromURL() {
-    const path = window.location.pathname;
+    const path = window.location.pathname.replace(/\/+$/, '') || '/';
     for (const [name, route] of Object.entries(dashRoutes)) {
       if (path === route && name !== 'overview') {
         go(name);
@@ -1289,6 +1304,12 @@ html, body {
         go(name);
         return;
       }
+    }
+    // Fallback: extract screen name from URL path segment
+    const seg = path.split('/').pop();
+    if (seg && screenIds[seg]) {
+      go(seg);
+      return;
     }
     if (localStorage.getItem('dv_token')) {
       go('dashboard');
@@ -1508,6 +1529,67 @@ html, body {
     }
   })();
 
+  // ── PASSKEY / BIOMETRIC AUTH ──
+  (function initMobPasskeyButton() {
+    if (window.PublicKeyCredential) {
+      var btn = document.getElementById('mob-btn-passkey-login');
+      if (btn) btn.style.display = '';
+    }
+  })();
+
+  async function mobHandlePasskeyLogin() {
+    mobHideError('mob-login-error');
+    var btn = document.getElementById('mob-btn-passkey-login');
+    var origText = btn.innerHTML;
+    btn.classList.add('loading');
+    btn.innerHTML = '<span class="btn-spinner"></span> Authenticating...';
+    try {
+      var optRes = await fetch('/api/passkeys/login/options', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+      var options = await optRes.json();
+      if (options.error) throw new Error(options.error);
+      var authResp = await SimpleWebAuthnBrowser.startAuthentication({ optionsJSON: options });
+      var verifyRes = await fetch('/api/passkeys/login/verify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(authResp) });
+      var data = await verifyRes.json();
+      if (data.error) throw new Error(data.error);
+      localStorage.setItem('dv_token', data.token);
+      localStorage.setItem('dv_artist', JSON.stringify(data.artist));
+      mobSetArtistNav(data.artist);
+      btn.innerHTML = '<span style="color:#4ade80">&#10003;</span> Success';
+      setTimeout(function() { btn.classList.remove('loading'); btn.innerHTML = origText; go('dashboard'); }, 600);
+    } catch (e) {
+      btn.classList.remove('loading');
+      btn.innerHTML = origText;
+      if (e.name === 'NotAllowedError') return;
+      mobShowError('mob-login-error', e.message || 'Passkey login failed. Try signing in with your password.');
+    }
+  }
+
+  async function mobHandleRegisterPasskey() {
+    var token = localStorage.getItem('dv_token');
+    if (!token) { alert('Please sign in first.'); return; }
+    var btn = document.getElementById('mob-btn-register-passkey');
+    if (!btn) return;
+    var origText = btn.innerHTML;
+    btn.classList.add('loading');
+    btn.innerHTML = '<span class="btn-spinner"></span> Registering...';
+    try {
+      var optRes = await fetch('/api/passkeys/register/options', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: '{}' });
+      var options = await optRes.json();
+      if (options.error) throw new Error(options.error);
+      var regResp = await SimpleWebAuthnBrowser.startRegistration({ optionsJSON: options });
+      var verifyRes = await fetch('/api/passkeys/register/verify', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify(regResp) });
+      var data = await verifyRes.json();
+      if (data.error) throw new Error(data.error);
+      btn.innerHTML = '<span style="color:#4ade80">&#10003;</span> Passkey registered';
+      setTimeout(function() { btn.classList.remove('loading'); btn.innerHTML = origText; }, 2000);
+    } catch (e) {
+      btn.classList.remove('loading');
+      btn.innerHTML = origText;
+      if (e.name === 'NotAllowedError') return;
+      alert(e.message || 'Failed to register passkey.');
+    }
+  }
+
   function mobSetArtistNav(artist) {
     const name = artist.name || artist.email;
     const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
@@ -1519,6 +1601,10 @@ html, body {
     if (ddEmail) ddEmail.textContent = artist.email || '';
     const avatar = document.getElementById('mob-avatar-initials');
     if (avatar) avatar.textContent = initials || '—';
+    if (window.PublicKeyCredential) {
+      var pkSec = document.getElementById('mob-passkey-section');
+      if (pkSec) pkSec.style.display = '';
+    }
   }
 
 
@@ -1542,7 +1628,7 @@ html, body {
         const artist = JSON.parse(decodeURIComponent(artistParam));
         localStorage.setItem('dv_token', token);
         localStorage.setItem('dv_artist', JSON.stringify(artist));
-        window.history.replaceState({}, '', '/mobile.html');
+        window.history.replaceState({}, '', '/');
         mobSetArtistNav(artist);
         go('dashboard');
       } catch (e) { console.error('Auth callback parse error:', e); }
