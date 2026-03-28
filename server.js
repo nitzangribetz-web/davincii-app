@@ -11,7 +11,6 @@ const songRoutes = require('./routes/songs');
 const royaltyRoutes = require('./routes/royalties');
 const payoutRoutes = require('./routes/payouts');
 const stripeRoutes = require('./routes/stripe');
-const passkeyRoutes = require('./routes/passkeys');
 
 const app = express();
 
@@ -48,7 +47,9 @@ app.use('/api/passkeys/login', authLimiter);
 app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public'), { index: false }));
+app.use(express.urlencoded({ extended: false }));
+const publicDir = path.resolve(__dirname, 'public');
+app.use(express.static(publicDir));
 
 // DB health check
 const pool = require('./db/pool');
@@ -67,17 +68,11 @@ app.use('/api/songs', songRoutes);
 app.use('/api/royalties', royaltyRoutes);
 app.use('/api/payouts', payoutRoutes);
 app.use('/api/stripe', stripeRoutes);
-app.use('/api/passkeys', passkeyRoutes);
 
-// Serve frontend for all non-API routes (detect mobile via user-agent)
-const mobileUA = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i;
-app.get('{*path}', (req, res) => {
-  const ua = req.headers['user-agent'] || '';
-  if (mobileUA.test(ua)) {
-    res.sendFile('mobile.html', { root: path.join(__dirname, 'public') });
-  } else {
-    res.sendFile('index.html', { root: path.join(__dirname, 'public') });
-  }
+// Serve SPA for all non-API, non-static routes (catch-all)
+app.use((req, res, next) => {
+  if (req.method !== 'GET' || req.path.startsWith('/api/')) return next();
+  res.sendFile(path.join(publicDir, 'index.html'));
 });
 
 // Global error handler

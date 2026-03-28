@@ -1931,11 +1931,11 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
         <div class="auth-title-rule"></div>
         <p class="auth-form-sub">Sign in to your artist portal to view your earnings and claim payments.</p>
         <div class="error-box" id="login-error"></div>
-        <form id="login-form" autocomplete="on" onsubmit="event.preventDefault(); handleLogin();">
+        <form id="login-form" action="/api/auth/login" method="POST" autocomplete="on">
         <label class="field-label">Email address</label>
-        <input class="field" type="email" name="username" autocomplete="username" placeholder="you@example.com" id="login-email">
+        <input class="field" type="email" name="email" autocomplete="username" placeholder="you@example.com" id="login-email" required>
         <label class="field-label">Password</label>
-        <input class="field" type="password" name="password" autocomplete="current-password" placeholder="Enter your password" id="login-password">
+        <input class="field" type="password" name="password" autocomplete="current-password" placeholder="Enter your password" id="login-password" required>
         <button class="auth-forgot" type="button" onclick="go('recover')">Forgot your password?</button>
         <button class="btn-primary" id="btn-login" type="submit" style="margin-bottom:22px">Sign in &rarr;</button>
         </form>
@@ -1976,13 +1976,13 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
         <div class="auth-title-rule"></div>
         <p class="auth-form-sub">Start collecting the royalties you're owed. No upfront cost, ever.</p>
         <div class="error-box" id="signup-error"></div>
-        <form id="signup-form" autocomplete="on" onsubmit="event.preventDefault(); handleSignup();">
+        <form id="signup-form" action="/api/auth/signup" method="POST" autocomplete="on">
         <label class="field-label">Full name</label>
-        <input class="field" type="text" name="name" autocomplete="name" placeholder="Your name" id="signup-name">
+        <input class="field" type="text" name="name" autocomplete="name" placeholder="Your name" id="signup-name" required>
         <label class="field-label">Email address</label>
-        <input class="field" type="email" name="email" autocomplete="email" placeholder="you@example.com" id="signup-email">
+        <input class="field" type="email" name="email" autocomplete="username" placeholder="you@example.com" id="signup-email" required>
         <label class="field-label">Password</label>
-        <input class="field" type="password" name="password" autocomplete="new-password" placeholder="Minimum 8 characters" id="signup-password">
+        <input class="field" type="password" name="password" autocomplete="new-password" placeholder="Minimum 8 characters" id="signup-password" required minlength="8">
         <button class="btn-primary" id="btn-signup" type="submit" style="margin-bottom:22px">Create account &rarr;</button>
         </form>
         <div class="divider"><div class="divider-line"></div><span class="divider-text">or continue with</span><div class="divider-line"></div></div>
@@ -2018,7 +2018,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
         <div class="auth-title-rule"></div>
         <p class="auth-form-sub">Enter your email and we'll send you a link to reset your password.</p>
         <label class="field-label">Email address</label>
-        <input class="field" type="email" placeholder="you@example.com">
+        <input class="field" type="email" name="username" autocomplete="username" placeholder="you@example.com" id="recover-email">
         <button class="btn-primary">Send reset link &rarr;</button>
         <div class="auth-link" style="margin-top:16px"><a onclick="go('login')">&larr; Back to sign in</a></div>
       </div>
@@ -2058,9 +2058,6 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
           </div>
           <div class="avatar-dropdown-section">
             <button class="avatar-menu-item" onclick="closeAvatarMenu()">
-              <span class="avatar-menu-icon">&#9881;</span> Account settings
-            </button>
-            <button class="avatar-menu-item" onclick="closeAvatarMenu()">
               <span class="avatar-menu-icon">&#128179;</span> Payout method
             </button>
             <button class="avatar-menu-item" onclick="closeAvatarMenu()">
@@ -2098,7 +2095,6 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
       <div class="sb-section">
         <span class="sb-label">Account</span>
         <button class="nav-lnk"><span class="nav-icon">&#10022;</span>Claim payment</button>
-        <button class="nav-lnk"><span class="nav-icon">&#9881;</span>Settings</button>
       </div>
     </div>
 
@@ -2305,6 +2301,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
           </div>
         </div>
       </div>
+
 
     </div><!-- /main-content -->
   </div><!-- /dash-layout -->
@@ -2610,6 +2607,10 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
   }
 
   function go(name) {
+    // Redirect to standalone auth pages for real browser form submission (Safari credential save)
+    if (name === 'login') { window.location.href = '/login.html'; return; }
+    if (name === 'signup') { window.location.href = '/signup.html'; return; }
+
     document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active'); s.style.removeProperty('display'); });
     document.querySelectorAll('.snav-btn').forEach(b => b.classList.remove('active'));
 
@@ -2872,6 +2873,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
   }
 
   // ── AUTH LOGIC ──
+
   function showError(id, msg) {
     const el = document.getElementById(id);
     if (el) { el.textContent = msg; el.style.display = 'block'; }
@@ -2881,72 +2883,26 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
     if (el) el.style.display = 'none';
   }
 
-  function handleLogin() {
-    hideError('login-error');
-    const email = document.getElementById('login-email').value.trim();
-    const password = document.getElementById('login-password').value;
-    if (!email || !password) { showError('login-error', 'Please enter your email and password.'); return; }
+  // Login and signup use real native form POST (no AJAX) so Safari detects
+  // the form submission + redirect and offers to save credentials to iCloud Keychain.
+  // The server responds with a 302 redirect to /auth-success?token=...&artist=...
+  // Errors redirect back to /login?error=... or /signup?error=...
 
-    const btn = document.getElementById('btn-login');
-    const origText = btn.innerHTML;
-    btn.classList.add('loading');
-    btn.innerHTML = '<span class="btn-spinner"></span> Signing in...';
-
-    fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
-    })
-    .then(r => r.json())
-    .then(data => {
-      if (data.error) {
-        btn.classList.remove('loading');
-        btn.innerHTML = origText;
-        showError('login-error', data.error);
-      } else {
-        localStorage.setItem('dv_token', data.token);
-        localStorage.setItem('dv_artist', JSON.stringify(data.artist));
-        btn.innerHTML = '<span style="color:#4ade80">&#10003;</span> Success';
-        setTimeout(() => { btn.classList.remove('loading'); btn.innerHTML = origText; onAuthSuccess(data.artist, false); }, 600);
+  // Show errors from URL params (after server redirect on auth failure)
+  (function showAuthErrors() {
+    const params = new URLSearchParams(window.location.search);
+    const error = params.get('error');
+    if (error) {
+      const path = window.location.pathname;
+      if (path === '/login' || path === '/signin') {
+        setTimeout(() => { showError('login-error', decodeURIComponent(error)); }, 50);
+      } else if (path === '/signup' || path === '/register') {
+        setTimeout(() => { showError('signup-error', decodeURIComponent(error)); }, 50);
       }
-    })
-    .catch(() => { btn.classList.remove('loading'); btn.innerHTML = origText; showError('login-error', 'Connection error. Please try again.'); });
-  }
-
-  function handleSignup() {
-    hideError('signup-error');
-    const name = document.getElementById('signup-name').value.trim();
-    const email = document.getElementById('signup-email').value.trim();
-    const password = document.getElementById('signup-password').value;
-    if (!name) { showError('signup-error', 'Please enter your name.'); return; }
-    if (!email) { showError('signup-error', 'Please enter your email.'); return; }
-    if (!password || password.length < 8) { showError('signup-error', 'Password must be at least 8 characters.'); return; }
-
-    const btn = document.getElementById('btn-signup');
-    const origText = btn.innerHTML;
-    btn.classList.add('loading');
-    btn.innerHTML = '<span class="btn-spinner"></span> Creating account...';
-
-    fetch('/api/auth/signup', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, password })
-    })
-    .then(r => r.json())
-    .then(data => {
-      if (data.error) {
-        btn.classList.remove('loading');
-        btn.innerHTML = origText;
-        showError('signup-error', data.error);
-      } else {
-        localStorage.setItem('dv_token', data.token);
-        localStorage.setItem('dv_artist', JSON.stringify(data.artist));
-        btn.innerHTML = '<span style="color:#4ade80">&#10003;</span> Success';
-        setTimeout(() => { btn.classList.remove('loading'); btn.innerHTML = origText; onAuthSuccess(data.artist, true); }, 600);
-      }
-    })
-    .catch(() => { btn.classList.remove('loading'); btn.innerHTML = origText; showError('signup-error', 'Connection error. Please try again.'); });
-  }
+      // Clean the URL
+      window.history.replaceState({}, '', path);
+    }
+  })();
 
   // ── PASSKEY / BIOMETRIC AUTH ──
   (function initPasskeyButton() {
@@ -3035,13 +2991,14 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
     const params = new URLSearchParams(window.location.search);
     const token = params.get('token');
     const artistParam = params.get('artist');
+    const isSignup = params.get('signup') === '1';
     if (token && artistParam) {
       try {
         const artist = JSON.parse(decodeURIComponent(artistParam));
         localStorage.setItem('dv_token', token);
         localStorage.setItem('dv_artist', JSON.stringify(artist));
         window.history.replaceState({}, '', '/');
-        onAuthSuccess(artist);
+        onAuthSuccess(artist, isSignup);
       } catch (e) { console.error('Auth callback parse error:', e); }
     }
     // Auto-login if token exists
@@ -3077,9 +3034,8 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
     }
   })();
 
-  // Allow Enter key to submit login/signup
-  document.getElementById('login-password')?.addEventListener('keydown', function(e) { if (e.key === 'Enter') handleLogin(); });
-  document.getElementById('signup-password')?.addEventListener('keydown', function(e) { if (e.key === 'Enter') handleSignup(); });
+  // Enter key submits natively now (real form POST), no JS handler needed
+
 
   // ── PARTICLE ANIMATION ──
   (function() {

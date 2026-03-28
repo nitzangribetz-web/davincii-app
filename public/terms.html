@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terms of Service — Davincii</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20fill%3D%22%23fff%22/%3E%3Ctext%20x%3D%223%22%20y%3D%2228%22%20font-family%3D%22Georgia%2Cserif%22%20font-style%3D%22italic%22%20font-size%3D%2230%22%20fill%3D%22%23080808%22%3ED%3C/text%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --black: #080808;
+  --white: #FFFFFF;
+  --red: #B80000;
+  --muted: #555;
+  --muted-light: #888;
+  --serif: 'Cormorant Garamond', Georgia, serif;
+  --sans: 'Inter', system-ui, sans-serif;
+}
+html, body { height:100%; }
+body { font-family:var(--sans); background:var(--white); color:var(--black); }
+
+.tos-nav {
+  position:sticky; top:0; z-index:10;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:18px 40px;
+  background:var(--white); border-bottom:1px solid rgba(0,0,0,0.08);
+}
+@media (max-width:768px) { .tos-nav { padding:16px 20px; } }
+.tos-nav-logo img { height:22px; display:block; filter:brightness(0); }
+.tos-nav-back { font-family:var(--sans); font-size:13px; font-weight:500; color:var(--muted); text-decoration:none; cursor:pointer; border:none; background:none; }
+.tos-nav-back:hover { color:var(--black); }
+
+.tos-container {
+  max-width:720px; margin:0 auto;
+  padding:56px 40px 80px;
+}
+@media (max-width:768px) { .tos-container { padding:36px 20px 60px; } }
+
+.tos-header { margin-bottom:40px; }
+.tos-company { font-family:var(--sans); font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted-light); margin-bottom:4px; }
+.tos-title { font-family:var(--serif); font-size:48px; font-weight:400; letter-spacing:-0.02em; line-height:1.08; color:var(--black); margin-bottom:8px; }
+.tos-title em { font-style:italic; }
+.tos-rule { width:24px; height:2px; background:var(--red); margin-bottom:16px; }
+.tos-subtitle { font-family:var(--sans); font-size:14px; font-weight:300; color:var(--muted); line-height:1.65; }
+
+.tos-callout {
+  border-left:3px solid var(--black);
+  padding:20px 24px;
+  margin:32px 0;
+  background:rgba(0,0,0,0.02);
+}
+.tos-callout p {
+  font-family:var(--sans); font-size:14px; font-weight:500; color:var(--black); line-height:1.7;
+}
+
+.tos-section { margin-bottom:32px; }
+.tos-section-title {
+  font-family:var(--sans); font-size:13px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase;
+  color:var(--black); padding-bottom:10px; border-bottom:1px solid rgba(0,0,0,0.10); margin-bottom:16px;
+}
+.tos-p {
+  font-family:var(--sans); font-size:14px; font-weight:300; color:#333; line-height:1.8; margin-bottom:14px;
+}
+.tos-p strong { font-weight:600; color:var(--black); }
+.tos-list {
+  list-style:none; padding-left:20px; margin-bottom:14px;
+}
+.tos-list li {
+  font-family:var(--sans); font-size:14px; font-weight:300; color:#333; line-height:1.8;
+  padding-left:8px; margin-bottom:6px; position:relative;
+}
+.tos-list li::before { content:'\2022'; position:absolute; left:-14px; color:var(--red); font-weight:700; }
+
+.tos-sub { font-family:var(--sans); font-size:13px; font-weight:300; color:#444; line-height:1.8; margin-bottom:12px; padding-left:16px; border-left:2px solid rgba(0,0,0,0.06); }
+.tos-sub strong { font-weight:600; color:var(--black); }
+
+.tos-highlight {
+  background:rgba(0,0,0,0.03); padding:16px 20px; margin:20px 0; border-radius:0;
+}
+.tos-highlight p {
+  font-family:var(--sans); font-size:14px; font-weight:500; color:var(--black); line-height:1.7; margin:0;
+}
+</style>
+</head>
+<body>
+
+<nav class="tos-nav">
+  <a class="tos-nav-logo" href="/"><img src="https://davincii.co/logo-sm.png" alt="Davincii"></a>
+  <button class="tos-nav-back" onclick="window.close(); window.history.back();">&larr; Back</button>
+</nav>
+
+<div class="tos-container">
+
+  <div class="tos-header">
+    <div class="tos-company">Davincii LLC</div>
+    <h1 class="tos-title">Terms of <em>Service.</em></h1>
+    <div class="tos-rule"></div>
+    <p class="tos-subtitle">By clicking "Accept" or completing onboarding, you're entering into an agreement with <strong>Davincii LLC</strong> ("Davincii"), a music publishing administration company based in New York. You are the <strong>"Artist"</strong> — or an Authorized Representative acting on the Artist's behalf.</p>
+  </div>
+
+  <div class="tos-callout">
+    <p>We find your missing royalties and make sure you get paid. No upfront fees. No ownership grab. You keep 100% of your music.</p>
+  </div>
+
+  <!-- Section 1 -->
+  <div class="tos-section">
+    <h2 class="tos-section-title">Section 1. What Davincii Does For You</h2>
+    <p class="tos-p">Davincii handles the administrative side of your publishing so you can focus on making music. That includes:</p>
+    <ul class="tos-list">
+      <li>Registering your songs with PROs (ASCAP, BMI, SESAC, and others), mechanical agencies, and collection societies — everywhere your music earns money.</li>
+      <li>Hunting down royalties you've already earned but haven't been paid — including money sitting uncollected before you joined Davincii.</li>
+      <li>Collecting and sending you your share of every dollar we find.</li>
+      <li>Handling registration paperwork on your behalf so you don't have to.</li>
+    </ul>
+    <p class="tos-p">We only administer your share of each song. We have zero authority over any co-writer's interest.</p>
+    <p class="tos-p"><strong>Your ownership is untouched.</strong> This agreement gives Davincii permission to administer your catalog — nothing more. You keep 100% of your copyright, always. The writer's share of performance income that PROs pay directly to you as a songwriter is yours entirely and is never touched by Davincii.</p>
+    <p class="tos-p"><strong>Historical royalties.</strong> If we find and recover money you earned before signing up — through gap analysis, audit work, or registration corrections — that money is treated the same as any other royalty we collect. We take our standard 15% and send you the rest.</p>
+
+    <div class="tos-sub"><strong>1.1 Metadata.</strong> To maximize what we recover, you agree to give us accurate song info: writer splits, co-writer details, ISWC and ISRC codes, and release dates. If we receive incomplete or inaccurate data, we can't be held responsible for any resulting gaps.</div>
+    <div class="tos-sub"><strong>1.2 Power of Attorney.</strong> By accepting these terms, you give Davincii a limited power of attorney — strictly limited to filing registrations with PROs, mechanical agencies, and collection societies for your submitted catalog. This permission cannot be used to transfer ownership or encumber your rights in any way, and it expires the moment this agreement ends (except to wrap up any in-progress collections).</div>
+    <div class="tos-sub"><strong>1.3 Digital Performance Royalties.</strong> If you own or control the sound recording rights and haven't directed collection elsewhere, you can separately authorize Davincii to register with SoundExchange or similar organizations. That requires a signed Letter of Direction from you — we won't touch digital performance royalties without it.</div>
+  </div>
+
+  <!-- Section 2 -->
+  <div class="tos-section">
+    <h2 class="tos-section-title">Section 2. Your Catalog</h2>
+    <p class="tos-p">Your catalog is yours to define. It includes only the songs you've specifically submitted to Davincii and that we've accepted for registration — nothing is added automatically just because you wrote it during the term.</p>
+    <p class="tos-p"><strong>"Compositions"</strong> means any musical work you authored or co-authored, whether it existed when you signed up or was submitted later. <strong>"Royalty Income"</strong> means publishing income from those songs: performance royalties (publisher's share), mechanical royalties, and related publishing revenue. It does not include master recording income or label-side royalties.</p>
+  </div>
+
+  <!-- Section 3 -->
+  <div class="tos-section">
+    <h2 class="tos-section-title">Section 3. Fees — Simple and Transparent</h2>
+    <div class="tos-highlight">
+      <p>No upfront costs. Davincii takes 15% of what we collect. You keep 85%. We earn nothing unless you do.</p>
+    </div>
+
+    <div class="tos-sub"><strong>3.1 Administration Fee.</strong> Davincii retains 15% of all royalties collected on your behalf — including money recovered through gap analysis or audit work. You receive 85% of everything we bring in.</div>
+    <div class="tos-sub"><strong>3.2 Songwriter Registration Fee.</strong> A one-time $100 Songwriter Registration Fee covers the cost of onboarding your catalog and setting up your publishing administration across all applicable platforms. Davincii advances this fee on your behalf — there is nothing to pay upfront. The $100 is then recouped from your first royalty disbursement, so you only see it once your music is earning.</div>
+    <div class="tos-sub"><strong>3.3 Accounting and Payment.</strong> Every quarter, within 45 days of the quarter closing, you'll receive a clear statement showing what was collected, what was deducted, and what's yours. We send your money at the same time. If your balance is under $50, it rolls to the next quarter. You can check your statements and request payment anytime through the Davincii dashboard. We pay via ACH, wire, PayPal, or another method we agree on.</div>
+    <div class="tos-sub"><strong>3.4 Your Audit Right.</strong> Once per year, with 30 days' notice, you have the right to audit our records at your expense. Statements are considered final if no written objection is raised within 180 days of receipt.</div>
+  </div>
+
+  <!-- Section 4 -->
+  <div class="tos-section">
+    <h2 class="tos-section-title">Section 4. Term and What Happens When You Leave</h2>
+    <p class="tos-p">This agreement starts on the date you complete onboarding and runs for one year, renewing automatically each year unless either of us gives 30 days' written notice before the renewal date. Either party can exit early only if the other commits a material breach and doesn't fix it within 30 days of written notice.</p>
+    <p class="tos-p"><strong>After you leave.</strong> For 12 months after this agreement ends, Davincii continues collecting royalties you earned during the term — making sure you get paid for work already done. Our 15% fee applies only during that window. Once the 12 months are up, Davincii has no further right to collect, receive, or take any fees — period, regardless of when the money arrives. We'll send you a final accounting and everything owed within 60 days of termination.</p>
+  </div>
+
+  <!-- Section 5 -->
+  <div class="tos-section">
+    <h2 class="tos-section-title">Section 5. Your Promises to Us</h2>
+    <p class="tos-p">By signing up, you confirm that: (a) you have the authority to enter this agreement; (b) you own or co-own the songs you submit and haven't already committed those rights to someone else; and (c) your songs don't infringe anyone else's rights.</p>
+    <p class="tos-p">If a claim arises because one of those things turns out to be untrue, you agree to cover us. Both of us also agree to keep each other's private financial and business information confidential — during this agreement and for three years after it ends.</p>
+  </div>
+
+  <!-- Section 6 -->
+  <div class="tos-section">
+    <h2 class="tos-section-title">Section 6. The Legal Stuff</h2>
+    <div class="tos-sub"><strong>6.1 Liability.</strong> Royalty amounts are controlled by third-party organizations — we can't guarantee a specific outcome. If Davincii is ever found liable for a claim, our liability is capped at the fees we retained in the 12 months before the claim. That cap doesn't apply in cases of gross negligence or willful misconduct on our part.</div>
+    <div class="tos-sub"><strong>6.2 Force Majeure.</strong> Neither of us is on the hook for delays or failures caused by things outside our control — acts of God, government action, platform outages, pandemics. We'll notify each other quickly and get back on track as soon as reasonably possible.</div>
+    <div class="tos-sub"><strong>6.3 Disputes.</strong> If we have a disagreement, we'll try to resolve it through mediation in New York, NY first. If that doesn't work within 30 days, it goes to binding arbitration under the AAA Commercial Arbitration Rules, also in New York. Whoever wins recovers their attorneys' fees. New York law governs this agreement.</div>
+  </div>
+
+  <!-- Section 7 -->
+  <div class="tos-section">
+    <h2 class="tos-section-title">Section 7. Everything Else</h2>
+    <div class="tos-sub"><strong>7.1 Notices.</strong> We'll reach each other by email (with read confirmation) or certified mail, using the contact info provided at onboarding or updated later in writing.</div>
+    <div class="tos-sub"><strong>7.2 Full Agreement.</strong> This is the complete agreement between us. Any changes require written sign-off from both parties — no surprises, no unilateral edits.</div>
+    <div class="tos-sub"><strong>7.3 Severability.</strong> If any part of this is found unenforceable, everything else stays in effect. Electronic signatures are valid and binding.</div>
+  </div>
+
+</div>
+</body>
+</html>
