@@ -81,22 +81,51 @@ router.get('/callback', async (req, res) => {
 
     // Redirect to frontend with token
     const artistPayload = encodeURIComponent(JSON.stringify({ id: artist.id, name: artist.name, email: artist.email }));
-    res.redirect(`/auth-success?token=${token}&artist=${artistPayload}`);
+    res.redirect(`/auth-complete.html?token=${token}&artist=${artistPayload}`);
   } catch (err) {
     console.error('OAuth callback error:', err.message);
     res.redirect('/?error=callback_failed');
   }
 });
 
+// Helper: generate JWT and build redirect URL for successful auth
+function authSuccessRedirect(artist, isSignup) {
+  const token = jwt.sign(
+    { id: artist.id, email: artist.email, name: artist.name },
+    process.env.JWT_SECRET,
+    { expiresIn: '7d' }
+  );
+  const artistPayload = encodeURIComponent(JSON.stringify({
+    id: artist.id, name: artist.name, email: artist.email
+  }));
+  const signupFlag = isSignup ? '&signup=1' : '';
+  return `/auth-complete.html?token=${token}&artist=${artistPayload}${signupFlag}`;
+}
+
 // POST /api/auth/signup
+// Form POST → 302 redirect (Safari saves credentials on real navigation)
+// JSON POST → JSON response (for passkey/API use)
 router.post('/signup', async (req, res) => {
-  const { name, email, password } = req.body;
+  const isFormSubmit = req.is('application/x-www-form-urlencoded');
+  // Support both "name" (legacy/JSON) and "first_name"+"last_name" (new form)
+  const first = req.body.first_name;
+  const last = req.body.last_name;
+  const name = (first && last) ? `${first.trim()} ${last.trim()}` : req.body.name;
+  const email = req.body.email;
+  const password = req.body.password;
+  const confirmPassword = req.body.confirm_password;
+
   if (!name || !email || !password) {
+    if (isFormSubmit) return res.redirect('/signup.html?error=' + encodeURIComponent('Name, email, and password are required'));
     return res.status(400).json({ error: 'Name, email, and password are required' });
+  }
+  if (isFormSubmit && confirmPassword && password !== confirmPassword) {
+    return res.redirect('/signup.html?error=' + encodeURIComponent('Passwords do not match'));
   }
   try {
     const existing = await pool.query('SELECT id FROM artists WHERE email = $1', [email]);
     if (existing.rows.length > 0) {
+      if (isFormSubmit) return res.redirect('/signup.html?error=' + encodeURIComponent('An account with this email already exists'));
       return res.status(409).json({ error: 'An account with this email already exists' });
     }
     const password_hash = await bcrypt.hash(password, 10);
@@ -105,6 +134,11 @@ router.post('/signup', async (req, res) => {
       [name, email, password_hash]
     );
     const artist = result.rows[0];
+
+    if (isFormSubmit) {
+      // 302 redirect → Safari detects successful form submission + navigation → saves credentials
+      return res.redirect(authSuccessRedirect(artist, true));
+    }
     const token = jwt.sign(
       { id: artist.id, email: artist.email, name: artist.name },
       process.env.JWT_SECRET,
@@ -113,25 +147,38 @@ router.post('/signup', async (req, res) => {
     res.status(201).json({ token, artist });
   } catch (err) {
     console.error('Signup error:', err.message);
+    if (isFormSubmit) return res.redirect('/signup.html?error=' + encodeURIComponent('Failed to create account'));
     res.status(500).json({ error: 'Failed to create account' });
   }
 });
 
 // POST /api/auth/login
+// Form POST → 302 redirect (Safari saves credentials on real navigation)
+// JSON POST → JSON response (for passkey/API use)
 router.post('/login', async (req, res) => {
+  const isFormSubmit = req.is('application/x-www-form-urlencoded');
   const { email, password } = req.body;
+
   if (!email || !password) {
+    if (isFormSubmit) return res.redirect('/login.html?error=' + encodeURIComponent('Email and password are required'));
     return res.status(400).json({ error: 'Email and password are required' });
   }
   try {
     const result = await pool.query('SELECT * FROM artists WHERE email = $1', [email]);
     const artist = result.rows[0];
     if (!artist) {
+      if (isFormSubmit) return res.redirect('/login.html?error=' + encodeURIComponent('Invalid email or password'));
       return res.status(401).json({ error: 'Invalid email or password' });
     }
     const validPassword = await bcrypt.compare(password, artist.password_hash);
     if (!validPassword) {
+      if (isFormSubmit) return res.redirect('/login.html?error=' + encodeURIComponent('Invalid email or password'));
       return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    if (isFormSubmit) {
+      // 302 redirect → Safari detects successful form submission + navigation → saves credentials
+      return res.redirect(authSuccessRedirect(artist, false));
     }
     const token = jwt.sign(
       { id: artist.id, email: artist.email, name: artist.name },
@@ -141,6 +188,7 @@ router.post('/login', async (req, res) => {
     res.json({ token, artist: { id: artist.id, name: artist.name, email: artist.email, created_at: artist.created_at } });
   } catch (err) {
     console.error('Login error:', err.message);
+    if (isFormSubmit) return res.redirect('/login.html?error=' + encodeURIComponent('Login failed'));
     res.status(500).json({ error: 'Login failed' });
   }
 });

@@ -743,11 +743,11 @@ html, body {
     <div class="mob-auth-title-rule"></div>
     <p class="mob-auth-sub">Sign in to your artist portal to view your earnings and claim payments.</p>
     <div class="error-box" id="mob-login-error"></div>
-    <form id="mob-login-form" autocomplete="on" onsubmit="event.preventDefault(); mobHandleLogin();">
+    <form id="mob-login-form" action="/api/auth/login" method="POST" autocomplete="on">
     <label class="field-label">Email address</label>
-    <input class="field" type="email" name="username" autocomplete="username" placeholder="you@example.com" id="mob-login-email">
+    <input class="field" type="email" name="email" autocomplete="username" placeholder="you@example.com" id="mob-login-email" required>
     <label class="field-label">Password</label>
-    <input class="field" type="password" name="password" autocomplete="current-password" placeholder="Enter your password" id="mob-login-password">
+    <input class="field" type="password" name="password" autocomplete="current-password" placeholder="Enter your password" id="mob-login-password" required>
     <button class="auth-forgot" type="button" onclick="go('recover')">Forgot your password?</button>
     <button class="btn-primary" id="mob-btn-login" type="submit" style="margin-bottom:20px">Sign in &rarr;</button>
     </form>
@@ -779,13 +779,13 @@ html, body {
     <div class="mob-auth-title-rule"></div>
     <p class="mob-auth-sub">Start collecting the royalties you're owed. No upfront cost, ever.</p>
     <div class="error-box" id="mob-signup-error"></div>
-    <form id="mob-signup-form" autocomplete="on" onsubmit="event.preventDefault(); mobHandleSignup();">
+    <form id="mob-signup-form" action="/api/auth/signup" method="POST" autocomplete="on">
     <label class="field-label">Full name</label>
-    <input class="field" type="text" name="name" autocomplete="name" placeholder="Your name" id="mob-signup-name">
+    <input class="field" type="text" name="name" autocomplete="name" placeholder="Your name" id="mob-signup-name" required>
     <label class="field-label">Email address</label>
-    <input class="field" type="email" name="email" autocomplete="email" placeholder="you@example.com" id="mob-signup-email">
+    <input class="field" type="email" name="email" autocomplete="username" placeholder="you@example.com" id="mob-signup-email" required>
     <label class="field-label">Password</label>
-    <input class="field" type="password" name="password" autocomplete="new-password" placeholder="Minimum 8 characters" id="mob-signup-password">
+    <input class="field" type="password" name="password" autocomplete="new-password" placeholder="Minimum 8 characters" id="mob-signup-password" required minlength="8">
     <button class="btn-primary" id="mob-btn-signup" type="submit" style="margin-bottom:20px">Create account &rarr;</button>
     </form>
     <div class="divider"><div class="divider-line"></div><span class="divider-text">or continue with</span><div class="divider-line"></div></div>
@@ -843,7 +843,6 @@ html, body {
             <button class="mob-dd-item" onclick="showDashPage('payouts');closeMenu()"><span class="mob-dd-icon">&#8593;</span>Payouts</button>
           </div>
           <div class="mob-dd-section">
-            <button class="mob-dd-item" onclick="closeMenu()"><span class="mob-dd-icon">&#9881;</span>Settings</button>
             <button class="mob-dd-item" onclick="closeMenu()"><span class="mob-dd-icon">&#128179;</span>Payout method</button>
           </div>
           <div class="mob-dd-section">
@@ -1007,6 +1006,7 @@ html, body {
       </div>
     </div>
   </div>
+
 
   <!-- BOTTOM TAB BAR -->
   <nav class="mob-tab-bar">
@@ -1216,6 +1216,10 @@ html, body {
   });
 
   function go(name) {
+    // Redirect to standalone auth pages for real browser form submission (Safari credential save)
+    if (name === 'login') { window.location.href = '/login.html'; return; }
+    if (name === 'signup') { window.location.href = '/signup.html'; return; }
+
     document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active'); s.style.removeProperty('display'); });
     document.querySelectorAll('.snav-btn').forEach(b => b.classList.remove('active'));
 
@@ -1477,6 +1481,9 @@ html, body {
   }
 
   // ── AUTH LOGIC (MOBILE) ──
+  // Login and signup use real native form POST (no AJAX) so Safari detects
+  // form submission + redirect and saves credentials to iCloud Keychain.
+
   function mobShowError(id, msg) {
     const el = document.getElementById(id);
     if (el) { el.textContent = msg; el.style.display = 'block'; }
@@ -1486,74 +1493,20 @@ html, body {
     if (el) el.style.display = 'none';
   }
 
-  function mobHandleLogin() {
-    mobHideError('mob-login-error');
-    const email = document.getElementById('mob-login-email').value.trim();
-    const password = document.getElementById('mob-login-password').value;
-    if (!email || !password) { mobShowError('mob-login-error', 'Please enter your email and password.'); return; }
-
-    const btn = document.getElementById('mob-btn-login');
-    const origText = btn.innerHTML;
-    btn.classList.add('loading');
-    btn.innerHTML = '<span class="btn-spinner"></span> Signing in...';
-
-    fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
-    })
-    .then(r => r.json())
-    .then(data => {
-      if (data.error) {
-        btn.classList.remove('loading');
-        btn.innerHTML = origText;
-        mobShowError('mob-login-error', data.error);
-      } else {
-        localStorage.setItem('dv_token', data.token);
-        localStorage.setItem('dv_artist', JSON.stringify(data.artist));
-        mobSetArtistNav(data.artist);
-        btn.innerHTML = '<span style="color:#4ade80">&#10003;</span> Success';
-        setTimeout(() => { btn.classList.remove('loading'); btn.innerHTML = origText; go('dashboard'); }, 600);
+  // Show errors from URL params (after server redirect on auth failure)
+  (function showMobAuthErrors() {
+    const params = new URLSearchParams(window.location.search);
+    const error = params.get('error');
+    if (error) {
+      const path = window.location.pathname;
+      if (path === '/login' || path === '/signin') {
+        setTimeout(() => { mobShowError('mob-login-error', decodeURIComponent(error)); }, 50);
+      } else if (path === '/signup' || path === '/register') {
+        setTimeout(() => { mobShowError('mob-signup-error', decodeURIComponent(error)); }, 50);
       }
-    })
-    .catch(() => { btn.classList.remove('loading'); btn.innerHTML = origText; mobShowError('mob-login-error', 'Connection error. Please try again.'); });
-  }
-
-  function mobHandleSignup() {
-    mobHideError('mob-signup-error');
-    const name = document.getElementById('mob-signup-name').value.trim();
-    const email = document.getElementById('mob-signup-email').value.trim();
-    const password = document.getElementById('mob-signup-password').value;
-    if (!name) { mobShowError('mob-signup-error', 'Please enter your name.'); return; }
-    if (!email) { mobShowError('mob-signup-error', 'Please enter your email.'); return; }
-    if (!password || password.length < 8) { mobShowError('mob-signup-error', 'Password must be at least 8 characters.'); return; }
-
-    const btn = document.getElementById('mob-btn-signup');
-    const origText = btn.innerHTML;
-    btn.classList.add('loading');
-    btn.innerHTML = '<span class="btn-spinner"></span> Creating account...';
-
-    fetch('/api/auth/signup', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, password })
-    })
-    .then(r => r.json())
-    .then(data => {
-      if (data.error) {
-        btn.classList.remove('loading');
-        btn.innerHTML = origText;
-        mobShowError('mob-signup-error', data.error);
-      } else {
-        localStorage.setItem('dv_token', data.token);
-        localStorage.setItem('dv_artist', JSON.stringify(data.artist));
-        mobSetArtistNav(data.artist);
-        btn.innerHTML = '<span style="color:#4ade80">&#10003;</span> Success';
-        setTimeout(() => { btn.classList.remove('loading'); btn.innerHTML = origText; go('dashboard'); }, 600);
-      }
-    })
-    .catch(() => { btn.classList.remove('loading'); btn.innerHTML = origText; mobShowError('mob-signup-error', 'Connection error. Please try again.'); });
-  }
+      window.history.replaceState({}, '', path);
+    }
+  })();
 
   function mobSetArtistNav(artist) {
     const name = artist.name || artist.email;
@@ -1583,6 +1536,7 @@ html, body {
     const params = new URLSearchParams(window.location.search);
     const token = params.get('token');
     const artistParam = params.get('artist');
+    const isSignup = params.get('signup') === '1';
     if (token && artistParam) {
       try {
         const artist = JSON.parse(decodeURIComponent(artistParam));
@@ -1609,6 +1563,7 @@ html, body {
 
   // Route based on URL
   setTimeout(routeFromURL, 100);
+
 
   // ── MOBILE PARTICLE ANIMATION ──
   (function() {

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Signing in — Davincii</title>
+<style>
+body {
+  margin: 0; display: flex; align-items: center; justify-content: center;
+  min-height: 100vh; font-family: 'Inter', system-ui, sans-serif;
+  background: #080808; color: #fff;
+}
+.msg { text-align: center; }
+.msg h1 { font-size: 18px; font-weight: 400; margin-bottom: 8px; }
+.msg p { font-size: 13px; color: rgba(255,255,255,0.5); }
+</style>
+</head>
+<body>
+<div class="msg">
+  <h1>Signing you in...</h1>
+  <p>You'll be redirected in a moment.</p>
+</div>
+
+<script>
+// This page loads after a real form POST + 302 redirect.
+// Safari has already seen the full form submission + navigation cycle,
+// so it will offer to save the credentials to iCloud Keychain.
+//
+// Now we store the auth token and redirect into the app.
+(function() {
+  var params = new URLSearchParams(window.location.search);
+  var token = params.get('token');
+  var artistParam = params.get('artist');
+  var isSignup = params.get('signup') === '1';
+
+  if (token && artistParam) {
+    try {
+      var artist = JSON.parse(decodeURIComponent(artistParam));
+      localStorage.setItem('dv_token', token);
+      localStorage.setItem('dv_artist', JSON.stringify(artist));
+      if (isSignup) {
+        localStorage.setItem('dv_just_signed_up', '1');
+      }
+    } catch (e) {
+      // Parse error — redirect to login
+      window.location.replace('/login.html');
+      return;
+    }
+    // Redirect into the app after a brief moment (page must fully load first for Safari)
+    setTimeout(function() {
+      window.location.replace('/');
+    }, 300);
+  } else {
+    // No token — something went wrong
+    window.location.replace('/login.html');
+  }
+})();
+</script>
+</body>
+</html>
