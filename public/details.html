@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Artist Details — Davincii</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20fill%3D%22%23fff%22/%3E%3Ctext%20x%3D%223%22%20y%3D%2228%22%20font-family%3D%22Georgia%2Cserif%22%20font-style%3D%22italic%22%20font-size%3D%2230%22%20fill%3D%22%23080808%22%3ED%3C/text%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Inter:wght@300;400;500;600&family=Pinyon+Script&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --black: #080808;
+  --white: #FFFFFF;
+  --red: #B80000;
+  --red-soft: rgba(184,0,0,0.07);
+  --muted: #555;
+  --muted-light: #888;
+  --serif: 'Cormorant Garamond', Georgia, serif;
+  --sans: 'Inter', system-ui, sans-serif;
+  --script: 'Pinyon Script', cursive;
+}
+html, body { height:100%; }
+body { font-family:var(--sans); background:var(--white); }
+
+.auth-layout { display:grid; grid-template-columns:300px 1fr; min-height:100vh; }
+@media (max-width:768px) { .auth-layout { grid-template-columns:1fr; } .auth-brand { display:none; } }
+
+.auth-brand {
+  background:var(--black); color:var(--white); padding:48px 36px;
+  display:flex; flex-direction:column; justify-content:space-between;
+  position:relative; overflow:hidden;
+}
+.auth-brand-logo img { height:26px; display:block; }
+.auth-brand-rule { width:24px; height:2px; background:var(--red); margin-bottom:20px; }
+.auth-brand-tagline { font-family:var(--serif); font-size:clamp(28px,2.5vw,38px); font-weight:300; color:var(--white); line-height:1.22; letter-spacing:-0.01em; margin-bottom:20px; }
+.auth-brand-tagline em { font-style:italic; color:rgba(255,255,255,0.6); }
+.auth-brand-sub { font-family:var(--sans); font-size:13px; font-weight:300; color:rgba(255,255,255,0.4); line-height:1.72; }
+.auth-brand-footer { font-family:var(--sans); font-size:10px; font-weight:400; letter-spacing:0.10em; text-transform:uppercase; color:rgba(255,255,255,0.18); }
+.auth-brand-bullets { list-style:none; margin-top:24px; }
+.auth-brand-bullets li { font-family:var(--sans); font-size:12px; font-weight:300; color:rgba(255,255,255,0.5); line-height:1.8; padding-left:16px; position:relative; }
+.auth-brand-bullets li::before { content:'\2022'; position:absolute; left:0; color:var(--red); font-weight:700; }
+
+.auth-form-panel { display:flex; align-items:flex-start; justify-content:center; padding:60px 64px; background:var(--white); overflow-y:auto; }
+@media (max-width:768px) { .auth-form-panel { padding:40px 24px; } }
+.auth-form-inner { width:100%; max-width:460px; }
+
+/* Steps */
+.steps { display:flex; align-items:center; gap:0; margin-bottom:36px; }
+.step { display:flex; align-items:center; gap:8px; }
+.step-num { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:var(--sans); font-size:12px; font-weight:600; }
+.step-num.done { background:var(--black); color:var(--white); }
+.step-num.active { background:var(--black); color:var(--white); }
+.step-num.inactive { background:transparent; border:1.5px solid #ccc; color:#aaa; }
+.step-label { font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.10em; text-transform:uppercase; }
+.step-label.done { color:var(--muted-light); }
+.step-label.active { color:var(--black); }
+.step-label.inactive { color:#aaa; }
+.step-line { width:48px; height:1px; background:#ddd; margin:0 12px; }
+.step-line.done { background:var(--black); }
+
+.auth-form-title { font-family:var(--serif); font-size:44px; font-weight:400; letter-spacing:-0.02em; line-height:1.08; margin-bottom:8px; color:var(--black); }
+.auth-form-title em { font-style:italic; }
+.auth-title-rule { width:24px; height:2px; background:var(--red); margin-bottom:16px; }
+.auth-form-sub { font-family:var(--sans); font-size:14px; font-weight:300; color:var(--muted); margin-bottom:32px; line-height:1.65; }
+
+.field-label { font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.13em; text-transform:uppercase; color:#2a2a2a; margin-bottom:7px; display:block; }
+.field { width:100%; border:1px solid rgba(0,0,0,0.16); padding:13px 16px; font-family:var(--sans); font-size:15px; font-weight:400; color:var(--black); background:transparent; outline:none; margin-bottom:18px; transition:border-color 0.18s; border-radius:0; -webkit-appearance:none; }
+.field:focus { border-color:var(--red); }
+.field::placeholder { color:#c0c0c0; }
+select.field { color:var(--black); background:var(--white); }
+select.field:invalid { color:#c0c0c0; }
+
+.field-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.field-row .field-group .field { margin-bottom:18px; }
+.field-group { display:flex; flex-direction:column; }
+
+.field-hint { font-family:var(--sans); font-size:11px; color:var(--muted-light); margin-top:-12px; margin-bottom:18px; line-height:1.5; }
+.field-hint a { color:var(--black); font-weight:500; text-decoration:underline; }
+
+.btn-row { display:flex; gap:12px; margin-top:8px; }
+.btn-primary { flex:1; background:var(--black); color:var(--white); border:none; padding:15px 32px; font-family:var(--sans); font-size:12px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; cursor:pointer; transition:background 0.18s; }
+.btn-primary:hover { background:#222; }
+.btn-ghost { flex:0 0 auto; background:transparent; color:var(--muted); border:1px solid rgba(0,0,0,0.16); padding:15px 24px; font-family:var(--sans); font-size:12px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; cursor:pointer; transition:background 0.18s, color 0.18s; }
+.btn-ghost:hover { background:rgba(0,0,0,0.04); color:var(--black); }
+
+.error-box { background:var(--red-soft); border-left:2px solid var(--red); padding:11px 14px; margin-bottom:16px; font-size:13px; color:var(--red); display:none; }
+.error-box.visible { display:block; }
+</style>
+</head>
+<body>
+<div class="auth-layout">
+  <div class="auth-brand">
+    <div class="auth-brand-logo"><img src="https://davincii.co/logo-white-sm.png" alt="Davincii"></div>
+    <div>
+      <div class="auth-brand-rule"></div>
+      <h2 class="auth-brand-tagline">"Most artists miss income not from lack of talent — but <em>lack of infrastructure.</em>"</h2>
+      <p class="auth-brand-sub">— DAVINCII</p>
+      <ul class="auth-brand-bullets">
+        <li>No upfront cost — ever</li>
+        <li>Register across 12+ global platforms</li>
+        <li>100% copyright stays with you</li>
+        <li>Quarterly payouts, full transparency</li>
+      </ul>
+    </div>
+    <div class="auth-brand-footer">info@davincii.co</div>
+  </div>
+
+  <div class="auth-form-panel">
+    <div class="auth-form-inner">
+
+      <div class="steps">
+        <div class="step"><span class="step-num done">&#10003;</span><span class="step-label done">Account</span></div>
+        <div class="step-line done"></div>
+        <div class="step"><span class="step-num active">2</span><span class="step-label active">Details</span></div>
+      </div>
+
+      <h1 class="auth-form-title">Artist <em>details.</em></h1>
+      <div class="auth-title-rule"></div>
+      <p class="auth-form-sub">Almost done — tell us how to register your catalog and where to send your royalties.</p>
+
+      <div class="error-box" id="details-error"></div>
+
+      <form method="POST" action="/api/auth/profile" autocomplete="on" id="details-form">
+        <label class="field-label" for="stage-name">Artist / Professional name</label>
+        <input class="field" type="text" name="stage_name" id="stage-name"
+               autocomplete="organization" placeholder="Stage name or professional name" required>
+
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label" for="pro">PRO affiliation</label>
+            <select class="field" name="pro" id="pro" required>
+              <option value="" disabled selected>Select your PRO</option>
+              <option value="ASCAP">ASCAP</option>
+              <option value="BMI">BMI</option>
+              <option value="SESAC">SESAC</option>
+              <option value="GMR">GMR</option>
+              <option value="SOCAN">SOCAN</option>
+              <option value="PRS">PRS</option>
+              <option value="GEMA">GEMA</option>
+              <option value="SACEM">SACEM</option>
+              <option value="Other">Other</option>
+              <option value="None">Not affiliated yet</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="pro-role">Role</label>
+            <select class="field" name="pro_role" id="pro-role">
+              <option value="" disabled selected>Writer / Publisher</option>
+              <option value="Writer">Writer</option>
+              <option value="Publisher">Publisher</option>
+              <option value="Both">Both</option>
+            </select>
+          </div>
+        </div>
+
+        <label class="field-label" for="ipi">IPI / CAE number</label>
+        <input class="field" type="text" name="ipi" id="ipi"
+               placeholder="e.g. 00123456789" maxlength="11"
+               style="font-family:monospace;font-size:14px;letter-spacing:0.04em">
+        <p class="field-hint">Your 11-digit IPI number is in your PRO dashboard. <a href="https://ipi.cisac.org" target="_blank">Look it up &rarr;</a></p>
+
+        <label class="field-label" for="dob">Date of birth</label>
+        <input class="field" type="date" name="dob" id="dob">
+
+        <label class="field-label">Mailing address</label>
+        <input class="field" type="text" name="address_street" id="address-street"
+               autocomplete="street-address" placeholder="Street address">
+        <div class="field-row">
+          <div class="field-group">
+            <input class="field" type="text" name="address_city" id="address-city"
+                   autocomplete="address-level2" placeholder="City">
+          </div>
+          <div class="field-group">
+            <input class="field" type="text" name="address_state" id="address-state"
+                   autocomplete="address-level1" placeholder="State / Province">
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn-primary" type="submit">Complete setup &rarr;</button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  // Check auth — must be logged in to access this page
+  var token = localStorage.getItem('dv_token');
+  if (!token) {
+    window.location.replace('/signup.html');
+    return;
+  }
+
+  // Show error from URL params
+  var params = new URLSearchParams(window.location.search);
+  var error = params.get('error');
+  if (error) {
+    var el = document.getElementById('details-error');
+    el.textContent = error;
+    el.classList.add('visible');
+    window.history.replaceState({}, '', '/details.html');
+  }
+
+  // Send token as Authorization header via fetch instead of form POST
+  // (form POST can't set headers, so we intercept and use fetch here)
+  var form = document.getElementById('details-form');
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    var data = new URLSearchParams(new FormData(form));
+
+    fetch('/api/auth/profile', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': 'Bearer ' + token
+      },
+      body: data.toString()
+    })
+    .then(function(r) {
+      if (r.redirected) {
+        window.location.href = r.url;
+        return;
+      }
+      return r.json();
+    })
+    .then(function(data) {
+      if (data && data.error) {
+        var el = document.getElementById('details-error');
+        el.textContent = data.error;
+        el.classList.add('visible');
+      } else if (data && data.success) {
+        // Go to dashboard
+        var artistStr = localStorage.getItem('dv_artist');
+        var qs = '?token=' + encodeURIComponent(token);
+        if (artistStr) qs += '&artist=' + encodeURIComponent(artistStr);
+        window.location.replace('/' + qs);
+      }
+    })
+    .catch(function() {
+      var el = document.getElementById('details-error');
+      el.textContent = 'Connection error. Please try again.';
+      el.classList.add('visible');
+    });
+  });
+})();
+</script>
+</body>
+</html>

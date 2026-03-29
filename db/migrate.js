@@ -58,6 +58,16 @@ const columnMigrations = [
   `ALTER TABLE artists ADD COLUMN IF NOT EXISTS stripe_account_id VARCHAR(255)`,
   `ALTER TABLE artists ADD COLUMN IF NOT EXISTS stripe_onboarded  BOOLEAN DEFAULT FALSE`,
   `ALTER TABLE payouts ADD COLUMN IF NOT EXISTS stripe_transfer_id VARCHAR(255)`,
+  // Artist profile / onboarding details
+  `ALTER TABLE artists ADD COLUMN IF NOT EXISTS stage_name    VARCHAR(255)`,
+  `ALTER TABLE artists ADD COLUMN IF NOT EXISTS pro           VARCHAR(50)`,
+  `ALTER TABLE artists ADD COLUMN IF NOT EXISTS pro_role      VARCHAR(50)`,
+  `ALTER TABLE artists ADD COLUMN IF NOT EXISTS ipi           VARCHAR(20)`,
+  `ALTER TABLE artists ADD COLUMN IF NOT EXISTS dob           DATE`,
+  `ALTER TABLE artists ADD COLUMN IF NOT EXISTS address_street VARCHAR(255)`,
+  `ALTER TABLE artists ADD COLUMN IF NOT EXISTS address_city   VARCHAR(100)`,
+  `ALTER TABLE artists ADD COLUMN IF NOT EXISTS address_state  VARCHAR(100)`,
+  `ALTER TABLE artists ADD COLUMN IF NOT EXISTS onboarded     BOOLEAN DEFAULT FALSE`,
 ];
 
 async function migrate() {
