@@ -59,6 +59,7 @@ router.get('/callback', async (req, res) => {
 
     // Find or create the artist in our database
     let artist;
+    let isNewUser = false;
     const existing = await pool.query('SELECT * FROM artists WHERE email = $1', [email]);
     if (existing.rows.length > 0) {
       artist = existing.rows[0];
@@ -70,6 +71,7 @@ router.get('/callback', async (req, res) => {
         [name, email, randomHash]
       );
       artist = result.rows[0];
+      isNewUser = true;
     }
 
     // Generate JWT
@@ -81,7 +83,7 @@ router.get('/callback', async (req, res) => {
 
     // Redirect to frontend with token
     const artistPayload = encodeURIComponent(JSON.stringify({ id: artist.id, name: artist.name, email: artist.email }));
-    res.redirect(`/auth-complete.html?token=${token}&artist=${artistPayload}`);
+    res.redirect(`/auth-complete.html?token=${token}&artist=${artistPayload}${isNewUser ? '&signup=1' : ''}`);
   } catch (err) {
     console.error('OAuth callback error:', err.message);
     res.redirect('/?error=callback_failed');
