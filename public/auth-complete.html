@@ -46,12 +46,16 @@ body {
       window.location.replace('/login.html');
       return;
     }
-    // Redirect into the app after a brief moment (page must fully load first for Safari)
-    // Pass params so index.html checkAuthCallback can pick them up and go straight to dashboard
+    // Redirect after a brief moment (page must fully load first for Safari)
     var qs = '?token=' + encodeURIComponent(token) + '&artist=' + encodeURIComponent(artistParam);
-    if (isSignup) qs += '&signup=1';
     setTimeout(function() {
-      window.location.replace('/' + qs);
+      if (isSignup) {
+        // New signup → go to Step 2 (artist details)
+        window.location.replace('/details.html');
+      } else {
+        // Existing user login → go to dashboard
+        window.location.replace('/' + qs);
+      }
     }, 300);
   } else {
     // No token — something went wrong

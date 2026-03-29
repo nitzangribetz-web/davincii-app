@@ -205,4 +205,35 @@ router.get('/me', require('../middleware/auth'), async (req, res) => {
   }
 });
 
+// POST /api/auth/profile — save artist onboarding details (Step 2)
+router.post('/profile', require('../middleware/auth'), async (req, res) => {
+  const isFormSubmit = req.is('application/x-www-form-urlencoded');
+  const { stage_name, pro, pro_role, ipi, dob, address_street, address_city, address_state } = req.body;
+
+  if (!stage_name) {
+    if (isFormSubmit) return res.redirect('/details.html?error=' + encodeURIComponent('Artist / professional name is required'));
+    return res.status(400).json({ error: 'Artist / professional name is required' });
+  }
+
+  try {
+    await pool.query(
+      `UPDATE artists SET stage_name=$1, pro=$2, pro_role=$3, ipi=$4, dob=$5,
+       address_street=$6, address_city=$7, address_state=$8, onboarded=TRUE
+       WHERE id=$9`,
+      [stage_name, pro || null, pro_role || null, ipi || null, dob || null,
+       address_street || null, address_city || null, address_state || null, req.artist.id]
+    );
+
+    if (isFormSubmit) {
+      // Redirect to main app — token is already in localStorage from auth-complete.html
+      return res.redirect('/');
+    }
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Profile update error:', err.message);
+    if (isFormSubmit) return res.redirect('/details.html?error=' + encodeURIComponent('Failed to save details'));
+    res.status(500).json({ error: 'Failed to save details' });
+  }
+});
+
 module.exports = router;
