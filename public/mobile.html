@@ -368,33 +368,11 @@ html, body {
 .mob-label { font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:#2a2a2a; margin-bottom:6px; display:block; }
 .mob-section-label { font-family:var(--sans); font-size:9px; font-weight:600; letter-spacing:0.16em; text-transform:uppercase; color:var(--muted); margin-bottom:16px; }
 
-/* Switcher */
-.screen-nav { position:fixed; bottom:72px; right:12px; z-index:9999; background:#FFFFFF; border:1px solid var(--border); padding:10px 12px; box-shadow:0 4px 20px rgba(0,0,0,0.14); display:flex; flex-direction:column; gap:4px; max-height:60vh; overflow-y:auto; }
-.screen-nav-label { font-family:var(--sans); font-size:9px; font-weight:600; letter-spacing:0.16em; text-transform:uppercase; color:#aaa; margin-bottom:2px; }
-.snav-btn { background:none; border:1px solid var(--border); padding:5px 10px; font-family:var(--sans); font-size:10px; cursor:pointer; text-align:left; color:var(--black); }
-.snav-btn.active { background:#080808; color:var(--white); }
+
 </style>
 </head>
 <body>
 
-<!-- PROTOTYPE SWITCHER -->
-<div class="screen-nav">
-  <div class="screen-nav-label">Screens</div>
-  <button class="snav-btn active" onclick="go('landing')">Landing</button>
-  <button class="snav-btn" onclick="go('login')">Login</button>
-  <button class="snav-btn" onclick="go('signup')">Sign Up</button>
-  <button class="snav-btn" onclick="go('dashboard')">Dashboard</button>
-  <button class="snav-btn" onclick="go('catalog')">→ Songs</button>
-  <button class="snav-btn" onclick="go('add-song')">→ Add Song</button>
-  <button class="snav-btn" onclick="go('royalties')">→ Royalties</button>
-  <button class="snav-btn" onclick="go('payouts')">→ Payouts</button>
-  <button class="snav-btn" onclick="go('profile')">→ Artist Profile</button>
-  <button class="snav-btn" onclick="go('howitworks')">How It Works</button>
-  <button class="snav-btn" onclick="go('pricing')">Pricing</button>
-  <button class="snav-btn" onclick="go('about')">About</button>
-  <button class="snav-btn" onclick="go('terms')">Terms</button>
-  <button class="snav-btn" onclick="go('privacy')">Privacy</button>
-</div>
 
 <!-- FOOTER TEMPLATE -->
 <template id="footer-tpl">
