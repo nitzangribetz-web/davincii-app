@@ -49,6 +49,25 @@ app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 const publicDir = path.resolve(__dirname, 'public');
+
+// Mobile detection — must run BEFORE express.static so it intercepts '/' requests
+// express.static would otherwise serve index.html directly, bypassing the catch-all
+app.use((req, res, next) => {
+  if (req.method !== 'GET') return next();
+  const ua = req.headers['user-agent'] || '';
+  const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+  if (!isMobile) return next();
+  // On mobile: serve mobile.html for root and SPA routes, let static files through
+  if (req.path === '/' || req.path === '/index.html') {
+    return res.sendFile('mobile.html', { root: publicDir });
+  }
+  // For SPA routes (no extension, not /api/), serve mobile.html
+  if (!req.path.startsWith('/api/') && !path.extname(req.path)) {
+    return res.sendFile('mobile.html', { root: publicDir });
+  }
+  next();
+});
+
 app.use(express.static(publicDir));
 
 // DB health check
@@ -75,12 +94,12 @@ app.use((req, res, next) => {
   if (req.method !== 'GET' || req.path.startsWith('/api/')) return next();
   const ua = req.headers['user-agent'] || '';
   const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(ua);
-  res.sendFile(path.join(publicDir, isMobile ? 'mobile.html' : 'index.html'));
+  res.sendFile(isMobile ? 'mobile.html' : 'index.html', { root: publicDir });
 });
 
 // Global error handler
 app.use((err, req, res, next) => {
-  console.error('Unhandled error:', err.message);
+  console.error('Unhandled error:', err.message, err.stack);
   res.status(500).json({ error: 'Internal server error' });
 });
 
