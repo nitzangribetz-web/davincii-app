@@ -861,7 +861,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
 
       <!-- OVERVIEW -->
       <div class="dash-page" id="dp-overview">
-        <div class="page-title">Good <em>morning</em>, <em>SwuM</em></div>
+        <div class="page-title" id="dash-greeting">Good <em>morning</em>, <em class="artist-display-name">SwuM</em></div>
         <div class="page-sub">Here's a summary of your royalty activity.</div>
         <div class="page-rule"></div>
 
@@ -1515,6 +1515,17 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
         });
     }
     if (!token) { setTimeout(routeFromURL, 100); }
+  })();
+
+  // ── TIME-BASED GREETING ──
+  (function updateGreeting() {
+    const el = document.getElementById('dash-greeting');
+    if (!el) return;
+    const h = new Date().getHours();
+    const tod = h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening';
+    const name = el.querySelector('.artist-display-name');
+    const nameText = name ? name.textContent : '';
+    el.innerHTML = 'Good <em>' + tod + '</em>, <em class="artist-display-name">' + nameText + '</em>';
   })();
 
   // ── PARTICLE ANIMATION ──

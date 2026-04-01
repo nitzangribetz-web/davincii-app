@@ -718,7 +718,7 @@ html, body {
 
   <!-- OVERVIEW -->
   <div class="dash-page mob-dash-content" id="dp-overview">
-    <div class="mob-page-title">Good <em>morning</em>, <em>SwuM</em></div>
+    <div class="mob-page-title" id="mob-dash-greeting">Good <em>morning</em>, <em class="artist-display-name">SwuM</em></div>
     <div class="mob-page-sub">Here's your royalty summary.</div>
     <div class="mob-page-rule"></div>
 
@@ -1413,6 +1413,17 @@ html, body {
 
   // Route based on URL on page load
   setTimeout(routeFromURL, 100);
+
+  // ── TIME-BASED GREETING ──
+  (function updateGreeting() {
+    const el = document.getElementById('mob-dash-greeting');
+    if (!el) return;
+    const h = new Date().getHours();
+    const tod = h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening';
+    const name = el.querySelector('.artist-display-name');
+    const nameText = name ? name.textContent : '';
+    el.innerHTML = 'Good <em>' + tod + '</em>, <em class="artist-display-name">' + nameText + '</em>';
+  })();
 
   // ── MOBILE PARTICLE ANIMATION ──
   (function() {
