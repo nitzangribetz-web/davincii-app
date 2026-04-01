@@ -352,6 +352,31 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
 @keyframes marqueeLux { from { transform:translateX(0); } to { transform:translateX(-50%); } }
 .partner-item-lux { display:flex; align-items:center; padding:0 32px; border-right:1px solid rgba(255,255,255,0.06); color:rgba(255,255,255,0.22); height:56px; }
 .partner-svg-lux { height:36px; width:auto; display:block; overflow:visible; }
+
+/* ── RESPONSIVE FALLBACK ── */
+@media (max-width: 768px) {
+  .landing-nav-lux { padding:0 16px; height:56px; }
+  .nav-links-lux { display:none; }
+  .nav-logo-lux { font-size:26px; }
+  .btn-ghost-lux { padding:7px 14px; font-size:12px; }
+  .btn-solid-lux { padding:7px 14px; font-size:12px; }
+  .hero-lux { padding:80px 24px 60px; }
+  .hero-headline-lux { font-size:clamp(48px,14vw,80px); margin-bottom:32px; }
+  .hero-cta-lux { flex-direction:column; gap:10px; }
+  .btn-cta-primary-lux, .btn-cta-secondary-lux { padding:14px 28px; width:80%; text-align:center; }
+  .partners-lux { position:relative; }
+  .footer-top { grid-template-columns:1fr; gap:32px; }
+  .footer-inner { padding:40px 24px 32px; }
+  .footer-bottom { flex-direction:column; gap:12px; align-items:flex-start; }
+  .auth-layout { grid-template-columns:1fr; }
+  .auth-brand { display:none; }
+  .auth-form-panel { padding:40px 24px; }
+  .dash-layout { grid-template-columns:1fr; }
+  .sidebar { display:none; }
+  .main-content { padding:24px 16px; }
+  .top-nav { padding:0 16px; }
+  .top-nav-logo { font-size:24px; }
+}
 </style>
 </head>
 <body>
