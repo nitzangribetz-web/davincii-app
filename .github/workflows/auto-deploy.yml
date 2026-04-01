@@ -1,0 +1,39 @@
+name: Auto Deploy from Claude branches
+
+on:
+  push:
+    branches:
+      - 'claude/**'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-merge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create and merge PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH="${{ github.ref_name }}"
+          COMMIT_MSG=$(git log -1 --pretty=%s)
+          
+          # Create PR
+          PR_URL=$(gh pr create \
+            --base main \
+            --head "$BRANCH" \
+            --title "$COMMIT_MSG" \
+            --body "Auto-deploy from $BRANCH" \
+            2>&1) || true
+          
+          # If PR already exists, get its URL
+          if echo "$PR_URL" | grep -q "already exists"; then
+            PR_URL=$(gh pr list --head "$BRANCH" --json url -q '.[0].url')
+          fi
+          
+          # Merge the PR
+          gh pr merge "$BRANCH" --merge --auto || gh pr merge "$BRANCH" --merge
