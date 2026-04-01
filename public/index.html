@@ -312,12 +312,6 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
 .field-select { appearance:none; -webkit-appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23999' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 16px center; cursor:pointer; }
 .field-optional { font-family:var(--sans); font-size:9px; font-weight:400; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted-light); margin-left:6px; }
 
-/* ── SCREEN NAV ── */
-.screen-nav { position:fixed; bottom:20px; right:20px; z-index:9999; background:var(--white); border:1px solid var(--border); padding:12px 16px; box-shadow:0 4px 24px rgba(0,0,0,0.13); display:flex; flex-direction:column; gap:5px; max-height:90vh; overflow-y:auto; }
-.screen-nav-label { font-family:var(--sans); font-size:9px; font-weight:600; letter-spacing:0.18em; text-transform:uppercase; color:#aaa; margin-bottom:3px; }
-.snav-btn { background:none; border:1px solid var(--border); padding:5px 10px; font-family:var(--sans); font-size:11px; letter-spacing:0.06em; cursor:pointer; text-align:left; color:var(--black); transition:background 0.15s; }
-.snav-btn:hover { background:rgba(0,0,0,0.04); }
-.snav-btn.active { background:var(--black); color:var(--white); }
 
 /* ════ LUXURY LANDING CSS ════ */
 #screen-landing { background:#080808; overflow:hidden; }
@@ -362,23 +356,6 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
 </head>
 <body>
 
-<!-- ── PROTOTYPE SWITCHER ── -->
-<div class="screen-nav">
-  <div class="screen-nav-label">Preview</div>
-  <button class="snav-btn active" onclick="go('landing')">Landing</button>
-  <button class="snav-btn" onclick="go('howitworks')">How It Works</button>
-  <button class="snav-btn" onclick="go('pricing')">Pricing</button>
-  <button class="snav-btn" onclick="go('about')">About</button>
-  <button class="snav-btn" onclick="go('login')">Login</button>
-  <button class="snav-btn" onclick="go('signup')">Sign Up</button>
-  <button class="snav-btn" onclick="go('dashboard')">Dashboard</button>
-  <button class="snav-btn" onclick="go('catalog')">→ Catalog</button>
-  <button class="snav-btn" onclick="go('royalties')">→ Royalties</button>
-  <button class="snav-btn" onclick="go('payouts')">→ Payouts</button>
-  <button class="snav-btn" onclick="go('dashboard');setTimeout(()=>showDashPage('profile'),50)">Artist Profile</button>
-  <button class="snav-btn" onclick="go('terms')">Terms</button>
-  <button class="snav-btn" onclick="go('privacy')">Privacy</button>
-</div>
 
 <!-- ════════════════ FOOTER TEMPLATE ════════════════ -->
 <template id="footer-tpl">
