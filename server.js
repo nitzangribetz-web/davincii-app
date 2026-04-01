@@ -70,9 +70,12 @@ app.use('/api/payouts', payoutRoutes);
 app.use('/api/stripe', stripeRoutes);
 
 // Serve SPA for all non-API, non-static routes (catch-all)
+// Detect mobile user-agents and serve mobile.html
 app.use((req, res, next) => {
   if (req.method !== 'GET' || req.path.startsWith('/api/')) return next();
-  res.sendFile(path.join(publicDir, 'index.html'));
+  const ua = req.headers['user-agent'] || '';
+  const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+  res.sendFile(path.join(publicDir, isMobile ? 'mobile.html' : 'index.html'));
 });
 
 // Global error handler
