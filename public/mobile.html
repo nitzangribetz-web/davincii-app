@@ -645,8 +645,10 @@ html, body {
     <div class="mob-auth-page-title">Create your <em>account.</em></div>
     <div class="error-box" id="mob-signup-error"></div>
 
-    <input class="mob-auth-field" id="mob-signup-first" type="text" autocomplete="given-name" placeholder="First name">
-    <input class="mob-auth-field" id="mob-signup-last" type="text" autocomplete="family-name" placeholder="Last name">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+      <input class="mob-auth-field" style="margin-bottom:0" id="mob-signup-first" type="text" autocomplete="given-name" placeholder="First name">
+      <input class="mob-auth-field" style="margin-bottom:0" id="mob-signup-last" type="text" autocomplete="family-name" placeholder="Last name">
+    </div>
     <input class="mob-auth-field" id="mob-signup-email" type="email" autocomplete="email" placeholder="Email address">
     <input class="mob-auth-field" id="mob-signup-pass" type="password" autocomplete="new-password" placeholder="Create a password">
     <div class="pw-strength" id="mob-pw-strength" style="display:none">
