@@ -1430,14 +1430,23 @@ html, body {
     const params = new URLSearchParams(window.location.search);
     const token = params.get('token');
     const artistParam = params.get('artist');
+    const isSignup = params.get('signup') === '1';
     if (token && artistParam) {
       try {
-        const artist = JSON.parse(decodeURIComponent(artistParam));
+        var artist;
+        try { artist = JSON.parse(artistParam); } catch(_) { artist = JSON.parse(decodeURIComponent(artistParam)); }
         localStorage.setItem('dv_token', token);
         localStorage.setItem('dv_artist', JSON.stringify(artist));
-        window.history.replaceState({}, '', '/dashboard');
-        mobSetArtistNav(artist);
-        go('dashboard');
+        if (isSignup) {
+          // New Google signup → go to dashboard (mobile has no multi-step signup)
+          window.history.replaceState({}, '', '/dashboard');
+          mobSetArtistNav(artist);
+          go('dashboard');
+        } else {
+          window.history.replaceState({}, '', '/dashboard');
+          mobSetArtistNav(artist);
+          go('dashboard');
+        }
       } catch (e) { console.error('Auth callback parse error:', e); }
       return; // Don't run routeFromURL — we already routed
     }

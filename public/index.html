@@ -1516,8 +1516,17 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
 
   // ── DESKTOP SIGNUP STEPS ──
   let desktopSignupStep = 1;
+  function showSignupStep(step) {
+    document.querySelectorAll('.signup-panel').forEach(function(p) { p.style.display = 'none'; });
+    var panel = document.getElementById('signup-step-' + step);
+    if (panel) { panel.style.display = 'block'; desktopSignupStep = step; }
+    window.scrollTo(0,0);
+  }
   function signupNextDesktop(step) {
-    // Validate step 1 before advancing
+    var errEl = document.getElementById('signup-error');
+    errEl.classList.remove('visible');
+
+    // Validate & create account when going from step 1 → 2
     if (step === 2 && desktopSignupStep === 1) {
       var first = document.getElementById('desk-signup-first').value.trim();
       var last = document.getElementById('desk-signup-last').value.trim();
@@ -1525,18 +1534,29 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
       var pw = document.getElementById('desk-signup-pw').value;
       var confirm = document.getElementById('desk-signup-confirm').value;
       var agree = document.getElementById('desk-agree-check').checked;
-      var errEl = document.getElementById('signup-error');
-      errEl.classList.remove('visible');
       if (!first || !last) { errEl.textContent = 'Please enter your full name.'; errEl.classList.add('visible'); return; }
       if (!email) { errEl.textContent = 'Please enter your email address.'; errEl.classList.add('visible'); return; }
       if (pw.length < 8) { errEl.textContent = 'Password must be at least 8 characters.'; errEl.classList.add('visible'); return; }
       if (pw !== confirm) { errEl.textContent = 'Passwords do not match.'; errEl.classList.add('visible'); return; }
       if (!agree) { errEl.textContent = 'Please agree to the Terms and Privacy Policy.'; errEl.classList.add('visible'); return; }
+
+      // Create the account now
+      fetch('/api/auth/signup', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({first_name:first, last_name:last, email:email, password:pw}) })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.error) { errEl.textContent = data.error; errEl.classList.add('visible'); return; }
+          if (data.token) {
+            localStorage.setItem('dv_token', data.token);
+            localStorage.setItem('dv_artist', JSON.stringify(data.artist || {}));
+            showSignupStep(2);
+          }
+        })
+        .catch(function() { errEl.textContent = 'Network error. Please try again.'; errEl.classList.add('visible'); });
+      return;
     }
-    document.querySelectorAll('.signup-panel').forEach(p => p.style.display = 'none');
-    var panel = document.getElementById('signup-step-' + step);
-    if (panel) { panel.style.display = 'block'; desktopSignupStep = step; }
-    window.scrollTo(0,0);
+
+    // All other step transitions (including Google OAuth step 2→3)
+    showSignupStep(step);
   }
   function signupBackDesktop() {
     if (desktopSignupStep > 1) signupNextDesktop(desktopSignupStep - 1);
@@ -1566,18 +1586,32 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
   var deskSignupComplete = document.getElementById('desk-signup-complete');
   if (deskSignupComplete) {
     deskSignupComplete.addEventListener('click', function() {
-      var first = document.getElementById('desk-signup-first').value.trim();
-      var last = document.getElementById('desk-signup-last').value.trim();
-      var email = document.getElementById('desk-signup-email').value.trim();
-      var pw = document.getElementById('desk-signup-pw').value;
+      var token = localStorage.getItem('dv_token');
       var errEl = document.getElementById('signup-error');
-      fetch('/api/auth/signup', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({first_name:first, last_name:last, email:email, password:pw}) })
-        .then(function(r) { return r.json(); })
-        .then(function(data) {
-          if (data.error) { signupNextDesktop(1); errEl.textContent = data.error; errEl.classList.add('visible'); return; }
-          if (data.token) { localStorage.setItem('token', data.token); localStorage.setItem('artist', JSON.stringify(data.artist || {})); go('dashboard'); }
-        })
-        .catch(function() { signupNextDesktop(1); errEl.textContent = 'Network error. Please try again.'; errEl.classList.add('visible'); });
+      if (!token) { errEl.textContent = 'Session expired. Please start over.'; errEl.classList.add('visible'); showSignupStep(1); return; }
+
+      var artistName = document.getElementById('desk-signup-artist').value.trim();
+      var pro = document.getElementById('desk-signup-pro').value;
+      var ipi = document.getElementById('desk-signup-ipi').value.trim();
+      var dob = document.getElementById('desk-signup-dob').value;
+      var street = document.getElementById('desk-signup-street').value.trim();
+      var city = document.getElementById('desk-signup-city').value.trim();
+      var state = document.getElementById('desk-signup-state').value.trim();
+      if (!artistName) { errEl.textContent = 'Please enter your artist name.'; errEl.classList.add('visible'); return; }
+
+      fetch('/api/auth/profile', {
+        method:'POST',
+        headers:{'Content-Type':'application/json', 'Authorization':'Bearer ' + token},
+        body:JSON.stringify({stage_name:artistName, pro:pro, ipi:ipi, dob:dob, address_street:street, address_city:city, address_state:state})
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.error) { errEl.textContent = data.error; errEl.classList.add('visible'); return; }
+        var savedArtist = localStorage.getItem('dv_artist');
+        try { savedArtist = JSON.parse(savedArtist); } catch(_) { savedArtist = {}; }
+        onAuthSuccess(savedArtist, true);
+      })
+      .catch(function() { errEl.textContent = 'Network error. Please try again.'; errEl.classList.add('visible'); });
     });
   }
 
@@ -1751,11 +1785,21 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
     const isSignup = params.get('signup') === '1';
     if (token && artistParam) {
       try {
-        const artist = JSON.parse(decodeURIComponent(artistParam));
+        var artist;
+        try { artist = JSON.parse(artistParam); } catch(_) { artist = JSON.parse(decodeURIComponent(artistParam)); }
         localStorage.setItem('dv_token', token);
         localStorage.setItem('dv_artist', JSON.stringify(artist));
-        window.history.replaceState({}, '', '/dashboard');
-        onAuthSuccess(artist, isSignup);
+        if (isSignup) {
+          // New Google signup → show agreement step (step 2), skip redirect to standalone
+          window.history.replaceState({}, '', '/signup');
+          document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+          document.getElementById('screen-signup').classList.add('active');
+          window.scrollTo(0,0);
+          setTimeout(function() { signupNextDesktop(2); }, 100);
+        } else {
+          window.history.replaceState({}, '', '/dashboard');
+          onAuthSuccess(artist, false);
+        }
       } catch (e) { console.error('Auth callback parse error:', e); }
       return; // Already routed — don't run routeFromURL
     }
