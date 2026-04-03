@@ -620,110 +620,43 @@ html, body {
   </div>
 </div>
 
-<!-- ════════════════ SIGN UP — 3-STEP ════════════════ -->
+<!-- ════════════════ SIGN UP ════════════════ -->
 <div class="screen" id="screen-signup">
   <div class="mob-auth-header">
     <div class="mob-auth-topbar">
       <span class="mob-auth-logo"><img src="/logo-white-sm.png" alt="Davincii"></span>
-      <button class="mob-back-btn" id="signup-back-btn" onclick="signupBack()">&larr; Back</button>
+      <button class="mob-back-btn" onclick="go('landing')">&larr; Back</button>
     </div>
   </div>
   <div class="mob-auth-body">
+    <div class="mob-auth-page-title">Create your <em>account.</em></div>
+    <div class="error-box" id="mob-signup-error"></div>
 
-    <!-- Step indicator -->
-    <div class="mob-signup-steps" id="mob-step-indicators">
-      <div class="mob-signup-step" id="mob-step-ind-1">
-        <div class="mob-step-circle active" id="mob-sc-1"><svg width="8" height="6" viewBox="0 0 8 6"><path d="M1 3l2 2 4-4" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div>
-        <span class="mob-step-label active" id="mob-sl-1">Account</span>
-      </div>
-      <div class="mob-step-line" id="mob-sline-1"></div>
-      <div class="mob-signup-step" id="mob-step-ind-2">
-        <div class="mob-step-circle" id="mob-sc-2"><svg width="8" height="6" viewBox="0 0 8 6"><path d="M1 3l2 2 4-4" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div>
-        <span class="mob-step-label" id="mob-sl-2">Agreement</span>
-      </div>
-      <div class="mob-step-line" id="mob-sline-2"></div>
-      <div class="mob-signup-step" id="mob-step-ind-3">
-        <div class="mob-step-circle" id="mob-sc-3"><svg width="8" height="6" viewBox="0 0 8 6"><path d="M1 3l2 2 4-4" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div>
-        <span class="mob-step-label" id="mob-sl-3">Details</span>
-      </div>
+    <input class="mob-auth-field" id="mob-signup-first" type="text" autocomplete="given-name" placeholder="First name">
+    <input class="mob-auth-field" id="mob-signup-last" type="text" autocomplete="family-name" placeholder="Last name">
+    <input class="mob-auth-field" id="mob-signup-email" type="email" autocomplete="email" placeholder="Email address">
+    <input class="mob-auth-field" id="mob-signup-pass" type="password" autocomplete="new-password" placeholder="Create a password">
+    <input class="mob-auth-field" id="mob-signup-confirm" type="password" autocomplete="new-password" placeholder="Confirm password">
+
+    <div class="mob-signup-agree" style="margin-bottom:24px">
+      <input type="checkbox" id="mob-agree-check">
+      <label for="mob-agree-check">I agree to Davincii's <a onclick="go('terms')" style="cursor:pointer;color:var(--black);text-decoration:underline">Terms</a> and <a onclick="go('privacy')" style="cursor:pointer;color:var(--black);text-decoration:underline">Privacy Policy</a></label>
     </div>
 
-    <!-- Step 1 -->
-    <div class="mob-signup-panel" id="mob-signup-step-1">
-      <div class="mob-auth-page-title">Get <em>started.</em></div>
-      <div class="error-box"></div>
+    <button class="mob-auth-btn-primary" id="mob-signup-btn">Create account</button>
 
-      <input class="mob-auth-field" id="mob-signup-first" type="text" placeholder="First name">
-      <input class="mob-auth-field" id="mob-signup-last" type="text" placeholder="Last name">
-      <input class="mob-auth-field" id="mob-signup-email" type="email" autocomplete="email" placeholder="Type in your email">
-      <input class="mob-auth-field" id="mob-signup-pass" type="password" autocomplete="new-password" placeholder="Create a password">
-      <input class="mob-auth-field" id="mob-signup-confirm" type="password" autocomplete="new-password" placeholder="Confirm your password">
-
-      <div class="mob-signup-agree" style="margin-bottom:18px">
-        <input type="checkbox" id="mob-agree-check">
-        <label for="mob-agree-check">I agree to Davincii's <a onclick="go('terms')" style="cursor:pointer;color:var(--black);text-decoration:underline">Terms</a> and <a onclick="go('privacy')" style="cursor:pointer;color:var(--black);text-decoration:underline">Privacy Policy</a></label>
-      </div>
-
-      <button class="mob-auth-btn-primary" onclick="mobSignupNext(2)">Continue</button>
-
-      <a href="/api/auth/google" class="mob-auth-btn-social">
-        <svg class="mob-auth-social-icon" viewBox="0 0 18 18"><path d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
-        Sign up with Google
-      </a>
-
-      <div class="mob-auth-footer-link"><span>Already have an account? </span><a onclick="go('login')">Sign in</a></div>
+    <div style="display:flex;align-items:center;gap:14px;margin:20px 0">
+      <div style="flex:1;height:1px;background:rgba(0,0,0,0.10)"></div>
+      <span style="font-family:var(--sans);font-size:12px;font-weight:500;color:#aaa;text-transform:uppercase;letter-spacing:0.08em">or</span>
+      <div style="flex:1;height:1px;background:rgba(0,0,0,0.10)"></div>
     </div>
 
-    <!-- Step 2 — Agreement -->
-    <div class="mob-signup-panel" id="mob-signup-step-2" style="display:none">
-      <div class="mob-auth-page-title">Publishing <em>Agreement.</em></div>
+    <a href="/api/auth/google" class="mob-auth-btn-social">
+      <svg class="mob-auth-social-icon" viewBox="0 0 18 18"><path d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
+      Sign up with Google
+    </a>
 
-      <div class="mob-agreement-box" style="margin-bottom:20px">
-        <div class="mob-agreement-box-header">
-          <span class="mob-agreement-box-title">Publishing Administration Agreement</span>
-          <span class="mob-agreement-box-badge">Davincii LLC</span>
-        </div>
-        <div class="mob-agreement-box-body">
-          <p>This agreement grants Davincii the right to register your compositions and collect royalties on your behalf.</p>
-          <p style="margin-top:10px"><strong>Key terms:</strong> 15% commission on collected royalties only. No upfront fees. 100% copyright stays yours. 30-day termination notice. 12-month collection tail.</p>
-        </div>
-        <div class="mob-agreement-box-footer">
-          <a onclick="go('terms')" style="cursor:pointer;font-family:var(--sans);font-size:12px;font-weight:500;color:var(--black);text-decoration:underline">Read full agreement &rarr;</a>
-        </div>
-      </div>
-
-      <input class="mob-auth-field" id="mob-signup-legal-name" type="text" placeholder="Type your full legal name to sign">
-      <p style="font-family:var(--sans);font-size:12px;font-weight:300;color:var(--muted);margin-top:-8px;margin-bottom:20px;line-height:1.5">By typing your name, you agree to be bound by these terms.</p>
-
-      <button class="mob-auth-btn-primary" onclick="mobSignupNext(3)">I agree &amp; continue</button>
-    </div>
-
-    <!-- Step 3 — Artist Details -->
-    <div class="mob-signup-panel" id="mob-signup-step-3" style="display:none">
-      <div class="mob-auth-page-title">Artist <em>details.</em></div>
-
-      <input class="mob-auth-field" id="mob-signup-stage" type="text" placeholder="Artist / stage name">
-
-      <select class="mob-auth-field" id="mob-signup-pro" style="-webkit-appearance:none;appearance:none;background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23999' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E&quot;);background-repeat:no-repeat;background-position:right 16px center">
-        <option value="" disabled selected>Select your PRO</option>
-        <option>ASCAP</option><option>BMI</option><option>SESAC</option>
-        <option>SOCAN</option><option>PRS for Music</option><option>SACEM</option>
-        <option>GEMA</option><option>APRA AMCOS</option><option>PPL</option>
-        <option>SIAE</option><option>Other</option><option>Not yet registered</option>
-      </select>
-
-      <input class="mob-auth-field" id="mob-signup-ipi" type="text" placeholder="IPI / CAE number (optional)">
-      <input class="mob-auth-field" id="mob-signup-dob" type="date">
-      <input class="mob-auth-field" id="mob-signup-street" type="text" placeholder="Street address">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px">
-        <input class="mob-auth-field" id="mob-signup-city" type="text" placeholder="City" style="margin-bottom:0">
-        <input class="mob-auth-field" id="mob-signup-state" type="text" placeholder="State" style="margin-bottom:0">
-      </div>
-      <div style="margin-bottom:14px"></div>
-
-      <button class="mob-auth-btn-primary" id="mob-signup-complete-btn" onclick="mobCompleteSignup()">Complete setup</button>
-    </div>
-
+    <div class="mob-auth-footer-link"><span>Already have an account? </span><a onclick="go('login')">Sign in</a></div>
   </div>
 </div>
 
@@ -1192,38 +1125,6 @@ html, body {
     if (w) w.classList.remove('open');
   }
 
-  // ── SIGNUP 3-STEP ──
-  let mobCurrentStep = 1;
-  function mobSignupNext(step) {
-    mobCurrentStep = step;
-    document.querySelectorAll('.mob-signup-panel').forEach(p => p.style.display = 'none');
-    const panel = document.getElementById('mob-signup-step-' + step);
-    if (panel) panel.style.display = 'block';
-    updateMobStepIndicators(step);
-    const body = document.querySelector('#screen-signup .mob-auth-body');
-    if (body) body.scrollTop = 0;
-  }
-  function signupBack() {
-    if (mobCurrentStep > 1) {
-      mobSignupNext(mobCurrentStep - 1);
-    } else {
-      go('landing');
-    }
-  }
-  function updateMobStepIndicators(step) {
-    for (let i = 1; i <= 3; i++) {
-      const circle = document.getElementById('mob-sc-' + i);
-      const label = document.getElementById('mob-sl-' + i);
-      const line = document.getElementById('mob-sline-' + i);
-      if (!circle) continue;
-      circle.classList.remove('active','done');
-      label.classList.remove('active','done');
-      if (line) line.classList.remove('done');
-      if (i < step) { circle.classList.add('done'); label.classList.add('done'); if (line) line.classList.add('done'); }
-      if (i === step) { circle.classList.add('active'); label.classList.add('active'); }
-    }
-  }
-
   // ── LOGIN HANDLER ──
   document.addEventListener('DOMContentLoaded', function() {
     const loginBtn = document.getElementById('mob-login-btn');
@@ -1258,56 +1159,63 @@ html, body {
         }
       });
     }
-  });
 
-  // ── SIGNUP COMPLETE ──
-  async function mobCompleteSignup() {
-    const btn = document.getElementById('mob-signup-complete-btn');
-    const errBox = document.querySelector('#screen-signup .error-box');
-    const firstName = (document.getElementById('mob-signup-first')?.value || '').trim();
-    const lastName = (document.getElementById('mob-signup-last')?.value || '').trim();
-    const email = (document.getElementById('mob-signup-email')?.value || '').trim();
-    const password = document.getElementById('mob-signup-pass')?.value || '';
-    const stageName = (document.getElementById('mob-signup-stage')?.value || '').trim();
-    const pro = document.getElementById('mob-signup-pro')?.value || '';
-    const ipi = (document.getElementById('mob-signup-ipi')?.value || '').trim();
-    const dob = document.getElementById('mob-signup-dob')?.value || '';
-    const street = (document.getElementById('mob-signup-street')?.value || '').trim();
-    const city = (document.getElementById('mob-signup-city')?.value || '').trim();
-    const state = (document.getElementById('mob-signup-state')?.value || '').trim();
+    // ── SIGNUP HANDLER ──
+    const signupBtn = document.getElementById('mob-signup-btn');
+    if (signupBtn) {
+      signupBtn.addEventListener('click', async function() {
+        const errBox = document.getElementById('mob-signup-error');
+        const firstName = (document.getElementById('mob-signup-first')?.value || '').trim();
+        const lastName = (document.getElementById('mob-signup-last')?.value || '').trim();
+        const email = (document.getElementById('mob-signup-email')?.value || '').trim();
+        const password = document.getElementById('mob-signup-pass')?.value || '';
+        const confirm = document.getElementById('mob-signup-confirm')?.value || '';
+        const agreed = document.getElementById('mob-agree-check')?.checked;
 
-    if (!stageName) { alert('Please enter your artist / stage name'); return; }
+        // Validation
+        if (!firstName || !lastName) {
+          if (errBox) { errBox.textContent = 'Please enter your first and last name'; errBox.style.display = 'block'; }
+          return;
+        }
+        if (!email) {
+          if (errBox) { errBox.textContent = 'Please enter your email address'; errBox.style.display = 'block'; }
+          return;
+        }
+        if (!password || password.length < 8) {
+          if (errBox) { errBox.textContent = 'Password must be at least 8 characters'; errBox.style.display = 'block'; }
+          return;
+        }
+        if (password !== confirm) {
+          if (errBox) { errBox.textContent = 'Passwords do not match'; errBox.style.display = 'block'; }
+          return;
+        }
+        if (!agreed) {
+          if (errBox) { errBox.textContent = 'Please agree to the Terms and Privacy Policy'; errBox.style.display = 'block'; }
+          return;
+        }
 
-    btn.disabled = true; btn.textContent = 'Setting up…';
-    try {
-      // Step 1: Create account
-      const signupRes = await fetch('/api/auth/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: firstName + ' ' + lastName, email, password })
+        if (errBox) errBox.style.display = 'none';
+        signupBtn.disabled = true; signupBtn.textContent = 'Creating account…';
+        try {
+          const res = await fetch('/api/auth/signup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: firstName + ' ' + lastName, email, password })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Signup failed');
+          localStorage.setItem('dv_token', data.token);
+          localStorage.setItem('dv_artist', JSON.stringify(data.artist));
+          window.history.replaceState({}, '', '/dashboard');
+          mobSetArtistNav(data.artist);
+          go('dashboard');
+        } catch (e) {
+          if (errBox) { errBox.textContent = e.message; errBox.style.display = 'block'; }
+          signupBtn.disabled = false; signupBtn.textContent = 'Create account';
+        }
       });
-      const signupData = await signupRes.json();
-      if (!signupRes.ok) throw new Error(signupData.error || 'Signup failed');
-
-      localStorage.setItem('dv_token', signupData.token);
-      localStorage.setItem('dv_artist', JSON.stringify(signupData.artist));
-
-      // Step 2: Save profile/details
-      const profileRes = await fetch('/api/auth/profile', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + signupData.token },
-        body: JSON.stringify({ stage_name: stageName, pro: pro || null, ipi: ipi || null, dob: dob || null, address_street: street || null, address_city: city || null, address_state: state || null })
-      });
-      if (!profileRes.ok) { const pd = await profileRes.json(); throw new Error(pd.error || 'Failed to save details'); }
-
-      window.history.replaceState({}, '', '/dashboard');
-      mobSetArtistNav(signupData.artist);
-      go('dashboard');
-    } catch (e) {
-      if (errBox) { errBox.textContent = e.message; errBox.style.display = 'block'; }
-      btn.disabled = false; btn.textContent = 'Complete setup';
     }
-  }
+  });
 
   // ── ADD SONG ──
   let mobCWCount = 0;
