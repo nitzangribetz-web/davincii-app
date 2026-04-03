@@ -1559,6 +1559,8 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
     showSignupStep(step);
   }
   function signupBackDesktop() {
+    // OAuth users have a token but no step-1 data — send them home from step 2
+    if (desktopSignupStep <= 2 && localStorage.getItem('dv_token')) { go('landing'); return; }
     if (desktopSignupStep > 1) signupNextDesktop(desktopSignupStep - 1);
     else go('landing');
   }
