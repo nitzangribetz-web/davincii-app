@@ -134,7 +134,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
 /* ── DASHBOARD NAV ── */
 .top-nav { height:62px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; padding:0 40px; position:sticky; top:0; background:rgba(255,255,255,0.97); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); z-index:50; flex-shrink:0; }
 .top-nav-logo { cursor:pointer; display:flex; align-items:center; }
-.top-nav-logo img { height:24px; display:block; }
+.top-nav-logo img { height:24px; display:block; filter:brightness(0); }
 .top-nav-right { display:flex; align-items:center; gap:20px; }
 .top-nav-name { font-family:var(--sans); font-size:12px; font-weight:400; color:var(--muted); letter-spacing:0.03em; }
 .top-nav-signout { font-family:var(--sans); font-size:11px; font-weight:400; letter-spacing:0.10em; text-transform:uppercase; color:var(--muted); background:none; border:none; cursor:pointer; transition:color 0.18s; }
@@ -842,7 +842,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
 <!-- ════════════════ DASHBOARD (v51 — with Artist Profile) ════════════════ -->
 <div class="screen" id="screen-dashboard">
   <div class="top-nav">
-    <span class="top-nav-logo" onclick="go('landing')"><img src="/logo-sm.png" alt="Davincii"></span>
+    <span class="top-nav-logo" onclick="go('landing')"><img src="/logo-white-sm.png" alt="Davincii"></span>
     <div class="top-nav-right">
       <span class="top-nav-name">SwuM</span>
       <div class="avatar-wrap" id="avatar-wrap">

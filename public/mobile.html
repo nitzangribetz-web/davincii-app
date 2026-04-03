@@ -165,7 +165,7 @@ html, body {
 /* ════ AUTH PAGES ════ */
 .mob-auth-nav { display:flex; align-items:center; justify-content:space-between; padding:20px 24px; border-bottom:1px solid var(--border); background:#FFFFFF; }
 .mob-auth-logo { display:flex; align-items:center; }
-.mob-auth-logo img { height:22px; display:block; }
+.mob-auth-logo img { height:22px; display:block; filter:brightness(0); }
 .mob-back-btn { font-family:var(--sans); font-size:11px; font-weight:400; letter-spacing:0.10em; text-transform:uppercase; color:var(--muted); background:none; border:none; cursor:pointer; padding:0; }
 
 .mob-auth-hero { background:#080808; padding:28px 24px 24px; position:relative; overflow:hidden; }
@@ -207,7 +207,7 @@ html, body {
 /* ════ DASHBOARD ════ */
 .mob-top-nav { height:56px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; padding:0 20px; position:sticky; top:0; background:#FFFFFF; z-index:50; flex-shrink:0; }
 .mob-nav-logo { cursor:pointer; display:flex; align-items:center; }
-.mob-nav-logo img { height:22px; display:block; }
+.mob-nav-logo img { height:22px; display:block; filter:brightness(0); }
 .mob-nav-right { display:flex; align-items:center; gap:12px; }
 .mob-avatar { width:32px; height:32px; background:#080808; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:var(--sans); font-size:11px; font-weight:600; color:var(--white); cursor:pointer; }
 
@@ -561,7 +561,7 @@ html, body {
 <!-- ════════════════ LOGIN ════════════════ -->
 <div class="screen" id="screen-login">
   <nav class="mob-auth-nav">
-    <span class="mob-auth-logo"><img src="/logo-sm.png" alt="Davincii"></span>
+    <span class="mob-auth-logo"><img src="/logo-white-sm.png" alt="Davincii"></span>
     <button class="mob-back-btn" onclick="go('landing')">&larr; Back</button>
   </nav>
   <div class="mob-auth-hero">
@@ -591,7 +591,7 @@ html, body {
 <!-- ════════════════ SIGN UP — 3-STEP (v51 adapted) ════════════════ -->
 <div class="screen" id="screen-signup">
   <nav class="mob-auth-nav">
-    <span class="mob-auth-logo"><img src="/logo-sm.png" alt="Davincii"></span>
+    <span class="mob-auth-logo"><img src="/logo-white-sm.png" alt="Davincii"></span>
     <button class="mob-back-btn" id="signup-back-btn" onclick="signupBack()">&larr; Back</button>
   </nav>
   <div class="mob-auth-hero">
@@ -705,7 +705,7 @@ html, body {
 <!-- ════════════════ RECOVER ════════════════ -->
 <div class="screen" id="screen-recover">
   <nav class="mob-auth-nav">
-    <span class="mob-auth-logo"><img src="/logo-sm.png" alt="Davincii"></span>
+    <span class="mob-auth-logo"><img src="/logo-white-sm.png" alt="Davincii"></span>
     <button class="mob-back-btn" onclick="go('login')">&larr; Back</button>
   </nav>
   <div class="mob-auth-hero">
@@ -726,7 +726,7 @@ html, body {
 <!-- ════════════════ DASHBOARD ════════════════ -->
 <div class="screen" id="screen-dashboard">
   <div class="mob-top-nav">
-    <span class="mob-nav-logo" onclick="go('landing')"><img src="/logo-sm.png" alt="Davincii"></span>
+    <span class="mob-nav-logo" onclick="go('landing')"><img src="/logo-white-sm.png" alt="Davincii"></span>
     <div class="mob-nav-right">
       <span style="font-family:var(--sans);font-size:12px;color:var(--muted)">SwuM</span>
       <div class="avatar-wrap" id="avatar-wrap">
