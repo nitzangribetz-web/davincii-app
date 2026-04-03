@@ -23,133 +23,134 @@
 html, body { height:100%; }
 body { font-family:var(--sans); background:var(--white); }
 
-.auth-layout { display:grid; grid-template-columns:300px 1fr; min-height:100vh; }
+.auth-layout { display:grid; grid-template-columns:320px 1fr; min-height:100vh; }
 @media (max-width:768px) { .auth-layout { grid-template-columns:1fr; } .auth-brand { display:none; } }
 
 .auth-brand {
-  background:var(--black); color:var(--white); padding:48px 36px;
+  background:var(--black); color:var(--white); padding:40px 44px 44px;
   display:flex; flex-direction:column; justify-content:space-between;
   position:relative; overflow:hidden;
 }
+.auth-brand::before { content:''; position:absolute; inset:0; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); opacity:0.04; pointer-events:none; }
+.auth-brand-glow { position:absolute; bottom:-80px; left:-60px; width:500px; height:500px; background:radial-gradient(ellipse, rgba(184,0,0,0.14) 0%, transparent 65%); pointer-events:none; animation:authGlow 10s ease-in-out infinite; }
+@keyframes authGlow { 0%,100% { transform:scale(1); opacity:0.7; } 50% { transform:scale(1.15); opacity:1; } }
+.auth-brand-top { position:relative; z-index:1; }
 .auth-brand-logo img { height:26px; display:block; }
-.auth-brand-rule { width:24px; height:2px; background:var(--red); margin-bottom:20px; }
-.auth-brand-tagline { font-family:var(--serif); font-size:clamp(28px,2.5vw,38px); font-weight:300; color:var(--white); line-height:1.22; letter-spacing:-0.01em; margin-bottom:20px; }
-.auth-brand-tagline em { font-style:italic; color:rgba(255,255,255,0.6); }
-.auth-brand-sub { font-family:var(--sans); font-size:13px; font-weight:300; color:rgba(255,255,255,0.4); line-height:1.72; }
-.auth-brand-footer { font-family:var(--sans); font-size:10px; font-weight:400; letter-spacing:0.10em; text-transform:uppercase; color:rgba(255,255,255,0.18); }
+.auth-brand-bottom { position:relative; z-index:1; }
+.auth-brand-rule { width:24px; height:2px; background:var(--red); margin-bottom:18px; }
+.auth-brand-tagline { font-family:var(--serif); font-size:28px; font-weight:300; color:#fff; line-height:1.22; letter-spacing:-0.01em; margin-bottom:14px; }
+.auth-brand-tagline em { font-style:italic; color:rgba(255,255,255,0.45); }
+.auth-brand-sub { font-family:var(--sans); font-size:13px; font-weight:300; color:rgba(255,255,255,0.28); line-height:1.7; }
 
-.auth-form-panel { display:flex; align-items:flex-start; justify-content:center; padding:60px 64px; background:var(--white); overflow-y:auto; }
+.auth-form-panel { display:flex; align-items:center; justify-content:center; padding:60px 80px; background:#FFFFFF; overflow-y:auto; }
 @media (max-width:768px) { .auth-form-panel { padding:40px 24px; } }
-.auth-form-inner { width:100%; max-width:420px; }
+.auth-form-inner { width:100%; max-width:400px; }
 
-/* Steps */
-.steps { display:flex; align-items:center; gap:0; margin-bottom:36px; }
-.step { display:flex; align-items:center; gap:8px; }
-.step-num { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:var(--sans); font-size:12px; font-weight:600; }
-.step-num.active { background:var(--black); color:var(--white); }
-.step-num.inactive { background:transparent; border:1.5px solid #ccc; color:#aaa; }
-.step-label { font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.10em; text-transform:uppercase; }
-.step-label.active { color:var(--black); }
-.step-label.inactive { color:#aaa; }
-.step-line { width:48px; height:1px; background:#ddd; margin:0 12px; }
+.auth-page-title { font-family:var(--serif); font-size:44px; font-weight:400; letter-spacing:-0.02em; line-height:1.08; color:var(--black); margin-bottom:36px; }
+.auth-page-title em { font-style:italic; }
 
-.auth-form-title { font-family:var(--serif); font-size:44px; font-weight:400; letter-spacing:-0.02em; line-height:1.08; margin-bottom:8px; color:var(--black); }
-.auth-form-title em { font-style:italic; }
-.auth-title-rule { width:24px; height:2px; background:var(--red); margin-bottom:16px; }
-.auth-form-sub { font-family:var(--sans); font-size:14px; font-weight:300; color:var(--muted); margin-bottom:32px; line-height:1.65; }
+.auth-field { width:100%; border:1.5px solid rgba(0,0,0,0.12); border-radius:10px; padding:15px 18px; font-family:var(--sans); font-size:15px; font-weight:400; color:var(--black); background:#FFFFFF; outline:none; margin-bottom:12px; -webkit-appearance:none; transition:border-color 0.18s; }
+.auth-field:focus { border-color:var(--black); }
+.auth-field::placeholder { color:#c0c0c0; }
 
-.field-label { font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.13em; text-transform:uppercase; color:#2a2a2a; margin-bottom:7px; display:block; }
-.field { width:100%; border:1px solid rgba(0,0,0,0.16); padding:13px 16px; font-family:var(--sans); font-size:15px; font-weight:400; color:var(--black); background:transparent; outline:none; margin-bottom:18px; transition:border-color 0.18s; border-radius:0; -webkit-appearance:none; }
-.field:focus { border-color:var(--red); }
-.field::placeholder { color:#c0c0c0; }
-.field-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-.field-row .field { margin-bottom:18px; }
+.auth-btn-primary { width:100%; background:var(--black); color:#fff; border:none; border-radius:10px; padding:16px; font-family:var(--sans); font-size:15px; font-weight:600; cursor:pointer; margin-bottom:12px; transition:opacity 0.18s; }
+.auth-btn-primary:hover { opacity:0.82; }
 
-.btn-primary { width:100%; background:var(--black); color:var(--white); border:none; padding:15px 32px; font-family:var(--sans); font-size:12px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; cursor:pointer; transition:background 0.18s; }
-.btn-primary:hover { background:#222; }
+.auth-btn-social { width:100%; background:#f5f5f5; color:var(--black); border:1.5px solid rgba(0,0,0,0.08); border-radius:10px; padding:14px 18px; font-family:var(--sans); font-size:14px; font-weight:500; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:12px; transition:background 0.15s; text-decoration:none; }
+.auth-btn-social:hover { background:#ebebeb; }
+.auth-social-icon { width:18px; height:18px; flex-shrink:0; }
 
 .error-box { background:var(--red-soft); border-left:2px solid var(--red); padding:11px 14px; margin-bottom:16px; font-size:13px; color:var(--red); display:none; }
 .error-box.visible { display:block; }
 
-.auth-link { font-family:var(--sans); font-size:13px; color:var(--muted); text-align:center; margin-top:24px; line-height:1.6; }
-.auth-link a { color:var(--black); font-weight:500; text-decoration:underline; cursor:pointer; }
+.auth-agree { display:flex; gap:10px; align-items:flex-start; margin-bottom:18px; font-family:var(--sans); font-size:13px; font-weight:300; color:var(--muted); line-height:1.55; }
+.auth-agree input { flex-shrink:0; width:15px; height:15px; margin-top:2px; cursor:pointer; }
+.auth-agree a { color:var(--black); font-weight:500; text-decoration:underline; }
 
-.auth-divider { display:flex; align-items:center; gap:14px; margin:24px 0; }
-.auth-divider::before, .auth-divider::after { content:''; flex:1; height:1px; background:rgba(0,0,0,0.10); }
-.auth-divider span { font-family:var(--sans); font-size:11px; font-weight:500; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted-light); }
+.auth-footer-link { font-family:var(--sans); font-size:13px; font-weight:400; color:rgba(0,0,0,0.45); text-align:center; margin-top:18px; }
+.auth-footer-link a { color:var(--black); font-weight:600; text-decoration:none; border-bottom:1px solid rgba(0,0,0,0.3); padding-bottom:1px; }
 
-.btn-google { display:flex; align-items:center; justify-content:center; gap:10px; width:100%; border:1px solid rgba(0,0,0,0.16); padding:13px 32px; font-family:var(--sans); font-size:13px; font-weight:500; color:var(--black); background:var(--white); text-decoration:none; cursor:pointer; transition:background 0.18s, border-color 0.18s; }
-.btn-google:hover { background:#f5f5f5; border-color:rgba(0,0,0,0.25); }
-
-.tos-check { display:flex; align-items:flex-start; gap:10px; margin-bottom:22px; margin-top:4px; }
-.tos-check input[type="checkbox"] { margin-top:3px; width:16px; height:16px; accent-color:var(--black); flex-shrink:0; cursor:pointer; }
-.tos-check label { font-family:var(--sans); font-size:12.5px; color:var(--muted); line-height:1.55; cursor:pointer; }
-.tos-check label a { color:var(--black); font-weight:500; text-decoration:underline; }
+/* Password strength */
+.pw-strength { margin-top:-6px; margin-bottom:14px; }
+.pw-strength-bar { height:4px; border-radius:2px; background:rgba(0,0,0,0.06); overflow:hidden; margin-bottom:8px; }
+.pw-strength-fill { height:100%; width:0; border-radius:2px; transition:width 0.3s, background 0.3s; }
+.pw-strength-fill.weak { width:25%; background:#e53e3e; }
+.pw-strength-fill.fair { width:50%; background:#dd6b20; }
+.pw-strength-fill.good { width:75%; background:#38a169; }
+.pw-strength-fill.strong { width:100%; background:#2f855a; }
+.pw-reqs { list-style:none; margin:0; padding:0; display:grid; grid-template-columns:1fr 1fr; gap:3px 12px; }
+.pw-reqs li { font-family:var(--sans); font-size:11px; font-weight:400; color:#bbb; display:flex; align-items:center; gap:5px; transition:color 0.2s; }
+.pw-reqs li.met { color:#38a169; }
+.pw-reqs li .pw-icon { font-size:10px; }
 </style>
 </head>
 <body>
 <div class="auth-layout">
   <div class="auth-brand">
-    <div class="auth-brand-logo"><img src="/logo-white-sm.png" alt="Davincii"></div>
-    <div>
-      <div class="auth-brand-rule"></div>
-      <h2 class="auth-brand-tagline">Your music<br>earns more<br><em>than you know.</em></h2>
+    <div class="auth-brand-glow"></div>
+    <div class="auth-brand-top">
+      <a href="/"><img src="/logo-white-sm.png" alt="Davincii"></a>
     </div>
-    <div class="auth-brand-footer">info@davincii.co</div>
+    <div class="auth-brand-bottom">
+      <div class="auth-brand-rule"></div>
+      <div class="auth-brand-tagline">$0 upfront.<br><em>100% yours.</em></div>
+      <div class="auth-brand-sub">No registration fees, no monthly plans. We take a commission only on what we collect — nothing more.</div>
+    </div>
   </div>
 
   <div class="auth-form-panel">
     <div class="auth-form-inner">
-
-      <h1 class="auth-form-title">Get <em>started.</em></h1>
-      <div class="auth-title-rule"></div>
-      <p class="auth-form-sub">Create your <u>free</u> account and start collecting royalties worldwide.</p>
+      <div class="auth-page-title">Get <em>started.</em></div>
 
       <div class="error-box" id="signup-error"></div>
 
-      <a class="btn-google" href="/api/auth/google">
-        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59a14.5 14.5 0 0 1 0-9.18l-7.98-6.19a24.0 24.0 0 0 0 0 21.56l7.98-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+      <a class="auth-btn-social" href="/api/auth/google">
+        <svg class="auth-social-icon" viewBox="0 0 18 18"><path d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
         Continue with Google
       </a>
 
-      <div class="auth-divider"><span>or</span></div>
+      <div style="display:flex;align-items:center;gap:14px;margin:16px 0">
+        <div style="flex:1;height:1px;background:rgba(0,0,0,0.10)"></div>
+        <span style="font-family:var(--sans);font-size:11px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted-light)">or</span>
+        <div style="flex:1;height:1px;background:rgba(0,0,0,0.10)"></div>
+      </div>
 
-      <!-- Real native form POST — no JS, no preventDefault, no AJAX -->
       <form method="POST" action="/api/auth/signup" autocomplete="on">
-        <div class="field-row">
-          <div>
-            <label class="field-label" for="signup-first">First</label>
-            <input class="field" type="text" name="first_name" id="signup-first"
-                   autocomplete="given-name" placeholder="First" required>
-          </div>
-          <div>
-            <label class="field-label" for="signup-last">Last</label>
-            <input class="field" type="text" name="last_name" id="signup-last"
-                   autocomplete="family-name" placeholder="Last" required>
-          </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+          <input class="auth-field" style="margin-bottom:0" type="text" name="first_name" id="signup-first"
+                 autocomplete="given-name" placeholder="First name" required>
+          <input class="auth-field" style="margin-bottom:0" type="text" name="last_name" id="signup-last"
+                 autocomplete="family-name" placeholder="Last name" required>
         </div>
 
-        <label class="field-label" for="signup-email">Email address</label>
-        <input class="field" type="email" name="email" id="signup-email"
-               autocomplete="email" placeholder="you@example.com" required>
+        <input class="auth-field" type="email" name="email" id="signup-email"
+               autocomplete="email" placeholder="Email address" required>
 
-        <label class="field-label" for="signup-password">Password</label>
-        <input class="field" type="password" name="password" id="signup-password"
-               autocomplete="new-password" placeholder="Min. 8 characters" required minlength="8">
+        <input class="auth-field" type="password" name="password" id="signup-password"
+               autocomplete="new-password" placeholder="Create a password" required minlength="8">
+        <div class="pw-strength" id="sa-pw-strength" style="display:none">
+          <div class="pw-strength-bar"><div class="pw-strength-fill" id="sa-pw-fill"></div></div>
+          <ul class="pw-reqs">
+            <li id="sa-req-len"><span class="pw-icon">○</span> 8+ characters</li>
+            <li id="sa-req-upper"><span class="pw-icon">○</span> Uppercase</li>
+            <li id="sa-req-lower"><span class="pw-icon">○</span> Lowercase</li>
+            <li id="sa-req-num"><span class="pw-icon">○</span> Number</li>
+            <li id="sa-req-special"><span class="pw-icon">○</span> Special char</li>
+          </ul>
+        </div>
 
-        <label class="field-label" for="signup-confirm">Confirm password</label>
-        <input class="field" type="password" name="confirm_password" id="signup-confirm"
-               autocomplete="new-password" placeholder="Repeat your password" required minlength="8">
+        <input class="auth-field" type="password" name="confirm_password" id="signup-confirm"
+               autocomplete="new-password" placeholder="Confirm password" required minlength="8">
 
-        <div class="tos-check">
+        <div class="auth-agree">
           <input type="checkbox" id="tos-agree" name="tos_agree" required>
-          <label for="tos-agree">By creating an account, I agree to Davincii's <a href="/terms.html" target="_blank">Terms of Service</a>.</label>
+          <label for="tos-agree">I agree to Davincii's <a href="/terms.html" target="_blank">Terms</a> and <a href="/privacy.html" target="_blank">Privacy Policy</a></label>
         </div>
 
-        <button class="btn-primary" type="submit">Continue &rarr;</button>
+        <button class="auth-btn-primary" type="submit">Continue</button>
       </form>
 
-      <div class="auth-link">Already have an account? <a href="/login.html">Sign in</a></div>
+      <div class="auth-footer-link">Already have an account? <a href="/login.html">Sign in</a></div>
     </div>
   </div>
 </div>
@@ -177,6 +178,26 @@ body { font-family:var(--sans); background:var(--white); }
       el.classList.add('visible');
     }
   });
+
+  // Password strength
+  var pwInput = document.getElementById('signup-password');
+  if (pwInput) {
+    pwInput.addEventListener('input', function() {
+      var v = this.value;
+      var wrap = document.getElementById('sa-pw-strength');
+      var fill = document.getElementById('sa-pw-fill');
+      wrap.style.display = v.length > 0 ? 'block' : 'none';
+      var hasLen = v.length >= 8, hasUpper = /[A-Z]/.test(v), hasLower = /[a-z]/.test(v), hasNum = /[0-9]/.test(v), hasSpecial = /[^A-Za-z0-9]/.test(v);
+      function setReq(id, met) { var el = document.getElementById(id); el.classList.toggle('met', met); el.querySelector('.pw-icon').textContent = met ? '✓' : '○'; }
+      setReq('sa-req-len', hasLen); setReq('sa-req-upper', hasUpper); setReq('sa-req-lower', hasLower); setReq('sa-req-num', hasNum); setReq('sa-req-special', hasSpecial);
+      var score = [hasLen, hasUpper, hasLower, hasNum, hasSpecial].filter(Boolean).length;
+      fill.className = 'pw-strength-fill';
+      if (score <= 1) fill.classList.add('weak');
+      else if (score <= 2) fill.classList.add('fair');
+      else if (score <= 3) fill.classList.add('good');
+      else fill.classList.add('strong');
+    });
+  }
 })();
 </script>
 </body>
