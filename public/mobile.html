@@ -1428,6 +1428,22 @@ html, body {
   // Handle OAuth callback redirect (token in URL)
   (function checkAuthCallback() {
     const params = new URLSearchParams(window.location.search);
+    // Show OAuth errors on login screen instead of silently landing
+    const oauthError = params.get('error');
+    if (oauthError) {
+      console.error('[OAuth] Error from callback:', oauthError);
+      window.history.replaceState({}, '', '/login');
+      document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+      document.getElementById('screen-login').classList.add('active');
+      var errBox = document.getElementById('mob-login-error');
+      if (errBox) {
+        var msgs = { oauth_failed:'Google sign-in failed. Please try again.', no_code:'OAuth callback missing code. Please try again.', callback_failed:'Sign-in callback failed. Please try again.' };
+        errBox.textContent = msgs[oauthError] || ('Sign-in error: ' + oauthError);
+        errBox.style.display = 'block';
+        if (errBox.classList) errBox.classList.add('visible');
+      }
+      return;
+    }
     const token = params.get('token');
     const artistParam = params.get('artist');
     const isSignup = params.get('signup') === '1';
@@ -1437,17 +1453,10 @@ html, body {
         try { artist = JSON.parse(artistParam); } catch(_) { artist = JSON.parse(decodeURIComponent(artistParam)); }
         localStorage.setItem('dv_token', token);
         localStorage.setItem('dv_artist', JSON.stringify(artist));
-        if (isSignup) {
-          // New Google signup → go to dashboard (mobile has no multi-step signup)
-          window.history.replaceState({}, '', '/dashboard');
-          mobSetArtistNav(artist);
-          go('dashboard');
-        } else {
-          window.history.replaceState({}, '', '/dashboard');
-          mobSetArtistNav(artist);
-          go('dashboard');
-        }
-      } catch (e) { console.error('Auth callback parse error:', e); }
+        window.history.replaceState({}, '', '/dashboard');
+        mobSetArtistNav(artist);
+        go('dashboard');
+      } catch (e) { console.error('[OAuth] Auth callback parse error:', e); }
       return; // Don't run routeFromURL — we already routed
     }
 
