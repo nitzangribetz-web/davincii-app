@@ -663,7 +663,7 @@ html, body {
 
     <div class="mob-signup-agree" style="margin-bottom:24px">
       <input type="checkbox" id="mob-agree-check">
-      <label for="mob-agree-check">I agree to Davincii's <a onclick="go('terms')" style="cursor:pointer;color:var(--black);text-decoration:underline">Terms</a> and <a onclick="go('privacy')" style="cursor:pointer;color:var(--black);text-decoration:underline">Privacy Policy</a></label>
+      <label for="mob-agree-check">I agree to Davincii's <a onclick="event.preventDefault();event.stopPropagation();go('terms')" style="cursor:pointer;color:var(--black);text-decoration:underline">Terms</a> and <a onclick="event.preventDefault();event.stopPropagation();go('privacy')" style="cursor:pointer;color:var(--black);text-decoration:underline">Privacy Policy</a></label>
     </div>
 
     <button class="mob-auth-btn-primary" id="mob-signup-btn">Create account</button>
