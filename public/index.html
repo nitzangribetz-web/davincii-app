@@ -35,6 +35,7 @@
   --noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
 }
 
+html { scroll-behavior: smooth; }
 html, body { width:100%; min-height:100vh; background:var(--white); font-family:var(--sans); color:var(--black); -webkit-font-smoothing:antialiased; }
 
 .screen { display:none; min-height:100vh; flex-direction:column; overflow:hidden; }
@@ -241,7 +242,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
 .btn-mkt-ghost:hover { color:#fff; border-color:rgba(255,255,255,0.35); }
 .btn-mkt-solid { font-family:var(--sans); font-size:13px; font-weight:600; color:#0a0a0a; background:#fff; border:none; padding:9px 22px; border-radius:999px; cursor:pointer; transition:opacity 0.2s; }
 .btn-mkt-solid:hover { opacity:0.88; }
-.mkt-hero { max-width:860px; margin:0 auto; padding:80px 60px 60px; text-align:center; }
+.mkt-hero { max-width:860px; margin:0 auto; padding:100px 60px 60px; text-align:center; }
 .mkt-hero-eyebrow { font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.22em; text-transform:uppercase; color:var(--red); margin-bottom:20px; }
 .mkt-hero-title { font-family:var(--serif); font-size:clamp(40px,4.5vw,60px); font-weight:300; letter-spacing:-0.02em; line-height:1.1; color:#fff; margin-bottom:20px; }
 .mkt-hero-title em { font-style:italic; color:rgba(255,255,255,0.5); }
@@ -314,7 +315,10 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
 
 
 /* ════ LUXURY LANDING CSS ════ */
-#screen-landing { background:#080808; overflow:hidden; }
+#screen-landing { background:#080808; overflow-x:hidden; }
+.landing-section { background:#080808; }
+.section-border-top { border-top:1px solid rgba(255,255,255,0.07); }
+.nav-link-lux.active { color:#fff; background:rgba(255,255,255,0.09); font-weight:500; }
 .glow-orb-lux { position:fixed; top:0; left:0; width:700px; height:700px; background:radial-gradient(ellipse at center, rgba(184,0,0,0.10) 0%, rgba(184,0,0,0.04) 35%, transparent 70%); pointer-events:none; z-index:0; animation:roamLux 25s ease-in-out infinite; transform:translate(-50%,-50%); border-radius:50%; filter:blur(40px); }
 @keyframes roamLux { 0% { top:20%;left:30%;opacity:0.8; } 12% { top:60%;left:70%;opacity:0.6; } 25% { top:80%;left:20%;opacity:1.0; } 37% { top:30%;left:80%;opacity:0.5; } 50% { top:10%;left:50%;opacity:0.9; } 62% { top:70%;left:40%;opacity:0.6; } 75% { top:50%;left:10%;opacity:0.8; } 87% { top:20%;left:60%;opacity:0.7; } 100% { top:20%;left:30%;opacity:0.8; } }
 .landing-nav-lux { position:fixed; top:0; left:0; right:0; z-index:100; display:flex; align-items:center; justify-content:space-between; padding:0 48px; height:64px; border-bottom:1px solid rgba(255,255,255,0.06); background:rgba(8,8,8,0.75); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); }
@@ -331,7 +335,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
 .btn-solid-lux::after { content:''; position:absolute; inset:0; background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,0.5) 50%,transparent 70%); transform:translateX(-110%); transition:transform 0.55s ease; border-radius:999px; }
 .btn-solid-lux:hover::after { transform:translateX(110%); }
 .btn-solid-lux:hover { opacity:0.9; box-shadow:0 0 20px rgba(255,255,255,0.15); }
-.hero-lux { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:120px 48px 80px; position:relative; }
+.hero-lux { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:120px 48px 160px; position:relative; overflow:hidden; }
 .hero-lux::after { content:''; position:absolute; top:64px; left:0; right:0; height:1px; background:linear-gradient(to right,transparent,rgba(255,255,255,0.06) 20%,rgba(255,255,255,0.06) 80%,transparent); pointer-events:none; }
 .hero-glow2-lux { position:absolute; bottom:10%; right:15%; width:500px; height:400px; background:radial-gradient(ellipse at center,rgba(184,0,0,0.07) 0%,transparent 65%); pointer-events:none; animation:glow2Lux 16s ease-in-out infinite alternate; }
 @keyframes glow2Lux { 0% { transform:translateX(0) translateY(0) scale(1);opacity:0.6; } 33% { transform:translateX(-40px) translateY(-30px) scale(1.1);opacity:0.9; } 66% { transform:translateX(30px) translateY(20px) scale(0.9);opacity:0.5; } 100% { transform:translateX(-20px) translateY(-10px) scale(1.05);opacity:0.8; } }
@@ -365,6 +369,16 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
   .hero-cta-lux { flex-direction:column; gap:10px; }
   .btn-cta-primary-lux, .btn-cta-secondary-lux { padding:14px 28px; width:80%; text-align:center; }
   .partners-lux { position:relative; }
+  .mkt-hero { padding:60px 24px 40px; }
+  .mkt-body { padding:0 24px 60px; }
+  .mkt-step { grid-template-columns:40px 1fr; gap:16px; padding:28px 0; }
+  .mkt-step-num { font-size:32px; }
+  .mkt-step-title { font-size:20px; }
+  .about-grid { grid-template-columns:1fr; gap:32px; }
+  .about-stat-grid { grid-template-columns:repeat(3,1fr); }
+  .about-stat-num { font-size:32px; }
+  .about-dark { flex-direction:column; padding:32px 24px; text-align:center; }
+  .about-dark-quote { font-size:22px; }
   .footer-top { grid-template-columns:1fr; gap:32px; }
   .footer-inner { padding:40px 24px 32px; }
   .footer-bottom { flex-direction:column; gap:12px; align-items:flex-start; }
@@ -396,8 +410,6 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
           <div class="footer-col-title">Navigate</div>
           <div class="footer-links">
             <button class="footer-link" onclick="go('landing')">Home</button>
-            <button class="footer-link" onclick="go('howitworks')">How it works</button>
-            <button class="footer-link" onclick="go('about')">About</button>
             <button class="footer-link" onclick="go('login')">Sign in</button>
             <button class="footer-link" onclick="go('signup')">Get started</button>
           </div>
@@ -425,14 +437,14 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
   </footer>
 </template>
 
-<!-- ════════════════ LANDING (v66) ════════════════ -->
+<!-- ════════════════ LANDING ════════════════ -->
 <div class="screen active" id="screen-landing">
   <nav class="landing-nav-lux">
-    <a class="nav-logo-lux" onclick="go('landing')">Davincii</a>
+    <a class="nav-logo-lux" onclick="scrollToTop()">Davincii</a>
     <div class="nav-links-lux">
-      <button class="nav-link-lux" onclick="go('howitworks')">How it works</button>
-      <button class="nav-link-lux" onclick="go('pricing')">Pricing</button>
-      <button class="nav-link-lux" onclick="go('about')">About</button>
+      <button class="nav-link-lux" onclick="scrollToSection('section-howitworks')">How it works</button>
+      <button class="nav-link-lux" onclick="scrollToSection('section-pricing')">Pricing</button>
+      <button class="nav-link-lux" onclick="scrollToSection('section-about')">About</button>
     </div>
     <div class="nav-right-lux">
       <button class="btn-ghost-lux" onclick="go('login')">Sign in</button>
@@ -440,7 +452,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
     </div>
   </nav>
 
-  <section class="hero-lux">
+  <section class="hero-lux" id="section-top">
     <div class="glow-orb-lux"></div>
     <div class="hero-glow2-lux"></div>
     <h1 class="hero-headline-lux">Collect<br><em>royalties.</em></h1>
@@ -479,173 +491,167 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
       </div>
     </div>
   </section>
-  <div id="landing-footer"></div>
-</div>
 
-<!-- ════════════════ HOW IT WORKS (v66) ════════════════ -->
-<div class="screen mkt-page" id="screen-howitworks">
-  <nav class="mkt-nav">
-    <span class="mkt-nav-logo" onclick="go('landing')">Davincii</span>
-    <div class="mkt-nav-links">
-      <button class="mkt-nav-link active" onclick="go('howitworks')">How it works</button>
-      <button class="mkt-nav-link" onclick="go('pricing')">Pricing</button>
-      <button class="mkt-nav-link" onclick="go('about')">About</button>
+  <!-- ── HOW IT WORKS ── -->
+  <section id="section-howitworks" class="landing-section section-border-top">
+    <div class="mkt-hero">
+      <div class="mkt-hero-eyebrow">The process</div>
+      <h2 class="mkt-hero-title">Collecting royalties<br>should be <em>effortless.</em></h2>
+      <div class="mkt-rule"></div>
+      <p class="mkt-hero-sub">We handle the entire publishing administration pipeline — from registration to collection — so you can focus on making music.</p>
     </div>
-    <div class="mkt-nav-right">
-      <button class="btn-mkt-ghost" onclick="go('login')">Sign in</button>
-      <button class="btn-mkt-solid" onclick="go('signup')">Get started</button>
-    </div>
-  </nav>
-
-  <div class="mkt-hero">
-    <div class="mkt-hero-eyebrow">The process</div>
-    <h1 class="mkt-hero-title">Collecting royalties<br>should be <em>effortless.</em></h1>
-    <div class="mkt-rule"></div>
-    <p class="mkt-hero-sub">We handle the entire publishing administration pipeline — from registration to collection — so you can focus on making music.</p>
-  </div>
-
-  <div class="mkt-body">
-    <div class="mkt-step">
-      <div class="mkt-step-num">01</div>
-      <div>
-        <div class="mkt-step-title">You sign up &amp; <em>share your catalog</em></div>
-        <p class="mkt-step-body">Create your free account and submit your songs — titles, ISRC codes, co-writer splits, and release dates. We handle everything from there. No upfront cost, no contracts that lock you in.</p>
-      </div>
-    </div>
-    <div class="mkt-step">
-      <div class="mkt-step-num">02</div>
-      <div>
-        <div class="mkt-step-title">We <em>register</em> your music everywhere</div>
-        <p class="mkt-step-body">Davincii registers your songs with ASCAP, BMI, SoundExchange, the MLC, and Songtrust. Most artists miss royalties simply because their music was never registered properly — we fix that across 12+ platforms.</p>
-      </div>
-    </div>
-    <div class="mkt-step">
-      <div class="mkt-step-num">03</div>
-      <div>
-        <div class="mkt-step-title">We <em>track &amp; collect</em> every quarter</div>
-        <p class="mkt-step-body">Performing rights royalties, digital performance royalties, mechanical royalties — we audit every platform every quarter and collect on your behalf. Nothing slips through.</p>
-      </div>
-    </div>
-    <div class="mkt-step">
-      <div class="mkt-step-num">04</div>
-      <div>
-        <div class="mkt-step-title">You <em>get paid</em> directly</div>
-        <p class="mkt-step-body">Log in to your Davincii portal, see exactly what was collected and from where, and claim your balance via ACH, PayPal, or Stripe. We take 15% of what we collect — that's it. You keep 100% of your copyrights.</p>
-      </div>
-    </div>
-  </div>
-
-  <div id="howitworks-footer" style="margin-top:80px"></div>
-</div>
-
-<!-- ════════════════ PRICING (v66) ════════════════ -->
-<div class="screen mkt-page" id="screen-pricing">
-  <nav class="mkt-nav">
-    <span class="mkt-nav-logo" onclick="go('landing')">Davincii</span>
-    <div class="mkt-nav-links">
-      <button class="mkt-nav-link" onclick="go('howitworks')">How it works</button>
-      <button class="mkt-nav-link active" onclick="go('pricing')">Pricing</button>
-      <button class="mkt-nav-link" onclick="go('about')">About</button>
-    </div>
-    <div class="mkt-nav-right">
-      <button class="btn-mkt-ghost" onclick="go('login')">Sign in</button>
-      <button class="btn-mkt-solid" onclick="go('signup')">Get started</button>
-    </div>
-  </nav>
-  <div class="mkt-hero">
-    <div class="mkt-hero-eyebrow">Pricing</div>
-    <h1 class="mkt-hero-title">Simple. <em>Performance-based.</em></h1>
-    <div class="mkt-rule"></div>
-    <p class="mkt-hero-sub">We don't charge you to work with us. Our fee is a small percentage of what we actually recover — we only succeed when you do. No collections, no charge.</p>
-  </div>
-  <div class="mkt-body">
-    <div style="max-width:480px;margin:0 auto 48px">
-      <div class="pricing-card pricing-card-featured">
-        <div class="pricing-pill">Simple &amp; transparent</div>
-        <div class="pricing-plan">Standard</div>
-        <div class="pricing-price">Performance-based</div>
-        <p class="pricing-desc" style="font-size:14px;margin-bottom:28px">A competitive share of royalties collected — only charged on what we recover for you.</p>
-        <ul class="pricing-features">
-          <li><span class="feat-check">✓</span> Registration with ASCAP, BMI, SoundExchange, MLC, Songtrust</li>
-          <li><span class="feat-check">✓</span> Quarterly royalty collection &amp; distribution</li>
-          <li><span class="feat-check">✓</span> Artist portal with full earnings transparency</li>
-          <li><span class="feat-check">✓</span> Back-catalog royalty audit &amp; recovery</li>
-          <li><span class="feat-check">✓</span> Split sheet management &amp; co-writer tracking</li>
-          <li><span class="feat-check">✓</span> ACH, PayPal, or Stripe payouts</li>
-          <li><span class="feat-check">✓</span> 100% copyright ownership retained</li>
-        </ul>
-        <button class="btn-primary" onclick="go('signup')">Get started free &rarr;</button>
-      </div>
-    </div>
-    <div style="border:1px solid rgba(255,255,255,0.08);padding:28px 32px;background:rgba(255,255,255,0.03);text-align:center;max-width:480px;margin:0 auto 48px">
-      <div style="font-family:var(--serif);font-size:22px;font-weight:300;color:#fff;margin-bottom:8px">No collections, <em style="font-style:italic;color:rgba(255,255,255,0.6)">no charge.</em></div>
-      <div style="font-family:var(--sans);font-size:13px;font-weight:300;color:rgba(255,255,255,0.45);line-height:1.7">If we don't recover royalties for you, you pay nothing. Fee details are outlined in your publishing administration agreement. Questions: <a href="mailto:hello@davincii.co" style="color:var(--red);text-decoration:none">hello@davincii.co</a></div>
-    </div>
-  </div>
-  <div id="pricing-footer"></div>
-</div>
-
-<!-- ════════════════ ABOUT (v66) ════════════════ -->
-<div class="screen mkt-page" id="screen-about">
-  <nav class="mkt-nav">
-    <span class="mkt-nav-logo" onclick="go('landing')">Davincii</span>
-    <div class="mkt-nav-links">
-      <button class="mkt-nav-link" onclick="go('howitworks')">How it works</button>
-      <button class="mkt-nav-link" onclick="go('pricing')">Pricing</button>
-      <button class="mkt-nav-link active" onclick="go('about')">About</button>
-    </div>
-    <div class="mkt-nav-right">
-      <button class="btn-mkt-ghost" onclick="go('login')">Sign in</button>
-      <button class="btn-mkt-solid" onclick="go('signup')">Get started</button>
-    </div>
-  </nav>
-
-  <div class="mkt-hero">
-    <div class="mkt-hero-eyebrow">Our story</div>
-    <h1 class="mkt-hero-title">Built by artists,<br>for <em>artists.</em></h1>
-    <div class="mkt-rule"></div>
-    <p class="mkt-hero-sub">Davincii was founded on a simple belief: every artist deserves to be paid for every play. We built the infrastructure to make that happen.</p>
-  </div>
-
-  <div class="mkt-body">
-    <div class="about-stat-grid">
-      <div class="about-stat"><div class="about-stat-num">$0</div><div class="about-stat-lbl">Upfront cost</div></div>
-      <div class="about-stat"><div class="about-stat-num">12+</div><div class="about-stat-lbl">Platforms covered</div></div>
-      <div class="about-stat"><div class="about-stat-num">100%</div><div class="about-stat-lbl">Your copyright</div></div>
-    </div>
-
-    <div class="about-grid">
-      <div>
-        <div class="about-label">The problem</div>
-        <h2 class="about-title">Billions in royalties go <em>uncollected</em> every year.</h2>
-        <p class="about-body">Most independent artists never see the full value of their music because royalty collection is fragmented across dozens of platforms, each with their own registration requirements and payout cycles. A song can generate income from performing rights, digital performance rights, and mechanical rights — and miss out on all three simply because no one was watching.</p>
-      </div>
-      <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);padding:40px;display:flex;flex-direction:column;gap:20px">
-        <div style="font-family:var(--sans);font-size:10px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.35)">Where royalties come from</div>
-        <div style="border-bottom:1px solid rgba(255,255,255,0.07);padding-bottom:16px">
-          <div style="font-family:var(--serif);font-size:18px;color:#fff;margin-bottom:4px">Performing Rights</div>
-          <div style="font-family:var(--sans);font-size:13px;font-weight:300;color:rgba(255,255,255,0.45)">ASCAP · BMI — radio, TV, live, streaming</div>
+    <div class="mkt-body">
+      <div class="mkt-step">
+        <div class="mkt-step-num">01</div>
+        <div>
+          <div class="mkt-step-title">You sign up &amp; <em>share your catalog</em></div>
+          <p class="mkt-step-body">Create your free account and submit your songs — titles, ISRC codes, co-writer splits, and release dates. We handle everything from there. No upfront cost, no contracts that lock you in.</p>
         </div>
-        <div style="border-bottom:1px solid rgba(255,255,255,0.07);padding-bottom:16px">
-          <div style="font-family:var(--serif);font-size:18px;color:#fff;margin-bottom:4px">Digital Performance</div>
-          <div style="font-family:var(--sans);font-size:13px;font-weight:300;color:rgba(255,255,255,0.45)">SoundExchange — Spotify, Apple Music, Pandora</div>
+      </div>
+      <div class="mkt-step">
+        <div class="mkt-step-num">02</div>
+        <div>
+          <div class="mkt-step-title">We <em>register</em> your music everywhere</div>
+          <p class="mkt-step-body">Davincii registers your songs with ASCAP, BMI, SoundExchange, the MLC, and Songtrust. Most artists miss royalties simply because their music was never registered properly — we fix that across 12+ platforms.</p>
+        </div>
+      </div>
+      <div class="mkt-step">
+        <div class="mkt-step-num">03</div>
+        <div>
+          <div class="mkt-step-title">We <em>track &amp; collect</em> every quarter</div>
+          <p class="mkt-step-body">Performing rights royalties, digital performance royalties, mechanical royalties — we audit every platform every quarter and collect on your behalf. Nothing slips through.</p>
+        </div>
+      </div>
+      <div class="mkt-step">
+        <div class="mkt-step-num">04</div>
+        <div>
+          <div class="mkt-step-title">You <em>get paid</em> directly</div>
+          <p class="mkt-step-body">Log in to your Davincii portal, see exactly what was collected and from where, and claim your balance via ACH, PayPal, or Stripe. We take 15% of what we collect — that's it. You keep 100% of your copyrights.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── PRICING ── -->
+  <section id="section-pricing" class="landing-section section-border-top">
+    <div class="mkt-hero">
+      <div class="mkt-hero-eyebrow">Pricing</div>
+      <h2 class="mkt-hero-title">Simple. <em>Performance-based.</em></h2>
+      <div class="mkt-rule"></div>
+      <p class="mkt-hero-sub">We don't charge you to work with us. Our fee is a small percentage of what we actually recover — we only succeed when you do. No collections, no charge.</p>
+    </div>
+    <div class="mkt-body">
+      <div style="max-width:480px;margin:0 auto 48px">
+        <div class="pricing-card-featured">
+          <div class="pricing-pill">Simple &amp; transparent</div>
+          <div class="pricing-plan">Standard</div>
+          <div class="pricing-price">Performance-based</div>
+          <p class="pricing-desc" style="font-size:14px;margin-bottom:28px">A competitive share of royalties collected — only charged on what we recover for you.</p>
+          <ul class="pricing-features">
+            <li><span class="feat-check">✓</span> Registration with ASCAP, BMI, SoundExchange, MLC, Songtrust</li>
+            <li><span class="feat-check">✓</span> Quarterly royalty collection &amp; distribution</li>
+            <li><span class="feat-check">✓</span> Artist portal with full earnings transparency</li>
+            <li><span class="feat-check">✓</span> Back-catalog royalty audit &amp; recovery</li>
+            <li><span class="feat-check">✓</span> Split sheet management &amp; co-writer tracking</li>
+            <li><span class="feat-check">✓</span> ACH, PayPal, or Stripe payouts</li>
+            <li><span class="feat-check">✓</span> 100% copyright ownership retained</li>
+          </ul>
+          <button class="btn-primary" onclick="go('signup')">Get started free &rarr;</button>
+        </div>
+      </div>
+      <div style="border:1px solid rgba(255,255,255,0.08);padding:28px 32px;background:rgba(255,255,255,0.03);text-align:center;max-width:480px;margin:0 auto 80px">
+        <div style="font-family:var(--serif);font-size:22px;font-weight:300;color:#fff;margin-bottom:8px">No collections, <em style="font-style:italic;color:rgba(255,255,255,0.6)">no charge.</em></div>
+        <div style="font-family:var(--sans);font-size:13px;font-weight:300;color:rgba(255,255,255,0.45);line-height:1.7">If we don't recover royalties for you, you pay nothing. Questions: <a href="mailto:hello@davincii.co" style="color:var(--red);text-decoration:none">hello@davincii.co</a></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── ABOUT ── -->
+  <section id="section-about" class="landing-section section-border-top">
+    <div class="mkt-hero">
+      <div class="mkt-hero-eyebrow">Our story</div>
+      <h2 class="mkt-hero-title">Built by artists,<br>for <em>artists.</em></h2>
+      <div class="mkt-rule"></div>
+      <p class="mkt-hero-sub">Davincii was founded on a simple belief: every artist deserves to be paid for every play. We built the infrastructure to make that happen.</p>
+    </div>
+    <div class="mkt-body">
+      <div class="about-stat-grid">
+        <div class="about-stat"><div class="about-stat-num">$0</div><div class="about-stat-lbl">Upfront cost</div></div>
+        <div class="about-stat"><div class="about-stat-num">12+</div><div class="about-stat-lbl">Platforms covered</div></div>
+        <div class="about-stat"><div class="about-stat-num">100%</div><div class="about-stat-lbl">Your copyright</div></div>
+      </div>
+      <div class="about-grid">
+        <div>
+          <div class="about-label">The problem</div>
+          <h3 class="about-title">Billions in royalties go <em>uncollected</em> every year.</h3>
+          <p class="about-body">Most independent artists never see the full value of their music because royalty collection is fragmented across dozens of platforms, each with their own registration requirements and payout cycles. A song can generate income from performing rights, digital performance rights, and mechanical rights — and miss out on all three simply because no one was watching.</p>
+        </div>
+        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);padding:40px;display:flex;flex-direction:column;gap:20px">
+          <div style="font-family:var(--sans);font-size:10px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.35)">Where royalties come from</div>
+          <div style="border-bottom:1px solid rgba(255,255,255,0.07);padding-bottom:16px">
+            <div style="font-family:var(--serif);font-size:18px;color:#fff;margin-bottom:4px">Performing Rights</div>
+            <div style="font-family:var(--sans);font-size:13px;font-weight:300;color:rgba(255,255,255,0.45)">ASCAP · BMI — radio, TV, live, streaming</div>
+          </div>
+          <div style="border-bottom:1px solid rgba(255,255,255,0.07);padding-bottom:16px">
+            <div style="font-family:var(--serif);font-size:18px;color:#fff;margin-bottom:4px">Digital Performance</div>
+            <div style="font-family:var(--sans);font-size:13px;font-weight:300;color:rgba(255,255,255,0.45)">SoundExchange — Spotify, Apple Music, Pandora</div>
+          </div>
+          <div>
+            <div style="font-family:var(--serif);font-size:18px;color:#fff;margin-bottom:4px">Mechanical Rights</div>
+            <div style="font-family:var(--sans);font-size:13px;font-weight:300;color:rgba(255,255,255,0.45)">MLC · Songtrust — on-demand streaming, downloads</div>
+          </div>
+        </div>
+      </div>
+      <div class="about-dark" style="margin-bottom:0">
+        <div class="about-dark-quote">"We built Davincii because we were tired of watching artists leave money on the table — not from lack of talent, but lack of infrastructure."</div>
+        <div style="position:relative;z-index:1;flex-shrink:0">
+          <button class="btn-primary" style="width:auto;white-space:nowrap" onclick="go('signup')">Join Davincii &rarr;</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ── -->
+  <footer class="site-footer" style="margin-top:80px">
+    <div class="footer-inner">
+      <div class="footer-top">
+        <div>
+          <span class="footer-brand-name">Davincii</span>
+          <div class="footer-red-line"></div>
+          <p class="footer-brand-desc">Music publishing administration — we register, track, and collect every royalty you're owed.</p>
         </div>
         <div>
-          <div style="font-family:var(--serif);font-size:18px;color:#fff;margin-bottom:4px">Mechanical Rights</div>
-          <div style="font-family:var(--sans);font-size:13px;font-weight:300;color:rgba(255,255,255,0.45)">MLC · Songtrust — on-demand streaming, downloads</div>
+          <div class="footer-col-title">Navigate</div>
+          <div class="footer-links">
+            <button class="footer-link" onclick="scrollToTop()">Home</button>
+            <button class="footer-link" onclick="scrollToSection('section-howitworks')">How it works</button>
+            <button class="footer-link" onclick="scrollToSection('section-pricing')">Pricing</button>
+            <button class="footer-link" onclick="scrollToSection('section-about')">About</button>
+            <button class="footer-link" onclick="go('login')">Sign in</button>
+            <button class="footer-link" onclick="go('signup')">Get started</button>
+          </div>
+        </div>
+        <div>
+          <div class="footer-col-title">Contact</div>
+          <div class="footer-links">
+            <a class="footer-contact-email" href="mailto:hello@davincii.co">hello@davincii.co</a>
+            <span class="footer-link" style="cursor:default">For artists &amp; inquiries</span>
+          </div>
+          <div style="margin-top:28px">
+            <div class="footer-col-title">Legal</div>
+            <div class="footer-links" style="margin-top:8px">
+              <button class="footer-legal-link" onclick="go('terms')" style="background:none;border:none;cursor:pointer;padding:0;text-align:left">Terms of Service</button>
+              <button class="footer-legal-link" onclick="go('privacy')" style="background:none;border:none;cursor:pointer;padding:0;text-align:left">Privacy Policy</button>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-
-    <div class="about-dark" style="margin-bottom:0">
-      <div class="about-dark-quote">"We built Davincii because we were tired of watching artists leave money on the table — not from lack of talent, but lack of infrastructure."</div>
-      <div style="position:relative;z-index:1;flex-shrink:0">
-        <button class="btn-primary" style="width:auto;white-space:nowrap" onclick="go('signup')">Join Davincii &rarr;</button>
+      <div class="footer-bottom">
+        <span class="footer-copy">&copy; 2026 Davincii. All rights reserved.</span>
+        <span class="footer-copy" style="letter-spacing:0.08em">davincii.co</span>
       </div>
     </div>
-  </div>
-
-  <div id="about-footer"></div>
+  </footer>
 </div>
 
 <!-- ════════════════ LOGIN (v51) ════════════════ -->
@@ -1262,25 +1268,63 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
     const tpl = document.getElementById('footer-tpl');
     if (!tpl) return;
     const content = tpl.content;
-    ['landing-footer','howitworks-footer','about-footer','dash-footer','terms-footer','privacy-footer','pricing-footer','profile-footer'].forEach(id => {
+    ['dash-footer','terms-footer','privacy-footer','profile-footer'].forEach(id => {
       const el = document.getElementById(id);
       if (el && el.children.length === 0) el.appendChild(content.cloneNode(true));
     });
   }
   injectFooters();
 
+  // ── SCROLL NAVIGATION ──
+  function scrollToSection(id) {
+    // If not on landing screen, switch to it first
+    const landing = document.getElementById('screen-landing');
+    if (!landing.classList.contains('active')) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      landing.classList.add('active');
+      history.pushState({ screen: 'landing' }, '', '/');
+    }
+    const el = document.getElementById(id);
+    if (!el) return;
+    const top = el.getBoundingClientRect().top + window.scrollY - 64;
+    window.scrollTo({ top, behavior: 'smooth' });
+  }
+  function scrollToTop() {
+    const landing = document.getElementById('screen-landing');
+    if (!landing.classList.contains('active')) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      landing.classList.add('active');
+      history.pushState({ screen: 'landing' }, '', '/');
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Scroll-spy: highlight active nav link
+  const spySectionIds = ['section-howitworks', 'section-pricing', 'section-about'];
+  const spyNavBtns = document.querySelectorAll('.landing-nav-lux .nav-link-lux');
+  function updateActiveNav() {
+    if (!document.getElementById('screen-landing').classList.contains('active')) return;
+    let current = -1;
+    spySectionIds.forEach((id, i) => {
+      const el = document.getElementById(id);
+      if (el && el.getBoundingClientRect().top <= 80) current = i;
+    });
+    spyNavBtns.forEach((btn, i) => {
+      btn.classList.toggle('active', i === current);
+    });
+  }
+  window.addEventListener('scroll', updateActiveNav, { passive: true });
+
   // ── SCREEN NAVIGATION ──
   const screenIds = {
     landing:'screen-landing', login:'screen-login', signup:'screen-signup',
     recover:'screen-recover', dashboard:'screen-dashboard',
-    howitworks:'screen-howitworks', about:'screen-about',
-    pricing:'screen-pricing', terms:'screen-terms', privacy:'screen-privacy'
+    terms:'screen-terms', privacy:'screen-privacy'
   };
 
   const screenRoutes = {
     landing: '/', login: '/login', signup: '/signup', recover: '/recover',
-    dashboard: '/dashboard', howitworks: '/how-it-works', about: '/about',
-    pricing: '/pricing', terms: '/terms', privacy: '/privacy'
+    dashboard: '/dashboard', terms: '/terms', privacy: '/privacy'
   };
   const dashRoutes = {
     overview: '/dashboard', catalog: '/dashboard/catalog',
@@ -1373,12 +1417,25 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
 
   // ── SCROLL TO PRICING ──
   function scrollToPricing() {
-    go('pricing');
+    scrollToSection('section-pricing');
   }
 
   // ── URL ROUTING ──
+  // Map old routes to scroll sections
+  const sectionRoutes = {
+    '/how-it-works': 'section-howitworks',
+    '/pricing': 'section-pricing',
+    '/about': 'section-about'
+  };
+
   function routeFromURL() {
     const path = window.location.pathname;
+    // Check section routes first (old /how-it-works, /pricing, /about)
+    if (sectionRoutes[path]) {
+      go('landing');
+      setTimeout(() => scrollToSection(sectionRoutes[path]), 150);
+      return;
+    }
     for (const [name, route] of Object.entries(dashRoutes)) {
       if (path === route && name !== 'overview') { go(name); return; }
     }
