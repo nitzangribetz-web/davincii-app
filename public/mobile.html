@@ -89,7 +89,7 @@ html, body {
 #screen-landing { background:#080808; position:relative; overflow:hidden; }
 #screen-dashboard { background:#FFFFFF; }
 #screen-howitworks, #screen-pricing, #screen-about { background:#080808; }
-#screen-terms, #screen-privacy { background:#080808; }
+#screen-terms, #screen-privacy { background:#FFFFFF; }
 #screen-landing::before { content:''; position:absolute; inset:0; background-image:var(--noise); opacity:0.05; pointer-events:none; z-index:0; }
 
 /* Roaming glow */
@@ -362,28 +362,28 @@ html, body {
 .mob-pricing-dark-cta { background:#FFFFFF; color:var(--black); }
 
 /* Legal dark */
-.mob-legal-dark { background:#080808; color:#fff; }
-.mob-legal-dark-nav { display:flex; justify-content:space-between; align-items:center; padding:0 24px; height:60px; border-bottom:1px solid rgba(255,255,255,0.06); }
+.mob-legal-dark { background:#FFFFFF; color:var(--black); }
+.mob-legal-dark-nav { display:flex; justify-content:space-between; align-items:center; padding:0 24px; height:60px; border-bottom:1px solid var(--border); }
 .mob-legal-dark-logo { cursor:pointer; display:flex; align-items:center; }
-.mob-legal-dark-logo img { height:22px; display:block; }
-.mob-legal-dark-back { font-family:var(--sans); font-size:11px; font-weight:400; letter-spacing:0.10em; text-transform:uppercase; color:rgba(255,255,255,0.6); background:none; border:none; cursor:pointer; }
-.mob-legal-dark-body { padding:28px 24px 60px; background:#080808; }
+.mob-legal-dark-logo img { height:22px; display:block; filter:brightness(0); }
+.mob-legal-dark-back { font-family:var(--sans); font-size:11px; font-weight:400; letter-spacing:0.10em; text-transform:uppercase; color:var(--muted); background:none; border:none; cursor:pointer; }
+.mob-legal-dark-body { padding:28px 24px 60px; background:#FFFFFF; }
 .mob-legal-dark-eyebrow { font-family:var(--sans); font-size:10px; font-weight:500; letter-spacing:0.22em; text-transform:uppercase; color:var(--red); margin-bottom:12px; }
-.mob-legal-dark-title { font-family:var(--serif); font-size:32px; font-weight:300; letter-spacing:-0.02em; line-height:1.1; color:#fff; margin-bottom:10px; }
-.mob-legal-dark-title em { font-style:italic; color:rgba(255,255,255,0.5); }
-.mob-legal-dark-meta { font-family:var(--sans); font-size:12px; font-weight:300; color:rgba(255,255,255,0.3); margin-bottom:28px; padding-bottom:20px; border-bottom:1px solid rgba(255,255,255,0.07); line-height:1.6; }
+.mob-legal-dark-title { font-family:var(--serif); font-size:32px; font-weight:300; letter-spacing:-0.02em; line-height:1.1; color:var(--black); margin-bottom:10px; }
+.mob-legal-dark-title em { font-style:italic; color:rgba(0,0,0,0.4); }
+.mob-legal-dark-meta { font-family:var(--sans); font-size:12px; font-weight:300; color:var(--muted-light); margin-bottom:28px; padding-bottom:20px; border-bottom:1px solid var(--border); line-height:1.6; }
 .mob-legal-dark-section { margin-bottom:32px; }
-.mob-legal-dark-section-title { font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; color:rgba(255,255,255,0.7); margin-bottom:10px; padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.07); }
-.mob-legal-dark-p { font-family:var(--sans); font-size:14px; font-weight:300; color:rgba(255,255,255,0.45); line-height:1.85; margin-bottom:12px; }
+.mob-legal-dark-section-title { font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; color:var(--black); margin-bottom:10px; padding-bottom:8px; border-bottom:1px solid var(--border); }
+.mob-legal-dark-p { font-family:var(--sans); font-size:14px; font-weight:300; color:var(--muted); line-height:1.85; margin-bottom:12px; }
 .mob-legal-dark-list { list-style:none; margin:10px 0 12px 0; }
-.mob-legal-dark-list li { font-family:var(--sans); font-size:13px; font-weight:300; color:rgba(255,255,255,0.45); line-height:1.75; padding:6px 0 6px 16px; position:relative; border-bottom:1px solid rgba(255,255,255,0.05); }
+.mob-legal-dark-list li { font-family:var(--sans); font-size:13px; font-weight:300; color:var(--muted); line-height:1.75; padding:6px 0 6px 16px; position:relative; border-bottom:1px solid var(--border-light); }
 .mob-legal-dark-list li:last-child { border-bottom:none; }
 .mob-legal-dark-list li::before { content:'–'; position:absolute; left:0; color:var(--red); }
-.mob-legal-dark-highlight { background:rgba(184,0,0,0.08); border-left:2px solid var(--red); padding:14px 16px; margin:16px 0; }
-.mob-legal-dark-highlight p { font-family:var(--sans); font-size:13px; font-weight:400; color:rgba(255,255,255,0.75); line-height:1.7; margin:0; }
-.mob-legal-dark-contact { border:1px solid rgba(255,255,255,0.1); padding:18px 20px; margin-top:16px; }
-.mob-legal-dark-contact-name { font-family:var(--sans); font-size:13px; font-weight:600; color:#fff; margin-bottom:6px; }
-.mob-legal-dark-contact-line { font-family:var(--sans); font-size:13px; font-weight:300; color:rgba(255,255,255,0.45); margin-bottom:4px; }
+.mob-legal-dark-highlight { background:var(--red-soft); border-left:2px solid var(--red); padding:14px 16px; margin:16px 0; }
+.mob-legal-dark-highlight p { font-family:var(--sans); font-size:13px; font-weight:400; color:var(--black); line-height:1.7; margin:0; }
+.mob-legal-dark-contact { border:1px solid var(--border); padding:18px 20px; margin-top:16px; }
+.mob-legal-dark-contact-name { font-family:var(--sans); font-size:13px; font-weight:600; color:var(--black); margin-bottom:6px; }
+.mob-legal-dark-contact-line { font-family:var(--sans); font-size:13px; font-weight:300; color:var(--muted); margin-bottom:4px; }
 .mob-legal-dark-contact-line a { color:var(--red); text-decoration:none; }
 
 /* FAQ */
