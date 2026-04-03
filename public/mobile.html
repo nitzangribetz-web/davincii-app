@@ -1367,29 +1367,36 @@ html, body {
     const params = new URLSearchParams(window.location.search);
     const token = params.get('token');
     const artistParam = params.get('artist');
-    const isSignup = params.get('signup') === '1';
     if (token && artistParam) {
       try {
         const artist = JSON.parse(decodeURIComponent(artistParam));
         localStorage.setItem('dv_token', token);
         localStorage.setItem('dv_artist', JSON.stringify(artist));
-        window.history.replaceState({}, '', '/');
+        window.history.replaceState({}, '', '/dashboard');
         mobSetArtistNav(artist);
         go('dashboard');
       } catch (e) { console.error('Auth callback parse error:', e); }
+      return; // Don't run routeFromURL — we already routed
     }
-  })();
 
-  // Auto-populate nav if already logged in
-  (function() {
+    // Auto-populate nav if already logged in
     const savedArtist = localStorage.getItem('dv_artist');
     if (savedArtist) {
       try { mobSetArtistNav(JSON.parse(savedArtist)); } catch(e) {}
     }
-  })();
 
-  // Route based on URL on page load
-  setTimeout(routeFromURL, 100);
+    // Auto-login: validate saved token
+    const savedToken = localStorage.getItem('dv_token');
+    if (savedToken && savedArtist) {
+      fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + savedToken } })
+        .then(r => { if (r.ok) return r.json(); throw new Error('expired'); })
+        .then(artist => { mobSetArtistNav(artist); })
+        .catch(() => { localStorage.removeItem('dv_token'); localStorage.removeItem('dv_artist'); });
+    }
+
+    // Route based on URL on page load
+    setTimeout(routeFromURL, 100);
+  })();
 
   // ── TIME-BASED GREETING ──
   (function updateGreeting() {
