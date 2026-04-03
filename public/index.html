@@ -1791,11 +1791,12 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
         localStorage.setItem('dv_artist', JSON.stringify(artist));
         if (isSignup) {
           // New Google signup → show agreement step (step 2), skip redirect to standalone
+          // Use showSignupStep (not signupNextDesktop) to bypass step-1 validation
           window.history.replaceState({}, '', '/signup');
           document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
           document.getElementById('screen-signup').classList.add('active');
           window.scrollTo(0,0);
-          setTimeout(function() { signupNextDesktop(2); }, 100);
+          setTimeout(function() { showSignupStep(2); }, 100);
         } else {
           window.history.replaceState({}, '', '/dashboard');
           onAuthSuccess(artist, false);
