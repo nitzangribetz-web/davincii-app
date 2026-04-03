@@ -1782,15 +1782,33 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
   // Handle OAuth callback redirect (token in URL)
   (function checkAuthCallback() {
     const params = new URLSearchParams(window.location.search);
+    // Show OAuth errors on login screen instead of silently landing
+    const oauthError = params.get('error');
+    if (oauthError) {
+      console.error('[OAuth] Error from callback:', oauthError);
+      window.history.replaceState({}, '', '/login');
+      document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+      document.getElementById('screen-login').classList.add('active');
+      var errBox = document.getElementById('login-error');
+      if (errBox) {
+        var msgs = { oauth_failed:'Google sign-in failed. Please try again.', no_code:'OAuth callback missing code. Please try again.', callback_failed:'Sign-in callback failed. Please try again.' };
+        errBox.textContent = msgs[oauthError] || ('Sign-in error: ' + oauthError);
+        errBox.style.display = 'block';
+        if (errBox.classList) errBox.classList.add('visible');
+      }
+      return;
+    }
     const token = params.get('token');
     const artistParam = params.get('artist');
     const isSignup = params.get('signup') === '1';
+    console.log('[OAuth] checkAuthCallback: token=' + !!token + ' artist=' + !!artistParam + ' signup=' + isSignup);
     if (token && artistParam) {
       try {
         var artist;
         try { artist = JSON.parse(artistParam); } catch(_) { artist = JSON.parse(decodeURIComponent(artistParam)); }
         localStorage.setItem('dv_token', token);
         localStorage.setItem('dv_artist', JSON.stringify(artist));
+        console.log('[OAuth] Stored token+artist. isSignup=' + isSignup);
         if (isSignup) {
           // New Google signup → show agreement step (step 2), skip redirect to standalone
           // Use showSignupStep (not signupNextDesktop) to bypass step-1 validation
@@ -1798,12 +1816,12 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
           document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
           document.getElementById('screen-signup').classList.add('active');
           window.scrollTo(0,0);
-          setTimeout(function() { showSignupStep(2); }, 100);
+          setTimeout(function() { console.log('[OAuth] showSignupStep(2)'); showSignupStep(2); }, 100);
         } else {
           window.history.replaceState({}, '', '/dashboard');
           onAuthSuccess(artist, false);
         }
-      } catch (e) { console.error('Auth callback parse error:', e); }
+      } catch (e) { console.error('[OAuth] Auth callback parse error:', e); }
       return; // Already routed — don't run routeFromURL
     }
     // Auto-login if token exists
