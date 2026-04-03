@@ -45,13 +45,20 @@ router.get('/apple', async (req, res) => {
 router.get('/callback', async (req, res) => {
   try {
     const code = req.query.code;
+    console.log('[OAuth callback] code present:', !!code, 'query keys:', Object.keys(req.query).join(','));
     if (!code) {
+      console.error('[OAuth callback] No code in query params. Full query:', JSON.stringify(req.query));
       return res.redirect('/?error=no_code');
     }
 
     // Exchange the code for a session
+    console.log('[OAuth callback] Exchanging code for session...');
     const { data: sessionData, error: sessionError } = await supabase.auth.exchangeCodeForSession(code);
-    if (sessionError) throw sessionError;
+    if (sessionError) {
+      console.error('[OAuth callback] exchangeCodeForSession error:', sessionError.message, sessionError);
+      throw sessionError;
+    }
+    console.log('[OAuth callback] Session exchanged. User:', sessionData.user?.email);
 
     const supaUser = sessionData.user;
     const email = supaUser.email;
@@ -63,8 +70,8 @@ router.get('/callback', async (req, res) => {
     const existing = await pool.query('SELECT * FROM artists WHERE email = $1', [email]);
     if (existing.rows.length > 0) {
       artist = existing.rows[0];
+      console.log('[OAuth callback] Existing artist id:', artist.id);
     } else {
-      // Create new artist (no password needed for OAuth users)
       isNewSignup = true;
       const randomHash = await bcrypt.hash(Math.random().toString(36), 10);
       const result = await pool.query(
@@ -72,6 +79,7 @@ router.get('/callback', async (req, res) => {
         [name, email, randomHash]
       );
       artist = result.rows[0];
+      console.log('[OAuth callback] New artist created id:', artist.id);
     }
 
     // Generate JWT
@@ -84,9 +92,10 @@ router.get('/callback', async (req, res) => {
     // Redirect to frontend with token
     const artistPayload = encodeURIComponent(JSON.stringify({ id: artist.id, name: artist.name, email: artist.email }));
     const signupFlag = isNewSignup ? '&signup=1' : '';
+    console.log('[OAuth callback] Redirecting to auth-complete. isNewSignup:', isNewSignup);
     res.redirect(`/auth-complete.html?token=${token}&artist=${artistPayload}${signupFlag}`);
   } catch (err) {
-    console.error('OAuth callback error:', err.message);
+    console.error('[OAuth callback] FAILED:', err.message, err.stack);
     res.redirect('/?error=callback_failed');
   }
 });
