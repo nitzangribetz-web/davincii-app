@@ -142,7 +142,7 @@ html, body {
 .mob-landing-dd-item.muted { color:#777; font-size:12px; }
 
 /* Hero full-screen */
-.mob-landing-hero { position:relative; z-index:10; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:80px 28px 160px; text-align:center; }
+.mob-landing-hero { position:relative; z-index:10; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:80px 28px 90px; text-align:center; }
 .mob-hero-glow2 { position:absolute; bottom:15%; right:5%; width:280px; height:240px; background:radial-gradient(ellipse, rgba(184,0,0,0.07) 0%, transparent 65%); pointer-events:none; animation:glow2Mob 14s ease-in-out infinite alternate; }
 @keyframes glow2Mob { 0% { transform:scale(1);opacity:0.6; } 100% { transform:scale(1.15);opacity:0.9; } }
 .mob-headline { font-family:var(--serif); font-size:clamp(64px,18vw,88px); font-weight:300; color:var(--white); line-height:0.96; letter-spacing:-0.03em; margin-bottom:40px; opacity:0; animation:fadeUpMob 0.9s ease 0.3s forwards; }
@@ -153,7 +153,7 @@ html, body {
 .btn-mob-cta-ghost { background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.75); border:1px solid rgba(255,255,255,0.2); padding:14px; font-family:var(--sans); font-size:11px; font-weight:400; letter-spacing:0.12em; text-transform:uppercase; cursor:pointer; border-radius:999px; }
 
 /* Partners strip */
-.mob-partners { position:absolute; bottom:0; left:0; right:0; z-index:10; border-top:1px solid rgba(255,255,255,0.07); padding:16px 0 0; background:#080808; }
+.mob-partners { position:absolute; bottom:0; left:0; right:0; z-index:10; border-top:1px solid rgba(255,255,255,0.07); padding:6px 0 0; background:#080808; }
 .mob-partners-eyebrow { font-family:var(--sans); font-size:9px; font-weight:500; letter-spacing:0.20em; text-transform:uppercase; color:rgba(255,255,255,0.22); text-align:center; margin-bottom:12px; }
 .mob-partners-wrap { overflow:hidden; mask-image:linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%); -webkit-mask-image:linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%); }
 .mob-partners-track { display:flex; align-items:center; width:max-content; animation:marquee 40s linear infinite; }
@@ -486,7 +486,6 @@ html, body {
     </div>
 
     <div class="mob-partners">
-      <div class="mob-partners-eyebrow">Registered &amp; collected across 12+ platforms worldwide</div>
       <div class="mob-partners-wrap">
         <div class="mob-partners-track">
           <div class="mob-partner-item"><svg viewBox="0 0 110 44" class="mob-partner-svg"><text x="55" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="2" text-anchor="middle">ASCAP</text></svg></div>
