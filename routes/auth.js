@@ -59,11 +59,13 @@ router.get('/callback', async (req, res) => {
 
     // Find or create the artist in our database
     let artist;
+    let isNewSignup = false;
     const existing = await pool.query('SELECT * FROM artists WHERE email = $1', [email]);
     if (existing.rows.length > 0) {
       artist = existing.rows[0];
     } else {
       // Create new artist (no password needed for OAuth users)
+      isNewSignup = true;
       const randomHash = await bcrypt.hash(Math.random().toString(36), 10);
       const result = await pool.query(
         'INSERT INTO artists (name, email, password_hash) VALUES ($1, $2, $3) RETURNING id, name, email, created_at',
@@ -81,7 +83,8 @@ router.get('/callback', async (req, res) => {
 
     // Redirect to frontend with token
     const artistPayload = encodeURIComponent(JSON.stringify({ id: artist.id, name: artist.name, email: artist.email }));
-    res.redirect(`/auth-complete.html?token=${token}&artist=${artistPayload}`);
+    const signupFlag = isNewSignup ? '&signup=1' : '';
+    res.redirect(`/auth-complete.html?token=${token}&artist=${artistPayload}${signupFlag}`);
   } catch (err) {
     console.error('OAuth callback error:', err.message);
     res.redirect('/?error=callback_failed');

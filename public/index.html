@@ -1572,14 +1572,15 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
         const artist = JSON.parse(decodeURIComponent(artistParam));
         localStorage.setItem('dv_token', token);
         localStorage.setItem('dv_artist', JSON.stringify(artist));
-        window.history.replaceState({}, '', '/');
+        window.history.replaceState({}, '', '/dashboard');
         onAuthSuccess(artist, isSignup);
       } catch (e) { console.error('Auth callback parse error:', e); }
+      return; // Already routed — don't run routeFromURL
     }
     // Auto-login if token exists
     const savedToken = localStorage.getItem('dv_token');
     const savedArtist = localStorage.getItem('dv_artist');
-    if (savedToken && savedArtist && !token) {
+    if (savedToken && savedArtist) {
       fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + savedToken } })
         .then(r => { if (r.ok) return r.json(); throw new Error('expired'); })
         .then(artist => {
