@@ -1342,6 +1342,9 @@ html, body {
 
   // ── URL ROUTING ──
   function routeFromURL() {
+    // Handle hash routes (e.g. /#login from standalone page redirects)
+    const hash = window.location.hash.replace('#', '');
+    if (hash && screenIds[hash]) { window.history.replaceState({}, '', '/' + hash); go(hash); return; }
     const path = window.location.pathname.replace(/\/+$/, '') || '/';
     // Check section routes first (old /how-it-works, /pricing, /about)
     if (mobSectionRoutes[path]) {
