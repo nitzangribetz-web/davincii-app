@@ -1137,10 +1137,6 @@ html, body {
   };
 
   function go(name) {
-    // Redirect to standalone auth pages for Safari credential save
-    if (name === 'login') { window.location.href = '/login.html'; return; }
-    if (name === 'signup') { window.location.href = '/signup.html'; return; }
-
     // Scroll sections within landing
     if (mobSectionKeys[name]) { mobScrollToSection(mobSectionKeys[name]); return; }
 
