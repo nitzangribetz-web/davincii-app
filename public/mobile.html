@@ -71,7 +71,8 @@ html, body {
 /* ════ MOBILE FOOTER ════ */
 .mob-footer { background:#080808; padding:44px 24px 32px; position:relative; overflow:hidden; }
 .mob-footer::before { content:''; position:absolute; inset:0; background-image:var(--noise); opacity:0.04; pointer-events:none; }
-.mob-footer-logo { font-family:var(--script); font-size:34px; color:var(--white); display:block; margin-bottom:8px; position:relative; z-index:1; }
+.mob-footer-logo { display:block; margin-bottom:8px; position:relative; z-index:1; }
+.mob-footer-logo img { height:26px; display:block; }
 .mob-footer-rule { width:24px; height:2px; background:var(--red); margin-bottom:16px; position:relative; z-index:1; }
 .mob-footer-desc { font-family:var(--sans); font-size:13px; font-weight:300; color:rgba(255,255,255,0.38); line-height:1.7; margin-bottom:32px; position:relative; z-index:1; }
 .mob-footer-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px 16px; margin-bottom:32px; position:relative; z-index:1; }
@@ -108,7 +109,8 @@ html, body {
   background: #080808;
   border-bottom: 1px solid rgba(255,255,255,0.06);
 }
-.mob-landing-logo { font-family:var(--script); font-size:30px; color:var(--white); line-height:1; }
+.mob-landing-logo { display:flex; align-items:center; }
+.mob-landing-logo img { height:24px; display:block; }
 .mob-landing-menu-btn {
   width:36px; height:36px;
   border:1px solid rgba(255,255,255,0.25);
@@ -162,7 +164,8 @@ html, body {
 
 /* ════ AUTH PAGES ════ */
 .mob-auth-nav { display:flex; align-items:center; justify-content:space-between; padding:20px 24px; border-bottom:1px solid var(--border); background:#FFFFFF; }
-.mob-auth-logo { font-family:var(--script); font-size:28px; color:var(--black); line-height:1; }
+.mob-auth-logo { display:flex; align-items:center; }
+.mob-auth-logo img { height:22px; display:block; }
 .mob-back-btn { font-family:var(--sans); font-size:11px; font-weight:400; letter-spacing:0.10em; text-transform:uppercase; color:var(--muted); background:none; border:none; cursor:pointer; padding:0; }
 
 .mob-auth-hero { background:#080808; padding:28px 24px 24px; position:relative; overflow:hidden; }
@@ -203,7 +206,8 @@ html, body {
 
 /* ════ DASHBOARD ════ */
 .mob-top-nav { height:56px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; padding:0 20px; position:sticky; top:0; background:#FFFFFF; z-index:50; flex-shrink:0; }
-.mob-nav-logo { font-family:var(--script); font-size:26px; color:var(--black); line-height:1; cursor:pointer; }
+.mob-nav-logo { cursor:pointer; display:flex; align-items:center; }
+.mob-nav-logo img { height:22px; display:block; }
 .mob-nav-right { display:flex; align-items:center; gap:12px; }
 .mob-avatar { width:32px; height:32px; background:#080808; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:var(--sans); font-size:11px; font-weight:600; color:var(--white); cursor:pointer; }
 
@@ -326,7 +330,8 @@ html, body {
 /* Legal dark */
 .mob-legal-dark { background:#080808; color:#fff; }
 .mob-legal-dark-nav { display:flex; justify-content:space-between; align-items:center; padding:0 24px; height:60px; border-bottom:1px solid rgba(255,255,255,0.06); }
-.mob-legal-dark-logo { font-family:var(--script); font-size:28px; color:#fff; line-height:1; cursor:pointer; }
+.mob-legal-dark-logo { cursor:pointer; display:flex; align-items:center; }
+.mob-legal-dark-logo img { height:22px; display:block; }
 .mob-legal-dark-back { font-family:var(--sans); font-size:11px; font-weight:400; letter-spacing:0.10em; text-transform:uppercase; color:rgba(255,255,255,0.6); background:none; border:none; cursor:pointer; }
 .mob-legal-dark-body { padding:28px 24px 60px; background:#080808; }
 .mob-legal-dark-eyebrow { font-family:var(--sans); font-size:10px; font-weight:500; letter-spacing:0.22em; text-transform:uppercase; color:var(--red); margin-bottom:12px; }
@@ -378,7 +383,7 @@ html, body {
 <!-- FOOTER TEMPLATE -->
 <template id="footer-tpl">
   <div class="mob-footer">
-    <span class="mob-footer-logo">Davincii</span>
+    <span class="mob-footer-logo"><img src="/logo-white-sm.png" alt="Davincii"></span>
     <div class="mob-footer-rule"></div>
     <p class="mob-footer-desc">Music publishing administration — we register, track, and collect every royalty you're owed.</p>
     <div class="mob-footer-grid">
@@ -415,7 +420,7 @@ html, body {
   <div class="mob-glow-orb"></div>
 
   <nav class="mob-landing-nav">
-    <div class="mob-landing-logo">Davincii</div>
+    <div class="mob-landing-logo"><img src="/logo-white-sm.png" alt="Davincii"></div>
     <div class="mob-landing-menu-btn" id="landing-menu" onclick="toggleLandingMenu()">
       <div class="mob-landing-menu-btn-icon">
         <span></span><span></span><span></span>
@@ -556,7 +561,7 @@ html, body {
 <!-- ════════════════ LOGIN ════════════════ -->
 <div class="screen" id="screen-login">
   <nav class="mob-auth-nav">
-    <span class="mob-auth-logo">Davincii</span>
+    <span class="mob-auth-logo"><img src="/logo-sm.png" alt="Davincii"></span>
     <button class="mob-back-btn" onclick="go('landing')">&larr; Back</button>
   </nav>
   <div class="mob-auth-hero">
@@ -586,7 +591,7 @@ html, body {
 <!-- ════════════════ SIGN UP — 3-STEP (v51 adapted) ════════════════ -->
 <div class="screen" id="screen-signup">
   <nav class="mob-auth-nav">
-    <span class="mob-auth-logo">Davincii</span>
+    <span class="mob-auth-logo"><img src="/logo-sm.png" alt="Davincii"></span>
     <button class="mob-back-btn" id="signup-back-btn" onclick="signupBack()">&larr; Back</button>
   </nav>
   <div class="mob-auth-hero">
@@ -700,7 +705,7 @@ html, body {
 <!-- ════════════════ RECOVER ════════════════ -->
 <div class="screen" id="screen-recover">
   <nav class="mob-auth-nav">
-    <span class="mob-auth-logo">Davincii</span>
+    <span class="mob-auth-logo"><img src="/logo-sm.png" alt="Davincii"></span>
     <button class="mob-back-btn" onclick="go('login')">&larr; Back</button>
   </nav>
   <div class="mob-auth-hero">
@@ -721,7 +726,7 @@ html, body {
 <!-- ════════════════ DASHBOARD ════════════════ -->
 <div class="screen" id="screen-dashboard">
   <div class="mob-top-nav">
-    <span class="mob-nav-logo" onclick="go('landing')">Davincii</span>
+    <span class="mob-nav-logo" onclick="go('landing')"><img src="/logo-sm.png" alt="Davincii"></span>
     <div class="mob-nav-right">
       <span style="font-family:var(--sans);font-size:12px;color:var(--muted)">SwuM</span>
       <div class="avatar-wrap" id="avatar-wrap">
@@ -995,7 +1000,7 @@ html, body {
 <!-- ════════════════ TERMS (dark) ════════════════ -->
 <div class="screen mob-legal-dark" id="screen-terms">
   <nav class="mob-legal-dark-nav">
-    <span class="mob-legal-dark-logo" onclick="go('landing')">Davincii</span>
+    <span class="mob-legal-dark-logo" onclick="go('landing')"><img src="/logo-white-sm.png" alt="Davincii"></span>
     <button class="mob-legal-dark-back" onclick="go('landing')">&larr; Back</button>
   </nav>
   <div class="mob-legal-dark-body">
@@ -1022,7 +1027,7 @@ html, body {
 <!-- ════════════════ PRIVACY (dark) ════════════════ -->
 <div class="screen mob-legal-dark" id="screen-privacy">
   <nav class="mob-legal-dark-nav">
-    <span class="mob-legal-dark-logo" onclick="go('landing')">Davincii</span>
+    <span class="mob-legal-dark-logo" onclick="go('landing')"><img src="/logo-white-sm.png" alt="Davincii"></span>
     <button class="mob-legal-dark-back" onclick="go('landing')">&larr; Back</button>
   </nav>
   <div class="mob-legal-dark-body">

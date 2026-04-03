@@ -68,7 +68,8 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
 .site-footer::before { content:''; position:absolute; inset:0; background-image:var(--noise); opacity:0.035; pointer-events:none; }
 .footer-inner { max-width:1100px; margin:0 auto; padding:56px 60px 40px; position:relative; z-index:1; }
 .footer-top { display:grid; grid-template-columns:1fr 1fr 1fr; gap:48px; padding-bottom:44px; border-bottom:1px solid rgba(255,255,255,0.08); margin-bottom:32px; }
-.footer-brand-name { font-family:var(--script); font-size:38px; color:var(--white); line-height:1; margin-bottom:12px; display:block; }
+.footer-brand-name { display:block; margin-bottom:12px; }
+.footer-brand-name img { height:30px; display:block; }
 .footer-brand-desc { font-family:var(--sans); font-size:13px; font-weight:300; color:rgba(255,255,255,0.38); line-height:1.7; max-width:240px; }
 .footer-col-title { font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.18em; text-transform:uppercase; color:rgba(255,255,255,0.3); margin-bottom:16px; }
 .footer-links { display:flex; flex-direction:column; gap:10px; }
@@ -89,7 +90,8 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
 .auth-brand { background:var(--black); display:flex; flex-direction:column; justify-content:space-between; padding:44px 40px 48px; position:relative; overflow:hidden; }
 .auth-brand::before { content:''; position:absolute; inset:0; background-image:var(--noise); opacity:0.04; pointer-events:none; }
 .auth-brand::after { content:''; position:absolute; bottom:-100px; left:-100px; width:400px; height:400px; background:radial-gradient(ellipse, rgba(184,0,0,0.07) 0%, transparent 70%); pointer-events:none; }
-.auth-brand-logo { font-family:var(--script); font-size:32px; color:var(--white); line-height:1; position:relative; z-index:1; }
+.auth-brand-logo { position:relative; z-index:1; }
+.auth-brand-logo img { height:26px; display:block; }
 .auth-brand-center { position:relative; z-index:1; }
 .auth-brand-rule { width:24px; height:2px; background:var(--red); margin-bottom:20px; }
 .auth-brand-tagline { font-family:var(--serif); font-size:clamp(24px,2.2vw,34px); font-weight:300; color:var(--white); line-height:1.22; letter-spacing:-0.01em; margin-bottom:20px; }
@@ -131,7 +133,8 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
 
 /* ── DASHBOARD NAV ── */
 .top-nav { height:62px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; padding:0 40px; position:sticky; top:0; background:rgba(255,255,255,0.97); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); z-index:50; flex-shrink:0; }
-.top-nav-logo { font-family:var(--script); font-size:28px; color:var(--black); line-height:1; cursor:pointer; letter-spacing:0.01em; }
+.top-nav-logo { cursor:pointer; display:flex; align-items:center; }
+.top-nav-logo img { height:24px; display:block; }
 .top-nav-right { display:flex; align-items:center; gap:20px; }
 .top-nav-name { font-family:var(--sans); font-size:12px; font-weight:400; color:var(--muted); letter-spacing:0.03em; }
 .top-nav-signout { font-family:var(--sans); font-size:11px; font-weight:400; letter-spacing:0.10em; text-transform:uppercase; color:var(--muted); background:none; border:none; cursor:pointer; transition:color 0.18s; }
@@ -322,7 +325,8 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
 .glow-orb-lux { position:fixed; top:0; left:0; width:700px; height:700px; background:radial-gradient(ellipse at center, rgba(184,0,0,0.10) 0%, rgba(184,0,0,0.04) 35%, transparent 70%); pointer-events:none; z-index:0; animation:roamLux 25s ease-in-out infinite; transform:translate(-50%,-50%); border-radius:50%; filter:blur(40px); }
 @keyframes roamLux { 0% { top:20%;left:30%;opacity:0.8; } 12% { top:60%;left:70%;opacity:0.6; } 25% { top:80%;left:20%;opacity:1.0; } 37% { top:30%;left:80%;opacity:0.5; } 50% { top:10%;left:50%;opacity:0.9; } 62% { top:70%;left:40%;opacity:0.6; } 75% { top:50%;left:10%;opacity:0.8; } 87% { top:20%;left:60%;opacity:0.7; } 100% { top:20%;left:30%;opacity:0.8; } }
 .landing-nav-lux { position:fixed; top:0; left:0; right:0; z-index:100; display:flex; align-items:center; justify-content:space-between; padding:0 48px; height:64px; border-bottom:1px solid rgba(255,255,255,0.06); background:rgba(8,8,8,0.75); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); }
-.nav-logo-lux { font-family:var(--script); font-size:32px; color:#fff; line-height:1; cursor:pointer; text-decoration:none; }
+.nav-logo-lux { cursor:pointer; text-decoration:none; display:flex; align-items:center; }
+.nav-logo-lux img { height:26px; display:block; }
 .nav-links-lux { position:absolute; left:50%; transform:translateX(-50%); display:flex; gap:6px; align-items:center; }
 .nav-link-lux { font-family:var(--sans); font-size:13px; font-weight:400; color:rgba(255,255,255,0.72); background:none; border:none; cursor:pointer; padding:8px 16px; border-radius:999px; transition:color 0.2s,background 0.2s; letter-spacing:0.01em; }
 .nav-link-lux:hover { color:#fff; background:rgba(255,255,255,0.07); }
@@ -361,7 +365,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
 @media (max-width: 768px) {
   .landing-nav-lux { padding:0 16px; height:56px; }
   .nav-links-lux { display:none; }
-  .nav-logo-lux { font-size:26px; }
+  .nav-logo-lux img { height:22px; }
   .btn-ghost-lux { padding:7px 14px; font-size:12px; }
   .btn-solid-lux { padding:7px 14px; font-size:12px; }
   .hero-lux { padding:80px 24px 60px; }
@@ -389,7 +393,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
   .sidebar { display:none; }
   .main-content { padding:24px 16px; }
   .top-nav { padding:0 16px; }
-  .top-nav-logo { font-size:24px; }
+  .top-nav-logo img { height:20px; }
 }
 </style>
 </head>
@@ -402,7 +406,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
     <div class="footer-inner">
       <div class="footer-top">
         <div>
-          <span class="footer-brand-name">Davincii</span>
+          <span class="footer-brand-name"><img src="/logo-white-sm.png" alt="Davincii"></span>
           <div class="footer-red-line"></div>
           <p class="footer-brand-desc">Music publishing administration — we register, track, and collect every royalty you're owed.</p>
         </div>
@@ -440,7 +444,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
 <!-- ════════════════ LANDING ════════════════ -->
 <div class="screen active" id="screen-landing">
   <nav class="landing-nav-lux">
-    <a class="nav-logo-lux" onclick="scrollToTop()">Davincii</a>
+    <a class="nav-logo-lux" onclick="scrollToTop()"><img src="/logo-white-sm.png" alt="Davincii"></a>
     <div class="nav-links-lux">
       <button class="nav-link-lux" onclick="scrollToSection('section-howitworks')">How it works</button>
       <button class="nav-link-lux" onclick="scrollToSection('section-pricing')">Pricing</button>
@@ -616,7 +620,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
     <div class="footer-inner">
       <div class="footer-top">
         <div>
-          <span class="footer-brand-name">Davincii</span>
+          <span class="footer-brand-name"><img src="/logo-white-sm.png" alt="Davincii"></span>
           <div class="footer-red-line"></div>
           <p class="footer-brand-desc">Music publishing administration — we register, track, and collect every royalty you're owed.</p>
         </div>
@@ -658,7 +662,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
 <div class="screen" id="screen-login">
   <div class="auth-layout">
     <div class="auth-brand">
-      <div class="auth-brand-logo">Davincii</div>
+      <div class="auth-brand-logo"><img src="/logo-white-sm.png" alt="Davincii"></div>
       <div class="auth-brand-center">
         <div class="auth-brand-rule"></div>
         <h2 class="auth-brand-tagline">Every stream,<br>every spin,<br><em>every dollar.</em></h2>
@@ -693,7 +697,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
 <div class="screen" id="screen-signup">
   <div class="auth-layout">
     <div class="auth-brand">
-      <div class="auth-brand-logo">Davincii</div>
+      <div class="auth-brand-logo"><img src="/logo-white-sm.png" alt="Davincii"></div>
       <div class="auth-brand-center">
         <div class="auth-brand-rule"></div>
         <h2 class="auth-brand-tagline">"Most artists miss income not from lack of talent — but lack of infrastructure."</h2>
@@ -813,7 +817,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
 <div class="screen" id="screen-recover">
   <div class="auth-layout">
     <div class="auth-brand">
-      <div class="auth-brand-logo">Davincii</div>
+      <div class="auth-brand-logo"><img src="/logo-white-sm.png" alt="Davincii"></div>
       <div class="auth-brand-center">
         <div class="auth-brand-rule"></div>
         <h2 class="auth-brand-tagline">We'll get<br>you back<br><em>in.</em></h2>
@@ -838,7 +842,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
 <!-- ════════════════ DASHBOARD (v51 — with Artist Profile) ════════════════ -->
 <div class="screen" id="screen-dashboard">
   <div class="top-nav">
-    <span class="top-nav-logo" onclick="go('landing')">Davincii</span>
+    <span class="top-nav-logo" onclick="go('landing')"><img src="/logo-sm.png" alt="Davincii"></span>
     <div class="top-nav-right">
       <span class="top-nav-name">SwuM</span>
       <div class="avatar-wrap" id="avatar-wrap">
