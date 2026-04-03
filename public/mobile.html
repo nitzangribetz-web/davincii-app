@@ -231,6 +231,20 @@ html, body {
 
 .mob-signup-agree { display:flex; gap:10px; align-items:flex-start; margin-bottom:18px; font-family:var(--sans); font-size:13px; font-weight:300; color:var(--muted); line-height:1.5; }
 .mob-signup-agree input { flex-shrink:0; cursor:pointer; width:16px; height:16px; margin-top:1px; }
+
+/* Password strength */
+.pw-strength { margin-top:-6px; margin-bottom:14px; }
+.pw-strength-bar { height:4px; border-radius:2px; background:rgba(0,0,0,0.06); overflow:hidden; margin-bottom:8px; }
+.pw-strength-fill { height:100%; width:0; border-radius:2px; transition:width 0.3s, background 0.3s; }
+.pw-strength-fill.weak { width:25%; background:#e53e3e; }
+.pw-strength-fill.fair { width:50%; background:#dd6b20; }
+.pw-strength-fill.good { width:75%; background:#38a169; }
+.pw-strength-fill.strong { width:100%; background:#2f855a; }
+.pw-strength-label { font-family:var(--sans); font-size:11px; font-weight:500; color:var(--muted); }
+.pw-reqs { list-style:none; margin:0; padding:0; display:grid; grid-template-columns:1fr 1fr; gap:3px 12px; }
+.pw-reqs li { font-family:var(--sans); font-size:11px; font-weight:400; color:#bbb; display:flex; align-items:center; gap:5px; transition:color 0.2s; }
+.pw-reqs li.met { color:#38a169; }
+.pw-reqs li .pw-icon { font-size:10px; }
 .mob-agreement-box { border:1px solid var(--border); background:#FFFFFF; margin-bottom:20px; border-radius:8px; overflow:hidden; }
 .mob-agreement-box-header { padding:12px 16px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
 .mob-agreement-box-title { font-family:var(--sans); font-size:11px; font-weight:600; color:var(--black); }
@@ -635,6 +649,16 @@ html, body {
     <input class="mob-auth-field" id="mob-signup-last" type="text" autocomplete="family-name" placeholder="Last name">
     <input class="mob-auth-field" id="mob-signup-email" type="email" autocomplete="email" placeholder="Email address">
     <input class="mob-auth-field" id="mob-signup-pass" type="password" autocomplete="new-password" placeholder="Create a password">
+    <div class="pw-strength" id="mob-pw-strength" style="display:none">
+      <div class="pw-strength-bar"><div class="pw-strength-fill" id="mob-pw-fill"></div></div>
+      <ul class="pw-reqs">
+        <li id="mob-req-len"><span class="pw-icon">○</span> 8+ characters</li>
+        <li id="mob-req-upper"><span class="pw-icon">○</span> Uppercase</li>
+        <li id="mob-req-lower"><span class="pw-icon">○</span> Lowercase</li>
+        <li id="mob-req-num"><span class="pw-icon">○</span> Number</li>
+        <li id="mob-req-special"><span class="pw-icon">○</span> Special char</li>
+      </ul>
+    </div>
     <input class="mob-auth-field" id="mob-signup-confirm" type="password" autocomplete="new-password" placeholder="Confirm password">
 
     <div class="mob-signup-agree" style="margin-bottom:24px">
@@ -1156,6 +1180,26 @@ html, body {
           if (errBox) { errBox.textContent = e.message; errBox.style.display = 'block'; }
           loginBtn.disabled = false; loginBtn.textContent = 'Sign in';
         }
+      });
+    }
+
+    // ── PASSWORD STRENGTH (MOBILE) ──
+    var mobPwInput = document.getElementById('mob-signup-pass');
+    if (mobPwInput) {
+      mobPwInput.addEventListener('input', function() {
+        var v = this.value;
+        var wrap = document.getElementById('mob-pw-strength');
+        var fill = document.getElementById('mob-pw-fill');
+        wrap.style.display = v.length > 0 ? 'block' : 'none';
+        var hasLen = v.length >= 8, hasUpper = /[A-Z]/.test(v), hasLower = /[a-z]/.test(v), hasNum = /[0-9]/.test(v), hasSpecial = /[^A-Za-z0-9]/.test(v);
+        function setReq(id, met) { var el = document.getElementById(id); el.classList.toggle('met', met); el.querySelector('.pw-icon').textContent = met ? '✓' : '○'; }
+        setReq('mob-req-len', hasLen); setReq('mob-req-upper', hasUpper); setReq('mob-req-lower', hasLower); setReq('mob-req-num', hasNum); setReq('mob-req-special', hasSpecial);
+        var score = [hasLen, hasUpper, hasLower, hasNum, hasSpecial].filter(Boolean).length;
+        fill.className = 'pw-strength-fill';
+        if (score <= 1) fill.classList.add('weak');
+        else if (score <= 2) fill.classList.add('fair');
+        else if (score <= 3) fill.classList.add('good');
+        else fill.classList.add('strong');
       });
     }
 
