@@ -5,14 +5,14 @@ const jwt = require('jsonwebtoken');
 const pool = require('../db/pool');
 const supabase = require('../db/supabase');
 
-// GET /api/auth/google - Initiate Google OAuth via Supabase
+// GET /api/auth/google - Initiate Google OAuth via Supabase (implicit flow)
 router.get('/google', async (req, res) => {
   try {
     const appUrl = process.env.APP_URL || 'https://davincii.co';
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${appUrl}/api/auth/callback`,
+        redirectTo: `${appUrl}/oauth-callback.html`,
       }
     });
     if (error) throw error;
@@ -23,14 +23,14 @@ router.get('/google', async (req, res) => {
   }
 });
 
-// GET /api/auth/apple - Initiate Apple OAuth via Supabase
+// GET /api/auth/apple - Initiate Apple OAuth via Supabase (implicit flow)
 router.get('/apple', async (req, res) => {
   try {
     const appUrl = process.env.APP_URL || 'https://davincii.co';
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'apple',
       options: {
-        redirectTo: `${appUrl}/api/auth/callback`,
+        redirectTo: `${appUrl}/oauth-callback.html`,
       }
     });
     if (error) throw error;
@@ -41,28 +41,25 @@ router.get('/apple', async (req, res) => {
   }
 });
 
-// GET /api/auth/callback - Handle OAuth callback from Supabase
-router.get('/callback', async (req, res) => {
+// POST /api/auth/oauth-exchange - Exchange Supabase access token for our JWT
+router.post('/oauth-exchange', async (req, res) => {
   try {
-    const code = req.query.code;
-    console.log('[OAuth callback] code present:', !!code, 'query keys:', Object.keys(req.query).join(','));
-    if (!code) {
-      console.error('[OAuth callback] No code in query params. Full query:', JSON.stringify(req.query));
-      return res.redirect('/?error=no_code');
+    const { access_token } = req.body;
+    if (!access_token) {
+      return res.status(400).json({ error: 'Missing access_token' });
     }
 
-    // Exchange the code for a session
-    console.log('[OAuth callback] Exchanging code for session...');
-    const { data: sessionData, error: sessionError } = await supabase.auth.exchangeCodeForSession(code);
-    if (sessionError) {
-      console.error('[OAuth callback] exchangeCodeForSession error:', sessionError.message, sessionError);
-      throw sessionError;
+    // Verify the token with Supabase to get user info
+    const { data: userData, error: userError } = await supabase.auth.getUser(access_token);
+    if (userError || !userData?.user) {
+      console.error('[OAuth exchange] getUser error:', userError?.message);
+      return res.status(401).json({ error: 'Invalid access token' });
     }
-    console.log('[OAuth callback] Session exchanged. User:', sessionData.user?.email);
 
-    const supaUser = sessionData.user;
+    const supaUser = userData.user;
     const email = supaUser.email;
     const name = supaUser.user_metadata?.full_name || supaUser.user_metadata?.name || email.split('@')[0];
+    console.log('[OAuth exchange] Verified user:', email);
 
     // Find or create the artist in our database
     let artist;
@@ -70,7 +67,6 @@ router.get('/callback', async (req, res) => {
     const existing = await pool.query('SELECT * FROM artists WHERE email = $1', [email]);
     if (existing.rows.length > 0) {
       artist = existing.rows[0];
-      console.log('[OAuth callback] Existing artist id:', artist.id);
     } else {
       isNewSignup = true;
       const randomHash = await bcrypt.hash(Math.random().toString(36), 10);
@@ -79,23 +75,66 @@ router.get('/callback', async (req, res) => {
         [name, email, randomHash]
       );
       artist = result.rows[0];
-      console.log('[OAuth callback] New artist created id:', artist.id);
+      console.log('[OAuth exchange] New artist created id:', artist.id);
     }
 
-    // Generate JWT
+    // Generate our JWT
     const token = jwt.sign(
       { id: artist.id, email: artist.email, name: artist.name },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
 
-    // Redirect to frontend with token
+    res.json({
+      token,
+      artist: { id: artist.id, name: artist.name, email: artist.email },
+      isNewSignup
+    });
+  } catch (err) {
+    console.error('[OAuth exchange] FAILED:', err.message);
+    res.status(500).json({ error: 'OAuth exchange failed' });
+  }
+});
+
+// GET /api/auth/callback - Legacy callback (kept for backward compatibility)
+router.get('/callback', async (req, res) => {
+  const code = req.query.code;
+  if (!code) {
+    return res.redirect('/?error=no_code');
+  }
+  try {
+    const { data: sessionData, error: sessionError } = await supabase.auth.exchangeCodeForSession(code);
+    if (sessionError) throw sessionError;
+
+    const supaUser = sessionData.user;
+    const email = supaUser.email;
+    const name = supaUser.user_metadata?.full_name || supaUser.user_metadata?.name || email.split('@')[0];
+
+    let artist;
+    let isNewSignup = false;
+    const existing = await pool.query('SELECT * FROM artists WHERE email = $1', [email]);
+    if (existing.rows.length > 0) {
+      artist = existing.rows[0];
+    } else {
+      isNewSignup = true;
+      const randomHash = await bcrypt.hash(Math.random().toString(36), 10);
+      const result = await pool.query(
+        'INSERT INTO artists (name, email, password_hash) VALUES ($1, $2, $3) RETURNING id, name, email, created_at',
+        [name, email, randomHash]
+      );
+      artist = result.rows[0];
+    }
+
+    const token = jwt.sign(
+      { id: artist.id, email: artist.email, name: artist.name },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
     const artistPayload = encodeURIComponent(JSON.stringify({ id: artist.id, name: artist.name, email: artist.email }));
     const signupFlag = isNewSignup ? '&signup=1' : '';
-    console.log('[OAuth callback] Redirecting to auth-complete. isNewSignup:', isNewSignup);
     res.redirect(`/auth-complete.html?token=${token}&artist=${artistPayload}${signupFlag}`);
   } catch (err) {
-    console.error('[OAuth callback] FAILED:', err.message, err.stack);
+    console.error('[OAuth callback] FAILED:', err.message);
     res.redirect('/?error=callback_failed');
   }
 });
