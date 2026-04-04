@@ -40,7 +40,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
 
 .screen { display:none; min-height:100vh; flex-direction:column; overflow:hidden; }
 .screen.active { display:flex; animation:fadeUp 0.3s ease; }
-#screen-dashboard.active { animation:none; }
+#screen-dashboard.active { animation:none; overflow:visible; }
 @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
 
 /* ── SHARED FORM ── */
@@ -286,7 +286,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
 .nav-lnk.active { color:var(--black); font-weight:500; background:rgba(0,0,0,0.05); border-left:2px solid var(--red); padding-left:22px; }
 .nav-icon { font-size:14px; opacity:0.5; }
 .nav-lnk.active .nav-icon { opacity:1; }
-.main-content { padding:44px 52px; max-width:1060px; overflow-y:auto; height:calc(100vh - 62px); }
+.main-content { padding:44px 52px; max-width:1060px; min-height:calc(100vh - 62px); }
 .profile-container { max-width:520px; }
 .profile-section-label { font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.18em; text-transform:uppercase; color:var(--black); margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid var(--border); margin-top:8px; }
 
