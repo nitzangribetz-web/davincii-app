@@ -402,27 +402,27 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
 .about-dark-quote em { font-style:italic; color:#fff; }
 
 /* Legal pages (v66 dark style) */
-.legal-page { background:#080808; color:#fff; }
-.legal-nav { display:flex; justify-content:space-between; align-items:center; padding:0 48px; height:64px; border-bottom:1px solid rgba(255,255,255,0.06); }
-.legal-nav-logo { font-family:var(--script); font-size:32px; color:#fff; line-height:1; cursor:pointer; }
+.legal-page { background:var(--white); color:var(--black); }
+.legal-nav { display:flex; justify-content:space-between; align-items:center; padding:0 48px; height:64px; border-bottom:1px solid rgba(0,0,0,0.08); }
+.legal-nav-logo { font-family:var(--script); font-size:32px; color:var(--black); line-height:1; cursor:pointer; }
 .legal-body { max-width:720px; margin:0 auto; padding:64px 60px 80px; }
 .legal-eyebrow { font-family:var(--sans); font-size:10px; font-weight:500; letter-spacing:0.22em; text-transform:uppercase; color:var(--red); margin-bottom:16px; }
-.legal-title { font-family:var(--serif); font-size:clamp(36px,4vw,52px); font-weight:300; letter-spacing:-0.02em; line-height:1.1; color:#fff; margin-bottom:12px; }
-.legal-title em { font-style:italic; color:rgba(255,255,255,0.5); }
-.legal-meta { font-family:var(--sans); font-size:13px; font-weight:300; color:rgba(255,255,255,0.3); margin-bottom:40px; padding-bottom:32px; border-bottom:1px solid rgba(255,255,255,0.07); }
+.legal-title { font-family:var(--serif); font-size:clamp(36px,4vw,52px); font-weight:300; letter-spacing:-0.02em; line-height:1.1; color:var(--black); margin-bottom:12px; }
+.legal-title em { font-style:italic; color:rgba(0,0,0,0.4); }
+.legal-meta { font-family:var(--sans); font-size:13px; font-weight:300; color:var(--muted-light); margin-bottom:40px; padding-bottom:32px; border-bottom:1px solid rgba(0,0,0,0.08); }
 .legal-rule { width:24px; height:2px; background:var(--red); margin-bottom:40px; }
 .legal-section { margin-bottom:44px; }
-.legal-section-title { font-family:var(--sans); font-size:12px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; color:rgba(255,255,255,0.7); margin-bottom:14px; padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.07); }
-.legal-p { font-family:var(--sans); font-size:14px; font-weight:300; color:rgba(255,255,255,0.45); line-height:1.85; margin-bottom:14px; }
+.legal-section-title { font-family:var(--sans); font-size:12px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted); margin-bottom:14px; padding-bottom:8px; border-bottom:1px solid rgba(0,0,0,0.08); }
+.legal-p { font-family:var(--sans); font-size:14px; font-weight:300; color:var(--muted); line-height:1.85; margin-bottom:14px; }
 .legal-list { list-style:none; margin:12px 0 14px 0; }
-.legal-list li { font-family:var(--sans); font-size:14px; font-weight:300; color:rgba(255,255,255,0.45); line-height:1.75; padding:6px 0 6px 18px; position:relative; border-bottom:1px solid rgba(255,255,255,0.05); }
+.legal-list li { font-family:var(--sans); font-size:14px; font-weight:300; color:var(--muted); line-height:1.75; padding:6px 0 6px 18px; position:relative; border-bottom:1px solid rgba(0,0,0,0.05); }
 .legal-list li:last-child { border-bottom:none; }
 .legal-list li::before { content:'–'; position:absolute; left:0; color:var(--red); font-weight:400; }
-.legal-highlight { background:rgba(184,0,0,0.08); border-left:2px solid var(--red); padding:16px 20px; margin:20px 0; }
-.legal-highlight p { font-family:var(--sans); font-size:14px; font-weight:400; color:rgba(255,255,255,0.75); line-height:1.7; margin:0; }
-.legal-contact { border:1px solid rgba(255,255,255,0.1); padding:24px 28px; margin-top:20px; }
-.legal-contact-name { font-family:var(--sans); font-size:13px; font-weight:600; color:#fff; margin-bottom:6px; }
-.legal-contact-line { font-family:var(--sans); font-size:13px; font-weight:300; color:rgba(255,255,255,0.45); margin-bottom:4px; }
+.legal-highlight { background:var(--red-soft); border-left:2px solid var(--red); padding:16px 20px; margin:20px 0; }
+.legal-highlight p { font-family:var(--sans); font-size:14px; font-weight:400; color:var(--black); line-height:1.7; margin:0; }
+.legal-contact { border:1px solid rgba(0,0,0,0.10); padding:24px 28px; margin-top:20px; }
+.legal-contact-name { font-family:var(--sans); font-size:13px; font-weight:600; color:var(--black); margin-bottom:6px; }
+.legal-contact-line { font-family:var(--sans); font-size:13px; font-weight:300; color:var(--muted); margin-bottom:4px; }
 .legal-contact-line a { color:var(--red); text-decoration:none; }
 
 /* ── PRO SECTION ── */
@@ -948,7 +948,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
 <!-- ════════════════ DASHBOARD (v51 — with Artist Profile) ════════════════ -->
 <div class="screen" id="screen-dashboard">
   <div class="top-nav">
-    <span class="top-nav-logo" onclick="go('landing')"><img src="/logo-white-sm.png" alt="Davincii"></span>
+    <span class="top-nav-logo" onclick="showDashPage('overview')"><img src="/logo-white-sm.png" alt="Davincii"></span>
     <div class="top-nav-right">
       <span class="top-nav-name">SwuM</span>
       <div class="avatar-wrap" id="avatar-wrap">
@@ -1376,7 +1376,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
 <div class="screen legal-page" id="screen-terms">
   <nav class="legal-nav">
     <span class="legal-nav-logo" onclick="go('landing')">Davincii</span>
-    <button class="btn-mkt-ghost" onclick="go('landing')" style="font-family:var(--sans);font-size:11px;font-weight:500;letter-spacing:0.10em;text-transform:uppercase;color:rgba(255,255,255,0.8);background:transparent;border:1px solid rgba(255,255,255,0.2);padding:9px 20px;cursor:pointer;border-radius:999px">&larr; Back</button>
+    <button class="btn-mkt-ghost" onclick="go('landing')" style="font-family:var(--sans);font-size:11px;font-weight:500;letter-spacing:0.10em;text-transform:uppercase;color:var(--muted);background:transparent;border:1px solid rgba(0,0,0,0.15);padding:9px 20px;cursor:pointer;border-radius:999px">&larr; Back</button>
   </nav>
   <div class="legal-body">
     <div class="legal-eyebrow">Legal</div>
@@ -1460,7 +1460,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
 <div class="screen legal-page" id="screen-privacy">
   <nav class="legal-nav">
     <span class="legal-nav-logo" onclick="go('landing')">Davincii</span>
-    <button class="btn-mkt-ghost" onclick="go('landing')" style="font-family:var(--sans);font-size:11px;font-weight:500;letter-spacing:0.10em;text-transform:uppercase;color:rgba(255,255,255,0.8);background:transparent;border:1px solid rgba(255,255,255,0.2);padding:9px 20px;cursor:pointer;border-radius:999px">&larr; Back</button>
+    <button class="btn-mkt-ghost" onclick="go('landing')" style="font-family:var(--sans);font-size:11px;font-weight:500;letter-spacing:0.10em;text-transform:uppercase;color:var(--muted);background:transparent;border:1px solid rgba(0,0,0,0.15);padding:9px 20px;cursor:pointer;border-radius:999px">&larr; Back</button>
   </nav>
   <div class="legal-body">
     <div class="legal-eyebrow">Legal</div>
@@ -1503,10 +1503,10 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
       <div class="legal-section-title">How We Share Your Information</div>
       <p class="legal-p">We do not sell your personal information. We share it only with:</p>
       <ul class="legal-list">
-        <li><strong style="color:rgba(255,255,255,0.8);font-weight:500">Stripe</strong> — for payment processing and artist payouts via Stripe Connect. Stripe's privacy policy governs their handling of payment data.</li>
-        <li><strong style="color:rgba(255,255,255,0.8);font-weight:500">PROs &amp; collection societies</strong> — performing rights organizations and collection platforms as needed for composition registration and royalty collection</li>
-        <li><strong style="color:rgba(255,255,255,0.8);font-weight:500">Cloud infrastructure providers</strong> — for hosting and platform operations</li>
-        <li><strong style="color:rgba(255,255,255,0.8);font-weight:500">Legal authorities</strong> — when required by law, court order, or to protect the rights and safety of Davincii or its users</li>
+        <li><strong style="color:var(--black);font-weight:500">Stripe</strong> — for payment processing and artist payouts via Stripe Connect. Stripe's privacy policy governs their handling of payment data.</li>
+        <li><strong style="color:var(--black);font-weight:500">PROs &amp; collection societies</strong> — performing rights organizations and collection platforms as needed for composition registration and royalty collection</li>
+        <li><strong style="color:var(--black);font-weight:500">Cloud infrastructure providers</strong> — for hosting and platform operations</li>
+        <li><strong style="color:var(--black);font-weight:500">Legal authorities</strong> — when required by law, court order, or to protect the rights and safety of Davincii or its users</li>
       </ul>
       <div class="legal-highlight"><p>Davincii's products are ad-free. We do not share data with advertisers or use third-party advertising cookies.</p></div>
     </div>
