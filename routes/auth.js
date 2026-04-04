@@ -5,10 +5,25 @@ const jwt = require('jsonwebtoken');
 const pool = require('../db/pool');
 const supabase = require('../db/supabase');
 
-// GET /api/auth/google - Initiate Google OAuth via Supabase (implicit flow)
+// GET /api/auth/google - Initiate Google OAuth (direct or via Supabase fallback)
 router.get('/google', async (req, res) => {
   try {
     const appUrl = process.env.APP_URL || 'https://davincii.co';
+    const googleClientId = process.env.GOOGLE_CLIENT_ID;
+
+    // Direct Google OAuth (bypasses Supabase so consent screen shows our app name)
+    if (googleClientId) {
+      const params = new URLSearchParams({
+        client_id: googleClientId,
+        redirect_uri: `${appUrl}/oauth-callback.html`,
+        response_type: 'token',
+        scope: 'openid email profile',
+        prompt: 'select_account',
+      });
+      return res.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`);
+    }
+
+    // Fallback: Supabase OAuth (if GOOGLE_CLIENT_ID not configured)
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
@@ -41,7 +56,8 @@ router.get('/apple', async (req, res) => {
   }
 });
 
-// POST /api/auth/oauth-exchange - Exchange Supabase access token for our JWT
+// POST /api/auth/oauth-exchange - Exchange access token for our JWT
+// Supports both direct Google tokens and Supabase tokens (fallback)
 router.post('/oauth-exchange', async (req, res) => {
   try {
     const { access_token } = req.body;
@@ -49,17 +65,39 @@ router.post('/oauth-exchange', async (req, res) => {
       return res.status(400).json({ error: 'Missing access_token' });
     }
 
-    // Verify the token with Supabase to get user info
-    const { data: userData, error: userError } = await supabase.auth.getUser(access_token);
-    if (userError || !userData?.user) {
-      console.error('[OAuth exchange] getUser error:', userError?.message);
-      return res.status(401).json({ error: 'Invalid access token' });
-    }
+    let email, name;
+    const googleClientId = process.env.GOOGLE_CLIENT_ID;
 
-    const supaUser = userData.user;
-    const email = supaUser.email;
-    const name = supaUser.user_metadata?.full_name || supaUser.user_metadata?.name || email.split('@')[0];
-    console.log('[OAuth exchange] Verified user:', email);
+    if (googleClientId) {
+      // Direct Google: verify token by calling Google userinfo endpoint
+      const userinfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: { Authorization: `Bearer ${access_token}` },
+      });
+      if (!userinfoRes.ok) {
+        const errText = await userinfoRes.text();
+        console.error('[OAuth exchange] Google userinfo error:', userinfoRes.status, errText);
+        return res.status(401).json({ error: 'Invalid access token' });
+      }
+      const profile = await userinfoRes.json();
+      if (!profile.email) {
+        console.error('[OAuth exchange] Google profile missing email:', profile);
+        return res.status(401).json({ error: 'Could not retrieve email from Google' });
+      }
+      email = profile.email;
+      name = profile.name || profile.email.split('@')[0];
+      console.log('[OAuth exchange] Google verified user:', email);
+    } else {
+      // Fallback: Supabase token verification
+      const { data: userData, error: userError } = await supabase.auth.getUser(access_token);
+      if (userError || !userData?.user) {
+        console.error('[OAuth exchange] getUser error:', userError?.message);
+        return res.status(401).json({ error: 'Invalid access token' });
+      }
+      const supaUser = userData.user;
+      email = supaUser.email;
+      name = supaUser.user_metadata?.full_name || supaUser.user_metadata?.name || email.split('@')[0];
+      console.log('[OAuth exchange] Supabase verified user:', email);
+    }
 
     // Find or create the artist in our database
     let artist;
