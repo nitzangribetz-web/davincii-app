@@ -47,6 +47,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
 .field { width:100%; border:1px solid rgba(0,0,0,0.16); padding:13px 16px; font-family:var(--sans); font-size:15px; font-weight:400; color:var(--black); background:transparent; outline:none; margin-bottom:18px; transition:border-color 0.18s; border-radius:0; -webkit-appearance:none; }
 .field:focus { border-color:var(--red); }
 .field.field-error { border-color:var(--red); background:rgba(184,0,0,0.03); }
+.field.field-warn { border-color:#e67e00; background:rgba(230,126,0,0.04); }
 .field-error-msg { font-family:var(--sans); font-size:11px; color:var(--red); margin-top:-12px; margin-bottom:14px; display:none; }
 .field-error-msg.visible { display:block; }
 .field::placeholder { color:#c0c0c0; }
@@ -948,7 +949,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
 <!-- ════════════════ DASHBOARD (v51 — with Artist Profile) ════════════════ -->
 <div class="screen" id="screen-dashboard">
   <div class="top-nav">
-    <span class="top-nav-logo" onclick="showDashPage('overview')"><img src="/logo-white-sm.png" alt="Davincii"></span>
+    <span class="top-nav-logo" onclick="go('overview')"><img src="/logo-white-sm.png" alt="Davincii"></span>
     <div class="top-nav-right">
       <span class="top-nav-name">SwuM</span>
       <div class="avatar-wrap" id="avatar-wrap">
@@ -1684,8 +1685,15 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
   // ── ADD SONG FORM ──
   let deskCWCount = 0;
 
+  function deskClampPct(inp) {
+    if (inp && parseFloat(inp.value) > 100) inp.value = 100;
+    if (inp && parseFloat(inp.value) < 0) inp.value = 0;
+  }
   function deskRecalc() {
-    let total = parseFloat(document.getElementById('desk-writer-pct')?.value) || 0;
+    const primary = document.getElementById('desk-writer-pct');
+    deskClampPct(primary);
+    document.querySelectorAll('[id^="desk-cw-pct-"]').forEach(inp => deskClampPct(inp));
+    let total = parseFloat(primary?.value) || 0;
     document.querySelectorAll('[id^="desk-cw-pct-"]').forEach(inp => { total += parseFloat(inp.value) || 0; });
     const el = document.getElementById('desk-ownership-total');
     if (el) { el.textContent = total + '%'; el.style.color = total === 100 ? 'var(--green)' : total > 100 ? 'var(--red)' : 'var(--black)'; }
@@ -2085,8 +2093,16 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
   // Handle OAuth callback redirect (token in URL)
   (function checkAuthCallback() {
     const params = new URLSearchParams(window.location.search);
-    // If Supabase redirects to site URL with ?code= instead of /api/auth/callback,
-    // forward the code to the server callback so it can exchange it for a session
+    // If Supabase redirects to site URL with #access_token= (implicit flow),
+    // forward to our oauth-callback page which handles the exchange
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const hashAccessToken = hashParams.get('access_token');
+    if (hashAccessToken) {
+      window.location.replace('/oauth-callback.html' + window.location.hash);
+      return;
+    }
+    // If Supabase redirects to site URL with ?code= (PKCE flow fallback),
+    // forward the code to the server callback
     const oauthCode = params.get('code');
     if (oauthCode && !params.get('token')) {
       window.location.replace('/api/auth/callback?code=' + encodeURIComponent(oauthCode));

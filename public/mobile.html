@@ -719,7 +719,7 @@ html, body {
 <!-- ════════════════ DASHBOARD ════════════════ -->
 <div class="screen" id="screen-dashboard">
   <div class="mob-top-nav">
-    <span class="mob-nav-logo" onclick="go('landing')"><img src="/logo-white-sm.png" alt="Davincii"></span>
+    <span class="mob-nav-logo" onclick="go('overview')"><img src="/logo-white-sm.png" alt="Davincii"></span>
     <div class="mob-nav-right">
       <span style="font-family:var(--sans);font-size:12px;color:var(--muted)">SwuM</span>
       <div class="avatar-wrap" id="avatar-wrap">
@@ -1457,8 +1457,16 @@ html, body {
   // Handle OAuth callback redirect (token in URL)
   (function checkAuthCallback() {
     const params = new URLSearchParams(window.location.search);
-    // If Supabase redirects to site URL with ?code= instead of /api/auth/callback,
-    // forward the code to the server callback so it can exchange it for a session
+    // If Supabase redirects to site URL with #access_token= (implicit flow),
+    // forward to our oauth-callback page which handles the exchange
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const hashAccessToken = hashParams.get('access_token');
+    if (hashAccessToken) {
+      window.location.replace('/oauth-callback.html' + window.location.hash);
+      return;
+    }
+    // If Supabase redirects to site URL with ?code= (PKCE flow fallback),
+    // forward the code to the server callback
     const oauthCode = params.get('code');
     if (oauthCode && !params.get('token')) {
       window.location.replace('/api/auth/callback?code=' + encodeURIComponent(oauthCode));
