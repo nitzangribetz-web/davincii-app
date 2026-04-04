@@ -46,6 +46,9 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
 .field-label { font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.13em; text-transform:uppercase; color:#2a2a2a; margin-bottom:7px; display:block; }
 .field { width:100%; border:1px solid rgba(0,0,0,0.16); padding:13px 16px; font-family:var(--sans); font-size:15px; font-weight:400; color:var(--black); background:transparent; outline:none; margin-bottom:18px; transition:border-color 0.18s; border-radius:0; -webkit-appearance:none; }
 .field:focus { border-color:var(--red); }
+.field.field-error { border-color:var(--red); background:rgba(184,0,0,0.03); }
+.field-error-msg { font-family:var(--sans); font-size:11px; color:var(--red); margin-top:-12px; margin-bottom:14px; display:none; }
+.field-error-msg.visible { display:block; }
 .field::placeholder { color:#c0c0c0; }
 .btn-primary { width:100%; background:var(--black); color:var(--white); border:none; padding:15px 32px; font-family:var(--sans); font-size:12px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; cursor:pointer; transition:background 0.18s; }
 .btn-primary:hover { background:#222; }
@@ -584,7 +587,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
           <div class="partner-item-lux"><svg viewBox="0 0 80 44" class="partner-svg-lux"><text x="40" y="28" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="1.5" text-anchor="middle">BMI</text></svg></div>
           <div class="partner-item-lux"><svg viewBox="0 0 105 44" class="partner-svg-lux"><text x="52" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="2" text-anchor="middle">SESAC</text></svg></div>
           <div class="partner-item-lux"><svg viewBox="0 0 90 44" class="partner-svg-lux"><text x="45" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="18" fill="currentColor" letter-spacing="2" text-anchor="middle">MLC</text></svg></div>
-          <div class="partner-item-lux"><svg viewBox="0 0 140 44" class="partner-svg-lux"><text x="70" y="29" font-family="Georgia,serif" font-weight="400" font-size="17" fill="currentColor" letter-spacing="0.3" text-anchor="middle">Songtrust</text></svg></div>
+          <div class="partner-item-lux"><svg viewBox="0 0 180 44" class="partner-svg-lux"><text x="90" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="14" fill="currentColor" letter-spacing="1.5" text-anchor="middle">SoundExchange</text></svg></div>
           <div class="partner-item-lux"><svg viewBox="0 0 155 44" class="partner-svg-lux"><text x="0" y="18" font-family="Arial Black,sans-serif" font-weight="900" font-size="13" fill="currentColor" letter-spacing="1.5">HARRY FOX</text><text x="0" y="36" font-family="Arial,sans-serif" font-weight="300" font-size="11" fill="currentColor" letter-spacing="4" opacity="0.7">AGENCY</text></svg></div>
           <div class="partner-item-lux"><svg viewBox="0 0 82 44" class="partner-svg-lux"><text x="12" y="30" font-family="Arial Black,sans-serif" font-weight="900" font-size="22" fill="currentColor" letter-spacing="3">PPL</text></svg></div>
           <div class="partner-item-lux"><svg viewBox="0 0 155 44" class="partner-svg-lux"><text x="0" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="22" fill="currentColor">PRS</text><text x="52" y="29" font-family="Arial,sans-serif" font-weight="300" font-size="14" fill="currentColor" letter-spacing="0.5" opacity="0.75">for Music</text></svg></div>
@@ -598,7 +601,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
           <div class="partner-item-lux"><svg viewBox="0 0 80 44" class="partner-svg-lux"><text x="40" y="28" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="1.5" text-anchor="middle">BMI</text></svg></div>
           <div class="partner-item-lux"><svg viewBox="0 0 105 44" class="partner-svg-lux"><text x="52" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="20" fill="currentColor" letter-spacing="2" text-anchor="middle">SESAC</text></svg></div>
           <div class="partner-item-lux"><svg viewBox="0 0 90 44" class="partner-svg-lux"><text x="45" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="18" fill="currentColor" letter-spacing="2" text-anchor="middle">MLC</text></svg></div>
-          <div class="partner-item-lux"><svg viewBox="0 0 140 44" class="partner-svg-lux"><text x="70" y="29" font-family="Georgia,serif" font-weight="400" font-size="17" fill="currentColor" letter-spacing="0.3" text-anchor="middle">Songtrust</text></svg></div>
+          <div class="partner-item-lux"><svg viewBox="0 0 180 44" class="partner-svg-lux"><text x="90" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="14" fill="currentColor" letter-spacing="1.5" text-anchor="middle">SoundExchange</text></svg></div>
           <div class="partner-item-lux"><svg viewBox="0 0 155 44" class="partner-svg-lux"><text x="0" y="18" font-family="Arial Black,sans-serif" font-weight="900" font-size="13" fill="currentColor" letter-spacing="1.5">HARRY FOX</text><text x="0" y="36" font-family="Arial,sans-serif" font-weight="300" font-size="11" fill="currentColor" letter-spacing="4" opacity="0.7">AGENCY</text></svg></div>
           <div class="partner-item-lux"><svg viewBox="0 0 82 44" class="partner-svg-lux"><text x="12" y="30" font-family="Arial Black,sans-serif" font-weight="900" font-size="22" fill="currentColor" letter-spacing="3">PPL</text></svg></div>
           <div class="partner-item-lux"><svg viewBox="0 0 155 44" class="partner-svg-lux"><text x="0" y="29" font-family="Arial Black,sans-serif" font-weight="900" font-size="22" fill="currentColor">PRS</text><text x="52" y="29" font-family="Arial,sans-serif" font-weight="300" font-size="14" fill="currentColor" letter-spacing="0.5" opacity="0.75">for Music</text></svg></div>
@@ -632,7 +635,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
         <div class="mkt-step-num">02</div>
         <div>
           <div class="mkt-step-title">We <em>register</em> your music everywhere</div>
-          <p class="mkt-step-body">Davincii registers your songs with ASCAP, BMI, SoundExchange, the MLC, and Songtrust. Most artists miss royalties simply because their music was never registered properly — we fix that across 12+ platforms.</p>
+          <p class="mkt-step-body">Davincii registers your songs across all major performing rights organizations and collection platforms. Most artists miss royalties simply because their music was never registered properly — we make sure every revenue stream is covered.</p>
         </div>
       </div>
       <div class="mkt-step">
@@ -668,7 +671,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
           <div class="pricing-price">Performance-based</div>
           <p class="pricing-desc" style="font-size:14px;margin-bottom:28px">A competitive share of royalties collected — only charged on what we recover for you.</p>
           <ul class="pricing-features">
-            <li><span class="feat-check">✓</span> Registration with ASCAP, BMI, SoundExchange, MLC, Songtrust</li>
+            <li><span class="feat-check">✓</span> Full registration across all major PROs &amp; platforms</li>
             <li><span class="feat-check">✓</span> Quarterly royalty collection &amp; distribution</li>
             <li><span class="feat-check">✓</span> Artist portal with full earnings transparency</li>
             <li><span class="feat-check">✓</span> Back-catalog royalty audit &amp; recovery</li>
@@ -697,7 +700,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
     <div class="mkt-body">
       <div class="about-stat-grid">
         <div class="about-stat"><div class="about-stat-num">$0</div><div class="about-stat-lbl">Upfront cost</div></div>
-        <div class="about-stat"><div class="about-stat-num">12+</div><div class="about-stat-lbl">Platforms covered</div></div>
+        <div class="about-stat"><div class="about-stat-num">Global</div><div class="about-stat-lbl">Platform coverage</div></div>
         <div class="about-stat"><div class="about-stat-num">100%</div><div class="about-stat-lbl">Your copyright</div></div>
       </div>
       <div class="about-grid">
@@ -718,7 +721,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
           </div>
           <div>
             <div style="font-family:var(--serif);font-size:18px;color:#fff;margin-bottom:4px">Mechanical Rights</div>
-            <div style="font-family:var(--sans);font-size:13px;font-weight:300;color:rgba(255,255,255,0.45)">MLC · Songtrust — on-demand streaming, downloads</div>
+            <div style="font-family:var(--sans);font-size:13px;font-weight:300;color:rgba(255,255,255,0.45)">MLC &amp; partners — on-demand streaming, downloads</div>
           </div>
         </div>
       </div>
@@ -1175,7 +1178,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
           <button onclick="deskOpenSubmitConfirm()" style="background:var(--black);color:#fff;border:none;padding:16px 40px;font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;cursor:pointer">Submit for Registration &#x2192;</button>
           <button onclick="showDashPage('catalog')" style="background:transparent;color:var(--muted);border:1px solid rgba(0,0,0,0.14);padding:16px 28px;font-family:var(--sans);font-size:11px;font-weight:500;letter-spacing:0.10em;text-transform:uppercase;cursor:pointer">Cancel</button>
         </div>
-        <div style="font-family:var(--sans);font-size:12px;font-weight:300;color:var(--muted-light);line-height:1.8;margin-bottom:48px">After submission, your composition will be registered with ASCAP/BMI, SoundExchange, the MLC, Songtrust, and 12+ international collection societies. Processing takes 3-7 business days.</div>
+        <div style="font-family:var(--sans);font-size:12px;font-weight:300;color:var(--muted-light);line-height:1.8;margin-bottom:48px">After submission, your composition will be registered across all major performing rights organizations and royalty collection platforms worldwide. Processing takes 3-7 business days.</div>
       </div>
 
       <!-- ROYALTIES -->
@@ -1383,7 +1386,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
     <div class="legal-section">
       <div class="legal-section-title">Overview</div>
       <p class="legal-p">These Terms of Service govern your access to and use of the Davincii platform, website (davincii.co), and artist portal, operated by Davincii LLC, a limited liability company organized under the laws of the State of New York. By creating an account or using the Service, you agree to be bound by these Terms.</p>
-      <p class="legal-p">Davincii provides music publishing administration services — registering your compositions with PROs, SoundExchange, the MLC, Songtrust, and other collection societies, and collecting and disbursing royalty income on your behalf. Davincii does not acquire copyright ownership in any compositions. Artists retain 100% of their copyrights at all times.</p>
+      <p class="legal-p">Davincii provides music publishing administration services — registering your compositions with PROs, digital service providers, and other applicable collection societies, and collecting and disbursing royalty income on your behalf. Davincii does not acquire copyright ownership in any compositions. Artists retain 100% of their copyrights at all times.</p>
     </div>
 
     <div class="legal-section">
@@ -1480,13 +1483,13 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
         <li>Log data: IP address, browser type, pages visited, and session data</li>
         <li>Correspondence and communications with Davincii</li>
       </ul>
-      <p class="legal-p">We may also receive information from third parties including ASCAP, BMI, SoundExchange, the MLC, Songtrust, and DistroKid in connection with administering your royalties. This information is used solely to fulfill our administration obligations.</p>
+      <p class="legal-p">We may also receive information from third-party performing rights organizations, collection societies, and distribution partners in connection with administering your royalties. This information is used solely to fulfill our administration obligations.</p>
     </div>
 
     <div class="legal-section">
       <div class="legal-section-title">How We Use Your Information</div>
       <ul class="legal-list">
-        <li>Registering your compositions with PROs, SoundExchange, MLC, Songtrust, and other collection societies</li>
+        <li>Registering your compositions with PROs, collection societies, and other applicable platforms</li>
         <li>Collecting, processing, and disbursing royalty income on your behalf</li>
         <li>Providing access to your artist portal and quarterly accounting statements</li>
         <li>Processing payouts via Stripe (ACH, PayPal, or other agreed methods)</li>
@@ -1501,7 +1504,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
       <p class="legal-p">We do not sell your personal information. We share it only with:</p>
       <ul class="legal-list">
         <li><strong style="color:rgba(255,255,255,0.8);font-weight:500">Stripe</strong> — for payment processing and artist payouts via Stripe Connect. Stripe's privacy policy governs their handling of payment data.</li>
-        <li><strong style="color:rgba(255,255,255,0.8);font-weight:500">PROs &amp; collection societies</strong> — ASCAP, BMI, SESAC, SoundExchange, MLC, and Songtrust for composition registration and royalty collection</li>
+        <li><strong style="color:rgba(255,255,255,0.8);font-weight:500">PROs &amp; collection societies</strong> — performing rights organizations and collection platforms as needed for composition registration and royalty collection</li>
         <li><strong style="color:rgba(255,255,255,0.8);font-weight:500">Cloud infrastructure providers</strong> — for hosting and platform operations</li>
         <li><strong style="color:rgba(255,255,255,0.8);font-weight:500">Legal authorities</strong> — when required by law, court order, or to protect the rights and safety of Davincii or its users</li>
       </ul>
@@ -1731,6 +1734,49 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
   }
 
   function deskOpenSubmitConfirm() {
+    // Clear previous validation states
+    document.querySelectorAll('#dp-add-song .field-error').forEach(f => f.classList.remove('field-error'));
+    document.querySelectorAll('#dp-add-song .field-error-msg').forEach(m => { m.classList.remove('visible'); });
+
+    const errors = [];
+    // Song title
+    const title = document.getElementById('desk-song-title');
+    if (!title.value.trim()) { title.classList.add('field-error'); errors.push(title); }
+    // Primary songwriter
+    const writerName = document.getElementById('desk-writer-name');
+    if (!writerName.value.trim()) { writerName.classList.add('field-error'); errors.push(writerName); }
+    // Primary percentage
+    const writerPct = document.getElementById('desk-writer-pct');
+    if (!writerPct.value || parseFloat(writerPct.value) <= 0) { writerPct.classList.add('field-error'); errors.push(writerPct); }
+    // Ownership must total 100%
+    let totalPct = parseFloat(writerPct.value) || 0;
+    document.querySelectorAll('[id^="desk-cw-pct-"]').forEach(inp => { totalPct += parseFloat(inp.value) || 0; });
+    if (totalPct !== 100) {
+      const ownershipEl = document.getElementById('desk-ownership-total');
+      ownershipEl.style.color = 'var(--red)';
+      if (!writerPct.value || parseFloat(writerPct.value) <= 0) {} else { errors.push(ownershipEl); }
+    }
+    // At least one recording
+    const recList = document.getElementById('desk-recording-list');
+    if (!recList.children.length) {
+      errors.push(recList);
+      // Flash the Add Recording button
+      const addRecBtn = recList.nextElementSibling?.nextElementSibling || recList.parentElement.querySelector('button');
+      if (addRecBtn) { addRecBtn.style.borderColor = 'var(--red)'; addRecBtn.style.color = 'var(--red)'; setTimeout(() => { addRecBtn.style.borderColor = ''; addRecBtn.style.color = ''; }, 2000); }
+    }
+
+    if (errors.length > 0) {
+      // Scroll first error into view
+      errors[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // Remove error styling on focus
+      errors.forEach(el => {
+        if (el.tagName === 'INPUT' || el.tagName === 'SELECT') {
+          el.addEventListener('focus', function handler() { el.classList.remove('field-error'); el.removeEventListener('focus', handler); }, { once: true });
+        }
+      });
+      return;
+    }
+
     const check = document.getElementById('confirm-auth-check');
     const btn = document.getElementById('confirm-submit-btn');
     check.checked = false;
