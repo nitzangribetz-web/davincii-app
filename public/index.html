@@ -286,7 +286,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
 .nav-lnk.active { color:var(--black); font-weight:500; background:rgba(0,0,0,0.05); border-left:2px solid var(--red); padding-left:22px; }
 .nav-icon { font-size:14px; opacity:0.5; }
 .nav-lnk.active .nav-icon { opacity:1; }
-.main-content { padding:44px 52px; max-width:1060px; }
+.main-content { padding:44px 52px; max-width:1060px; overflow-y:auto; height:calc(100vh - 62px); }
 .profile-container { max-width:520px; }
 .profile-section-label { font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.18em; text-transform:uppercase; color:var(--black); margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid var(--border); margin-top:8px; }
 
@@ -1192,52 +1192,131 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
       <!-- ROYALTIES -->
       <div class="dash-page" id="dp-royalties" style="display:none">
         <div class="page-title">Your <em>Royalties</em></div>
-        <div class="page-sub">All royalty payments collected and pending across platforms.</div>
+        <div class="page-sub">All payments collected on your behalf.</div>
         <div class="page-rule"></div>
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px">
-          <div class="stat-card stat-card-red"><div class="stat-num">—</div><div class="stat-lbl">Total collected</div></div>
-          <div class="stat-card"><div class="stat-num">—</div><div class="stat-lbl">This quarter</div></div>
-          <div class="stat-card"><div class="stat-num">—</div><div class="stat-lbl">Pending</div></div>
-          <div class="stat-card"><div class="stat-num">—</div><div class="stat-lbl">Payments received</div></div>
+        <div class="sbox"><div class="sbox-head"><div class="sbox-title">Royalty History</div><div class="sbox-sub">No royalties collected yet</div></div><div class="sbox-body" style="padding:40px 24px;text-align:center"><div style="font-family:var(--serif);font-size:20px;font-weight:300;color:var(--muted-light)">Nothing here yet.</div><div style="font-family:var(--sans);font-size:13px;color:var(--muted-light);margin-top:8px">Royalties will appear here once your compositions are registered and distributions are processed.</div></div></div>
+      </div>
+
+      <!-- PAYOUTS -->
+      <div class="dash-page" id="dp-payouts" style="display:none;max-width:800px;overflow:hidden">
+        <div class="page-title">Payments &amp; <em>Payouts</em></div>
+        <div class="page-sub">Withdraw your royalties and manage your tax information.</div>
+        <div class="page-rule"></div>
+
+        <!-- BALANCE + WITHDRAW CARD -->
+        <div style="background:#FFFFFF;border:1px solid var(--border);padding:44px 48px;margin-bottom:24px;position:relative;overflow:hidden">
+          <div style="position:absolute;top:0;left:0;width:3px;height:100%;background:var(--red)"></div>
+          <div style="position:relative;z-index:1">
+            <div style="font-family:var(--sans);font-size:9px;font-weight:600;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted-light);margin-bottom:10px">Available Balance</div>
+            <div style="font-family:var(--serif);font-size:72px;font-weight:300;color:var(--black);letter-spacing:-0.04em;line-height:1;margin-bottom:6px">$0.00</div>
+            <div style="font-family:var(--sans);font-size:12px;font-weight:300;color:var(--muted-light);margin-bottom:44px">Next distribution: Q2 2025 &nbsp;&middot;&nbsp; Minimum withdrawal: $50</div>
+
+            <div style="font-family:var(--sans);font-size:9px;font-weight:600;letter-spacing:0.20em;text-transform:uppercase;color:var(--muted);margin-bottom:14px">Select payout method</div>
+            <div style="display:flex;gap:12px;margin-bottom:32px">
+              <label id="stripe-option" style="flex:1;border:1.5px solid var(--border);padding:18px 20px;cursor:pointer;display:flex;align-items:center;gap:14px;background:#fff;transition:border-color 0.2s">
+                <input type="radio" name="payout-method" value="stripe" style="width:14px;height:14px;flex-shrink:0;accent-color:#080808" onchange="selectPayout('stripe')">
+                <div style="display:flex;align-items:center;gap:12px">
+                  <svg height="22" viewBox="0 0 58 22" xmlns="http://www.w3.org/2000/svg" style="display:block;flex-shrink:0;overflow:visible"><text y="19" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Arial,sans-serif" font-weight="700" font-size="19" letter-spacing="-0.5" fill="#635BFF">stripe</text></svg>
+                  <div>
+                    <div style="font-family:var(--sans);font-size:13px;font-weight:600;color:var(--black);margin-bottom:2px">Stripe</div>
+                    <div style="font-family:var(--sans);font-size:11px;font-weight:300;color:var(--muted)">ACH &middot; 2&ndash;5 business days</div>
+                  </div>
+                </div>
+              </label>
+              <label id="paypal-option" style="flex:1;border:1.5px solid var(--border);padding:18px 20px;cursor:pointer;display:flex;align-items:center;gap:14px;background:#fff;transition:border-color 0.2s">
+                <input type="radio" name="payout-method" value="paypal" style="width:14px;height:14px;flex-shrink:0;accent-color:#080808" onchange="selectPayout('paypal')">
+                <div style="display:flex;align-items:center;gap:12px">
+                  <svg height="20" viewBox="0 0 58 20" xmlns="http://www.w3.org/2000/svg" style="display:block;flex-shrink:0;overflow:visible"><text y="16" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Arial,sans-serif" font-weight="800" font-size="15" letter-spacing="-0.2"><tspan fill="#003087">Pay</tspan><tspan fill="#009CDE">Pal</tspan></text></svg>
+                  <div>
+                    <div style="font-family:var(--sans);font-size:13px;font-weight:600;color:var(--black);margin-bottom:2px">PayPal</div>
+                    <div style="font-family:var(--sans);font-size:11px;font-weight:300;color:var(--muted)">PayPal &middot; 1&ndash;2 days</div>
+                  </div>
+                </div>
+              </label>
+            </div>
+
+            <button style="background:var(--black);color:#fff;border:none;padding:14px 32px;font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;cursor:pointer;transition:opacity 0.18s" onmouseover="this.style.opacity='.82'" onmouseout="this.style.opacity='1'">Withdraw &rarr;</button>
+          </div>
         </div>
+
+        <!-- PAYOUT HISTORY -->
+        <div class="sbox" style="margin-bottom:24px">
+          <div class="sbox-head"><div class="sbox-title">Payout History</div></div>
+          <div class="sbox-body" style="padding:36px 24px;text-align:center">
+            <div style="font-family:var(--serif);font-size:20px;font-weight:300;color:var(--muted-light)">No payouts yet.</div>
+            <div style="font-family:var(--sans);font-size:13px;color:var(--muted-light);margin-top:6px">Your payout history will appear here.</div>
+          </div>
+        </div>
+
+        <!-- TAX FORMS -->
         <div class="sbox">
-          <div class="sbox-head"><div><div class="sbox-title">All Royalty Payments</div><div class="sbox-sub">Sorted by most recent</div></div></div>
-          <div class="sbox-body">
-            <div class="t-head col-5"><div class="t-th">Song</div><div class="t-th">Platform</div><div class="t-th">Quarter</div><div class="t-th">Status</div><div class="t-th" style="text-align:right">Amount</div></div>
-            <div class="t-row col-5" style="opacity:0.3"><div><div class="t-song">—</div></div><div class="t-cell">—</div><div class="t-cell">—</div><div>—</div><div class="t-amount">—</div></div>
-            <div class="t-row col-5" style="opacity:0.3"><div><div class="t-song">—</div></div><div class="t-cell">—</div><div class="t-cell">—</div><div>—</div><div class="t-amount">—</div></div>
-            <div class="t-row col-5" style="opacity:0.3"><div><div class="t-song">—</div></div><div class="t-cell">—</div><div class="t-cell">—</div><div>—</div><div class="t-amount">—</div></div>
+          <div class="sbox-head">
+            <div>
+              <div class="sbox-title">Tax Forms</div>
+              <div class="sbox-sub">Required before your first payout can be processed</div>
+            </div>
+            <div id="w9-status-badge" style="display:flex;align-items:center;gap:6px;background:rgba(184,0,0,0.08);border:1px solid rgba(184,0,0,0.2);padding:5px 12px">
+              <div id="w9-status-dot" style="width:7px;height:7px;background:var(--red);border-radius:50%"></div>
+              <span style="font-family:var(--sans);font-size:9px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--red)" id="w9-status-text">Not Submitted</span>
+            </div>
+          </div>
+          <div class="sbox-body" style="padding:24px">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
+              <div>
+                <div style="font-family:var(--sans);font-size:14px;font-weight:500;color:var(--black);margin-bottom:4px">W-9 &mdash; Request for Taxpayer Identification Number</div>
+                <div style="font-family:var(--sans);font-size:13px;font-weight:300;color:var(--muted)">Required for U.S. persons. Non-U.S. persons complete a W-8BEN.</div>
+              </div>
+              <button onclick="openW9Modal()" style="background:transparent;color:var(--black);border:1.5px solid var(--black);padding:10px 20px;font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer;white-space:nowrap;transition:background 0.18s,color 0.18s" onmouseover="this.style.background='var(--black)';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='var(--black)'">Complete Tax Form</button>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- PAYOUTS -->
-      <div class="dash-page" id="dp-payouts" style="display:none">
-        <div class="page-title">Your <em>Payouts</em></div>
-        <div class="page-sub">Payments sent to your account.</div>
-        <div class="page-rule"></div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px">
-          <div class="stat-card"><div class="stat-num">—</div><div class="stat-lbl">Total paid out</div></div>
-          <div class="stat-card stat-card-red"><div class="stat-num">—</div><div class="stat-lbl">Available to claim</div></div>
-          <div class="stat-card"><div class="stat-num">—</div><div class="stat-lbl">Payments sent</div></div>
-        </div>
-        <div style="border:1px solid var(--border);padding:28px 32px;margin-bottom:28px;display:flex;justify-content:space-between;align-items:center;background:var(--off-white)">
-          <div>
-            <div style="font-family:var(--sans);font-size:10px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Available balance</div>
-            <div style="font-family:var(--serif);font-size:44px;font-weight:400;letter-spacing:-0.02em;line-height:1">—</div>
-            <div style="font-family:var(--sans);font-size:12px;color:var(--muted);margin-top:4px">Ready to claim</div>
+      <!-- W-9 MODAL -->
+      <div id="w9-modal-overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(8,8,8,0.55);z-index:9000;align-items:center;justify-content:center;padding:24px">
+        <div style="background:#fff;max-width:620px;width:100%;max-height:90vh;overflow-y:auto;animation:fadeUp 0.22s ease">
+          <div style="padding:24px 32px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:#fff;z-index:1">
+            <div>
+              <div style="font-family:var(--serif);font-size:24px;font-weight:400;color:var(--black)">W-9 Tax Form</div>
+              <div style="font-family:var(--sans);font-size:12px;font-weight:300;color:var(--muted)">Request for Taxpayer Identification Number</div>
+            </div>
+            <button onclick="closeW9Modal()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;line-height:1">&times;</button>
           </div>
-          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
-            <button class="btn-primary" style="width:auto;padding:14px 28px">Claim payment &rarr;</button>
-            <div style="font-family:var(--sans);font-size:11px;color:var(--muted-light)">Via ACH, PayPal, or Stripe</div>
-          </div>
-        </div>
-        <div class="sbox">
-          <div class="sbox-head"><div><div class="sbox-title">Payout History</div><div class="sbox-sub">All payments sent to your account</div></div></div>
-          <div class="sbox-body">
-            <div class="t-head" style="display:grid;grid-template-columns:1fr 140px 140px 120px;gap:12px"><div class="t-th">Date</div><div class="t-th">Method</div><div class="t-th">Status</div><div class="t-th" style="text-align:right">Amount</div></div>
-            <div class="t-row" style="display:grid;grid-template-columns:1fr 140px 140px 120px;gap:12px;align-items:center;opacity:0.3"><div><div class="t-song" style="font-size:15px">—</div></div><div class="t-cell">—</div><div>—</div><div class="t-amount">—</div></div>
-            <div class="t-row" style="display:grid;grid-template-columns:1fr 140px 140px 120px;gap:12px;align-items:center;opacity:0.3"><div><div class="t-song" style="font-size:15px">—</div></div><div class="t-cell">—</div><div>—</div><div class="t-amount">—</div></div>
+          <div style="padding:28px 32px">
+            <div style="font-family:var(--sans);font-size:12px;font-weight:300;color:var(--muted);line-height:1.75;margin-bottom:24px;padding:14px 16px;background:rgba(0,0,0,0.03);border:1px solid var(--border)">Under penalties of perjury, you certify that the information you provide is accurate and that you are a U.S. person.</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+              <div><label class="field-label">Legal Name *</label><input class="field" type="text" placeholder="As shown on tax return" id="w9-name"></div>
+              <div><label class="field-label">Business / DBA <span style="font-weight:300;text-transform:none;letter-spacing:0;color:var(--muted-light)">if different</span></label><input class="field" type="text" placeholder="e.g. SwuM LLC" id="w9-biz"></div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+              <div>
+                <label class="field-label">Federal Tax Classification *</label>
+                <select class="field" style="-webkit-appearance:none" id="w9-class">
+                  <option value="" disabled selected>Select classification</option>
+                  <option>Individual / Sole proprietor</option><option>C Corporation</option>
+                  <option>S Corporation</option><option>Partnership</option>
+                  <option>LLC</option><option>Other</option>
+                </select>
+              </div>
+              <div><label class="field-label">Taxpayer ID (SSN or EIN) *</label><input class="field" type="text" placeholder="XXX-XX-XXXX" id="w9-tin" style="font-family:monospace"></div>
+            </div>
+            <div style="margin-bottom:20px">
+              <label class="field-label">Street Address *</label>
+              <input class="field" type="text" placeholder="Street address" id="w9-addr" style="margin-bottom:10px">
+              <div style="display:grid;grid-template-columns:1fr 1fr 110px;gap:12px">
+                <input class="field" type="text" placeholder="City" id="w9-city" style="margin-bottom:0">
+                <input class="field" type="text" placeholder="State" id="w9-state" style="margin-bottom:0">
+                <input class="field" type="text" placeholder="ZIP" id="w9-zip" style="margin-bottom:0">
+              </div>
+            </div>
+            <label style="display:flex;gap:10px;align-items:flex-start;cursor:pointer;margin-bottom:24px">
+              <input type="checkbox" id="w9-certify" style="width:14px;height:14px;margin-top:2px;accent-color:#080808;flex-shrink:0">
+              <span style="font-family:var(--sans);font-size:12px;font-weight:300;color:var(--muted);line-height:1.65">I certify under penalties of perjury that all information provided is accurate, that I am a U.S. person, and that I am not subject to backup withholding.</span>
+            </label>
+            <div style="display:flex;gap:12px">
+              <button onclick="submitW9()" style="background:var(--black);color:#fff;border:none;padding:13px 28px;font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer">Submit W-9</button>
+              <button onclick="closeW9Modal()" style="background:transparent;color:var(--muted);border:1px solid rgba(0,0,0,0.14);padding:13px 22px;font-family:var(--sans);font-size:11px;font-weight:500;letter-spacing:0.10em;text-transform:uppercase;cursor:pointer">Cancel</button>
+            </div>
           </div>
         </div>
       </div>
@@ -1687,6 +1766,35 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
     });
     const activeLnk = document.getElementById('nl-' + page);
     if (activeLnk) activeLnk.classList.add('active');
+  }
+
+  // ── PAYOUTS ──
+  function openW9Modal() {
+    document.getElementById('w9-modal-overlay').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+  function closeW9Modal() {
+    document.getElementById('w9-modal-overlay').style.display = 'none';
+    document.body.style.overflow = '';
+  }
+  function submitW9() {
+    var certify = document.getElementById('w9-certify');
+    if (!certify.checked) { alert('Please certify the information before submitting.'); return; }
+    closeW9Modal();
+    var badge = document.getElementById('w9-status-badge');
+    badge.style.background = 'rgba(30,107,30,0.08)';
+    badge.style.border = '1px solid rgba(30,107,30,0.25)';
+    var dot = document.getElementById('w9-status-dot');
+    if (dot) dot.style.background = '#1E6B1E';
+    var txt = document.getElementById('w9-status-text');
+    txt.textContent = 'Active';
+    txt.style.color = '#1E6B1E';
+  }
+  function selectPayout(method) {
+    ['stripe-option','paypal-option'].forEach(function(id) {
+      document.getElementById(id).style.borderColor = 'rgba(0,0,0,0.10)';
+    });
+    document.getElementById(method + '-option').style.borderColor = 'var(--black)';
   }
 
   // ── ADD SONG FORM ──
