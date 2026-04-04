@@ -40,6 +40,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
 
 .screen { display:none; min-height:100vh; flex-direction:column; overflow:hidden; }
 .screen.active { display:flex; animation:fadeUp 0.3s ease; }
+#screen-dashboard.active { animation:none; }
 @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
 
 /* ── SHARED FORM ── */
@@ -341,13 +342,13 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
 .btn-add:hover { opacity:0.8; }
 
 /* ── ARTIST PROFILE BANNER ── */
-.profile-banner { display:flex; align-items:center; justify-content:space-between; gap:24px; background:var(--off-white); border:1px solid var(--border); border-left:3px solid var(--red); padding:18px 24px; margin-bottom:24px; }
-.profile-banner-left { display:flex; align-items:center; gap:16px; }
-.profile-banner-icon { width:32px; height:32px; background:var(--red); border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:var(--sans); font-size:14px; font-weight:700; color:var(--white); flex-shrink:0; }
-.profile-banner-title { font-family:var(--sans); font-size:13px; font-weight:600; color:var(--black); margin-bottom:3px; }
-.profile-banner-sub { font-family:var(--sans); font-size:12px; font-weight:300; color:var(--muted); line-height:1.5; }
-.profile-banner-btn { font-family:var(--sans); font-size:11px; font-weight:600; letter-spacing:0.10em; text-transform:uppercase; color:var(--black); background:none; border:1px solid var(--black); padding:10px 20px; cursor:pointer; white-space:nowrap; transition:background 0.18s,color 0.18s; }
-.profile-banner-btn:hover { background:var(--black); color:var(--white); }
+.profile-banner { display:flex; align-items:center; justify-content:space-between; gap:28px; background:var(--off-white); border:1px solid var(--border); border-left:4px solid var(--red); padding:36px 32px; margin-bottom:28px; min-height:110px; }
+.profile-banner-left { display:flex; align-items:center; gap:20px; }
+.profile-banner-icon { width:44px; height:44px; background:var(--red); border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:var(--sans); font-size:20px; font-weight:700; color:var(--white); flex-shrink:0; }
+.profile-banner-title { font-family:var(--sans); font-size:15px; font-weight:600; color:var(--black); margin-bottom:5px; }
+.profile-banner-sub { font-family:var(--sans); font-size:13px; font-weight:300; color:var(--muted); line-height:1.6; }
+.profile-banner-btn { font-family:var(--sans); font-size:11px; font-weight:600; letter-spacing:0.10em; text-transform:uppercase; color:var(--white); background:var(--black); border:1px solid var(--black); padding:14px 26px; cursor:pointer; white-space:nowrap; transition:opacity 0.18s; }
+.profile-banner-btn:hover { opacity:0.82; }
 
 /* ── MARKETING PAGES (v66 dark style) ── */
 .mkt-page { background:#080808; color:#fff; }
@@ -890,7 +891,13 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
           </div>
 
           <input class="auth-field" type="text" id="desk-signup-legal" placeholder="Type your full legal name to sign">
-          <p class="auth-note">By typing your name, you agree to be bound by these terms.</p>
+
+          <div class="auth-agree" style="margin-top:16px">
+            <input type="checkbox" id="desk-signup-tos">
+            <label for="desk-signup-tos">I agree to Davincii's <a href="/terms" target="_blank" onclick="event.preventDefault();event.stopPropagation();window.open('/terms','_blank')">Terms of Service</a> and <a href="/privacy" target="_blank" onclick="event.preventDefault();event.stopPropagation();window.open('/privacy','_blank')">Privacy Policy</a></label>
+          </div>
+
+          <p class="auth-note">By typing your name and checking the box above, you agree to be bound by these terms.</p>
           <button class="auth-btn-primary" onclick="signupNextDesktop(3)">I agree &amp; continue</button>
         </div>
 
@@ -1127,7 +1134,7 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
             <div>
               <label class="field-label">Percentage *</label>
               <div style="position:relative">
-                <input class="field" type="number" placeholder="0" id="desk-writer-pct" oninput="deskRecalc()" style="margin-bottom:0;padding-right:32px">
+                <input class="field" type="number" placeholder="0" id="desk-writer-pct" min="0" max="100" oninput="deskRecalc()" style="margin-bottom:0;padding-right:32px">
                 <span style="position:absolute;right:14px;top:50%;transform:translateY(-50%);font-family:var(--sans);font-size:13px;color:var(--muted);pointer-events:none">%</span>
               </div>
             </div>
@@ -1724,19 +1731,26 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
     const g = document.getElementById('desk-rec-genre'); if(g) g.value = '';
   }
   function deskSaveRecording() {
-    const title = document.getElementById('desk-rec-title').value.trim();
-    const isrc = document.getElementById('desk-rec-isrc').value.trim();
-    const artist = document.getElementById('desk-rec-artist').value.trim();
-    if (!title || !isrc || !artist) {
-      const btn = document.getElementById('desk-rec-save-btn');
-      btn.style.color = 'var(--red)';
-      setTimeout(() => btn.style.color = '', 1400);
+    const title = document.getElementById('desk-rec-title');
+    const isrc = document.getElementById('desk-rec-isrc');
+    const artist = document.getElementById('desk-rec-artist');
+    // Clear previous warnings
+    [title, isrc, artist].forEach(el => el.classList.remove('field-warn'));
+    let hasError = false;
+    if (!title.value.trim()) { title.classList.add('field-warn'); hasError = true; }
+    if (!isrc.value.trim()) { isrc.classList.add('field-warn'); hasError = true; }
+    if (!artist.value.trim()) { artist.classList.add('field-warn'); hasError = true; }
+    if (hasError) {
+      // Clear warning on focus
+      [title, isrc, artist].forEach(el => {
+        el.addEventListener('focus', function h() { el.classList.remove('field-warn'); el.removeEventListener('focus', h); }, { once: true });
+      });
       return;
     }
     const list = document.getElementById('desk-recording-list');
     const div = document.createElement('div');
     div.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border:1px solid var(--border);margin-bottom:10px;background:#fff';
-    div.innerHTML = '<div><div style="font-family:var(--sans);font-size:14px;font-weight:600;color:var(--black)">' + title + '</div><div style="font-family:var(--sans);font-size:12px;color:var(--muted);margin-top:2px">' + artist + ' &nbsp;&middot;&nbsp; <span style="font-family:monospace">' + isrc + '</span></div></div><button onclick="this.closest(\'div[style]\').remove()" style="border:none;background:none;font-size:18px;color:var(--muted);cursor:pointer">&#215;</button>';
+    div.innerHTML = '<div><div style="font-family:var(--sans);font-size:14px;font-weight:600;color:var(--black)">' + title.value.trim() + '</div><div style="font-family:var(--sans);font-size:12px;color:var(--muted);margin-top:2px">' + artist.value.trim() + ' &nbsp;&middot;&nbsp; <span style="font-family:monospace">' + isrc.value.trim() + '</span></div></div><button onclick="this.closest(\'div[style]\').remove()" style="border:none;background:none;font-size:18px;color:var(--muted);cursor:pointer">&#215;</button>';
     list.appendChild(div);
     deskCloseRecording();
   }
@@ -1768,9 +1782,12 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
     const recList = document.getElementById('desk-recording-list');
     if (!recList.children.length) {
       errors.push(recList);
-      // Flash the Add Recording button
-      const addRecBtn = recList.nextElementSibling?.nextElementSibling || recList.parentElement.querySelector('button');
-      if (addRecBtn) { addRecBtn.style.borderColor = 'var(--red)'; addRecBtn.style.color = 'var(--red)'; setTimeout(() => { addRecBtn.style.borderColor = ''; addRecBtn.style.color = ''; }, 2000); }
+      // Orange highlight on the Add Recording button
+      const addRecBtn = recList.parentElement.querySelector('button');
+      if (addRecBtn) {
+        addRecBtn.style.borderColor = '#e67e00'; addRecBtn.style.color = '#e67e00';
+        addRecBtn.addEventListener('click', function h() { addRecBtn.style.borderColor = ''; addRecBtn.style.color = ''; addRecBtn.removeEventListener('click', h); }, { once: true });
+      }
     }
 
     if (errors.length > 0) {
@@ -1864,6 +1881,14 @@ html, body { width:100%; min-height:100vh; background:var(--white); font-family:
         })
         .catch(function() { errEl.textContent = 'Network error. Please try again.'; errEl.classList.add('visible'); });
       return;
+    }
+
+    // Validate agreement step before going from step 2 → 3
+    if (step === 3 && desktopSignupStep === 2) {
+      var legalName = document.getElementById('desk-signup-legal').value.trim();
+      var tosChecked = document.getElementById('desk-signup-tos').checked;
+      if (!legalName) { errEl.textContent = 'Please type your full legal name to sign.'; errEl.classList.add('visible'); return; }
+      if (!tosChecked) { errEl.textContent = 'Please agree to the Terms of Service and Privacy Policy.'; errEl.classList.add('visible'); return; }
     }
 
     // All other step transitions (including Google OAuth step 2→3)
