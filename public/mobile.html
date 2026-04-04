@@ -49,6 +49,7 @@ html, body {
 .field-label { font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:0.13em; text-transform:uppercase; color:#2a2a2a; margin-bottom:7px; display:block; }
 .field { width:100%; border:1px solid rgba(0,0,0,0.16); padding:14px 16px; font-family:var(--sans); font-size:16px; font-weight:400; color:var(--black); background:transparent; outline:none; margin-bottom:16px; transition:border-color 0.18s; border-radius:0; -webkit-appearance:none; }
 .field:focus { border-color:var(--red); }
+.field.field-warn, .mob-input.field-warn { border-color:#e67e00 !important; background:rgba(230,126,0,0.04); }
 .field::placeholder { color:#c0c0c0; }
 .field-select { appearance:none; -webkit-appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23999' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 16px center; cursor:pointer; }
 .field-optional { font-family:var(--sans); font-size:9px; font-weight:400; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted-light); margin-left:6px; }
@@ -833,7 +834,7 @@ html, body {
     <div style="margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid var(--border)">
       <div class="mob-section-label">Song Information</div>
       <label class="mob-label">Song Title</label>
-      <input class="mob-input" type="text" placeholder="e.g. With U" style="margin-bottom:16px">
+      <input class="mob-input" type="text" placeholder="e.g. With U" id="mob-as-title" style="margin-bottom:16px">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
         <div><label class="mob-label">Year</label><input class="mob-input" type="text" placeholder="2024" maxlength="4"></div>
         <div><label class="mob-label">Genre</label><input class="mob-input" type="text" placeholder="Hip-Hop"></div>
@@ -849,7 +850,7 @@ html, body {
       <label class="mob-label">Primary Songwriter</label>
       <div style="display:grid;grid-template-columns:1fr 80px;gap:10px;margin-bottom:16px">
         <input class="mob-input" type="text" placeholder="Full name" id="mob-writer-primary" oninput="mobRecalc()">
-        <div style="position:relative"><input class="mob-input" type="number" placeholder="100" id="mob-writer-pct" oninput="mobRecalc()" style="padding-right:24px"><span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:13px;pointer-events:none">%</span></div>
+        <div style="position:relative"><input class="mob-input" type="number" placeholder="100" id="mob-writer-pct" min="0" max="100" oninput="mobRecalc()" style="padding-right:24px"><span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:13px;pointer-events:none">%</span></div>
       </div>
       <label class="mob-label">Co-writers?</label>
       <div style="display:flex;margin-bottom:14px">
@@ -865,10 +866,10 @@ html, body {
     <div style="margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid var(--border)">
       <div class="mob-section-label">ISRC</div>
       <label class="mob-label">ISRC Code</label>
-      <input class="mob-input" type="text" placeholder="US-AB3-24-00142" maxlength="15" style="font-family:monospace;letter-spacing:0.05em;margin-bottom:6px">
+      <input class="mob-input" type="text" placeholder="US-AB3-24-00142" id="mob-as-isrc" maxlength="15" style="font-family:monospace;letter-spacing:0.05em;margin-bottom:6px">
       <div style="font-family:var(--sans);font-size:11px;color:var(--muted-light)">Format: CC-XXX-YY-NNNNN · 12 characters</div>
     </div>
-    <button onclick="showDashPage('catalog')" style="width:100%;background:var(--red);color:var(--white);border:none;padding:16px;font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;cursor:pointer;margin-bottom:10px">Submit Song &rarr;</button>
+    <button onclick="mobSubmitSong()" style="width:100%;background:var(--red);color:var(--white);border:none;padding:16px;font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;cursor:pointer;margin-bottom:10px">Submit Song &rarr;</button>
     <button onclick="showDashPage('catalog')" style="width:100%;background:transparent;color:var(--muted);border:1px solid rgba(0,0,0,0.14);padding:14px;font-family:var(--sans);font-size:11px;font-weight:500;letter-spacing:0.10em;text-transform:uppercase;cursor:pointer;margin-bottom:24px">Cancel</button>
     <div style="font-family:var(--sans);font-size:11px;font-weight:300;color:var(--muted-light);line-height:1.7;margin-bottom:80px">After submission, your composition will be registered across all major performing rights organizations and royalty collection platforms worldwide. Processing takes 3–7 business days.</div>
   </div>
@@ -876,43 +877,130 @@ html, body {
   <!-- ROYALTIES -->
   <div class="dash-page mob-dash-content" id="dp-royalties" style="display:none">
     <div class="mob-page-title">Your <em>Royalties</em></div>
-    <div class="mob-page-sub">All payments collected.</div>
+    <div class="mob-page-sub">All payments collected on your behalf.</div>
     <div class="mob-page-rule"></div>
-    <div class="mob-stat-row">
-      <div class="mob-stat-card mob-stat-card-red"><div class="mob-stat-num">—</div><div class="mob-stat-lbl">Collected</div></div>
-      <div class="mob-stat-card"><div class="mob-stat-num">—</div><div class="mob-stat-lbl">Pending</div></div>
-    </div>
     <div class="mob-sbox">
-      <div class="mob-sbox-head"><div><div class="mob-sbox-title">All Royalty Payments</div><div class="mob-sbox-sub">Most recent first</div></div></div>
-      <div class="mob-sbox-body">
-        <div class="mob-row" style="opacity:0.3"><div><div class="mob-row-song">—</div><div class="mob-row-meta">—</div></div><div class="mob-row-right"><div class="mob-row-amount">—</div><div><span class="badge badge-pend">—</span></div></div></div>
-        <div class="mob-row" style="opacity:0.3"><div><div class="mob-row-song">—</div><div class="mob-row-meta">—</div></div><div class="mob-row-right"><div class="mob-row-amount">—</div><div><span class="badge badge-pend">—</span></div></div></div>
-        <div class="mob-row" style="opacity:0.3"><div><div class="mob-row-song">—</div><div class="mob-row-meta">—</div></div><div class="mob-row-right"><div class="mob-row-amount">—</div><div><span class="badge badge-pend">—</span></div></div></div>
+      <div class="mob-sbox-head"><div><div class="mob-sbox-title">Royalty History</div><div class="mob-sbox-sub">No royalties collected yet</div></div></div>
+      <div class="mob-sbox-body" style="padding:32px 16px;text-align:center">
+        <div style="font-family:var(--serif);font-size:18px;font-weight:300;color:var(--muted-light)">Nothing here yet.</div>
+        <div style="font-family:var(--sans);font-size:12px;color:var(--muted-light);margin-top:8px">Royalties will appear here once your compositions are registered and distributions are processed.</div>
       </div>
     </div>
   </div>
 
   <!-- PAYOUTS -->
-  <div class="dash-page mob-dash-content" id="dp-payouts" style="display:none">
-    <div class="mob-page-title">Your <em>Payouts</em></div>
-    <div class="mob-page-sub">Payments sent to your account.</div>
+  <div class="dash-page mob-dash-content" id="dp-payouts" style="display:none;overflow:hidden">
+    <div class="mob-page-title">Payments &amp; <em>Payouts</em></div>
+    <div class="mob-page-sub">Withdraw your royalties and manage your tax information.</div>
     <div class="mob-page-rule"></div>
-    <div class="mob-stat-row">
-      <div class="mob-stat-card"><div class="mob-stat-num">—</div><div class="mob-stat-lbl">Paid out</div></div>
-      <div class="mob-stat-card mob-stat-card-red"><div class="mob-stat-num">—</div><div class="mob-stat-lbl">Available</div></div>
+
+    <!-- BALANCE + WITHDRAW CARD -->
+    <div style="background:#FFFFFF;border:1px solid var(--border);padding:24px 20px;margin-bottom:16px;position:relative;overflow:hidden">
+      <div style="position:absolute;top:0;left:0;width:3px;height:100%;background:var(--red)"></div>
+      <div style="position:relative;z-index:1">
+        <div style="font-family:var(--sans);font-size:9px;font-weight:600;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted-light);margin-bottom:8px">Available Balance</div>
+        <div style="font-family:var(--serif);font-size:48px;font-weight:300;color:var(--black);letter-spacing:-0.04em;line-height:1;margin-bottom:4px">$0.00</div>
+        <div style="font-family:var(--sans);font-size:11px;font-weight:300;color:var(--muted-light);margin-bottom:28px">Minimum withdrawal: $50</div>
+
+        <div style="font-family:var(--sans);font-size:9px;font-weight:600;letter-spacing:0.20em;text-transform:uppercase;color:var(--muted);margin-bottom:12px">Select payout method</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px">
+          <label id="mob-stripe-option" style="border:1.5px solid var(--border);padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:12px;background:#fff;transition:border-color 0.2s">
+            <input type="radio" name="mob-payout-method" value="stripe" style="width:14px;height:14px;flex-shrink:0;accent-color:#080808" onchange="mobSelectPayout('stripe')">
+            <div>
+              <div style="font-family:var(--sans);font-size:13px;font-weight:600;color:var(--black);margin-bottom:2px">Stripe</div>
+              <div style="font-family:var(--sans);font-size:11px;font-weight:300;color:var(--muted)">ACH &middot; 2&ndash;5 business days</div>
+            </div>
+          </label>
+          <label id="mob-paypal-option" style="border:1.5px solid var(--border);padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:12px;background:#fff;transition:border-color 0.2s">
+            <input type="radio" name="mob-payout-method" value="paypal" style="width:14px;height:14px;flex-shrink:0;accent-color:#080808" onchange="mobSelectPayout('paypal')">
+            <div>
+              <div style="font-family:var(--sans);font-size:13px;font-weight:600;color:var(--black);margin-bottom:2px">PayPal</div>
+              <div style="font-family:var(--sans);font-size:11px;font-weight:300;color:var(--muted)">PayPal &middot; 1&ndash;2 days</div>
+            </div>
+          </label>
+        </div>
+
+        <button style="background:var(--black);color:#fff;border:none;padding:14px 0;width:100%;font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;cursor:pointer">Withdraw &rarr;</button>
+      </div>
     </div>
-    <div style="border:1px solid var(--border);padding:20px;margin-bottom:16px;background:#FFFFFF">
-      <div style="font-family:var(--sans);font-size:10px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Available balance</div>
-      <div style="font-family:var(--serif);font-size:38px;font-weight:400;letter-spacing:-0.02em;margin-bottom:4px">—</div>
-      <div style="font-family:var(--sans);font-size:12px;color:var(--muted);margin-bottom:16px">Ready to claim</div>
-      <button class="btn-primary" style="padding:14px">Claim payment &rarr;</button>
-      <div style="font-family:var(--sans);font-size:11px;color:var(--muted-light);margin-top:8px;text-align:center">Via ACH, PayPal, or Stripe</div>
-    </div>
-    <div class="mob-sbox">
+
+    <!-- PAYOUT HISTORY -->
+    <div class="mob-sbox" style="margin-bottom:16px">
       <div class="mob-sbox-head"><div><div class="mob-sbox-title">Payout History</div></div></div>
-      <div class="mob-sbox-body">
-        <div class="mob-row" style="opacity:0.3"><div><div class="mob-row-song" style="font-size:14px">—</div><div class="mob-row-meta">—</div></div><div class="mob-row-right"><div class="mob-row-amount">—</div><div><span class="badge badge-pend">—</span></div></div></div>
-        <div class="mob-row" style="opacity:0.3"><div><div class="mob-row-song" style="font-size:14px">—</div><div class="mob-row-meta">—</div></div><div class="mob-row-right"><div class="mob-row-amount">—</div><div><span class="badge badge-pend">—</span></div></div></div>
+      <div class="mob-sbox-body" style="padding:28px 16px;text-align:center">
+        <div style="font-family:var(--serif);font-size:18px;font-weight:300;color:var(--muted-light)">No payouts yet.</div>
+        <div style="font-family:var(--sans);font-size:12px;color:var(--muted-light);margin-top:6px">Your payout history will appear here.</div>
+      </div>
+    </div>
+
+    <!-- TAX FORMS -->
+    <div class="mob-sbox">
+      <div class="mob-sbox-head">
+        <div>
+          <div class="mob-sbox-title">Tax Forms</div>
+          <div class="mob-sbox-sub">Required before first payout</div>
+        </div>
+        <div id="mob-w9-status-badge" style="display:flex;align-items:center;gap:5px;background:rgba(184,0,0,0.08);border:1px solid rgba(184,0,0,0.2);padding:4px 10px">
+          <div id="mob-w9-status-dot" style="width:6px;height:6px;background:var(--red);border-radius:50%"></div>
+          <span style="font-family:var(--sans);font-size:8px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--red)" id="mob-w9-status-text">Not Submitted</span>
+        </div>
+      </div>
+      <div class="mob-sbox-body" style="padding:16px">
+        <div style="font-family:var(--sans);font-size:13px;font-weight:500;color:var(--black);margin-bottom:4px">W-9 &mdash; Taxpayer ID</div>
+        <div style="font-family:var(--sans);font-size:12px;font-weight:300;color:var(--muted);margin-bottom:14px">Required for U.S. persons. Non-U.S. persons complete a W-8BEN.</div>
+        <button onclick="openMobW9Modal()" style="background:transparent;color:var(--black);border:1.5px solid var(--black);padding:10px 18px;font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer;width:100%">Complete Tax Form</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- W-9 MODAL (MOBILE) -->
+  <div id="mob-w9-modal-overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(8,8,8,0.55);z-index:9000;align-items:flex-end;justify-content:center;padding:0">
+    <div style="background:#fff;width:100%;max-height:92vh;overflow-y:auto;border-radius:16px 16px 0 0">
+      <div style="padding:20px 20px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:#fff;z-index:1">
+        <div>
+          <div style="font-family:var(--serif);font-size:20px;font-weight:400;color:var(--black)">W-9 Tax Form</div>
+          <div style="font-family:var(--sans);font-size:11px;font-weight:300;color:var(--muted)">Taxpayer Identification Number</div>
+        </div>
+        <button onclick="closeMobW9Modal()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;line-height:1">&times;</button>
+      </div>
+      <div style="padding:20px">
+        <div style="font-family:var(--sans);font-size:11px;font-weight:300;color:var(--muted);line-height:1.75;margin-bottom:20px;padding:12px 14px;background:rgba(0,0,0,0.03);border:1px solid var(--border)">Under penalties of perjury, you certify that the information you provide is accurate and that you are a U.S. person.</div>
+        <div style="margin-bottom:14px">
+          <label class="field-label">Legal Name *</label>
+          <input class="field" type="text" placeholder="As shown on tax return" id="mob-w9-name">
+        </div>
+        <div style="margin-bottom:14px">
+          <label class="field-label">Business / DBA</label>
+          <input class="field" type="text" placeholder="e.g. SwuM LLC" id="mob-w9-biz">
+        </div>
+        <div style="margin-bottom:14px">
+          <label class="field-label">Federal Tax Classification *</label>
+          <select class="field" style="-webkit-appearance:none" id="mob-w9-class">
+            <option value="" disabled selected>Select classification</option>
+            <option>Individual / Sole proprietor</option><option>C Corporation</option>
+            <option>S Corporation</option><option>Partnership</option>
+            <option>LLC</option><option>Other</option>
+          </select>
+        </div>
+        <div style="margin-bottom:14px">
+          <label class="field-label">Taxpayer ID (SSN or EIN) *</label>
+          <input class="field" type="text" placeholder="XXX-XX-XXXX" id="mob-w9-tin" style="font-family:monospace">
+        </div>
+        <div style="margin-bottom:14px">
+          <label class="field-label">Street Address *</label>
+          <input class="field" type="text" placeholder="Street address" id="mob-w9-addr" style="margin-bottom:10px">
+          <input class="field" type="text" placeholder="City" id="mob-w9-city" style="margin-bottom:10px">
+          <div style="display:grid;grid-template-columns:1fr 100px;gap:10px">
+            <input class="field" type="text" placeholder="State" id="mob-w9-state" style="margin-bottom:0">
+            <input class="field" type="text" placeholder="ZIP" id="mob-w9-zip" style="margin-bottom:0">
+          </div>
+        </div>
+        <label style="display:flex;gap:10px;align-items:flex-start;cursor:pointer;margin-bottom:20px">
+          <input type="checkbox" id="mob-w9-certify" style="width:14px;height:14px;margin-top:2px;accent-color:#080808;flex-shrink:0">
+          <span style="font-family:var(--sans);font-size:11px;font-weight:300;color:var(--muted);line-height:1.65">I certify under penalties of perjury that all information provided is accurate, that I am a U.S. person, and that I am not subject to backup withholding.</span>
+        </label>
+        <button onclick="submitMobW9()" style="background:var(--black);color:#fff;border:none;padding:14px 0;width:100%;font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer;margin-bottom:10px">Submit W-9</button>
+        <button onclick="closeMobW9Modal()" style="background:transparent;color:var(--muted);border:1px solid rgba(0,0,0,0.14);padding:14px 0;width:100%;font-family:var(--sans);font-size:11px;font-weight:500;letter-spacing:0.10em;text-transform:uppercase;cursor:pointer">Cancel</button>
       </div>
     </div>
   </div>
@@ -1291,6 +1379,35 @@ html, body {
     }
   });
 
+  // ── PAYOUTS ──
+  function openMobW9Modal() {
+    document.getElementById('mob-w9-modal-overlay').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+  function closeMobW9Modal() {
+    document.getElementById('mob-w9-modal-overlay').style.display = 'none';
+    document.body.style.overflow = '';
+  }
+  function submitMobW9() {
+    var certify = document.getElementById('mob-w9-certify');
+    if (!certify.checked) { alert('Please certify the information before submitting.'); return; }
+    closeMobW9Modal();
+    var badge = document.getElementById('mob-w9-status-badge');
+    badge.style.background = 'rgba(30,107,30,0.08)';
+    badge.style.border = '1px solid rgba(30,107,30,0.25)';
+    var dot = document.getElementById('mob-w9-status-dot');
+    if (dot) dot.style.background = '#1E6B1E';
+    var txt = document.getElementById('mob-w9-status-text');
+    txt.textContent = 'Active';
+    txt.style.color = '#1E6B1E';
+  }
+  function mobSelectPayout(method) {
+    ['mob-stripe-option','mob-paypal-option'].forEach(function(id) {
+      document.getElementById(id).style.borderColor = 'rgba(0,0,0,0.10)';
+    });
+    document.getElementById('mob-' + method + '-option').style.borderColor = 'var(--black)';
+  }
+
   // ── ADD SONG ──
   let mobCWCount = 0;
   function mobSetCW(hasCowriters) {
@@ -1315,8 +1432,15 @@ html, body {
     if (el) el.remove();
     mobRecalc();
   }
+  function mobClampPct(inp) {
+    if (inp && parseFloat(inp.value) > 100) inp.value = 100;
+    if (inp && parseFloat(inp.value) < 0) inp.value = 0;
+  }
   function mobRecalc() {
-    let total = parseFloat(document.getElementById('mob-writer-pct')?.value) || 0;
+    const primary = document.getElementById('mob-writer-pct');
+    mobClampPct(primary);
+    document.querySelectorAll('[id^="mob-cw-pct-"]').forEach(inp => mobClampPct(inp));
+    let total = parseFloat(primary?.value) || 0;
     document.querySelectorAll('[id^="mob-cw-pct-"]').forEach(inp => { total += parseFloat(inp.value) || 0; });
     const el = document.getElementById('mob-ownership-total');
     if (el) { el.textContent = total + '%'; el.style.color = total === 100 ? 'var(--green)' : total > 100 ? 'var(--red)' : 'var(--black)'; }
@@ -1423,12 +1547,24 @@ html, body {
     mobRecalc();
   }
 
+  function mobWarnField(el) {
+    if (!el) return;
+    el.classList.add('field-warn');
+    el.addEventListener('focus', function h() { el.classList.remove('field-warn'); el.removeEventListener('focus', h); }, { once: true });
+  }
   function mobSubmitSong() {
-    const title = (document.getElementById('mob-as-title')?.value || '').trim();
-    if (!title) { alert('Please enter a song title.'); return; }
-    const primaryName = (document.getElementById('mob-writer-primary')?.value || '').trim();
-    if (!primaryName) { alert('Please enter the primary songwriter name.'); return; }
-    const primaryPct = parseFloat(document.getElementById('mob-writer-pct')?.value) || 0;
+    // Clear previous warnings
+    document.querySelectorAll('#dp-add-song .field-warn').forEach(f => f.classList.remove('field-warn'));
+    const errors = [];
+    const titleEl = document.getElementById('mob-as-title');
+    const title = (titleEl?.value || '').trim();
+    if (!title) { mobWarnField(titleEl); errors.push(titleEl); }
+    const writerEl = document.getElementById('mob-writer-primary');
+    const primaryName = (writerEl?.value || '').trim();
+    if (!primaryName) { mobWarnField(writerEl); errors.push(writerEl); }
+    const pctEl = document.getElementById('mob-writer-pct');
+    const primaryPct = parseFloat(pctEl?.value) || 0;
+    if (!pctEl?.value || primaryPct <= 0) { mobWarnField(pctEl); errors.push(pctEl); }
     const cowriters = [];
     document.querySelectorAll('[id^="mob-cw-row-"]').forEach(row => {
       const id = row.id.replace('mob-cw-row-', '');
@@ -1441,8 +1577,18 @@ html, body {
     });
     let totalPct = primaryPct;
     cowriters.forEach(cw => { totalPct += cw.pct; });
-    if (totalPct !== 100) { alert('Ownership splits must total exactly 100%. Currently at ' + totalPct + '%.'); return; }
-    const isrc = (document.getElementById('mob-as-isrc')?.value || '').trim();
+    if (totalPct !== 100) {
+      const ownershipEl = document.getElementById('mob-ownership-total');
+      if (ownershipEl) ownershipEl.style.color = '#e67e00';
+      if (!errors.length) errors.push(ownershipEl || pctEl);
+    }
+    const isrcEl = document.getElementById('mob-as-isrc');
+    const isrc = (isrcEl?.value || '').trim();
+    if (!isrc) { mobWarnField(isrcEl); errors.push(isrcEl); }
+    if (errors.length > 0) {
+      errors[0]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
     const token = localStorage.getItem('dv_token');
     fetch('/api/songs', {
       method: 'POST',
