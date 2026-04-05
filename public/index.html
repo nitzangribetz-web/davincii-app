@@ -1518,41 +1518,6 @@
     }
 
 
-    /* ── Preview Switcher ── */
-    #preview-bar {
-      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-      z-index: 99999;
-      display: flex; align-items: center; gap: 6px;
-      background: rgba(3,9,18,0.92);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 100px;
-      padding: 6px 8px;
-      backdrop-filter: blur(16px);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.40);
-    }
-    .pvw-label {
-      font-family: 'DM Sans', sans-serif;
-      font-size: 10px; font-weight: 600; letter-spacing: 0.16em;
-      text-transform: uppercase; color: rgba(255,255,255,0.30);
-      padding: 0 10px 0 6px;
-    }
-    .pvw-btn {
-      font-family: 'DM Sans', sans-serif;
-      font-size: 12px; font-weight: 500;
-      color: rgba(255,255,255,0.55);
-      background: none; border: none; cursor: pointer;
-      padding: 7px 16px; border-radius: 100px;
-      transition: all 0.18s; letter-spacing: 0.01em;
-      white-space: nowrap;
-    }
-    .pvw-btn:hover { color: #fff; background: rgba(255,255,255,0.08); }
-    .pvw-btn.active {
-      background: #1452CC; color: #fff;
-    }
-    .pvw-divider {
-      width: 1px; height: 16px;
-      background: rgba(255,255,255,0.12);
-    }
 
 
     /* ── Legal pages ── */
@@ -1706,17 +1671,6 @@
   /* ── Global ── */
   body { overflow-x: hidden; }
 
-  /* ── Preview bar — horizontal scroll on mobile ── */
-  #preview-bar {
-    left: 0; right: 0; transform: none;
-    border-radius: 0; bottom: 0;
-    overflow-x: auto; justify-content: flex-start;
-    padding: 8px 12px; gap: 4px;
-    scrollbar-width: none;
-  }
-  #preview-bar::-webkit-scrollbar { display: none; }
-  .pvw-label { display: none; }
-  .pvw-btn { font-size: 11px; padding: 6px 12px; }
 
   /* ════════════════════════════════════════
      LANDING PAGE
@@ -2404,22 +2358,6 @@
 
 <!-- Scroll darkening overlay — fades in when scrolling past hero -->
 
-<!-- ── PREVIEW SWITCHER ── -->
-<div id="preview-bar">
-  <span class="pvw-label">Preview</span>
-  <button class="pvw-btn active" id="pvw-landing" onclick="pvw('landing')">Landing</button>
-  <div class="pvw-divider"></div>
-  <button class="pvw-btn" id="pvw-login" onclick="pvw('login')">Login</button>
-  <button class="pvw-btn" id="pvw-signup" onclick="pvw('signup')">Sign up</button>
-  <div class="pvw-divider"></div>
-  <button class="pvw-btn" id="pvw-dashboard" onclick="pvw('dashboard')">Dashboard</button>
-  <button class="pvw-btn" id="pvw-catalog" onclick="pvw('catalog')">Catalog</button>
-  <button class="pvw-btn" id="pvw-payouts" onclick="pvw('payouts')">Payouts</button>
-  <button class="pvw-btn" id="pvw-profile" onclick="pvw('profile')">Profile</button>
-  <div class="pvw-divider"></div>
-  <button class="pvw-btn" id="pvw-privacy" onclick="pvw('privacy')">Privacy</button>
-  <button class="pvw-btn" id="pvw-terms" onclick="pvw('terms')">Terms</button>
-</div>
 
 <!-- ── GRAIN ── -->
 <canvas id="grain"></canvas>
@@ -2928,34 +2866,12 @@
   // SCREEN NAVIGATION
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // PREVIEW SWITCHER
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  function pvw(key) {
-    // Update active button
-    document.querySelectorAll('.pvw-btn').forEach(b => b.classList.remove('active'));
-    const btn = document.getElementById('pvw-' + key);
-    if (btn) btn.classList.add('active');
-    // Navigate
-    if (key === 'catalog' || key === 'payouts' || key === 'profile') {
-      go('dashboard'); setTimeout(() => showDashPage(key), 60); return;
-    }
-    go(key);
-  }
-  // Sync preview bar when go() is called
-  const _origGo = go;
-  // Mark landing as active on load
-  setTimeout(() => {
-    const lb = document.getElementById('pvw-landing'); if(lb) lb.classList.add('active');
-  }, 100);
-
   function go(key) {
     if (key === 'login') { window.location.href = '/login.html'; return; }
     if (key === 'signup') { window.location.href = '/signup.html'; return; }
     if(key==='catalog'){go('dashboard');setTimeout(()=>showDashPage('catalog'),50);return;}
     if(key==='royalties'){go('dashboard');setTimeout(()=>showDashPage('royalties'),50);return;}
     if(key==='payouts'){go('dashboard');setTimeout(()=>showDashPage('payouts'),50);return;}
-    // privacy and terms handled normally
     document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
     const t=document.getElementById('screen-'+key);
     if(t){t.classList.add('active');window.scrollTo(0,0);}

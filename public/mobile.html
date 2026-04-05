@@ -1077,45 +1077,7 @@ footer.m-footer{
 .m-legal-hl{background:rgba(34,96,204,0.05);border-left:3px solid var(--blue);padding:12px 15px;margin:12px 0;border-radius:0 6px 6px 0}
 .m-legal-hl p{font-family:var(--sans);font-size:13px;font-weight:400;color:var(--slate);line-height:1.7;margin:0}
 
-    /* ── PREVIEW BAR ── */
-    #mob-preview-bar {
-      position: fixed; bottom: 0; left: 0; right: 0;
-      z-index: 99999;
-      display: flex; align-items: center;
-      background: rgba(3,9,18,0.94);
-      border-top: 1px solid rgba(255,255,255,0.10);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-      padding: 0 8px;
-      height: 48px;
-    }
-    #mob-preview-bar::-webkit-scrollbar { display: none; }
-    .mpvw-label {
-      font-family: 'DM Sans', sans-serif;
-      font-size: 9px; font-weight: 700; letter-spacing: 0.18em;
-      text-transform: uppercase; color: rgba(255,255,255,0.28);
-      padding: 0 10px 0 4px; flex-shrink: 0; white-space: nowrap;
-    }
-    .mpvw-btn {
-      font-family: 'DM Sans', sans-serif;
-      font-size: 11.5px; font-weight: 500;
-      color: rgba(255,255,255,0.52);
-      background: none; border: none; cursor: pointer;
-      padding: 6px 13px; border-radius: 100px;
-      transition: all 0.16s; white-space: nowrap;
-      flex-shrink: 0;
-    }
-    .mpvw-btn:active { color: #fff; background: rgba(255,255,255,0.08); }
-    .mpvw-btn.active { background: #1452CC; color: #fff; }
-    .mpvw-div {
-      width: 1px; height: 14px; flex-shrink: 0;
-      background: rgba(255,255,255,0.12); margin: 0 2px;
-    }
-    /* Push tab bar above preview bar when on dashboard */
-    .dashboard-active .d-tab-bar { bottom: 48px; display:flex; }
+    .dashboard-active .d-tab-bar { display:flex; }
 
 
     /* ── Scroll-triggered reveal ── */
@@ -2201,43 +2163,6 @@ function dTogglePro(v){
   if(w)w.style.display=v==='Other'?'block':'none';
 }
 
-// ── Preview bar navigation ──
-const DASH_PAGES = ['dashboard','catalog','add-song','royalties','payouts','profile','settings','notifications','registration','statements','sync'];
-
-function mpvw(key) {
-  // Update active state
-  document.querySelectorAll('.mpvw-btn').forEach(b => b.classList.remove('active'));
-  const btn = document.getElementById('mpvw-' + key);
-  if (btn) {
-    btn.classList.add('active');
-    btn.scrollIntoView({behavior:'smooth', block:'nearest', inline:'center'});
-  }
-  // Handle dash sub-pages
-  if (DASH_PAGES.includes(key) && key !== 'dashboard') {
-    go('dashboard');
-    document.body.classList.add('dashboard-active');
-    setTimeout(() => showDP(key), 60);
-    return;
-  }
-  if (key === 'dashboard') {
-    go('dashboard');
-    document.body.classList.add('dashboard-active');
-    showDP('overview');
-    return;
-  }
-  document.body.classList.remove('dashboard-active');
-  go(key);
-}
-
-// Add bottom padding to landing to avoid preview bar overlap
-document.querySelectorAll('#screen-landing footer.m-footer').forEach(f => {
-  f.style.paddingBottom = '96px';
-});
-// Init landing active
-setTimeout(() => {
-  const lb = document.getElementById('mpvw-landing');
-  if (lb) lb.classList.add('active');
-}, 100);
 
 
 // ── Scroll reveal ──
@@ -2254,18 +2179,6 @@ setTimeout(() => {
 })();
 
 
-// ── Prevent preview bar from being tapped during scroll momentum ──
-(function(){
-  let scrollTimer;
-  const bar = document.getElementById('mob-preview-bar');
-  window.addEventListener('scroll', () => {
-    if (bar) bar.style.pointerEvents = 'none';
-    clearTimeout(scrollTimer);
-    scrollTimer = setTimeout(() => {
-      if (bar) bar.style.pointerEvents = '';
-    }, 350);
-  }, { passive: true });
-})();
 
 
 // ── Add Song — mobile ──
@@ -2456,25 +2369,6 @@ function submitMobW9() {
   </div>
 </div>
 
-<!-- ── PREVIEW BAR ── -->
-<div id="mob-preview-bar">
-  <span class="mpvw-label">Preview</span>
-  <button class="mpvw-btn active" id="mpvw-landing" onclick="mpvw('landing')">Landing</button>
-  <div class="mpvw-div"></div>
-  <button class="mpvw-btn" id="mpvw-login" onclick="mpvw('login')">Login</button>
-  <button class="mpvw-btn" id="mpvw-signup" onclick="mpvw('signup')">Sign up</button>
-  <div class="mpvw-div"></div>
-  <button class="mpvw-btn" id="mpvw-dashboard" onclick="mpvw('dashboard')">Dashboard</button>
-  <button class="mpvw-btn" id="mpvw-catalog" onclick="mpvw('catalog')">Songs</button>
-  <button class="mpvw-btn" id="mpvw-add-song" onclick="mpvw('add-song')">Add Song</button>
-  <button class="mpvw-btn" id="mpvw-royalties" onclick="mpvw('royalties')">Royalties</button>
-  <button class="mpvw-btn" id="mpvw-payouts" onclick="mpvw('payouts')">Payouts</button>
-  <button class="mpvw-btn" id="mpvw-profile" onclick="mpvw('profile')">Profile</button>
-  <button class="mpvw-btn" id="mpvw-settings" onclick="mpvw('settings')">Settings</button>
-  <div class="mpvw-div"></div>
-  <button class="mpvw-btn" id="mpvw-terms" onclick="mpvw('terms')">Terms</button>
-  <button class="mpvw-btn" id="mpvw-privacy" onclick="mpvw('privacy')">Privacy</button>
-</div>
 
 
 </body>
