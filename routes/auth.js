@@ -4,6 +4,72 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const pool = require('../db/pool');
 const supabase = require('../db/supabase');
+const { Resend } = require('resend');
+
+// Send signup notification email to admin
+async function sendSignupNotification({ name, email, method }) {
+  try {
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZoneName: 'short' });
+
+    const html = `
+      <div style="font-family:'Inter',Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;color:#0A0A0A">
+        <div style="background:linear-gradient(135deg,#0E2A78 0%,#060E28 100%);padding:28px 36px;text-align:center">
+          <img src="https://davincii.co/logo-white-sm.png" alt="Davincii" style="height:26px">
+        </div>
+        <div style="padding:36px;background:#ffffff;border:1px solid #E2E8F0;border-top:none">
+          <h2 style="font-family:Georgia,serif;font-size:22px;font-weight:400;margin:0 0 6px;color:#0A0A0A">New Artist Signup</h2>
+          <div style="width:28px;height:2px;background:#2260CC;margin-bottom:20px"></div>
+          <p style="font-size:13px;color:#64748B;margin:0 0 28px;line-height:1.6">A new artist has registered on the Davincii platform.</p>
+
+          <table style="width:100%;border-collapse:collapse;margin-bottom:24px">
+            <tr>
+              <td style="padding:12px 0;border-bottom:1px solid #F1F5F9;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#94A3B8;width:120px">Name</td>
+              <td style="padding:12px 0;border-bottom:1px solid #F1F5F9;font-size:15px;font-weight:600;color:#0A0A0A">${name}</td>
+            </tr>
+            <tr>
+              <td style="padding:12px 0;border-bottom:1px solid #F1F5F9;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#94A3B8">Email</td>
+              <td style="padding:12px 0;border-bottom:1px solid #F1F5F9;font-size:14px;color:#0A0A0A">
+                <a href="mailto:${email}" style="color:#2563EB;text-decoration:none">${email}</a>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:12px 0;border-bottom:1px solid #F1F5F9;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#94A3B8">Method</td>
+              <td style="padding:12px 0;border-bottom:1px solid #F1F5F9;font-size:14px;color:#0A0A0A">${method}</td>
+            </tr>
+            <tr>
+              <td style="padding:12px 0;border-bottom:1px solid #F1F5F9;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#94A3B8">Date</td>
+              <td style="padding:12px 0;border-bottom:1px solid #F1F5F9;font-size:14px;color:#0A0A0A">${dateStr}</td>
+            </tr>
+            <tr>
+              <td style="padding:12px 0;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#94A3B8">Time</td>
+              <td style="padding:12px 0;font-size:14px;color:#0A0A0A">${timeStr}</td>
+            </tr>
+          </table>
+
+          <div style="background:#F8FAFC;border:1px solid #E2E8F0;padding:14px 18px;font-size:12px;color:#475569;line-height:1.7;border-radius:6px">
+            <strong style="color:#0A0A0A">Next steps:</strong> Artist needs to complete onboarding (artist details, PRO affiliation, IPI number).
+          </div>
+        </div>
+        <div style="padding:18px 36px;text-align:center;font-size:11px;color:#94A3B8">
+          Davincii Publishing Administration &middot; davincii.co
+        </div>
+      </div>`;
+
+    await resend.emails.send({
+      from: 'Davincii <onboarding@resend.dev>',
+      to: 'nitzangribetz@gmail.com',
+      subject: `New Signup: ${name} (${email})`,
+      html
+    });
+    console.log(`[Signup notification] Email sent for: ${email}`);
+  } catch (err) {
+    console.error('[Signup notification] Failed:', err.message);
+    // Don't throw — email failure shouldn't block signup
+  }
+}
 
 // GET /api/auth/google - Initiate Google OAuth (direct or via Supabase fallback)
 router.get('/google', async (req, res) => {
@@ -114,6 +180,8 @@ router.post('/oauth-exchange', async (req, res) => {
       );
       artist = result.rows[0];
       console.log('[OAuth exchange] New artist created id:', artist.id);
+      // Send signup notification email (non-blocking)
+      sendSignupNotification({ name, email, method: 'Google OAuth' });
     }
 
     // Generate our JWT
@@ -161,6 +229,8 @@ router.get('/callback', async (req, res) => {
         [name, email, randomHash]
       );
       artist = result.rows[0];
+      // Send signup notification email (non-blocking)
+      sendSignupNotification({ name, email, method: 'Google OAuth (Supabase)' });
     }
 
     const token = jwt.sign(
@@ -223,6 +293,9 @@ router.post('/signup', async (req, res) => {
       [name, email, password_hash]
     );
     const artist = result.rows[0];
+
+    // Send signup notification email (non-blocking)
+    sendSignupNotification({ name, email, method: 'Email / Password' });
 
     if (isFormSubmit) {
       // 302 redirect → Safari detects successful form submission + navigation → saves credentials
