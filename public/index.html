@@ -10,7 +10,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Playfair+Display:ital,wght@0,400;0,700;0,800;0,900;1,400;1,700;1,900&family=Inter:wght@300;400;500;600;700;800;900&family=Pinyon+Script&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Playfair+Display:ital,wght@0,400;0,700;0,800;0,900;1,400;1,700;1,900&family=Inter:wght@300;400;500;600;700;800;900&family=DM+Sans:wght@300;400;500;600;700&family=Pinyon+Script&display=swap" rel="stylesheet">
 
   <script>
     tailwind.config = {
@@ -2751,7 +2751,7 @@
     if (savedToken && savedArtist) {
       fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + savedToken } })
         .then(function(r) { if (r.ok) return r.json(); throw new Error('expired'); })
-        .then(function(artist) { updateArtistUI(artist); })
+        .then(function(artist) { onAuthSuccess(artist, false); })
         .catch(function() { localStorage.removeItem('dv_token'); localStorage.removeItem('dv_artist'); });
     }
     // Route from URL path

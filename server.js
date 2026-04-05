@@ -11,6 +11,7 @@ const songRoutes = require('./routes/songs');
 const royaltyRoutes = require('./routes/royalties');
 const payoutRoutes = require('./routes/payouts');
 const stripeRoutes = require('./routes/stripe');
+const passkeyRoutes = require('./routes/passkeys');
 
 const app = express();
 
@@ -19,12 +20,12 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "https://unpkg.com"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://unpkg.com", "https://cdnjs.cloudflare.com", "https://cdn.tailwindcss.com"],
       scriptSrcAttr: ["'unsafe-inline'"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdn.tailwindcss.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
       imgSrc: ["'self'", "https://davincii.co", "data:"],
-      connectSrc: ["'self'"],
+      connectSrc: ["'self'", "https://www.googleapis.com"],
     },
   },
 }));
@@ -87,6 +88,7 @@ app.use('/api/songs', songRoutes);
 app.use('/api/royalties', royaltyRoutes);
 app.use('/api/payouts', payoutRoutes);
 app.use('/api/stripe', stripeRoutes);
+app.use('/api/passkeys', passkeyRoutes);
 
 // Serve SPA for all non-API, non-static routes (catch-all)
 // Detect mobile user-agents and serve mobile.html

@@ -2085,12 +2085,55 @@ footer.m-footer{
 </div>
 
 <script>
-// OAuth hash fragment interception
+// ── AUTH CALLBACK + AUTO-LOGIN ──
 (function checkAuthCallback() {
+  // Hash fragment interception (implicit OAuth flow)
   var h = window.location.hash;
   if (h && h.indexOf('access_token') !== -1) {
     window.location.href = '/oauth-callback.html' + h;
     return;
+  }
+  var params = new URLSearchParams(window.location.search);
+  // PKCE code fallback
+  var oauthCode = params.get('code');
+  if (oauthCode && !params.get('token')) { window.location.replace('/api/auth/callback?code=' + encodeURIComponent(oauthCode)); return; }
+  // Token from auth callback redirect
+  var token = params.get('token');
+  var artistParam = params.get('artist');
+  var isSignup = params.get('signup') === '1';
+  if (token && artistParam) {
+    try {
+      var artist;
+      try { artist = JSON.parse(artistParam); } catch(_) { artist = JSON.parse(decodeURIComponent(artistParam)); }
+      localStorage.setItem('dv_token', token);
+      localStorage.setItem('dv_artist', JSON.stringify(artist));
+      window.history.replaceState({}, '', '/dashboard');
+      document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+      document.getElementById('screen-dashboard').classList.add('active');
+      window.scrollTo(0, 0);
+    } catch (e) { console.error('[Auth] parse error:', e); }
+    return;
+  }
+  // Auto-login if token exists in localStorage
+  var savedToken = localStorage.getItem('dv_token');
+  var savedArtist = localStorage.getItem('dv_artist');
+  if (savedToken && savedArtist) {
+    fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + savedToken } })
+      .then(function(r) { if (r.ok) return r.json(); throw new Error('expired'); })
+      .then(function(artist) {
+        document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+        document.getElementById('screen-dashboard').classList.add('active');
+        window.scrollTo(0, 0);
+      })
+      .catch(function() { localStorage.removeItem('dv_token'); localStorage.removeItem('dv_artist'); });
+  }
+  // Route from URL path
+  var path = window.location.pathname;
+  if (path === '/dashboard' || path.startsWith('/dashboard/')) {
+    if (savedToken) {
+      document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+      document.getElementById('screen-dashboard').classList.add('active');
+    }
   }
 })();
 
