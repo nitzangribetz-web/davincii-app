@@ -2382,6 +2382,17 @@
   </style>
 </head>
 <body>
+<script>
+// Early auth detection: if token is in URL or localStorage, immediately switch to dashboard background
+// This prevents the dark landing page flash before JS loads
+(function(){
+  var p = new URLSearchParams(window.location.search);
+  if (p.get('token') || (localStorage.getItem('dv_token') && (window.location.pathname === '/dashboard' || window.location.pathname.indexOf('/dashboard/') === 0 || p.get('token')))) {
+    document.body.style.background = '#F0F4FA';
+    document.body.style.color = '#0A0A0A';
+  }
+})();
+</script>
 
 <!-- Scroll darkening overlay — fades in when scrolling past hero -->
 
@@ -2821,19 +2832,41 @@
     }
   }
 
+  // Back button handler: if authenticated, don't allow going back to login/signup
+  window.addEventListener('popstate', function() {
+    var token = localStorage.getItem('dv_token');
+    if (token) {
+      // User is authenticated — ensure they stay on dashboard
+      var dashScreen = document.getElementById('screen-dashboard');
+      if (!dashScreen || !dashScreen.classList.contains('active')) {
+        onAuthSuccess(JSON.parse(localStorage.getItem('dv_artist') || '{}'), false);
+      }
+    }
+  });
+
   function updateArtistUI(artist) {
+    var displayName = artist.stage_name || artist.name || artist.email || '';
     var name = artist.name || artist.email || '';
-    var initials = name.split(' ').map(function(w) { return w[0]; }).join('').toUpperCase().slice(0,2);
-    document.querySelectorAll('.artist-display-name').forEach(function(el) { el.textContent = name; });
+    var initials = displayName.split(' ').map(function(w) { return w[0]; }).join('').toUpperCase().slice(0,2);
+    document.querySelectorAll('.artist-display-name').forEach(function(el) { el.textContent = displayName; });
     var avatar = document.getElementById('avatar-initials');
     if (avatar) avatar.textContent = initials || '—';
     var ddName = document.getElementById('dropdown-artist-name');
-    if (ddName) ddName.textContent = name;
+    if (ddName) ddName.textContent = displayName;
     var ddEmail = document.getElementById('dropdown-artist-email');
     if (ddEmail) ddEmail.textContent = artist.email || '';
     // Settings email
     var settingsEmail = document.getElementById('settings-email-display');
     if (settingsEmail) settingsEmail.textContent = artist.email || '';
+    // Dashboard greeting with time-aware message
+    var greetingName = document.getElementById('dash-greeting-name');
+    if (greetingName) greetingName.textContent = displayName + '.';
+    var greetingEl = document.getElementById('dash-greeting');
+    if (greetingEl) {
+      var hour = new Date().getHours();
+      var greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+      greetingEl.innerHTML = greeting + ', <em id="dash-greeting-name">' + displayName + '.</em>';
+    }
   }
 
   // ── FILM GRAIN (canvas, highest quality) ──
@@ -2985,8 +3018,8 @@
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   function go(key) {
-    if (key === 'login') { window.location.href = '/login.html'; return; }
-    if (key === 'signup') { window.location.href = '/signup.html'; return; }
+    if (key === 'login') { window.location.replace('/login.html'); return; }
+    if (key === 'signup') { window.location.replace('/signup.html'); return; }
     if(key==='catalog'){go('dashboard');setTimeout(()=>showDashPage('catalog'),50);return;}
     if(key==='royalties'){go('dashboard');setTimeout(()=>showDashPage('royalties'),50);return;}
     if(key==='payouts'){go('dashboard');setTimeout(()=>showDashPage('payouts'),50);return;}
@@ -3215,8 +3248,10 @@
     var form = document.getElementById('profile-form');
     if (!validateFields(form)) return;
 
+    // Get stage_name from stored artist data (set during signup)
+    var storedArtist = JSON.parse(localStorage.getItem('dv_artist') || '{}');
     var data = {
-      stage_name: document.getElementById('pf-stage-name').value.trim(),
+      stage_name: storedArtist.stage_name || storedArtist.name || '',
       dob: document.getElementById('pf-dob').value,
       pro: document.getElementById('pro-select').value,
       ipi: document.getElementById('pf-ipi').value.trim(),
@@ -3282,10 +3317,26 @@
       }
     });
 
-    // Check recordings
+    // Check recordings — highlight section if empty
     var recList = document.getElementById('desk-recording-list');
     if (!recList || recList.children.length === 0) {
-      showToast('Please add at least one recording', 'error');
+      var recSection = recList ? recList.closest('div[style*="border-bottom"]') : null;
+      if (recSection) {
+        recSection.style.borderColor = '#EF4444';
+        recSection.style.boxShadow = '0 0 0 2px rgba(239,68,68,0.10)';
+        var existingMsg = recSection.querySelector('.field-error-msg');
+        if (!existingMsg) {
+          var msg = document.createElement('div');
+          msg.className = 'field-error-msg visible';
+          msg.textContent = 'At least one recording is required';
+          msg.style.marginTop = '12px';
+          recList.parentElement.insertBefore(msg, recList.nextSibling);
+        }
+        setTimeout(function() {
+          recSection.style.borderColor = '';
+          recSection.style.boxShadow = '';
+        }, 4000);
+      }
       valid = false;
     }
 
@@ -3624,7 +3675,7 @@
 
       <!-- OVERVIEW -->
       <div class="dash-page main-content" id="dp-overview">
-        <div class="page-title">Good morning, <em>SwuM.</em></div>
+        <div class="page-title" id="dash-greeting">Good morning, <em id="dash-greeting-name">—</em></div>
         <div class="page-sub">Here's your publishing overview.</div>
         <div class="page-rule"></div>
 
@@ -4292,11 +4343,6 @@
         <form id="profile-form" novalidate>
         <!-- Artist Details — two-column, wider, industry standard -->
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px 40px;max-width:680px;">
-
-          <div>
-            <label class="field-label">Artist / Stage Name *</label>
-            <input class="field" type="text" placeholder="Artist name" id="pf-stage-name" data-required="true" style="margin-bottom:0;">
-          </div>
 
           <div>
             <label class="field-label">Date of Birth *</label>

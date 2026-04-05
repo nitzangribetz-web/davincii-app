@@ -201,6 +201,15 @@ body { font-family:'DM Sans', system-ui, sans-serif; background:#fff; }
 
 <script>
 (function() {
+  // If user has a valid session, redirect to dashboard
+  var savedToken = localStorage.getItem('dv_token');
+  if (savedToken) {
+    fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + savedToken } })
+      .then(function(r) { if (r.ok) return r.json(); throw new Error('expired'); })
+      .then(function() { window.location.replace('/dashboard'); })
+      .catch(function() { localStorage.removeItem('dv_token'); localStorage.removeItem('dv_artist'); });
+  }
+
   var params = new URLSearchParams(window.location.search);
   var error = params.get('error');
   if (error) {

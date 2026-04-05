@@ -1327,6 +1327,16 @@ footer.m-footer{
 </style>
 </head>
 <body>
+<script>
+// Early auth detection: prevent dark flash when redirecting from login
+(function(){
+  var p = new URLSearchParams(window.location.search);
+  if (p.get('token') || (localStorage.getItem('dv_token') && (window.location.pathname === '/dashboard' || window.location.pathname.indexOf('/dashboard/') === 0))) {
+    document.body.style.background = '#F0F4FA';
+    document.body.style.color = '#0A0A0A';
+  }
+})();
+</script>
 
 <!-- ════════════════════════════════════
      LANDING
@@ -1760,7 +1770,7 @@ footer.m-footer{
 
   <!-- ── OVERVIEW ── -->
   <div class="dash-page d-content" id="dp-overview">
-    <div class="d-pg-title">Good morning, <em>SwuM.</em></div>
+    <div class="d-pg-title" id="mob-dash-greeting">Good morning, <em id="mob-greeting-name">—</em></div>
     <div class="d-pg-sub">Here's your publishing overview.</div>
     <div class="d-pg-rule"></div>
     <div class="d-alert">
@@ -1996,7 +2006,6 @@ footer.m-footer{
     <div class="d-pg-rule"></div>
     <form id="mob-profile-form" novalidate>
     <div class="d-form-card">
-      <label class="field-label">Artist / Stage Name *</label><input class="field" type="text" placeholder="Artist name" id="mob-pf-stage-name" data-required="true">
       <label class="field-label">PRO Affiliation *</label>
       <select class="field" style="-webkit-appearance:none" id="d-pro" data-required="true" onchange="dTogglePro(this.value)">
         <option value="" disabled selected>Select your PRO</option>
@@ -2176,7 +2185,28 @@ footer.m-footer{
 function mobUpdateSettingsEmail(artist) {
   var el = document.getElementById('mob-settings-email');
   if (el && artist && artist.email) el.textContent = artist.email;
+  // Update greeting
+  var displayName = (artist && (artist.stage_name || artist.name)) || '';
+  var greetingEl = document.getElementById('mob-dash-greeting');
+  if (greetingEl && displayName) {
+    var hour = new Date().getHours();
+    var greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+    greetingEl.innerHTML = greeting + ', <em id="mob-greeting-name">' + displayName + '.</em>';
+  }
 }
+
+// Back button handler
+window.addEventListener('popstate', function() {
+  var token = localStorage.getItem('dv_token');
+  if (token) {
+    var dashScreen = document.getElementById('screen-dashboard');
+    if (!dashScreen || !dashScreen.classList.contains('active')) {
+      document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+      document.getElementById('screen-dashboard').classList.add('active');
+      window.history.replaceState({ screen: 'dashboard' }, '', '/dashboard');
+    }
+  }
+});
 
 // ── Nav scroll effect ──
 window.addEventListener('scroll',()=>{
@@ -2477,8 +2507,9 @@ function mobSaveProfile() {
   var form = document.getElementById('mob-profile-form');
   if (!mobValidateFields(form)) return;
 
+  var storedArtist = JSON.parse(localStorage.getItem('dv_artist') || '{}');
   var data = {
-    stage_name: document.getElementById('mob-pf-stage-name').value.trim(),
+    stage_name: storedArtist.stage_name || storedArtist.name || '',
     dob: document.getElementById('mob-pf-dob').value,
     pro: document.getElementById('d-pro').value,
     ipi: document.getElementById('mob-pf-ipi').value.trim(),
@@ -2542,7 +2573,20 @@ function mobSubmitSong() {
 
   var recList = document.getElementById('mob-recording-list');
   if (!recList || recList.children.length === 0) {
-    showToast('Please add at least one recording', 'error');
+    var recCard = recList ? recList.closest('.d-form-card') : null;
+    if (recCard) {
+      recCard.style.borderColor = '#EF4444';
+      recCard.style.boxShadow = '0 0 0 2px rgba(239,68,68,0.10)';
+      var existingMsg = recCard.querySelector('.field-error-msg');
+      if (!existingMsg) {
+        var msg = document.createElement('div');
+        msg.className = 'field-error-msg visible';
+        msg.textContent = 'At least one recording is required';
+        msg.style.marginTop = '10px';
+        recList.parentElement.insertBefore(msg, recList.nextSibling);
+      }
+      setTimeout(function() { recCard.style.borderColor = ''; recCard.style.boxShadow = ''; }, 4000);
+    }
     valid = false;
   }
 

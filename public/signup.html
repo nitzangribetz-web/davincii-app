@@ -221,6 +221,9 @@ body { font-family:'DM Sans', system-ui, sans-serif; background:#fff; }
                  autocomplete="family-name" placeholder="Last name" required>
         </div>
 
+        <input class="auth-field" type="text" name="artist_name" id="signup-artist-name"
+               autocomplete="nickname" placeholder="Artist / stage name" required>
+
         <input class="auth-field" type="email" name="email" id="signup-email"
                autocomplete="email" placeholder="Email address" required>
 
@@ -255,6 +258,15 @@ body { font-family:'DM Sans', system-ui, sans-serif; background:#fff; }
 
 <script>
 (function() {
+  // If user has a valid session, redirect to dashboard
+  var savedToken = localStorage.getItem('dv_token');
+  if (savedToken) {
+    fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + savedToken } })
+      .then(function(r) { if (r.ok) return r.json(); throw new Error('expired'); })
+      .then(function() { window.location.replace('/dashboard'); })
+      .catch(function() { localStorage.removeItem('dv_token'); localStorage.removeItem('dv_artist'); });
+  }
+
   var params = new URLSearchParams(window.location.search);
   var error = params.get('error');
   if (error) {

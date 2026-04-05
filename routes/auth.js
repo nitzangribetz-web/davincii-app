@@ -193,7 +193,7 @@ router.post('/oauth-exchange', async (req, res) => {
 
     res.json({
       token,
-      artist: { id: artist.id, name: artist.name, email: artist.email },
+      artist: { id: artist.id, name: artist.name, email: artist.email, stage_name: artist.stage_name || null },
       isNewSignup
     });
   } catch (err) {
@@ -255,7 +255,7 @@ function authSuccessRedirect(artist, isSignup) {
     { expiresIn: '7d' }
   );
   const artistPayload = encodeURIComponent(JSON.stringify({
-    id: artist.id, name: artist.name, email: artist.email
+    id: artist.id, name: artist.name, email: artist.email, stage_name: artist.stage_name || null
   }));
   const signupFlag = isSignup ? '&signup=1' : '';
   return `/auth-complete.html?token=${token}&artist=${artistPayload}${signupFlag}`;
@@ -273,6 +273,7 @@ router.post('/signup', async (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   const confirmPassword = req.body.confirm_password;
+  const artistName = req.body.artist_name ? req.body.artist_name.trim() : null;
 
   if (!name || !email || !password) {
     if (isFormSubmit) return res.redirect('/signup.html?error=' + encodeURIComponent('Name, email, and password are required'));
@@ -289,8 +290,8 @@ router.post('/signup', async (req, res) => {
     }
     const password_hash = await bcrypt.hash(password, 10);
     const result = await pool.query(
-      'INSERT INTO artists (name, email, password_hash) VALUES ($1, $2, $3) RETURNING id, name, email, created_at',
-      [name, email, password_hash]
+      'INSERT INTO artists (name, email, password_hash, stage_name) VALUES ($1, $2, $3, $4) RETURNING id, name, email, stage_name, created_at',
+      [name, email, password_hash, artistName]
     );
     const artist = result.rows[0];
 
@@ -347,7 +348,7 @@ router.post('/login', async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
-    res.json({ token, artist: { id: artist.id, name: artist.name, email: artist.email, created_at: artist.created_at } });
+    res.json({ token, artist: { id: artist.id, name: artist.name, email: artist.email, stage_name: artist.stage_name || null, created_at: artist.created_at } });
   } catch (err) {
     console.error('Login error:', err.message);
     if (isFormSubmit) return res.redirect('/login.html?error=' + encodeURIComponent('Login failed'));
@@ -358,7 +359,7 @@ router.post('/login', async (req, res) => {
 // GET /api/auth/me
 router.get('/me', require('../middleware/auth'), async (req, res) => {
   try {
-    const result = await pool.query('SELECT id, name, email, created_at FROM artists WHERE id = $1', [req.artist.id]);
+    const result = await pool.query('SELECT id, name, email, stage_name, created_at FROM artists WHERE id = $1', [req.artist.id]);
     const artist = result.rows[0];
     if (!artist) return res.status(404).json({ error: 'Artist not found' });
     res.json(artist);
