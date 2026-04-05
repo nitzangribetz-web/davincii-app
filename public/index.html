@@ -2352,6 +2352,33 @@
     }
     .notif-panel-footer button:hover { color: #2563EB; }
 
+    /* Toast notification */
+    .toast {
+      position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: #0F172A; color: #fff; padding: 12px 24px;
+      border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13.5px; font-weight: 400;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18); z-index: 9999;
+      opacity: 0; transition: opacity 0.25s, transform 0.25s; pointer-events: none;
+    }
+    .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+    .toast.success { border-left: 3px solid #10B981; }
+    .toast.error { border-left: 3px solid #EF4444; }
+
+    /* Field validation error state */
+    .field.field-error { border-color: #EF4444; box-shadow: 0 0 0 3px rgba(239,68,68,0.10); }
+    .field-error-msg {
+      font-family: 'DM Sans', sans-serif; font-size: 11.5px; font-weight: 400;
+      color: #EF4444; margin-top: 4px; margin-bottom: 8px; display: none;
+    }
+    .field-error-msg.visible { display: block; }
+
+    /* Error box for password change etc */
+    .error-box {
+      background: rgba(239,68,68,0.06); border-left: 2px solid #EF4444;
+      padding: 11px 14px; margin-bottom: 16px;
+      font-family: 'DM Sans', sans-serif; font-size: 13px; color: #DC2626;
+    }
+
   </style>
 </head>
 <body>
@@ -2776,7 +2803,22 @@
     if (grain) grain.style.display = 'none';
     if (noise) noise.style.display = 'none';
     document.body.style.background = '#F0F4FA';
+    // Replace history so back button doesn't go to login
+    window.history.replaceState({ screen: 'dashboard' }, '', '/dashboard');
     window.scrollTo(0, 0);
+    // Populate settings email from artist data
+    var settingsEmail = document.getElementById('settings-email-display');
+    if (settingsEmail) settingsEmail.textContent = artist.email || '';
+  }
+
+  function logoClick() {
+    var token = localStorage.getItem('dv_token');
+    if (token) {
+      go('dashboard');
+      showDashPage('overview');
+    } else {
+      go('landing');
+    }
   }
 
   function updateArtistUI(artist) {
@@ -2789,6 +2831,9 @@
     if (ddName) ddName.textContent = name;
     var ddEmail = document.getElementById('dropdown-artist-email');
     if (ddEmail) ddEmail.textContent = artist.email || '';
+    // Settings email
+    var settingsEmail = document.getElementById('settings-email-display');
+    if (settingsEmail) settingsEmail.textContent = artist.email || '';
   }
 
   // ── FILM GRAIN (canvas, highest quality) ──
@@ -3096,6 +3141,257 @@
     const s=document.getElementById(m+'-option');if(s)s.classList.add('selected');
   }
 
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // TOAST NOTIFICATIONS
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  function showToast(msg, type) {
+    var existing = document.querySelector('.toast');
+    if (existing) existing.remove();
+    var t = document.createElement('div');
+    t.className = 'toast ' + (type || 'success');
+    t.textContent = msg;
+    document.body.appendChild(t);
+    requestAnimationFrame(function() { t.classList.add('visible'); });
+    setTimeout(function() {
+      t.classList.remove('visible');
+      setTimeout(function() { t.remove(); }, 300);
+    }, 3000);
+  }
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // FORM VALIDATION
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  function validateFields(container) {
+    var fields = container.querySelectorAll('[data-required="true"]');
+    var valid = true;
+    fields.forEach(function(f) {
+      // Remove previous error state
+      f.classList.remove('field-error');
+      var errMsg = f.parentElement.querySelector('.field-error-msg');
+      if (errMsg) errMsg.remove();
+      // Check value
+      var val = f.value ? f.value.trim() : '';
+      if (!val) {
+        f.classList.add('field-error');
+        var msg = document.createElement('div');
+        msg.className = 'field-error-msg visible';
+        msg.textContent = 'This field is required';
+        f.parentElement.appendChild(msg);
+        valid = false;
+      }
+    });
+    if (!valid) {
+      var first = container.querySelector('.field-error');
+      if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    return valid;
+  }
+
+  function clearFieldErrors(container) {
+    container.querySelectorAll('.field-error').forEach(function(f) { f.classList.remove('field-error'); });
+    container.querySelectorAll('.field-error-msg').forEach(function(m) { m.remove(); });
+  }
+
+  // Clear error on input
+  document.addEventListener('input', function(e) {
+    if (e.target.classList.contains('field-error')) {
+      e.target.classList.remove('field-error');
+      var msg = e.target.parentElement.querySelector('.field-error-msg');
+      if (msg) msg.remove();
+    }
+  });
+  document.addEventListener('change', function(e) {
+    if (e.target.classList.contains('field-error')) {
+      e.target.classList.remove('field-error');
+      var msg = e.target.parentElement.querySelector('.field-error-msg');
+      if (msg) msg.remove();
+    }
+  });
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // PROFILE SAVE
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  function saveProfile() {
+    var form = document.getElementById('profile-form');
+    if (!validateFields(form)) return;
+
+    var data = {
+      stage_name: document.getElementById('pf-stage-name').value.trim(),
+      dob: document.getElementById('pf-dob').value,
+      pro: document.getElementById('pro-select').value,
+      ipi: document.getElementById('pf-ipi').value.trim(),
+      country: document.getElementById('pf-country').value,
+      address1: document.getElementById('pf-addr1').value.trim(),
+      address2: (document.getElementById('pf-addr2').value || '').trim(),
+      city: document.getElementById('pf-city').value.trim(),
+      postal: document.getElementById('pf-postal').value.trim(),
+      state: (document.getElementById('pf-state').value || '').trim()
+    };
+    if (data.pro === 'Other') {
+      data.pro_other = (document.getElementById('pro-other-input').value || '').trim();
+    }
+
+    var token = localStorage.getItem('dv_token');
+    fetch('/api/auth/profile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify(data)
+    })
+    .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+    .then(function(res) {
+      if (res.ok) {
+        showToast('Profile saved successfully', 'success');
+      } else {
+        showToast(res.data.error || 'Failed to save profile', 'error');
+      }
+    })
+    .catch(function() { showToast('Network error — please try again', 'error'); });
+  }
+
+  function discardProfile() {
+    var form = document.getElementById('profile-form');
+    clearFieldErrors(form);
+    form.querySelectorAll('input[type="text"], input[type="date"]').forEach(function(i) { i.value = ''; });
+    form.querySelectorAll('select').forEach(function(s) { s.selectedIndex = 0; });
+    document.getElementById('pro-other-wrap').style.display = 'none';
+  }
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // SONG SUBMISSION
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  function submitSong() {
+    var container = document.getElementById('dp-add-song');
+    // Validate song title
+    var titleField = document.getElementById('desk-song-title');
+    var writerField = document.getElementById('desk-writer-name');
+    var pctField = document.getElementById('desk-writer-pct');
+    var valid = true;
+
+    [titleField, writerField, pctField].forEach(function(f) {
+      if (!f) return;
+      f.classList.remove('field-error');
+      var errMsg = f.parentElement.querySelector('.field-error-msg');
+      if (errMsg) errMsg.remove();
+      if (!f.value || !f.value.trim()) {
+        f.classList.add('field-error');
+        var msg = document.createElement('div');
+        msg.className = 'field-error-msg visible';
+        msg.textContent = 'This field is required';
+        f.parentElement.appendChild(msg);
+        valid = false;
+      }
+    });
+
+    // Check recordings
+    var recList = document.getElementById('desk-recording-list');
+    if (!recList || recList.children.length === 0) {
+      showToast('Please add at least one recording', 'error');
+      valid = false;
+    }
+
+    // Check ownership total
+    var totalEl = document.getElementById('desk-ownership-total');
+    if (totalEl && totalEl.textContent !== '100%') {
+      showToast('Total ownership must equal 100%', 'error');
+      valid = false;
+    }
+
+    if (!valid) {
+      var first = container.querySelector('.field-error');
+      if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    // Collect data and submit
+    var songData = {
+      title: titleField.value.trim(),
+      songwriter: writerField.value.trim(),
+      songwriter_pct: pctField.value.trim()
+    };
+
+    var token = localStorage.getItem('dv_token');
+    fetch('/api/songs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify(songData)
+    })
+    .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+    .then(function(res) {
+      if (res.ok) {
+        showToast('Song submitted for registration', 'success');
+        setTimeout(function() { showDashPage('catalog'); }, 1200);
+      } else {
+        showToast(res.data.error || 'Failed to submit song', 'error');
+      }
+    })
+    .catch(function() { showToast('Network error — please try again', 'error'); });
+  }
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // SETTINGS — PASSWORD CHANGE
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  function togglePasswordChange() {
+    var panel = document.getElementById('pw-change-form');
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+  }
+
+  function submitPasswordChange() {
+    var curr = document.getElementById('pw-current').value;
+    var newPw = document.getElementById('pw-new').value;
+    var confirm = document.getElementById('pw-confirm').value;
+    var errEl = document.getElementById('pw-change-error');
+
+    errEl.style.display = 'none';
+
+    if (!curr || !newPw || !confirm) {
+      errEl.textContent = 'All fields are required.';
+      errEl.style.display = 'block';
+      return;
+    }
+    if (newPw.length < 8) {
+      errEl.textContent = 'New password must be at least 8 characters.';
+      errEl.style.display = 'block';
+      return;
+    }
+    if (newPw !== confirm) {
+      errEl.textContent = 'New passwords do not match.';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    var token = localStorage.getItem('dv_token');
+    fetch('/api/auth/change-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ current_password: curr, new_password: newPw })
+    })
+    .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+    .then(function(res) {
+      if (res.ok) {
+        showToast('Password updated successfully', 'success');
+        togglePasswordChange();
+        document.getElementById('pw-current').value = '';
+        document.getElementById('pw-new').value = '';
+        document.getElementById('pw-confirm').value = '';
+      } else {
+        errEl.textContent = res.data.error || 'Failed to change password.';
+        errEl.style.display = 'block';
+      }
+    })
+    .catch(function() {
+      errEl.textContent = 'Network error — please try again.';
+      errEl.style.display = 'block';
+    });
+  }
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // SETTINGS — 2FA
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  function toggle2FA() {
+    var panel = document.getElementById('tfa-setup-panel');
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+  }
+
 </script>
 
 <!-- ════════════ LOGIN ════════════ -->
@@ -3243,7 +3539,7 @@
 <!-- ════════════ DASHBOARD ════════════ -->
 <div class="screen" id="screen-dashboard">
   <nav class="top-nav">
-    <span class="top-nav-logo" onclick="go('landing')"><img src="/logo-white-sm.png" alt="Davincii" style="height:22px"></span>
+    <span class="top-nav-logo" onclick="logoClick()"><img src="/logo-white-sm.png" alt="Davincii" style="height:22px"></span>
     <div class="top-nav-right">
       <span class="top-nav-name">SwuM</span>
       <!-- Notification bell -->
@@ -3442,7 +3738,7 @@
           <div class="profile-section-sub">Title your song to save as a draft or submit for registration.</div>
           <div class="field-group">
             <label class="field-label">Song Title *</label>
-            <input class="field" type="text" placeholder="e.g. With U" style="max-width:460px;margin-bottom:0">
+            <input class="field" type="text" placeholder="e.g. With U" id="desk-song-title" data-required="true" style="max-width:460px;margin-bottom:0">
           </div>
         </div>
         <div style="margin-bottom:44px;padding-bottom:44px;border-bottom:1px solid #D8E2F0">
@@ -3486,7 +3782,7 @@
           <input class="field" type="text" placeholder="T-123456789-1" style="max-width:240px;font-family:monospace">
         </div>
         <div style="display:flex;gap:14px;align-items:center;margin-bottom:48px">
-          <button class="btn-blue" style="font-size:12px;letter-spacing:0.12em;text-transform:uppercase;padding:15px 40px">Submit for Registration →</button>
+          <button type="button" class="btn-blue" style="font-size:12px;letter-spacing:0.12em;text-transform:uppercase;padding:15px 40px" onclick="submitSong()">Submit for Registration →</button>
           <button onclick="showDashPage('catalog')" class="btn-ghost-dark">Cancel</button>
         </div>
       </div>
@@ -3615,23 +3911,49 @@
             <div class="settings-row">
               <div>
                 <div class="settings-label">Email Address</div>
-                <div class="settings-sub">swum@davincii.co</div>
+                <div class="settings-sub" id="settings-email-display">—</div>
               </div>
-              <button class="btn-ghost-dark" style="font-size:11px;letter-spacing:0.10em;text-transform:uppercase">Change</button>
             </div>
-            <div class="settings-row">
+            <div class="settings-row" id="pw-change-row">
               <div>
                 <div class="settings-label">Password</div>
-                <div class="settings-sub">Last changed — never</div>
+                <div class="settings-sub" id="pw-change-sub">Change your account password</div>
               </div>
-              <button class="btn-ghost-dark" style="font-size:11px;letter-spacing:0.10em;text-transform:uppercase">Change</button>
+              <button class="btn-ghost-dark" style="font-size:11px;letter-spacing:0.10em;text-transform:uppercase" onclick="togglePasswordChange()">Change</button>
+            </div>
+            <div id="pw-change-form" style="display:none;padding:20px 24px;border-bottom:1px solid #E2E8F0">
+              <div style="max-width:360px">
+                <label class="field-label">Current Password</label>
+                <input class="field" type="password" id="pw-current" autocomplete="current-password" placeholder="Enter current password">
+                <label class="field-label">New Password</label>
+                <input class="field" type="password" id="pw-new" autocomplete="new-password" placeholder="Enter new password" minlength="8">
+                <label class="field-label">Confirm New Password</label>
+                <input class="field" type="password" id="pw-confirm" autocomplete="new-password" placeholder="Confirm new password" minlength="8">
+                <div id="pw-change-error" class="error-box" style="display:none;margin-bottom:12px"></div>
+                <div style="display:flex;gap:10px;margin-top:4px">
+                  <button class="btn-blue" style="font-size:11px;letter-spacing:0.10em;text-transform:uppercase;padding:11px 24px" onclick="submitPasswordChange()">Update Password</button>
+                  <button class="btn-ghost-dark" onclick="togglePasswordChange()">Cancel</button>
+                </div>
+              </div>
             </div>
             <div class="settings-row">
               <div>
                 <div class="settings-label">Two-Factor Authentication</div>
-                <div class="settings-sub">Add an extra layer of security to your account</div>
+                <div class="settings-sub" id="tfa-status-sub">Add an extra layer of security to your account</div>
               </div>
-              <button class="btn-ghost-dark" style="font-size:11px;letter-spacing:0.10em;text-transform:uppercase">Enable</button>
+              <button class="btn-ghost-dark" style="font-size:11px;letter-spacing:0.10em;text-transform:uppercase" id="tfa-toggle-btn" onclick="toggle2FA()">Enable</button>
+            </div>
+            <div id="tfa-setup-panel" style="display:none;padding:20px 24px;border-bottom:1px solid #E2E8F0">
+              <div style="max-width:400px">
+                <div style="font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:300;color:#374151;line-height:1.7;margin-bottom:16px">
+                  Two-factor authentication adds an extra layer of security by requiring a verification code from your authenticator app each time you sign in.
+                </div>
+                <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:20px;text-align:center;margin-bottom:16px">
+                  <div style="font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#64748B;margin-bottom:12px">Coming Soon</div>
+                  <div style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:300;color:#94A3B8">2FA setup will be available in a future update. We'll notify you when it's ready.</div>
+                </div>
+                <button class="btn-ghost-dark" onclick="toggle2FA()">Close</button>
+              </div>
             </div>
           </div>
         </div>
@@ -3967,23 +4289,24 @@
         <div class="page-sub">Your artist and performing rights information.</div>
         <div class="page-rule"></div>
 
+        <form id="profile-form" novalidate>
         <!-- Artist Details — two-column, wider, industry standard -->
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px 40px;max-width:680px;">
 
           <div>
             <label class="field-label">Artist / Stage Name *</label>
-            <input class="field" type="text" placeholder="Artist name" style="margin-bottom:0;">
+            <input class="field" type="text" placeholder="Artist name" id="pf-stage-name" data-required="true" style="margin-bottom:0;">
           </div>
 
           <div>
             <label class="field-label">Date of Birth *</label>
-            <input class="field" type="date" style="margin-bottom:0;">
+            <input class="field" type="date" id="pf-dob" data-required="true" style="margin-bottom:0;">
           </div>
 
           <div>
             <label class="field-label">PRO Affiliation *</label>
             <select class="field" style="-webkit-appearance:none;margin-bottom:0;"
-                    id="pro-select" onchange="toggleOtherPro(this.value)">
+                    id="pro-select" data-required="true" onchange="toggleOtherPro(this.value)">
               <option value="" disabled selected>Select your PRO</option>
               <option>ASCAP</option><option>BMI</option><option>SESAC</option>
               <option>SOCAN</option><option>PRS for Music</option><option>GEMA</option>
@@ -3993,7 +4316,7 @@
 
           <div>
             <label class="field-label">IPI / CAE Number *</label>
-            <input class="field" type="text" placeholder="e.g. 00123456789" style="margin-bottom:0;">
+            <input class="field" type="text" placeholder="e.g. 00123456789" id="pf-ipi" data-required="true" style="margin-bottom:0;">
           </div>
 
         </div>
@@ -4016,7 +4339,7 @@
                       margin-bottom:22px;">Mailing Address</div>
 
           <label class="field-label">Country *</label>
-          <select class="field" style="-webkit-appearance:none;max-width:340px;">
+          <select class="field" id="pf-country" data-required="true" style="-webkit-appearance:none;max-width:340px;">
             <option value="" disabled selected>Select country</option>
             <option>United States</option><option>United Kingdom</option>
             <option>Canada</option><option>Australia</option>
@@ -4035,31 +4358,32 @@
           </select>
 
           <label class="field-label">Address Line 1 *</label>
-          <input class="field" type="text" placeholder="Street address">
+          <input class="field" type="text" placeholder="Street address" id="pf-addr1" data-required="true">
 
           <label class="field-label">Address Line 2 <span style="font-weight:300;text-transform:none;letter-spacing:0;color:#94A3B8;">(Apt, suite, floor — optional)</span></label>
-          <input class="field" type="text" placeholder="">
+          <input class="field" type="text" placeholder="" id="pf-addr2">
 
           <div style="display:grid;grid-template-columns:1fr 1fr 180px;gap:14px;margin-bottom:14px;">
             <div>
               <label class="field-label">City *</label>
-              <input class="field" type="text" placeholder="City" style="margin-bottom:0;">
+              <input class="field" type="text" placeholder="City" id="pf-city" data-required="true" style="margin-bottom:0;">
             </div>
             <div>
               <label class="field-label">Postal Code *</label>
-              <input class="field" type="text" placeholder="10001 or SW1A 1AA" style="margin-bottom:0;">
+              <input class="field" type="text" placeholder="10001 or SW1A 1AA" id="pf-postal" data-required="true" style="margin-bottom:0;">
             </div>
             <div>
               <label class="field-label">State / Region <span style="font-weight:300;text-transform:none;letter-spacing:0;color:#94A3B8;">if any</span></label>
-              <input class="field" type="text" placeholder="Optional" style="margin-bottom:0;">
+              <input class="field" type="text" placeholder="Optional" id="pf-state" style="margin-bottom:0;">
             </div>
           </div>
         </div>
 
         <div style="display:flex;gap:12px;align-items:center;padding-top:8px;padding-bottom:48px">
-          <button class="btn-blue">Save Changes</button>
-          <button class="btn-ghost-dark">Discard</button>
+          <button type="button" class="btn-blue" onclick="saveProfile()">Save Changes</button>
+          <button type="button" class="btn-ghost-dark" onclick="discardProfile()">Discard</button>
         </div>
+        </form>
       </div>
 
     </div><!-- /main content scroll -->

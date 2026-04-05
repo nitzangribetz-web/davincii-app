@@ -253,9 +253,15 @@ body { font-family:'DM Sans', system-ui, sans-serif; background:#fff; }
   </div>
 </div>
 
-<script src="https://unpkg.com/@simplewebauthn/browser/dist/bundle/index.umd.min.js"></script>
 <script>
 (function() {
+  // If already logged in, redirect to dashboard
+  var savedToken = localStorage.getItem('dv_token');
+  if (savedToken) {
+    window.location.replace('/');
+    return;
+  }
+
   var params = new URLSearchParams(window.location.search);
   var error = params.get('error');
   if (error) {

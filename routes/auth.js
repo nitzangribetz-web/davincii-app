@@ -367,34 +367,95 @@ router.get('/me', require('../middleware/auth'), async (req, res) => {
   }
 });
 
-// POST /api/auth/profile — save artist onboarding details (Step 2)
+// POST /api/auth/profile — save artist profile from dashboard
 router.post('/profile', require('../middleware/auth'), async (req, res) => {
   const isFormSubmit = req.is('application/x-www-form-urlencoded');
-  const { stage_name, pro, pro_role, ipi, dob, address_street, address_city, address_state } = req.body;
+  const { stage_name, pro, pro_other, ipi, dob, country, address1, address2, city, postal, state } = req.body;
 
   if (!stage_name) {
     if (isFormSubmit) return res.redirect('/details.html?error=' + encodeURIComponent('Artist / professional name is required'));
     return res.status(400).json({ error: 'Artist / professional name is required' });
   }
 
+  const proValue = pro === 'Other' && pro_other ? pro_other : (pro || null);
+  const addressStreet = [address1, address2].filter(Boolean).join(', ');
+  const addressCity = [city, state, postal].filter(Boolean).join(', ');
+
   try {
     await pool.query(
-      `UPDATE artists SET stage_name=$1, pro=$2, pro_role=$3, ipi=$4, dob=$5,
-       address_street=$6, address_city=$7, address_state=$8, onboarded=TRUE
-       WHERE id=$9`,
-      [stage_name, pro || null, pro_role || null, ipi || null, dob || null,
-       address_street || null, address_city || null, address_state || null, req.artist.id]
+      `UPDATE artists SET stage_name=$1, pro=$2, ipi=$3, dob=$4,
+       address_street=$5, address_city=$6, address_state=$7, onboarded=TRUE
+       WHERE id=$8`,
+      [stage_name, proValue, ipi || null, dob || null,
+       addressStreet || null, addressCity || null, country || null, req.artist.id]
     );
 
-    if (isFormSubmit) {
-      // Redirect to main app — token is already in localStorage from auth-complete.html
-      return res.redirect('/');
+    // Send profile update notification to admin
+    try {
+      const resend = new Resend(process.env.RESEND_API_KEY);
+      const artist = (await pool.query('SELECT name, email FROM artists WHERE id = $1', [req.artist.id])).rows[0];
+      await resend.emails.send({
+        from: 'Davincii <onboarding@resend.dev>',
+        to: 'info@davincii.co',
+        subject: `Profile Updated: ${stage_name} (${artist.email})`,
+        html: `
+          <div style="font-family:'Inter',Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;color:#0A0A0A">
+            <div style="background:linear-gradient(135deg,#0E2A78 0%,#060E28 100%);padding:28px 36px;text-align:center">
+              <img src="https://davincii.co/logo-white-sm.png" alt="Davincii" style="height:26px">
+            </div>
+            <div style="padding:36px;background:#ffffff;border:1px solid #E2E8F0;border-top:none">
+              <h2 style="font-family:Georgia,serif;font-size:22px;font-weight:400;margin:0 0 6px;color:#0A0A0A">Artist Profile Updated</h2>
+              <div style="width:28px;height:2px;background:#2260CC;margin-bottom:20px"></div>
+              <table style="width:100%;border-collapse:collapse;margin-bottom:24px">
+                <tr><td style="padding:10px 0;border-bottom:1px solid #F1F5F9;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#94A3B8;width:130px">Artist Name</td><td style="padding:10px 0;border-bottom:1px solid #F1F5F9;font-size:14px;color:#0A0A0A">${stage_name}</td></tr>
+                <tr><td style="padding:10px 0;border-bottom:1px solid #F1F5F9;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#94A3B8">Email</td><td style="padding:10px 0;border-bottom:1px solid #F1F5F9;font-size:14px;color:#0A0A0A">${artist.email}</td></tr>
+                <tr><td style="padding:10px 0;border-bottom:1px solid #F1F5F9;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#94A3B8">PRO</td><td style="padding:10px 0;border-bottom:1px solid #F1F5F9;font-size:14px;color:#0A0A0A">${proValue || '—'}</td></tr>
+                <tr><td style="padding:10px 0;border-bottom:1px solid #F1F5F9;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#94A3B8">IPI</td><td style="padding:10px 0;border-bottom:1px solid #F1F5F9;font-size:14px;color:#0A0A0A">${ipi || '—'}</td></tr>
+                <tr><td style="padding:10px 0;border-bottom:1px solid #F1F5F9;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#94A3B8">DOB</td><td style="padding:10px 0;border-bottom:1px solid #F1F5F9;font-size:14px;color:#0A0A0A">${dob || '—'}</td></tr>
+                <tr><td style="padding:10px 0;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#94A3B8">Address</td><td style="padding:10px 0;font-size:14px;color:#0A0A0A">${[address1, address2, city, state, postal, country].filter(Boolean).join(', ') || '—'}</td></tr>
+              </table>
+            </div>
+            <div style="padding:18px 36px;text-align:center;font-size:11px;color:#94A3B8">Davincii Publishing Administration &middot; davincii.co</div>
+          </div>`
+      });
+    } catch (emailErr) {
+      console.error('[Profile notification] Failed:', emailErr.message);
     }
+
+    if (isFormSubmit) return res.redirect('/');
     res.json({ success: true });
   } catch (err) {
     console.error('Profile update error:', err.message);
     if (isFormSubmit) return res.redirect('/details.html?error=' + encodeURIComponent('Failed to save details'));
     res.status(500).json({ error: 'Failed to save details' });
+  }
+});
+
+// POST /api/auth/change-password
+router.post('/change-password', require('../middleware/auth'), async (req, res) => {
+  const { current_password, new_password } = req.body;
+  if (!current_password || !new_password) {
+    return res.status(400).json({ error: 'Current and new password are required' });
+  }
+  if (new_password.length < 8) {
+    return res.status(400).json({ error: 'New password must be at least 8 characters' });
+  }
+  try {
+    const result = await pool.query('SELECT password_hash FROM artists WHERE id = $1', [req.artist.id]);
+    const artist = result.rows[0];
+    if (!artist) return res.status(404).json({ error: 'Artist not found' });
+
+    const valid = await bcrypt.compare(current_password, artist.password_hash);
+    if (!valid) {
+      return res.status(401).json({ error: 'Current password is incorrect' });
+    }
+
+    const newHash = await bcrypt.hash(new_password, 10);
+    await pool.query('UPDATE artists SET password_hash = $1 WHERE id = $2', [newHash, req.artist.id]);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Password change error:', err.message);
+    res.status(500).json({ error: 'Failed to change password' });
   }
 });
 
