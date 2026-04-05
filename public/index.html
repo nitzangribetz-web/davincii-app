@@ -2431,8 +2431,8 @@
     </h1>
 
     <div id="hero-cta" style="margin-top:52px; display:flex; align-items:center; gap:20px; justify-content:center;">
-      <button class="btn-cta-hero">Get started →</button>
-      <button class="btn-ghost-hero">Sign in to portal</button>
+      <button class="btn-cta-hero" onclick="go('signup')">Get started →</button>
+      <button class="btn-ghost-hero" onclick="go('login')">Sign in to portal</button>
     </div>
   </div>
 </section>
@@ -2628,7 +2628,7 @@
         <div class="p-feat-item"><span class="p-dot"></span>100% copyright ownership retained</div>
       </div>
       <div class="pricing-cta-row">
-        <button class="btn-cta-hero" style="font-size:14px;padding:13px 30px;">Get started →</button>
+        <button class="btn-cta-hero" style="font-size:14px;padding:13px 30px;" onclick="go('signup')">Get started →</button>
         <span class="pricing-cta-note">Free to start — no upfront cost, ever.</span>
       </div>
     </div>
@@ -2660,7 +2660,7 @@
       <p class="cta-sub">Join free. No upfront cost. We only get paid when you do.</p>
     </div>
     <div class="cta-actions">
-      <button class="btn-cta-hero" style="font-size:14px;padding:12px 30px;white-space:nowrap;">Get started →</button>
+      <button class="btn-cta-hero" style="font-size:14px;padding:12px 30px;white-space:nowrap;" onclick="go('signup')">Get started →</button>
     </div>
   </div>
 </div>
@@ -2709,14 +2709,80 @@
 
 <!-- ══════════ SCRIPTS ══════════ -->
 <script>
-  // OAuth hash fragment interception
+  // ── AUTH CALLBACK + AUTO-LOGIN ──
   (function checkAuthCallback() {
-    var h = window.location.hash;
-    if (h && h.indexOf('access_token') !== -1) {
-      window.location.href = '/oauth-callback.html' + h;
+    var params = new URLSearchParams(window.location.search);
+    // Hash fragment interception (implicit OAuth flow)
+    var hashParams = new URLSearchParams(window.location.hash.substring(1));
+    var hashAccessToken = hashParams.get('access_token');
+    if (hashAccessToken) { window.location.replace('/oauth-callback.html' + window.location.hash); return; }
+    // PKCE code fallback
+    var oauthCode = params.get('code');
+    if (oauthCode && !params.get('token')) { window.location.replace('/api/auth/callback?code=' + encodeURIComponent(oauthCode)); return; }
+    // OAuth errors
+    var oauthError = params.get('error');
+    if (oauthError) {
+      window.history.replaceState({}, '', '/');
       return;
     }
+    // Token from OAuth callback redirect
+    var token = params.get('token');
+    var artistParam = params.get('artist');
+    var isSignup = params.get('signup') === '1';
+    if (token && artistParam) {
+      try {
+        var artist;
+        try { artist = JSON.parse(artistParam); } catch(_) { artist = JSON.parse(decodeURIComponent(artistParam)); }
+        localStorage.setItem('dv_token', token);
+        localStorage.setItem('dv_artist', JSON.stringify(artist));
+        if (isSignup) {
+          window.history.replaceState({}, '', '/signup');
+          go('signup');
+        } else {
+          window.history.replaceState({}, '', '/dashboard');
+          onAuthSuccess(artist, false);
+        }
+      } catch (e) { console.error('[OAuth] Auth callback parse error:', e); }
+      return;
+    }
+    // Auto-login if token exists in localStorage
+    var savedToken = localStorage.getItem('dv_token');
+    var savedArtist = localStorage.getItem('dv_artist');
+    if (savedToken && savedArtist) {
+      fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + savedToken } })
+        .then(function(r) { if (r.ok) return r.json(); throw new Error('expired'); })
+        .then(function(artist) { updateArtistUI(artist); })
+        .catch(function() { localStorage.removeItem('dv_token'); localStorage.removeItem('dv_artist'); });
+    }
+    // Route from URL path
+    var path = window.location.pathname;
+    if (path === '/dashboard' || path.startsWith('/dashboard/')) {
+      if (savedToken) {
+        go('dashboard');
+        var sub = path.replace('/dashboard/', '').replace('/dashboard', '');
+        if (sub && sub !== '') setTimeout(function() { showDashPage(sub); }, 60);
+      }
+    }
   })();
+
+  function onAuthSuccess(artist, isSignup) {
+    updateArtistUI(artist);
+    document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+    document.getElementById('screen-dashboard').classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  function updateArtistUI(artist) {
+    var name = artist.name || artist.email || '';
+    var initials = name.split(' ').map(function(w) { return w[0]; }).join('').toUpperCase().slice(0,2);
+    document.querySelectorAll('.artist-display-name').forEach(function(el) { el.textContent = name; });
+    var avatar = document.getElementById('avatar-initials');
+    if (avatar) avatar.textContent = initials || '—';
+    var ddName = document.getElementById('dropdown-artist-name');
+    if (ddName) ddName.textContent = name;
+    var ddEmail = document.getElementById('dropdown-artist-email');
+    if (ddEmail) ddEmail.textContent = artist.email || '';
+  }
 
   // ── FILM GRAIN (canvas, highest quality) ──
   (function(){
