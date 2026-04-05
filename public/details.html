@@ -5,23 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Artist Details — Davincii</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20fill%3D%22%23fff%22/%3E%3Ctext%20x%3D%223%22%20y%3D%2228%22%20font-family%3D%22Georgia%2Cserif%22%20font-style%3D%22italic%22%20font-size%3D%2230%22%20fill%3D%22%23080808%22%3ED%3C/text%3E%3C/svg%3E">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=DM+Sans:wght@300;400;500;600&family=Pinyon+Script&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-:root {
-  --black: #080808;
-  --white: #FFFFFF;
-  --red: #B80000;
-  --red-soft: rgba(184,0,0,0.07);
-  --muted: #555;
-  --muted-light: #888;
-  --serif: 'Cormorant Garamond', Georgia, serif;
-  --sans: 'Inter', system-ui, sans-serif;
-}
 html, body { height:100%; }
 body {
-  font-family: var(--sans);
-  background: #f5f5f3;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  background: #F1F5F9;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -35,37 +25,50 @@ body {
   max-width: 860px;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 4px 32px rgba(0,0,0,0.12);
+  box-shadow: 0 4px 32px rgba(0,0,0,0.10);
 }
 
 /* ── Sidebar ── */
 .sidebar {
-  width: 240px;
-  min-width: 240px;
-  background: var(--black);
-  color: var(--white);
-  padding: 32px 28px;
+  width: 260px;
+  min-width: 260px;
+  background: radial-gradient(ellipse 140% 120% at 20% 0%, #0E2A78 0%, #0A2060 40%, #060E28 80%, #030810 100%);
+  color: #fff;
+  padding: 36px 32px;
   display: flex;
   flex-direction: column;
   gap: 20px;
+  position: relative;
+  overflow: hidden;
 }
+.sidebar-glow {
+  position: absolute;
+  width: 400px; height: 320px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(50,110,240,0.35) 0%, rgba(32,80,200,0.12) 50%, transparent 78%);
+  top: 40%; left: 50%; transform: translate(-50%, -50%);
+  filter: blur(36px); pointer-events: none; z-index: 0;
+}
+.sidebar-logo { position: relative; z-index: 1; }
 .sidebar-logo img { height: 22px; display: block; }
-.red-line { width: 28px; height: 2px; background: var(--red); }
+.sidebar-rule { width: 28px; height: 1px; background: rgba(255,255,255,0.30); position: relative; z-index: 1; }
 .quote {
-  font-family: var(--serif);
+  font-family: 'Playfair Display', serif;
   font-size: 15px;
   line-height: 1.7;
   color: #e0e0e0;
   font-style: italic;
+  position: relative; z-index: 1;
 }
-.quote em { font-style: italic; color: rgba(255,255,255,0.6); }
+.quote em { font-style: italic; color: rgba(255,255,255,0.50); }
 .attr {
-  font-family: var(--sans);
+  font-family: 'DM Sans', sans-serif;
   font-size: 11px;
-  color: var(--muted-light);
+  color: rgba(255,255,255,0.35);
   letter-spacing: 1px;
   text-transform: uppercase;
   margin-top: -8px;
+  position: relative; z-index: 1;
 }
 .bullets {
   list-style: none;
@@ -73,11 +76,12 @@ body {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  position: relative; z-index: 1;
 }
 .bullets li {
-  font-family: var(--sans);
+  font-family: 'DM Sans', sans-serif;
   font-size: 12px;
-  color: #aaa;
+  color: rgba(255,255,255,0.50);
   padding-left: 14px;
   position: relative;
 }
@@ -85,22 +89,23 @@ body {
   content: '\2022';
   position: absolute;
   left: 0;
-  color: var(--red);
+  color: #3B82F6;
   font-weight: 700;
 }
 .sidebar-email {
-  font-family: var(--sans);
+  font-family: 'DM Sans', sans-serif;
   font-size: 10px;
   color: rgba(255,255,255,0.18);
   letter-spacing: 0.10em;
   text-transform: uppercase;
   margin-top: 8px;
+  position: relative; z-index: 1;
 }
 
 /* ── Main panel ── */
 .main {
   flex: 1;
-  background: var(--white);
+  background: #fff;
   padding: 36px 40px;
   overflow-y: auto;
 }
@@ -111,31 +116,31 @@ body {
 .step-num {
   width: 26px; height: 26px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-family: var(--sans); font-size: 11px; font-weight: 600;
+  font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 600;
 }
-.step-num.done { background: var(--black); color: var(--white); }
-.step-num.active { background: var(--white); color: var(--black); border: 2px solid var(--black); }
+.step-num.done { background: #2260CC; color: #fff; }
+.step-num.active { background: #fff; color: #0A0A0A; border: 2px solid #2260CC; }
 .step-label {
-  font-family: var(--sans); font-size: 10px; font-weight: 600;
+  font-family: 'DM Sans', sans-serif; font-size: 10px; font-weight: 600;
   letter-spacing: 0.10em; text-transform: uppercase;
 }
-.step-label.done { color: var(--muted-light); }
-.step-label.active { color: var(--black); }
-.step-line { width: 48px; height: 1px; background: var(--black); margin: 0 12px; }
+.step-label.done { color: #94A3B8; }
+.step-label.active { color: #0A0A0A; }
+.step-line { width: 48px; height: 1px; background: #CBD5E1; margin: 0 12px; }
 
 .title {
-  font-family: var(--serif);
+  font-family: 'Playfair Display', serif;
   font-size: 28px;
   font-weight: 400;
-  color: var(--black);
+  color: #0A0A0A;
   margin-bottom: 6px;
 }
 .title em { font-style: italic; }
-.red-accent { width: 28px; height: 2px; background: var(--red); margin-bottom: 14px; }
+.blue-accent { width: 28px; height: 1px; background: #2260CC; margin-bottom: 14px; }
 .subtitle {
-  font-family: var(--sans);
+  font-family: 'DM Sans', sans-serif;
   font-size: 13px;
-  color: var(--muted-light);
+  color: #64748B;
   margin-bottom: 24px;
   line-height: 1.5;
 }
@@ -144,72 +149,76 @@ body {
 .field-group { margin-bottom: 16px; }
 .field-label {
   display: block;
-  font-family: var(--sans);
+  font-family: 'DM Sans', sans-serif;
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 1.5px;
   text-transform: uppercase;
-  color: #999;
+  color: #94A3B8;
   margin-bottom: 6px;
 }
 .field {
   width: 100%;
-  height: 40px;
-  border: 1px solid #ddd;
+  height: 42px;
+  border: 1px solid #E2E8F0;
   border-radius: 6px;
-  padding: 0 12px;
-  font-family: var(--sans);
+  padding: 0 14px;
+  font-family: 'DM Sans', sans-serif;
   font-size: 13px;
-  background: var(--white);
-  color: var(--black);
+  background: #F8FAFC;
+  color: #0A0A0A;
   outline: none;
-  transition: border-color 0.2s;
+  transition: border-color 0.18s, box-shadow 0.18s;
   -webkit-appearance: none;
 }
-.field:focus { border-color: var(--black); }
-.field::placeholder { color: #c0c0c0; }
-select.field { color: var(--black); }
-select.field:invalid { color: #c0c0c0; }
+.field:focus {
+  border-color: #3B82F6;
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+}
+.field::placeholder { color: #94A3B8; }
+select.field { color: #0A0A0A; }
+select.field:invalid { color: #94A3B8; }
 
 .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .row .field-group { margin-bottom: 16px; }
 
 .hint {
-  font-family: var(--sans);
+  font-family: 'DM Sans', sans-serif;
   font-size: 11px;
-  color: #aaa;
+  color: #94A3B8;
   margin-top: 5px;
   line-height: 1.5;
 }
-.hint a { color: var(--red); text-decoration: none; }
+.hint a { color: #2563EB; text-decoration: none; }
 .hint a:hover { text-decoration: underline; }
 
 .btn {
   width: 100%;
   height: 44px;
-  background: var(--black);
-  color: var(--white);
+  background: #2260CC;
+  color: #fff;
   border: none;
-  border-radius: 6px;
-  font-family: var(--sans);
-  font-size: 11px;
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
   font-weight: 600;
-  letter-spacing: 2px;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
   cursor: pointer;
   margin-top: 8px;
-  transition: background 0.2s;
+  transition: background 0.18s, transform 0.12s;
 }
-.btn:hover { background: #333; }
+.btn:hover { background: #1A52B8; }
+.btn:active { transform: scale(0.99); }
 
 .error-box {
-  background: var(--red-soft);
-  border-left: 2px solid var(--red);
+  background: rgba(239,68,68,0.06);
+  border-left: 2px solid #EF4444;
   border-radius: 4px;
   padding: 10px 14px;
   margin-bottom: 14px;
+  font-family: 'DM Sans', sans-serif;
   font-size: 13px;
-  color: var(--red);
+  color: #DC2626;
   display: none;
 }
 .error-box.visible { display: block; }
@@ -229,13 +238,14 @@ select.field:invalid { color: #c0c0c0; }
 <body>
 <div class="wrap">
   <div class="sidebar">
+    <div class="sidebar-glow"></div>
     <div class="sidebar-logo"><img src="/logo-white-sm.png" alt="Davincii"></div>
-    <div class="red-line"></div>
+    <div class="sidebar-rule"></div>
     <div class="quote">"Most artists miss income not from lack of talent — but <em>lack of infrastructure.</em>"</div>
     <div class="attr">— DAVINCII</div>
     <ul class="bullets">
       <li>No upfront cost — ever</li>
-      <li>Register across 12+ global platforms</li>
+      <li>Register across global platforms</li>
       <li>100% copyright stays with you</li>
       <li>Quarterly payouts, full transparency</li>
     </ul>
@@ -256,7 +266,7 @@ select.field:invalid { color: #c0c0c0; }
     </div>
 
     <div class="title">Artist <em>details.</em></div>
-    <div class="red-accent"></div>
+    <div class="blue-accent"></div>
     <p class="subtitle">Almost done — tell us how to register your catalog and where to send your royalties.</p>
 
     <div class="error-box" id="details-error"></div>
