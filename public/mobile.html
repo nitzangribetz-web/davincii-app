@@ -1310,6 +1310,20 @@ footer.m-footer{
 .mob-w9-actions .btn-p{flex:1}
 .mob-w9-actions .btn-s{flex:0 0 auto;width:auto;padding:14px 20px}
 
+/* Toast notification */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--navy);color:#fff;padding:12px 22px;border-radius:8px;font-family:var(--sans);font-size:13px;font-weight:400;box-shadow:0 8px 32px rgba(0,0,0,0.22);z-index:9999;opacity:0;transition:opacity 0.25s,transform 0.25s;pointer-events:none;max-width:90vw;text-align:center}
+.toast.visible{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
+.toast.success{border-left:3px solid #10B981}
+.toast.error{border-left:3px solid #EF4444}
+
+/* Field validation error */
+.field.field-error{border-color:#EF4444!important;box-shadow:0 0 0 3px rgba(239,68,68,0.10)}
+.field-error-msg{font-family:var(--sans);font-size:11px;font-weight:400;color:#EF4444;margin-top:4px;margin-bottom:6px;display:none}
+.field-error-msg.visible{display:block}
+
+/* Error box */
+.error-box{background:rgba(239,68,68,0.06);border-left:2px solid #EF4444;padding:11px 14px;margin-bottom:14px;font-family:var(--sans);font-size:13px;color:#DC2626}
+
 </style>
 </head>
 <body>
@@ -1321,7 +1335,7 @@ footer.m-footer{
 
   <!-- NAV -->
   <nav class="mob-nav" id="mob-nav">
-    <a class="nav-logo-m" onclick="scrollTo({top:0,behavior:'smooth'})"><img src="/logo-white-sm.png" alt="Davincii" style="height:20px"></a>
+    <a class="nav-logo-m" onclick="logoClick()"><img src="/logo-white-sm.png" alt="Davincii" style="height:20px"></a>
     <div class="nav-right-m">
       <button class="btn-nav-ghost-m" onclick="go('login')">Log In</button>
       <button class="btn-nav-solid-m" onclick="go('signup')">Get started</button>
@@ -1690,7 +1704,7 @@ footer.m-footer{
 <div class="screen" id="screen-dashboard">
   <!-- Top nav -->
   <div class="d-nav">
-    <span class="d-nav-logo" onclick="go('landing')"><img src="/logo-white-sm.png" alt="Davincii" style="height:20px"></span>
+    <span class="d-nav-logo" onclick="logoClick()"><img src="/logo-white-sm.png" alt="Davincii" style="height:20px"></span>
     <div class="d-nav-r">
       <span class="d-nav-name">SwuM</span>
       <div class="notif-dropdown-wrap" id="notif-drop-wrap">
@@ -1814,7 +1828,7 @@ footer.m-footer{
       <div class="d-form-title">Song <em>information</em></div>
       <div class="d-form-sub">Title your song to save as a draft or submit for registration.</div>
       <label class="field-label">Song Title *</label>
-      <input class="field" type="text" placeholder="e.g. With U" style="margin-bottom:0">
+      <input class="field" type="text" placeholder="e.g. With U" id="mob-song-title" data-required="true" style="margin-bottom:0">
     </div>
 
     <!-- Songwriters -->
@@ -1881,7 +1895,7 @@ footer.m-footer{
       <input class="field" type="text" placeholder="T-123456789-1" style="font-family:monospace;margin-bottom:0">
     </div>
 
-    <button class="btn-p" style="margin-bottom:10px">Submit for Registration →</button>
+    <button type="button" class="btn-p" style="margin-bottom:10px" onclick="mobSubmitSong()">Submit for Registration →</button>
     <button class="btn-s" onclick="showDP('catalog')" style="margin-bottom:16px">Cancel</button>
   </div>
 
@@ -1980,23 +1994,24 @@ footer.m-footer{
     <div class="d-pg-title">Artist <em>Profile</em></div>
     <div class="d-pg-sub">Your artist and performing rights information.</div>
     <div class="d-pg-rule"></div>
+    <form id="mob-profile-form" novalidate>
     <div class="d-form-card">
-      <label class="field-label">Artist / Stage Name *</label><input class="field" type="text" placeholder="Artist name">
+      <label class="field-label">Artist / Stage Name *</label><input class="field" type="text" placeholder="Artist name" id="mob-pf-stage-name" data-required="true">
       <label class="field-label">PRO Affiliation *</label>
-      <select class="field" style="-webkit-appearance:none" id="d-pro" onchange="dTogglePro(this.value)">
+      <select class="field" style="-webkit-appearance:none" id="d-pro" data-required="true" onchange="dTogglePro(this.value)">
         <option value="" disabled selected>Select your PRO</option>
         <option>ASCAP</option><option>BMI</option><option>SESAC</option>
         <option>SOCAN</option><option>PRS for Music</option><option>GEMA</option>
         <option>SIAE</option><option>Other</option><option>Not yet registered</option>
       </select>
-      <div id="d-pro-other" style="display:none"><label class="field-label">Specify your PRO *</label><input class="field" type="text" placeholder="e.g. SABAM, ICMP…"></div>
-      <label class="field-label">IPI / CAE Number *</label><input class="field" type="text" placeholder="e.g. 00123456789">
-      <label class="field-label">Date of Birth *</label><input class="field" type="date" style="font-size:16px;color:var(--black)">
+      <div id="d-pro-other" style="display:none"><label class="field-label">Specify your PRO *</label><input class="field" type="text" id="mob-pro-other" placeholder="e.g. SABAM, ICMP…"></div>
+      <label class="field-label">IPI / CAE Number *</label><input class="field" type="text" placeholder="e.g. 00123456789" id="mob-pf-ipi" data-required="true">
+      <label class="field-label">Date of Birth *</label><input class="field" type="date" id="mob-pf-dob" data-required="true" style="font-size:16px;color:var(--black)">
     </div>
     <div class="d-form-card">
       <div class="d-form-title" style="margin-bottom:16px">Mailing Address</div>
       <label class="field-label">Country *</label>
-      <select class="field" style="-webkit-appearance:none">
+      <select class="field" style="-webkit-appearance:none" id="mob-pf-country" data-required="true">
         <option value="" disabled selected>Select country</option>
         <option>United States</option><option>United Kingdom</option><option>Canada</option>
         <option>Australia</option><option>Germany</option><option>France</option>
@@ -2004,16 +2019,17 @@ footer.m-footer{
         <option>Israel</option><option>Japan</option><option>Brazil</option>
         <option>South Korea</option><option>Mexico</option><option>Other</option>
       </select>
-      <label class="field-label">Address Line 1 *</label><input class="field" type="text" placeholder="Street address">
-      <label class="field-label">Address Line 2 <span style="font-weight:300;font-size:10px;text-transform:none;letter-spacing:0;color:var(--muted-lt)">(optional)</span></label><input class="field" type="text" placeholder="Apt, suite, floor…">
+      <label class="field-label">Address Line 1 *</label><input class="field" type="text" placeholder="Street address" id="mob-pf-addr1" data-required="true">
+      <label class="field-label">Address Line 2 <span style="font-weight:300;font-size:10px;text-transform:none;letter-spacing:0;color:var(--muted-lt)">(optional)</span></label><input class="field" type="text" placeholder="Apt, suite, floor…" id="mob-pf-addr2">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div><label class="field-label">City *</label><input class="field" type="text" placeholder="City" style="margin-bottom:0"></div>
-        <div><label class="field-label">Postal Code *</label><input class="field" type="text" placeholder="ZIP / Postcode" style="margin-bottom:0"></div>
+        <div><label class="field-label">City *</label><input class="field" type="text" placeholder="City" id="mob-pf-city" data-required="true" style="margin-bottom:0"></div>
+        <div><label class="field-label">Postal Code *</label><input class="field" type="text" placeholder="ZIP / Postcode" id="mob-pf-postal" data-required="true" style="margin-bottom:0"></div>
       </div>
-      <div style="margin-top:12px"><label class="field-label">State / Region <span style="font-weight:300;font-size:10px;text-transform:none;letter-spacing:0;color:var(--muted-lt)">(if applicable)</span></label><input class="field" type="text" placeholder="e.g. California, Ontario"></div>
+      <div style="margin-top:12px"><label class="field-label">State / Region <span style="font-weight:300;font-size:10px;text-transform:none;letter-spacing:0;color:var(--muted-lt)">(if applicable)</span></label><input class="field" type="text" placeholder="e.g. California, Ontario" id="mob-pf-state"></div>
     </div>
-    <button class="btn-p" style="margin-bottom:10px">Save Changes</button>
-    <button class="btn-s">Discard</button>
+    <button type="button" class="btn-p" style="margin-bottom:10px" onclick="mobSaveProfile()">Save Changes</button>
+    <button type="button" class="btn-s" onclick="mobDiscardProfile()">Discard</button>
+    </form>
   </div>
 
   <!-- ── SETTINGS ── -->
@@ -2023,9 +2039,30 @@ footer.m-footer{
     <div class="d-pg-rule"></div>
     <div class="d-sbox" style="margin-bottom:12px">
       <div class="d-sbox-hd"><div><div class="d-sbox-title">Login &amp; Security</div></div></div>
-      <div class="d-set-row"><div><div class="d-set-lbl">Email</div><div class="d-set-sub">swum@davincii.co</div></div><button class="d-btn-sm">Change</button></div>
-      <div class="d-set-row"><div><div class="d-set-lbl">Password</div><div class="d-set-sub">Last changed never</div></div><button class="d-btn-sm">Change</button></div>
-      <div class="d-set-row"><div><div class="d-set-lbl">Two-Factor Auth</div><div class="d-set-sub">Not enabled</div></div><button class="d-btn-sm">Enable</button></div>
+      <div class="d-set-row"><div><div class="d-set-lbl">Email</div><div class="d-set-sub" id="mob-settings-email">—</div></div></div>
+      <div class="d-set-row"><div><div class="d-set-lbl">Password</div><div class="d-set-sub">Change your password</div></div><button class="d-btn-sm" onclick="mobTogglePwChange()">Change</button></div>
+      <div id="mob-pw-change-form" style="display:none;padding:16px;border-bottom:1px solid var(--border-lt)">
+        <label class="field-label">Current Password</label>
+        <input class="field" type="password" id="mob-pw-current" autocomplete="current-password" placeholder="Current password">
+        <label class="field-label">New Password</label>
+        <input class="field" type="password" id="mob-pw-new" autocomplete="new-password" placeholder="New password" minlength="8">
+        <label class="field-label">Confirm New Password</label>
+        <input class="field" type="password" id="mob-pw-confirm" autocomplete="new-password" placeholder="Confirm password" minlength="8">
+        <div id="mob-pw-error" class="error-box" style="display:none"></div>
+        <div style="display:flex;gap:10px;margin-top:4px">
+          <button class="btn-p" style="flex:1" type="button" onclick="mobSubmitPwChange()">Update</button>
+          <button class="btn-s" style="flex:0 0 auto;width:auto;padding:14px 20px" type="button" onclick="mobTogglePwChange()">Cancel</button>
+        </div>
+      </div>
+      <div class="d-set-row"><div><div class="d-set-lbl">Two-Factor Auth</div><div class="d-set-sub">Not enabled</div></div><button class="d-btn-sm" onclick="mobToggle2FA()">Enable</button></div>
+      <div id="mob-tfa-panel" style="display:none;padding:16px;border-bottom:1px solid var(--border-lt)">
+        <div style="font-family:var(--sans);font-size:13px;font-weight:300;color:var(--slate);line-height:1.7;margin-bottom:12px">Two-factor authentication adds an extra layer of security by requiring a verification code each time you sign in.</div>
+        <div style="background:#F8FAFC;border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center;margin-bottom:12px">
+          <div style="font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Coming Soon</div>
+          <div style="font-family:var(--sans);font-size:12px;font-weight:300;color:var(--muted-lt)">2FA setup will be available in a future update.</div>
+        </div>
+        <button class="btn-s" style="width:auto;padding:10px 20px" type="button" onclick="mobToggle2FA()">Close</button>
+      </div>
     </div>
     <div class="d-sbox" style="margin-bottom:12px">
       <div class="d-sbox-hd"><div><div class="d-sbox-title">Notifications</div></div></div>
@@ -2107,10 +2144,11 @@ footer.m-footer{
       try { artist = JSON.parse(artistParam); } catch(_) { artist = JSON.parse(decodeURIComponent(artistParam)); }
       localStorage.setItem('dv_token', token);
       localStorage.setItem('dv_artist', JSON.stringify(artist));
-      window.history.replaceState({}, '', '/dashboard');
+      window.history.replaceState({ screen: 'dashboard' }, '', '/dashboard');
       document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
       document.getElementById('screen-dashboard').classList.add('active');
       window.scrollTo(0, 0);
+      mobUpdateSettingsEmail(artist);
     } catch (e) { console.error('[Auth] parse error:', e); }
     return;
   }
@@ -2121,9 +2159,11 @@ footer.m-footer{
     fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + savedToken } })
       .then(function(r) { if (r.ok) return r.json(); throw new Error('expired'); })
       .then(function(artist) {
+        mobUpdateSettingsEmail(artist);
         // Only switch to dashboard if on /dashboard route
         var p = window.location.pathname;
         if (p === '/dashboard' || p.startsWith('/dashboard/')) {
+          window.history.replaceState({ screen: 'dashboard' }, '', '/dashboard');
           document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
           document.getElementById('screen-dashboard').classList.add('active');
           window.scrollTo(0, 0);
@@ -2132,6 +2172,11 @@ footer.m-footer{
       .catch(function() { localStorage.removeItem('dv_token'); localStorage.removeItem('dv_artist'); });
   }
 })();
+
+function mobUpdateSettingsEmail(artist) {
+  var el = document.getElementById('mob-settings-email');
+  if (el && artist && artist.email) el.textContent = artist.email;
+}
 
 // ── Nav scroll effect ──
 window.addEventListener('scroll',()=>{
@@ -2349,6 +2394,256 @@ function submitMobW9() {
   }
   alert('W-9 submitted successfully.');
   closeMobW9Modal();
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// LOGO CLICK
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function logoClick() {
+  var token = localStorage.getItem('dv_token');
+  if (token) {
+    go('dashboard');
+    showDP('overview');
+  } else {
+    go('landing');
+    scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// TOAST
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function showToast(msg, type) {
+  var existing = document.querySelector('.toast');
+  if (existing) existing.remove();
+  var t = document.createElement('div');
+  t.className = 'toast ' + (type || 'success');
+  t.textContent = msg;
+  document.body.appendChild(t);
+  requestAnimationFrame(function() { t.classList.add('visible'); });
+  setTimeout(function() {
+    t.classList.remove('visible');
+    setTimeout(function() { t.remove(); }, 300);
+  }, 3000);
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// FORM VALIDATION
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function mobValidateFields(container) {
+  var fields = container.querySelectorAll('[data-required="true"]');
+  var valid = true;
+  fields.forEach(function(f) {
+    f.classList.remove('field-error');
+    var errMsg = f.parentElement.querySelector('.field-error-msg');
+    if (errMsg) errMsg.remove();
+    var val = f.value ? f.value.trim() : '';
+    if (!val) {
+      f.classList.add('field-error');
+      var msg = document.createElement('div');
+      msg.className = 'field-error-msg visible';
+      msg.textContent = 'This field is required';
+      f.parentElement.appendChild(msg);
+      valid = false;
+    }
+  });
+  if (!valid) {
+    var first = container.querySelector('.field-error');
+    if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  return valid;
+}
+
+// Clear errors on input
+document.addEventListener('input', function(e) {
+  if (e.target.classList.contains('field-error')) {
+    e.target.classList.remove('field-error');
+    var msg = e.target.parentElement.querySelector('.field-error-msg');
+    if (msg) msg.remove();
+  }
+});
+document.addEventListener('change', function(e) {
+  if (e.target.classList.contains('field-error')) {
+    e.target.classList.remove('field-error');
+    var msg = e.target.parentElement.querySelector('.field-error-msg');
+    if (msg) msg.remove();
+  }
+});
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// PROFILE SAVE
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function mobSaveProfile() {
+  var form = document.getElementById('mob-profile-form');
+  if (!mobValidateFields(form)) return;
+
+  var data = {
+    stage_name: document.getElementById('mob-pf-stage-name').value.trim(),
+    dob: document.getElementById('mob-pf-dob').value,
+    pro: document.getElementById('d-pro').value,
+    ipi: document.getElementById('mob-pf-ipi').value.trim(),
+    country: document.getElementById('mob-pf-country').value,
+    address1: document.getElementById('mob-pf-addr1').value.trim(),
+    address2: (document.getElementById('mob-pf-addr2').value || '').trim(),
+    city: document.getElementById('mob-pf-city').value.trim(),
+    postal: document.getElementById('mob-pf-postal').value.trim(),
+    state: (document.getElementById('mob-pf-state').value || '').trim()
+  };
+  if (data.pro === 'Other') {
+    data.pro_other = (document.getElementById('mob-pro-other').value || '').trim();
+  }
+
+  var token = localStorage.getItem('dv_token');
+  fetch('/api/auth/profile', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+    body: JSON.stringify(data)
+  })
+  .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+  .then(function(res) {
+    if (res.ok) showToast('Profile saved successfully', 'success');
+    else showToast(res.data.error || 'Failed to save profile', 'error');
+  })
+  .catch(function() { showToast('Network error — please try again', 'error'); });
+}
+
+function mobDiscardProfile() {
+  var form = document.getElementById('mob-profile-form');
+  form.querySelectorAll('.field-error').forEach(function(f) { f.classList.remove('field-error'); });
+  form.querySelectorAll('.field-error-msg').forEach(function(m) { m.remove(); });
+  form.querySelectorAll('input[type="text"], input[type="date"]').forEach(function(i) { i.value = ''; });
+  form.querySelectorAll('select').forEach(function(s) { s.selectedIndex = 0; });
+  document.getElementById('d-pro-other').style.display = 'none';
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// SONG SUBMISSION
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function mobSubmitSong() {
+  var titleField = document.getElementById('mob-song-title');
+  var writerField = document.getElementById('mob-writer-name');
+  var pctField = document.getElementById('mob-writer-pct');
+  var valid = true;
+
+  [titleField, writerField, pctField].forEach(function(f) {
+    if (!f) return;
+    f.classList.remove('field-error');
+    var errMsg = f.parentElement.querySelector('.field-error-msg');
+    if (errMsg) errMsg.remove();
+    if (!f.value || !f.value.trim()) {
+      f.classList.add('field-error');
+      var msg = document.createElement('div');
+      msg.className = 'field-error-msg visible';
+      msg.textContent = 'This field is required';
+      f.parentElement.appendChild(msg);
+      valid = false;
+    }
+  });
+
+  var recList = document.getElementById('mob-recording-list');
+  if (!recList || recList.children.length === 0) {
+    showToast('Please add at least one recording', 'error');
+    valid = false;
+  }
+
+  var totalEl = document.getElementById('mob-ownership-total');
+  if (totalEl && totalEl.textContent !== '100%') {
+    showToast('Total ownership must equal 100%', 'error');
+    valid = false;
+  }
+
+  if (!valid) {
+    var first = document.getElementById('dp-add-song').querySelector('.field-error');
+    if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+
+  var songData = {
+    title: titleField.value.trim(),
+    songwriter: writerField.value.trim(),
+    songwriter_pct: pctField.value.trim()
+  };
+
+  var token = localStorage.getItem('dv_token');
+  fetch('/api/songs', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+    body: JSON.stringify(songData)
+  })
+  .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+  .then(function(res) {
+    if (res.ok) {
+      showToast('Song submitted for registration', 'success');
+      setTimeout(function() { showDP('catalog'); }, 1200);
+    } else {
+      showToast(res.data.error || 'Failed to submit song', 'error');
+    }
+  })
+  .catch(function() { showToast('Network error — please try again', 'error'); });
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// SETTINGS — PASSWORD CHANGE
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function mobTogglePwChange() {
+  var panel = document.getElementById('mob-pw-change-form');
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+
+function mobSubmitPwChange() {
+  var curr = document.getElementById('mob-pw-current').value;
+  var newPw = document.getElementById('mob-pw-new').value;
+  var confirm = document.getElementById('mob-pw-confirm').value;
+  var errEl = document.getElementById('mob-pw-error');
+  errEl.style.display = 'none';
+
+  if (!curr || !newPw || !confirm) {
+    errEl.textContent = 'All fields are required.';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (newPw.length < 8) {
+    errEl.textContent = 'New password must be at least 8 characters.';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (newPw !== confirm) {
+    errEl.textContent = 'New passwords do not match.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  var token = localStorage.getItem('dv_token');
+  fetch('/api/auth/change-password', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+    body: JSON.stringify({ current_password: curr, new_password: newPw })
+  })
+  .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+  .then(function(res) {
+    if (res.ok) {
+      showToast('Password updated successfully', 'success');
+      mobTogglePwChange();
+      document.getElementById('mob-pw-current').value = '';
+      document.getElementById('mob-pw-new').value = '';
+      document.getElementById('mob-pw-confirm').value = '';
+    } else {
+      errEl.textContent = res.data.error || 'Failed to change password.';
+      errEl.style.display = 'block';
+    }
+  })
+  .catch(function() {
+    errEl.textContent = 'Network error — please try again.';
+    errEl.style.display = 'block';
+  });
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// SETTINGS — 2FA
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function mobToggle2FA() {
+  var panel = document.getElementById('mob-tfa-panel');
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
 }
 
 </script>
