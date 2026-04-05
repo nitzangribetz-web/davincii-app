@@ -60,7 +60,7 @@ async function sendSignupNotification({ name, email, method }) {
 
     await resend.emails.send({
       from: 'Davincii <onboarding@resend.dev>',
-      to: 'nitzangribetz@gmail.com',
+      to: 'info@davincii.co',
       subject: `New Signup: ${name} (${email})`,
       html
     });

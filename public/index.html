@@ -2751,17 +2751,18 @@
     if (savedToken && savedArtist) {
       fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + savedToken } })
         .then(function(r) { if (r.ok) return r.json(); throw new Error('expired'); })
-        .then(function(artist) { onAuthSuccess(artist, false); })
+        .then(function(artist) {
+          // Only update UI (name/avatar), stay on current page
+          updateArtistUI(artist);
+          // If on /dashboard route, switch to dashboard
+          var p = window.location.pathname;
+          if (p === '/dashboard' || p.startsWith('/dashboard/')) {
+            onAuthSuccess(artist, false);
+            var sub = p.replace('/dashboard/', '').replace('/dashboard', '');
+            if (sub && sub !== '') setTimeout(function() { showDashPage(sub); }, 60);
+          }
+        })
         .catch(function() { localStorage.removeItem('dv_token'); localStorage.removeItem('dv_artist'); });
-    }
-    // Route from URL path
-    var path = window.location.pathname;
-    if (path === '/dashboard' || path.startsWith('/dashboard/')) {
-      if (savedToken) {
-        go('dashboard');
-        var sub = path.replace('/dashboard/', '').replace('/dashboard', '');
-        if (sub && sub !== '') setTimeout(function() { showDashPage(sub); }, 60);
-      }
     }
   })();
 
@@ -2769,6 +2770,12 @@
     updateArtistUI(artist);
     document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
     document.getElementById('screen-dashboard').classList.add('active');
+    // Hide landing-page grain/noise overlays on dashboard
+    var grain = document.getElementById('grain');
+    var noise = document.querySelector('.noise-layer');
+    if (grain) grain.style.display = 'none';
+    if (noise) noise.style.display = 'none';
+    document.body.style.background = '#F0F4FA';
     window.scrollTo(0, 0);
   }
 
@@ -2941,6 +2948,18 @@
     document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
     const t=document.getElementById('screen-'+key);
     if(t){t.classList.add('active');window.scrollTo(0,0);}
+    // Toggle grain/noise overlays and body bg based on screen
+    var grain = document.getElementById('grain');
+    var noise = document.querySelector('.noise-layer');
+    if (key === 'dashboard') {
+      if (grain) grain.style.display = 'none';
+      if (noise) noise.style.display = 'none';
+      document.body.style.background = '#F0F4FA';
+    } else {
+      if (grain) grain.style.display = '';
+      if (noise) noise.style.display = '';
+      document.body.style.background = '#030912';
+    }
   }
   document.addEventListener('click',e=>{
     const w=document.getElementById('avatar-wrap');
