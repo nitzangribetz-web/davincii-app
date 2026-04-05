@@ -3,24 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Signing in...</title>
-<style>
-body { margin:0; display:flex; align-items:center; justify-content:center; min-height:100vh; background:#fff; font-family:'Inter',system-ui,sans-serif; }
-.loader { text-align:center; }
-.spinner { width:32px; height:32px; border:3px solid rgba(0,0,0,0.08); border-top-color:#080808; border-radius:50%; animation:spin 0.7s linear infinite; margin:0 auto 16px; }
-@keyframes spin { to { transform:rotate(360deg); } }
-.msg { font-size:14px; color:#888; }
-</style>
+<title>Davincii</title>
+<style>body { margin:0; background:#030912; }</style>
 </head>
 <body>
-<div class="loader">
-  <div class="spinner"></div>
-  <div class="msg" id="status">Completing sign-in...</div>
-</div>
 <script>
 (function() {
-  var status = document.getElementById('status');
-
   // Parse hash fragment: #access_token=...&token_type=bearer&...
   var hash = window.location.hash.substring(1);
   var params = new URLSearchParams(hash);
@@ -32,8 +20,7 @@ body { margin:0; display:flex; align-items:center; justify-content:center; min-h
   var error = query.get('error') || query.get('error_description') || params.get('error_description');
 
   if (error) {
-    status.textContent = 'Sign-in failed. Redirecting...';
-    setTimeout(function() { window.location.replace('/?error=oauth_failed'); }, 1000);
+    window.location.replace('/?error=oauth_failed');
     return;
   }
 
@@ -53,7 +40,6 @@ body { margin:0; display:flex; align-items:center; justify-content:center; min-h
       localStorage.setItem('dv_token', d.token);
       localStorage.setItem('dv_artist', JSON.stringify(d.artist));
 
-      // Build redirect to SPA
       var qs = '?token=' + encodeURIComponent(d.token) +
                '&artist=' + encodeURIComponent(JSON.stringify(d.artist));
       if (d.isNewSignup) {
@@ -62,23 +48,18 @@ body { margin:0; display:flex; align-items:center; justify-content:center; min-h
       }
       window.location.replace('/' + qs);
     })
-    .catch(function(err) {
-      console.error('OAuth exchange error:', err);
-      status.textContent = 'Sign-in failed. Redirecting...';
-      setTimeout(function() { window.location.replace('/?error=callback_failed'); }, 1000);
+    .catch(function() {
+      window.location.replace('/?error=callback_failed');
     });
     return;
   }
 
   if (code) {
-    // Code flow fallback: forward to server callback
     window.location.replace('/api/auth/callback?code=' + encodeURIComponent(code));
     return;
   }
 
-  // No token, no code, no error — something went wrong
-  status.textContent = 'No authentication data received. Redirecting...';
-  setTimeout(function() { window.location.replace('/?error=oauth_failed'); }, 1500);
+  window.location.replace('/?error=oauth_failed');
 })();
 </script>
 </body>

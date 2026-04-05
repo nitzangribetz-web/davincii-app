@@ -3,23 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Signing in — Davincii</title>
-<style>
-body {
-  margin: 0; display: flex; align-items: center; justify-content: center;
-  min-height: 100vh; font-family: 'Inter', system-ui, sans-serif;
-  background: #080808; color: #fff;
-}
-.msg { text-align: center; }
-.msg h1 { font-size: 18px; font-weight: 400; margin-bottom: 8px; }
-.msg p { font-size: 13px; color: rgba(255,255,255,0.5); }
-</style>
+<title>Davincii</title>
+<style>body { margin:0; background:#030912; }</style>
 </head>
 <body>
-<div class="msg">
-  <h1>Signing you in...</h1>
-  <p>You'll be redirected in a moment.</p>
-</div>
 
 <script>
 // This page loads after a real form POST + 302 redirect.
@@ -42,18 +29,13 @@ body {
         localStorage.setItem('dv_just_signed_up', '1');
       }
     } catch (e) {
-      // Parse error — redirect to login
       window.location.replace('/login.html');
       return;
     }
-    // Redirect after a brief moment (page must fully load first for Safari)
     var qs = '?token=' + encodeURIComponent(token) + '&artist=' + encodeURIComponent(artistParam);
     if (isSignup) { qs += '&signup=1'; }
-    setTimeout(function() {
-      window.location.replace('/' + qs);
-    }, 300);
+    window.location.replace('/' + qs);
   } else {
-    // No token — something went wrong
     window.location.replace('/login.html');
   }
 })();
