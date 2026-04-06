@@ -213,21 +213,21 @@ body { font-family:'DM Sans', system-ui, sans-serif; background:#fff; }
         <div class="auth-divider-line"></div>
       </div>
 
-      <form method="POST" action="/api/auth/signup" autocomplete="on">
+      <form method="POST" action="/api/auth/signup">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
-          <input class="auth-field" style="margin-bottom:0" type="text" name="first_name" id="signup-first"
+          <input class="auth-field" style="margin-bottom:0" type="text" name="first_name" id="first_name"
                  autocomplete="given-name" placeholder="First name" required>
-          <input class="auth-field" style="margin-bottom:0" type="text" name="last_name" id="signup-last"
+          <input class="auth-field" style="margin-bottom:0" type="text" name="last_name" id="last_name"
                  autocomplete="family-name" placeholder="Last name" required>
         </div>
 
-        <input class="auth-field" type="text" name="artist_name" id="signup-artist-name"
+        <input class="auth-field" type="text" name="artist_name" id="artist_name"
                autocomplete="nickname" placeholder="Artist / stage name" required>
 
-        <input class="auth-field" type="text" inputmode="email" name="email" id="signup-email"
+        <input class="auth-field" type="email" name="email" id="email"
                autocomplete="username" placeholder="Email address" required>
 
-        <input class="auth-field" type="password" name="password" id="signup-password"
+        <input class="auth-field" type="password" name="password" id="password"
                autocomplete="new-password" placeholder="Create a password" required minlength="8">
         <div class="pw-strength" id="sa-pw-strength" style="display:none">
           <div class="pw-strength-bar"><div class="pw-strength-fill" id="sa-pw-fill"></div></div>
@@ -240,7 +240,7 @@ body { font-family:'DM Sans', system-ui, sans-serif; background:#fff; }
           </ul>
         </div>
 
-        <input class="auth-field" type="password" name="confirm_password" id="signup-confirm"
+        <input class="auth-field" type="password" name="confirm_password" id="confirm_password"
                autocomplete="new-password" placeholder="Confirm password" required minlength="8">
 
         <div class="auth-agree">
@@ -279,8 +279,8 @@ body { font-family:'DM Sans', system-ui, sans-serif; background:#fff; }
   // Client-side password match check before submit
   var form = document.querySelector('form');
   form.addEventListener('submit', function(e) {
-    var pw = document.getElementById('signup-password').value;
-    var confirm = document.getElementById('signup-confirm').value;
+    var pw = document.getElementById('password').value;
+    var confirm = document.getElementById('confirm_password').value;
     if (pw !== confirm) {
       e.preventDefault();
       var el = document.getElementById('signup-error');
@@ -290,7 +290,7 @@ body { font-family:'DM Sans', system-ui, sans-serif; background:#fff; }
   });
 
   // Password strength
-  var pwInput = document.getElementById('signup-password');
+  var pwInput = document.getElementById('password');
   if (pwInput) {
     pwInput.addEventListener('input', function() {
       var v = this.value;
