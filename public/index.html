@@ -2383,13 +2383,19 @@
 </head>
 <body>
 <script>
-// Early auth detection: if token is in URL or localStorage, immediately switch to dashboard background
-// This prevents the dark landing page flash before JS loads
+// ── AUTH BOOT ──
+// Runs BEFORE any HTML renders. If authenticated, inject CSS that
+// hides the landing page and shows the dashboard instantly.
+// This prevents the dark-screen flash between page load and JS activation.
 (function(){
-  var p = new URLSearchParams(window.location.search);
-  if (p.get('token') || (localStorage.getItem('dv_token') && (window.location.pathname === '/dashboard' || window.location.pathname.indexOf('/dashboard/') === 0 || p.get('token')))) {
-    document.body.style.background = '#F0F4FA';
-    document.body.style.color = '#0A0A0A';
+  var params = new URLSearchParams(window.location.search);
+  var hasTokenInURL = params.get('token');
+  var hasTokenInStorage = localStorage.getItem('dv_token');
+  if (hasTokenInURL || hasTokenInStorage) {
+    var s = document.createElement('style');
+    s.id = 'auth-boot';
+    s.textContent = '#screen-landing{display:none!important}#screen-dashboard{display:block!important}body{background:#F0F4FA!important;color:#0A0A0A!important}#grain,.noise-layer{display:none!important}';
+    document.head.appendChild(s);
   }
 })();
 </script>
@@ -2747,79 +2753,97 @@
 
 <!-- ══════════ SCRIPTS ══════════ -->
 <script>
-  // ── AUTH CALLBACK + AUTO-LOGIN ──
-  (function checkAuthCallback() {
+  // ── AUTH BOOTSTRAP ──
+  // Single linear startup path:
+  //   1. Check for OAuth redirects (hash/code) → redirect away
+  //   2. Check for token in URL (from auth-complete.html) → store + activate dashboard
+  //   3. Check for token in localStorage → validate + activate dashboard
+  //   4. No token → remove boot CSS, show landing
+  (function authBoot() {
     var params = new URLSearchParams(window.location.search);
-    // Hash fragment interception (implicit OAuth flow)
+
+    // Step 1: OAuth redirect interception — these leave the page entirely
     var hashParams = new URLSearchParams(window.location.hash.substring(1));
-    var hashAccessToken = hashParams.get('access_token');
-    if (hashAccessToken) { window.location.replace('/oauth-callback.html' + window.location.hash); return; }
-    // PKCE code fallback
+    if (hashParams.get('access_token')) { window.location.replace('/oauth-callback.html' + window.location.hash); return; }
     var oauthCode = params.get('code');
     if (oauthCode && !params.get('token')) { window.location.replace('/api/auth/callback?code=' + encodeURIComponent(oauthCode)); return; }
-    // OAuth errors
-    var oauthError = params.get('error');
-    if (oauthError) {
-      window.history.replaceState({}, '', '/');
-      return;
-    }
-    // Token from OAuth callback redirect
+    if (params.get('error')) { removeBootCSS(); window.history.replaceState({}, '', '/'); return; }
+
+    // Step 2: Token in URL (arriving from auth-complete.html after login/signup)
     var token = params.get('token');
     var artistParam = params.get('artist');
-    var isSignup = params.get('signup') === '1';
     if (token && artistParam) {
       try {
         var artist;
         try { artist = JSON.parse(artistParam); } catch(_) { artist = JSON.parse(decodeURIComponent(artistParam)); }
         localStorage.setItem('dv_token', token);
         localStorage.setItem('dv_artist', JSON.stringify(artist));
-        if (isSignup) {
-          window.history.replaceState({}, '', '/signup');
-          go('signup');
-        } else {
-          window.history.replaceState({}, '', '/dashboard');
-          onAuthSuccess(artist, false);
-        }
-      } catch (e) { console.error('[OAuth] Auth callback parse error:', e); }
+        window.history.replaceState({ screen: 'dashboard' }, '', '/dashboard');
+        onAuthSuccess(artist, params.get('signup') === '1');
+      } catch (e) {
+        console.error('[Auth] parse error:', e);
+        removeBootCSS();
+      }
       return;
     }
-    // Auto-login if token exists in localStorage
+
+    // Step 3: Token in localStorage (returning user or page refresh)
     var savedToken = localStorage.getItem('dv_token');
     var savedArtist = localStorage.getItem('dv_artist');
     if (savedToken && savedArtist) {
+      // Immediately activate dashboard from cached data (no flash)
+      try {
+        var cachedArtist = JSON.parse(savedArtist);
+        onAuthSuccess(cachedArtist, false);
+      } catch(_) {}
+      // Then validate token in background — if expired, boot back to landing
       fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + savedToken } })
         .then(function(r) { if (r.ok) return r.json(); throw new Error('expired'); })
-        .then(function(artist) {
-          // Only update UI (name/avatar), stay on current page
-          updateArtistUI(artist);
-          // If on /dashboard route, switch to dashboard
-          var p = window.location.pathname;
-          if (p === '/dashboard' || p.startsWith('/dashboard/')) {
-            onAuthSuccess(artist, false);
-            var sub = p.replace('/dashboard/', '').replace('/dashboard', '');
-            if (sub && sub !== '') setTimeout(function() { showDashPage(sub); }, 60);
-          }
+        .then(function(freshArtist) {
+          // Update UI with fresh data from server
+          updateArtistUI(freshArtist);
+          localStorage.setItem('dv_artist', JSON.stringify(freshArtist));
         })
-        .catch(function() { localStorage.removeItem('dv_token'); localStorage.removeItem('dv_artist'); });
+        .catch(function() {
+          // Token expired — clear auth and show landing
+          localStorage.removeItem('dv_token');
+          localStorage.removeItem('dv_artist');
+          removeBootCSS();
+          document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+          document.getElementById('screen-landing').classList.add('active');
+          document.body.style.background = '#030912';
+          document.body.style.color = '#fff';
+        });
+      return;
     }
+
+    // Step 4: No token — show landing page (remove boot CSS if it was injected)
+    removeBootCSS();
   })();
+
+  function removeBootCSS() {
+    var bootStyle = document.getElementById('auth-boot');
+    if (bootStyle) bootStyle.remove();
+  }
 
   function onAuthSuccess(artist, isSignup) {
     updateArtistUI(artist);
+    // Activate dashboard screen
     document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
     document.getElementById('screen-dashboard').classList.add('active');
-    // Hide landing-page grain/noise overlays on dashboard
+    // Hide landing-page grain/noise overlays
     var grain = document.getElementById('grain');
     var noise = document.querySelector('.noise-layer');
     if (grain) grain.style.display = 'none';
     if (noise) noise.style.display = 'none';
+    // Set dashboard background
     document.body.style.background = '#F0F4FA';
-    // Replace history so back button doesn't go to login
+    document.body.style.color = '#0A0A0A';
+    // Remove boot CSS (class-based activation now handles visibility)
+    removeBootCSS();
+    // Clean URL and set history state
     window.history.replaceState({ screen: 'dashboard' }, '', '/dashboard');
     window.scrollTo(0, 0);
-    // Populate settings email from artist data
-    var settingsEmail = document.getElementById('settings-email-display');
-    if (settingsEmail) settingsEmail.textContent = artist.email || '';
   }
 
   function logoClick() {
