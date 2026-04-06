@@ -2849,8 +2849,11 @@
     document.body.style.color = '#0A0A0A';
     // Remove boot CSS (class-based activation now handles visibility)
     removeBootCSS();
-    // Clean URL and set history state
-    window.history.replaceState({ screen: 'dashboard' }, '', '/dashboard');
+    // Restore dashboard page from URL or default to overview
+    var initialPage = getDashPageFromURL() || 'overview';
+    var url = initialPage === 'overview' ? '/dashboard' : '/dashboard/' + initialPage;
+    window.history.replaceState({ screen: 'dashboard', page: initialPage }, '', url);
+    showDashPage(initialPage, true);
     window.scrollTo(0, 0);
   }
 
@@ -2858,23 +2861,33 @@
     var token = localStorage.getItem('dv_token');
     if (token) {
       go('dashboard');
-      showDashPage('overview');
+      showDashPage('overview', false);
     } else {
       go('landing');
     }
   }
 
-  // Back button handler: if authenticated, don't allow going back to login/signup
-  window.addEventListener('popstate', function() {
+  // Back/forward button handler
+  window.addEventListener('popstate', function(e) {
     var token = localStorage.getItem('dv_token');
     if (token) {
-      // User is authenticated — ensure they stay on dashboard
       var dashScreen = document.getElementById('screen-dashboard');
       if (!dashScreen || !dashScreen.classList.contains('active')) {
         onAuthSuccess(JSON.parse(localStorage.getItem('dv_artist') || '{}'), false);
       }
+      // Restore the correct dashboard page from state or URL
+      var page = (e.state && e.state.page) || getDashPageFromURL();
+      if (page) showDashPage(page, true);
     }
   });
+
+  function getDashPageFromURL() {
+    var path = window.location.pathname;
+    var match = path.match(/^\/dashboard\/(.+)$/);
+    if (match) return match[1];
+    if (path === '/dashboard' || path === '/dashboard/') return 'overview';
+    return null;
+  }
 
   function updateArtistUI(artist) {
     var displayName = artist.stage_name || artist.name || artist.email || '';
@@ -3080,13 +3093,17 @@
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // DASHBOARD
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  function showDashPage(page){
+  function showDashPage(page, skipPush){
     document.querySelectorAll('.dash-page').forEach(p=>p.style.display='none');
     const t=document.getElementById('dp-'+page);if(t)t.style.display='block';
     ['overview','catalog','add-song','royalties','statements','payouts','registration','sync','notifications','settings','profile'].forEach(p=>{
       const l=document.getElementById('nl-'+p);if(l)l.classList.remove('active');
     });
     const a=document.getElementById('nl-'+page);if(a)a.classList.add('active');
+    if(!skipPush){
+      var url = page === 'overview' ? '/dashboard' : '/dashboard/' + page;
+      window.history.pushState({ screen:'dashboard', page: page }, '', url);
+    }
   }
 
   // ── Notification bell ──
@@ -3098,6 +3115,26 @@
       badge.style.display = _unreadCount > 0 ? 'block' : 'none';
     }
   }
+
+  // Expose closure functions to global scope for inline onclick handlers
+  window.go = go;
+  window.showDashPage = showDashPage;
+  window.logoClick = logoClick;
+  window.toggleNotifPanel = toggleNotifPanel;
+  window.closeNotifPanel = closeNotifPanel;
+  window.markAllRead = markAllRead;
+  window.toggleAvatarMenu = toggleAvatarMenu;
+  window.closeAvatarMenu = closeAvatarMenu;
+  window.signupNextDesktop = signupNextDesktop;
+  window.signupBackDesktop = signupBackDesktop;
+  window.deskAddCW = deskAddCW;
+  window.deskOpenRecording = deskOpenRecording;
+  window.submitSong = submitSong;
+  window.toggle2FA = toggle2FA;
+  window.toggleFaqNew = toggleFaqNew;
+  window.toggleFaq = toggleFaq;
+  window.toggleMobileNav = toggleMobileNav;
+  window.closeMobileNav = closeMobileNav;
 
   function toggleNotifPanel() {
     const wrap = document.getElementById('notif-bell-wrap');
@@ -3196,6 +3233,8 @@
   function openW9Modal(){document.getElementById('w9-modal-overlay').classList.add('open');}
   function closeW9Modal(){document.getElementById('w9-modal-overlay').classList.remove('open');}
   function submitW9(){
+    var modal = document.getElementById('w9-modal-overlay');
+    if (!validateFields(modal)) return;
     const b=document.getElementById('w9-status-badge');
     const t=document.getElementById('w9-status-text');
     if(b)b.className='status-badge pending';if(t)t.textContent='Submitted';
@@ -3349,24 +3388,26 @@
       }
     });
 
-    // Check recordings — highlight section if empty
+    // Check recordings — highlight Add Recording button if empty
     var recList = document.getElementById('desk-recording-list');
     if (!recList || recList.children.length === 0) {
-      var recSection = recList ? recList.closest('div[style*="border-bottom"]') : null;
-      if (recSection) {
-        recSection.style.borderColor = '#EF4444';
-        recSection.style.boxShadow = '0 0 0 2px rgba(239,68,68,0.10)';
-        var existingMsg = recSection.querySelector('.field-error-msg');
+      var addRecBtn = recList ? recList.nextElementSibling : null;
+      if (addRecBtn && addRecBtn.tagName === 'BUTTON') {
+        addRecBtn.style.borderColor = '#EF4444';
+        addRecBtn.style.color = '#EF4444';
+        addRecBtn.style.boxShadow = '0 0 0 2px rgba(239,68,68,0.10)';
+        var existingMsg = recList.parentElement.querySelector('.field-error-msg');
         if (!existingMsg) {
           var msg = document.createElement('div');
           msg.className = 'field-error-msg visible';
           msg.textContent = 'At least one recording is required';
           msg.style.marginTop = '12px';
-          recList.parentElement.insertBefore(msg, recList.nextSibling);
+          addRecBtn.parentElement.insertBefore(msg, addRecBtn.nextSibling);
         }
         setTimeout(function() {
-          recSection.style.borderColor = '';
-          recSection.style.boxShadow = '';
+          addRecBtn.style.borderColor = '';
+          addRecBtn.style.color = '';
+          addRecBtn.style.boxShadow = '';
         }, 4000);
       }
       valid = false;
@@ -4513,15 +4554,15 @@
     <div class="modal-body">
       <div class="note-box">Under penalties of perjury, you certify that the information you provide is accurate and that you are a U.S. person.</div>
       <div class="field-grid-2" style="margin-bottom:16px">
-        <div><label class="field-label">Legal Name *</label><input class="field" type="text" placeholder="As shown on tax return" id="w9-name" style="margin-bottom:0"></div>
+        <div><label class="field-label">Legal Name *</label><input class="field" type="text" placeholder="As shown on tax return" id="w9-name" data-required="true" style="margin-bottom:0"></div>
         <div><label class="field-label">Business / DBA <span style="font-weight:300;text-transform:none;letter-spacing:0;color:#94A3B8">if different</span></label><input class="field" type="text" placeholder="e.g. SwuM LLC" id="w9-biz" style="margin-bottom:0"></div>
       </div>
       <div class="field-grid-2" style="margin-bottom:16px">
-        <div><label class="field-label">Federal Tax Classification *</label><select class="field" style="-webkit-appearance:none;margin-bottom:0" id="w9-class"><option value="" disabled selected>Select classification</option><option>Individual / Sole proprietor</option><option>C Corporation</option><option>S Corporation</option><option>Partnership</option><option>LLC</option><option>Other</option></select></div>
-        <div><label class="field-label">Taxpayer ID (SSN or EIN) *</label><input class="field" type="text" placeholder="XXX-XX-XXXX" id="w9-tin" style="font-family:monospace;margin-bottom:0"></div>
+        <div><label class="field-label">Federal Tax Classification *</label><select class="field" style="-webkit-appearance:none;margin-bottom:0" id="w9-class" data-required="true"><option value="" disabled selected>Select classification</option><option>Individual / Sole proprietor</option><option>C Corporation</option><option>S Corporation</option><option>Partnership</option><option>LLC</option><option>Other</option></select></div>
+        <div><label class="field-label">Taxpayer ID (SSN or EIN) *</label><input class="field" type="text" placeholder="XXX-XX-XXXX" id="w9-tin" data-required="true" style="font-family:monospace;margin-bottom:0"></div>
       </div>
       <label class="field-label">Street Address *</label>
-      <input class="field" type="text" placeholder="Street address" id="w9-addr">
+      <input class="field" type="text" placeholder="Street address" id="w9-addr" data-required="true">
       <div class="field-grid-3">
         <div><input class="field" type="text" placeholder="City" style="margin-bottom:0"></div>
         <div><input class="field" type="text" placeholder="State" style="margin-bottom:0"></div>
