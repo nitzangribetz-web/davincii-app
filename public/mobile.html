@@ -2255,6 +2255,8 @@ window.addEventListener('scroll',()=>{
 
 // ── Screen navigation ──
 function go(key){
+  if(key==='login'){window.location.replace('/login.html');return;}
+  if(key==='signup'){window.location.replace('/signup.html');return;}
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const t=document.getElementById('screen-'+key);
   if(t){t.classList.add('active');window.scrollTo(0,0)}
