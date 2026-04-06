@@ -76,6 +76,8 @@ const columnMigrations = [
   `ALTER TABLE artists ADD COLUMN IF NOT EXISTS verification_last_sent  TIMESTAMPTZ`,
   // Mark all existing accounts as verified (they signed up before email verification was added)
   `UPDATE artists SET email_verified = TRUE WHERE verification_code IS NULL AND (email_verified IS NULL OR email_verified = FALSE)`,
+  // Admin flag
+  `ALTER TABLE artists ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT FALSE`,
 ];
 
 async function migrate() {

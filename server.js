@@ -91,6 +91,7 @@ app.use('/api/royalties', royaltyRoutes);
 app.use('/api/payouts', payoutRoutes);
 app.use('/api/stripe', stripeRoutes);
 app.use('/api/passkeys', passkeyRoutes);
+app.use('/api/admin', require('./routes/admin'));
 
 // Serve standalone auth pages for clean URLs (Safari requires real <form> for credential autofill)
 app.get('/login', (req, res) => res.sendFile('login.html', { root: publicDir }));

@@ -2856,6 +2856,11 @@
     document.body.style.color = '#0A0A0A';
     // Remove boot CSS (class-based activation now handles visibility)
     removeBootCSS();
+    // Show admin nav if admin
+    if (artist && artist.is_admin) {
+      var adminNav = document.getElementById('admin-nav-section');
+      if (adminNav) adminNav.style.display = '';
+    }
     // Restore dashboard page from URL or default to overview
     var initialPage = getDashPageFromURL() || 'overview';
     var url = initialPage === 'overview' ? '/dashboard' : '/dashboard/' + initialPage;
@@ -3123,7 +3128,7 @@
   function showDashPage(page, skipPush){
     document.querySelectorAll('.dash-page').forEach(p=>p.style.display='none');
     const t=document.getElementById('dp-'+page);if(t)t.style.display='block';
-    ['overview','catalog','add-song','royalties','statements','payouts','registration','sync','notifications','settings','profile'].forEach(p=>{
+    ['overview','catalog','add-song','royalties','statements','payouts','registration','sync','notifications','settings','profile','signups'].forEach(p=>{
       const l=document.getElementById('nl-'+p);if(l)l.classList.remove('active');
     });
     const a=document.getElementById('nl-'+page);if(a)a.classList.add('active');
@@ -3131,6 +3136,7 @@
       var url = page === 'overview' ? '/dashboard' : '/dashboard/' + page;
       window.history.pushState({ screen:'dashboard', page: page }, '', url);
     }
+    if(page === 'signups') loadSignups();
   }
 
   // ── Notification bell ──
@@ -3145,6 +3151,46 @@
 
   // Expose closure functions to global scope for inline onclick handlers
   window.go = go;
+  // ── Admin: Load signups ──
+  function loadSignups() {
+    var token = localStorage.getItem('dv_token');
+    if (!token) return;
+    var tbody = document.getElementById('signups-tbody');
+    var countEl = document.getElementById('signups-count');
+    if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="padding:32px;text-align:center;color:#94A3B8">Loading...</td></tr>';
+    fetch('/api/admin/signups', { headers: { 'Authorization': 'Bearer ' + token } })
+      .then(function(r) { if (!r.ok) throw new Error('Not authorized'); return r.json(); })
+      .then(function(artists) {
+        if (countEl) countEl.textContent = artists.length + ' artist' + (artists.length !== 1 ? 's' : '');
+        if (!tbody) return;
+        if (artists.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" style="padding:32px;text-align:center;color:#94A3B8">No signups yet.</td></tr>';
+          return;
+        }
+        tbody.innerHTML = artists.map(function(a) {
+          var d = new Date(a.created_at);
+          var date = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+          var time = d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+          return '<tr style="border-top:1px solid #E8EDF5">'
+            + '<td style="padding:10px 14px;font-weight:500">' + (a.name || '—') + '</td>'
+            + '<td style="padding:10px 14px;color:#374151">' + (a.email || '—') + '</td>'
+            + '<td style="padding:10px 14px;color:#64748B">' + (a.stage_name || '—') + '</td>'
+            + '<td style="padding:10px 14px"><span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;'
+            + (a.email_verified ? 'background:#DCFCE7;color:#16A34A' : 'background:#FEF2F2;color:#DC2626') + '">'
+            + (a.email_verified ? 'Yes' : 'No') + '</span></td>'
+            + '<td style="padding:10px 14px"><span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;'
+            + (a.onboarded ? 'background:#DCFCE7;color:#16A34A' : 'background:#FEF9C3;color:#A16207') + '">'
+            + (a.onboarded ? 'Yes' : 'No') + '</span></td>'
+            + '<td style="padding:10px 14px;color:#64748B;font-size:12px">' + date + '<br>' + time + '</td>'
+            + '</tr>';
+        }).join('');
+      })
+      .catch(function(err) {
+        if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="padding:32px;text-align:center;color:#DC2626">Access denied or error loading signups.</td></tr>';
+      });
+  }
+
+  window.loadSignups = loadSignups;
   window.showDashPage = showDashPage;
   window.logoClick = logoClick;
   window.toggleNotifPanel = toggleNotifPanel;
@@ -3871,6 +3917,10 @@
         <span class="sb-label">Account</span>
         <button class="nav-lnk" id="nl-profile" onclick="showDashPage('profile')"><span class="nav-icon">◎</span>Artist Profile</button>
         <button class="nav-lnk" id="nl-settings" onclick="showDashPage('settings')"><span class="nav-icon">⚙</span>Settings</button>
+      </div>
+      <div class="sb-section admin-nav" id="admin-nav-section" style="display:none">
+        <span class="sb-label">Admin</span>
+        <button class="nav-lnk" id="nl-signups" onclick="showDashPage('signups')"><span class="nav-icon">☰</span>Signups</button>
       </div>
     </aside>
 
@@ -4634,6 +4684,39 @@
           <button type="button" class="btn-ghost-dark" onclick="discardProfile()">Discard</button>
         </div>
         </form>
+      </div>
+
+      <!-- ════════ SIGNUPS (Admin) ════════ -->
+      <div class="dash-page main-content" id="dp-signups" style="display:none;max-width:960px">
+        <div class="page-title">Artist <em>Signups</em></div>
+        <div class="page-sub">All registered artists on the platform.</div>
+        <div class="page-rule"></div>
+
+        <div class="sbox">
+          <div class="sbox-head">
+            <div>
+              <div class="sbox-title">Registered Artists</div>
+              <div class="sbox-sub" id="signups-count"></div>
+            </div>
+          </div>
+          <div class="sbox-body" style="padding:0;overflow-x:auto">
+            <table style="width:100%;border-collapse:collapse;font-family:var(--sans);font-size:13px">
+              <thead>
+                <tr style="background:#E8EDF5;text-align:left">
+                  <th style="padding:10px 14px;font-weight:600;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:#374151">Name</th>
+                  <th style="padding:10px 14px;font-weight:600;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:#374151">Email</th>
+                  <th style="padding:10px 14px;font-weight:600;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:#374151">Stage Name</th>
+                  <th style="padding:10px 14px;font-weight:600;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:#374151">Verified</th>
+                  <th style="padding:10px 14px;font-weight:600;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:#374151">Onboarded</th>
+                  <th style="padding:10px 14px;font-weight:600;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:#374151">Signed Up</th>
+                </tr>
+              </thead>
+              <tbody id="signups-tbody">
+                <tr><td colspan="6" style="padding:32px;text-align:center;color:#94A3B8">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
     </div><!-- /main content scroll -->

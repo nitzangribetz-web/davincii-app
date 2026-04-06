@@ -1766,6 +1766,9 @@ footer.m-footer{
           <div class="d-dd-sec">
             <button class="d-dd-btn" onclick="showDP('settings');closeDMenu()"><span class="d-dd-icon">⚙</span>Settings</button>
           </div>
+          <div class="d-dd-sec admin-nav-mob" id="mob-admin-nav" style="display:none">
+            <button class="d-dd-btn" onclick="showDP('signups');closeDMenu()"><span class="d-dd-icon">☰</span>Signups</button>
+          </div>
           <div class="d-dd-sec">
             <button class="d-dd-btn danger" onclick="go('landing');closeDMenu()"><span class="d-dd-icon">←</span>Sign out</button>
           </div>
@@ -2098,6 +2101,31 @@ footer.m-footer{
     </div>
   </div>
 
+  <!-- ── SIGNUPS (Admin) ── -->
+  <div class="dash-page d-content" id="dp-signups" style="display:none">
+    <div class="d-pg-title">Artist <em>Signups</em></div>
+    <div class="d-pg-sub">All registered artists on the platform.</div>
+    <div class="d-pg-rule"></div>
+    <div class="d-sbox">
+      <div class="d-sbox-hd"><div><div class="d-sbox-title">Registered Artists</div><div class="d-sbox-sub" id="mob-signups-count"></div></div></div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-family:var(--sans);font-size:12px">
+          <thead>
+            <tr style="background:#E8EDF5;text-align:left">
+              <th style="padding:8px 10px;font-weight:600;font-size:9px;letter-spacing:0.08em;text-transform:uppercase;color:#374151">Name</th>
+              <th style="padding:8px 10px;font-weight:600;font-size:9px;letter-spacing:0.08em;text-transform:uppercase;color:#374151">Email</th>
+              <th style="padding:8px 10px;font-weight:600;font-size:9px;letter-spacing:0.08em;text-transform:uppercase;color:#374151">Verified</th>
+              <th style="padding:8px 10px;font-weight:600;font-size:9px;letter-spacing:0.08em;text-transform:uppercase;color:#374151">Signed Up</th>
+            </tr>
+          </thead>
+          <tbody id="mob-signups-tbody">
+            <tr><td colspan="4" style="padding:24px;text-align:center;color:#94A3B8">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
   <!-- Bottom tab bar -->
   <nav class="d-tab-bar">
     <button class="d-tab active" id="d-tab-overview" onclick="showDP('overview')"><span class="d-tab-icon">▦</span><span class="d-tab-lbl">Overview</span></button>
@@ -2328,6 +2356,11 @@ function mobActivateDashboard(artist) {
   document.body.style.background = '#F0F4FA';
   document.body.style.color = '#0A0A0A';
   mobRemoveBootCSS();
+  // Show admin nav if admin
+  if (artist && artist.is_admin) {
+    var adminNav = document.getElementById('mob-admin-nav');
+    if (adminNav) adminNav.style.display = '';
+  }
   var initialPage = getDashPageFromURL() || 'overview';
   var url = initialPage === 'overview' ? '/dashboard' : '/dashboard/' + initialPage;
   window.history.replaceState({ screen: 'dashboard', page: initialPage }, '', url);
@@ -2396,7 +2429,7 @@ function go(key, skipPush){
 }
 
 // ── Dashboard page switching ──
-const ALL_DP=['overview','catalog','add-song','royalties','registration','statements','payouts','notifications','sync','profile','settings'];
+const ALL_DP=['overview','catalog','add-song','royalties','registration','statements','payouts','notifications','sync','profile','settings','signups'];
 const TAB_DP=['overview','catalog','add-song','royalties','payouts','profile'];
 
 function showDP(page, skipPush){
@@ -2414,6 +2447,7 @@ function showDP(page, skipPush){
     var url = page === 'overview' ? '/dashboard' : '/dashboard/' + page;
     window.history.pushState({ screen:'dashboard', page: page }, '', url);
   }
+  if(page === 'signups') mobLoadSignups();
 }
 
 function getDashPageFromURL(){
@@ -2466,6 +2500,40 @@ function dPayout(m){
 function dTogglePro(v){
   const w=document.getElementById('d-pro-other');
   if(w)w.style.display=v==='Other'?'block':'none';
+}
+
+// ── Admin: Load signups ──
+function mobLoadSignups() {
+  var token = localStorage.getItem('dv_token');
+  if (!token) return;
+  var tbody = document.getElementById('mob-signups-tbody');
+  var countEl = document.getElementById('mob-signups-count');
+  if (tbody) tbody.innerHTML = '<tr><td colspan="4" style="padding:24px;text-align:center;color:#94A3B8">Loading...</td></tr>';
+  fetch('/api/admin/signups', { headers: { 'Authorization': 'Bearer ' + token } })
+    .then(function(r) { if (!r.ok) throw new Error('Not authorized'); return r.json(); })
+    .then(function(artists) {
+      if (countEl) countEl.textContent = artists.length + ' artist' + (artists.length !== 1 ? 's' : '');
+      if (!tbody) return;
+      if (artists.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="padding:24px;text-align:center;color:#94A3B8">No signups yet.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = artists.map(function(a) {
+        var d = new Date(a.created_at);
+        var date = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        return '<tr style="border-top:1px solid #E8EDF5">'
+          + '<td style="padding:8px 10px;font-weight:500">' + (a.name || '—') + '</td>'
+          + '<td style="padding:8px 10px;color:#374151;font-size:11px;word-break:break-all">' + (a.email || '—') + '</td>'
+          + '<td style="padding:8px 10px"><span style="display:inline-block;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600;'
+          + (a.email_verified ? 'background:#DCFCE7;color:#16A34A' : 'background:#FEF2F2;color:#DC2626') + '">'
+          + (a.email_verified ? 'Yes' : 'No') + '</span></td>'
+          + '<td style="padding:8px 10px;color:#64748B;font-size:11px">' + date + '</td>'
+          + '</tr>';
+      }).join('');
+    })
+    .catch(function(err) {
+      if (tbody) tbody.innerHTML = '<tr><td colspan="4" style="padding:24px;text-align:center;color:#DC2626">Access denied.</td></tr>';
+    });
 }
 
 
