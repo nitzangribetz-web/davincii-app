@@ -485,12 +485,23 @@ router.post('/profile', require('../middleware/auth'), async (req, res) => {
   const addressStreet = [address1, address2].filter(Boolean).join(', ');
   const addressCity = [city, state, postal].filter(Boolean).join(', ');
 
+  // Convert MM/DD/YYYY → YYYY-MM-DD for PostgreSQL DATE column
+  let dobValue = null;
+  if (dob) {
+    const parts = dob.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (parts) {
+      dobValue = `${parts[3]}-${parts[1]}-${parts[2]}`;
+    } else if (/^\d{4}-\d{2}-\d{2}$/.test(dob)) {
+      dobValue = dob; // Already in ISO format
+    }
+  }
+
   try {
     await pool.query(
       `UPDATE artists SET stage_name=$1, pro=$2, ipi=$3, dob=$4,
        address_street=$5, address_city=$6, address_state=$7, onboarded=TRUE
        WHERE id=$8`,
-      [stage_name, proValue, ipi || null, dob || null,
+      [stage_name, proValue, ipi || null, dobValue,
        addressStreet || null, addressCity || null, country || null, req.artist.id]
     );
 
