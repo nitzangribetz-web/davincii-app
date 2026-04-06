@@ -3012,8 +3012,10 @@ function mobToggle2FA() {
       <label class="field-label" id="mob-w9-tin-label">Social Security Number (SSN) *</label>
       <input class="field" type="text" id="mob-w9-tin" data-required="true" placeholder="XXX-XX-XXXX" maxlength="11" oninput="mobW9FormatTin(this)" style="font-family:monospace">
 
-      <label class="field-label">Street Address *</label>
-      <input class="field" type="text" id="mob-w9-street" data-required="true" placeholder="Street address">
+      <div>
+        <label class="field-label">Street Address *</label>
+        <input class="field" type="text" id="mob-w9-street" data-required="true" placeholder="Street address">
+      </div>
       <div style="display:grid;grid-template-columns:1fr 80px 90px;gap:10px">
         <div>
           <label class="field-label">City *</label>
@@ -3035,11 +3037,15 @@ function mobToggle2FA() {
       </div>
       <div id="mob-w9-cert-error" class="field-error-msg"></div>
 
-      <div style="margin-top:18px;padding-top:18px;border-top:1px solid var(--border-lt)">
-        <label class="field-label">Signature (type your full legal name) *</label>
-        <input class="field" type="text" id="mob-w9-sig" data-required="true" placeholder="Type your full legal name">
-        <label class="field-label">Date *</label>
-        <input class="field" type="date" id="mob-w9-date" data-required="true" style="margin-bottom:0">
+      <div style="margin-top:18px;padding-top:18px;border-top:1px solid var(--border-lt);display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <label class="field-label">Signature *</label>
+          <input class="field" type="text" id="mob-w9-sig" data-required="true" placeholder="Type full legal name" style="margin-bottom:0">
+        </div>
+        <div>
+          <label class="field-label">Date *</label>
+          <input class="field" type="date" id="mob-w9-date" data-required="true" style="margin-bottom:0">
+        </div>
       </div>
     </div>
     <div class="mob-w9-actions">
