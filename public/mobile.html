@@ -1717,7 +1717,11 @@ footer.m-footer{
         <option>SIAE</option><option>Other</option><option>Not yet registered</option>
       </select>
       <input class="field" type="text" name="ipi" placeholder="IPI / CAE number">
-      <input class="field" type="date" name="dob">
+      <div style="position:relative">
+        <input class="field" type="text" name="dob" id="mob-signup-dob" placeholder="MM/DD/YYYY" maxlength="10" inputmode="numeric" oninput="formatDobInput(this)" style="padding-right:36px;margin-bottom:0">
+        <input type="date" style="position:absolute;right:0;top:0;width:36px;height:100%;opacity:0;cursor:pointer" onchange="dobCalPick(this,'mob-signup-dob')">
+        <svg style="position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;width:16px;height:16px;opacity:0.35" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      </div>
       <button class="btn-p" type="submit" onclick="document.getElementById('mob-signup-form').submit()">Complete setup →</button>
     </div>
   </div>
@@ -2053,7 +2057,12 @@ footer.m-footer{
       </select>
       <div id="d-pro-other" style="display:none"><label class="field-label">Specify your PRO *</label><input class="field" type="text" id="mob-pro-other" placeholder="e.g. SABAM, ICMP…"></div>
       <label class="field-label">IPI / CAE Number *</label><input class="field" type="text" placeholder="e.g. 00123456789" id="mob-pf-ipi" data-required="true">
-      <label class="field-label">Date of Birth *</label><input class="field" type="date" id="mob-pf-dob" data-required="true" style="font-size:16px;color:var(--black)">
+      <label class="field-label">Date of Birth *</label>
+      <div style="position:relative">
+        <input class="field" type="text" id="mob-pf-dob" data-required="true" placeholder="MM/DD/YYYY" maxlength="10" inputmode="numeric" oninput="formatDobInput(this)" style="font-size:16px;color:var(--black);padding-right:36px;margin-bottom:0">
+        <input type="date" id="mob-pf-dob-cal" style="position:absolute;right:0;top:0;width:36px;height:100%;opacity:0;cursor:pointer" onchange="dobCalPick(this,'mob-pf-dob')">
+        <svg style="position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;width:16px;height:16px;opacity:0.35" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      </div>
     </div>
     <div class="d-form-card">
       <div class="d-form-title" style="margin-bottom:16px">Mailing Address</div>
@@ -2850,6 +2859,17 @@ function mobW9TinTypeChange(type) {
     input.maxLength = 11;
   }
   input.value = '';
+}
+function formatDobInput(el) {
+  var v = el.value.replace(/[^\d]/g, '');
+  if (v.length >= 4) v = v.slice(0,2) + '/' + v.slice(2,4) + '/' + v.slice(4,8);
+  else if (v.length >= 2) v = v.slice(0,2) + '/' + v.slice(2);
+  el.value = v;
+}
+function dobCalPick(cal, targetId) {
+  if (!cal.value) return;
+  var parts = cal.value.split('-');
+  document.getElementById(targetId).value = parts[1] + '/' + parts[2] + '/' + parts[0];
 }
 function mobW9FormatTin(el) {
   var type = document.querySelector('input[name="mob-w9-tin-type"]:checked').value;
