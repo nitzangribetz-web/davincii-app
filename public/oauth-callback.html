@@ -4,15 +4,21 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Davincii</title>
-<style>body { margin:0; background:#030912; }</style>
+<style>
+body { margin:0; background:#F0F4FA; display:flex; align-items:center; justify-content:center; min-height:100vh; }
+.loader { width:32px; height:32px; border:3px solid #E2E8F0; border-top-color:#2260CC; border-radius:50%; animation:spin 0.6s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+</style>
 </head>
 <body>
+<div class="loader"></div>
 <script>
 (function() {
-  // Parse hash fragment: #access_token=...&token_type=bearer&...
+  // Parse hash fragment: #access_token=...&provider_token=...&token_type=bearer&...
   var hash = window.location.hash.substring(1);
   var params = new URLSearchParams(hash);
   var accessToken = params.get('access_token');
+  var providerToken = params.get('provider_token');
 
   // Also check query params (in case of code flow)
   var query = new URLSearchParams(window.location.search);
@@ -24,12 +30,12 @@
     return;
   }
 
-  if (accessToken) {
-    // Implicit flow: exchange Supabase access token for our JWT
+  if (accessToken || providerToken) {
+    // Send both tokens — server will try provider_token (Google) first, then Supabase token
     fetch('/api/auth/oauth-exchange', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ access_token: accessToken })
+      body: JSON.stringify({ access_token: accessToken, provider_token: providerToken })
     })
     .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
     .then(function(result) {

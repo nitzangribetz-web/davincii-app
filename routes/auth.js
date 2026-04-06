@@ -176,46 +176,67 @@ router.get('/apple', async (req, res) => {
 });
 
 // POST /api/auth/oauth-exchange - Exchange access token for our JWT
-// Supports both direct Google tokens and Supabase tokens (fallback)
+// Accepts provider_token (Google access token) and/or access_token (Supabase JWT)
 router.post('/oauth-exchange', async (req, res) => {
   try {
-    const { access_token } = req.body;
-    if (!access_token) {
+    const { access_token, provider_token } = req.body;
+    if (!access_token && !provider_token) {
       return res.status(400).json({ error: 'Missing access_token' });
     }
 
     let email, name;
-    const googleClientId = process.env.GOOGLE_CLIENT_ID;
 
-    if (googleClientId) {
-      // Direct Google: verify token by calling Google userinfo endpoint
+    // Strategy 1: Use provider_token (Google's actual access token) to call Google userinfo
+    if (provider_token) {
       const userinfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-        headers: { Authorization: `Bearer ${access_token}` },
+        headers: { Authorization: `Bearer ${provider_token}` },
       });
-      if (!userinfoRes.ok) {
-        const errText = await userinfoRes.text();
-        console.error('[OAuth exchange] Google userinfo error:', userinfoRes.status, errText);
-        return res.status(401).json({ error: 'Invalid access token' });
+      if (userinfoRes.ok) {
+        const profile = await userinfoRes.json();
+        if (profile.email) {
+          email = profile.email;
+          name = profile.name || profile.email.split('@')[0];
+          console.log('[OAuth exchange] Google provider_token verified user:', email);
+        }
+      } else {
+        console.warn('[OAuth exchange] Google provider_token failed:', userinfoRes.status);
       }
-      const profile = await userinfoRes.json();
-      if (!profile.email) {
-        console.error('[OAuth exchange] Google profile missing email:', profile);
-        return res.status(401).json({ error: 'Could not retrieve email from Google' });
+    }
+
+    // Strategy 2: Use access_token directly with Google userinfo (for direct Google OAuth)
+    if (!email && access_token) {
+      const googleClientId = process.env.GOOGLE_CLIENT_ID;
+      if (googleClientId) {
+        const userinfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: `Bearer ${access_token}` },
+        });
+        if (userinfoRes.ok) {
+          const profile = await userinfoRes.json();
+          if (profile.email) {
+            email = profile.email;
+            name = profile.name || profile.email.split('@')[0];
+            console.log('[OAuth exchange] Google direct token verified user:', email);
+          }
+        }
       }
-      email = profile.email;
-      name = profile.name || profile.email.split('@')[0];
-      console.log('[OAuth exchange] Google verified user:', email);
-    } else {
-      // Fallback: Supabase token verification
+    }
+
+    // Strategy 3: Verify Supabase token
+    if (!email && access_token) {
       const { data: userData, error: userError } = await supabase.auth.getUser(access_token);
-      if (userError || !userData?.user) {
-        console.error('[OAuth exchange] getUser error:', userError?.message);
-        return res.status(401).json({ error: 'Invalid access token' });
+      if (!userError && userData?.user) {
+        const supaUser = userData.user;
+        email = supaUser.email;
+        name = supaUser.user_metadata?.full_name || supaUser.user_metadata?.name || email.split('@')[0];
+        console.log('[OAuth exchange] Supabase token verified user:', email);
+      } else {
+        console.warn('[OAuth exchange] Supabase getUser failed:', userError?.message);
       }
-      const supaUser = userData.user;
-      email = supaUser.email;
-      name = supaUser.user_metadata?.full_name || supaUser.user_metadata?.name || email.split('@')[0];
-      console.log('[OAuth exchange] Supabase verified user:', email);
+    }
+
+    if (!email) {
+      console.error('[OAuth exchange] All verification strategies failed');
+      return res.status(401).json({ error: 'Could not verify your Google account. Please try again.' });
     }
 
     // Find or create the artist in our database
