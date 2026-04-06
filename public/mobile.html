@@ -1919,7 +1919,7 @@ footer.m-footer{
       <div class="d-form-title">ISWC</div>
       <div class="d-form-sub">If previously registered, enter the ISWC assigned by your home society.</div>
       <label class="field-label">ISWC <span style="font-weight:300;text-transform:none;letter-spacing:0;color:var(--muted-lt)">(Optional)</span></label>
-      <input class="field" type="text" placeholder="T-123456789-1" style="font-family:monospace;margin-bottom:0">
+      <input class="field" type="text" placeholder="T-123456789-1" id="mob-iswc" style="font-family:monospace;margin-bottom:0">
     </div>
 
     <button type="button" class="btn-p" style="margin-bottom:10px" onclick="mobSubmitSong()">Submit for Registration →</button>
@@ -3003,6 +3003,22 @@ function mobDiscardProfile() {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // SONG SUBMISSION
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function mobResetAddSong(){
+  ['mob-song-title','mob-writer-name','mob-writer-pct','mob-iswc'].forEach(function(id){
+    var el=document.getElementById(id);if(el){el.value='';el.classList.remove('field-error');}
+  });
+  var recList=document.getElementById('mob-recording-list');
+  if(recList)recList.innerHTML='';
+  var cwRows=document.getElementById('mob-cw-rows');
+  if(cwRows)cwRows.innerHTML='';
+  var cwNo=document.getElementById('mob-cw-no');
+  if(cwNo)cwNo.checked=true;
+  var totalEl=document.getElementById('mob-ownership-total');
+  if(totalEl){totalEl.textContent='0%';totalEl.style.color='var(--black)';}
+  var container=document.getElementById('dp-add-song');
+  if(container)container.querySelectorAll('.field-error-msg').forEach(function(m){m.remove();});
+}
+
 function mobSubmitSong() {
   var titleField = document.getElementById('mob-song-title');
   var writerField = document.getElementById('mob-writer-name');
@@ -3116,7 +3132,8 @@ function mobSubmitSong() {
   .then(function(res) {
     if (res.ok) {
       showToast('Song submitted for registration', 'success');
-      setTimeout(function() { showDP('catalog'); }, 1200);
+      mobResetAddSong();
+      setTimeout(function() { showDP('catalog'); }, 400);
     } else {
       showToast(res.data.error || 'Failed to submit song', 'error');
     }

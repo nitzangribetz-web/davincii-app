@@ -3691,6 +3691,25 @@
   }
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // RESET ADD SONG FORM
+  function deskResetAddSong(){
+    ['desk-song-title','desk-writer-name','desk-writer-pct','desk-iswc'].forEach(function(id){
+      var el=document.getElementById(id);if(el){el.value='';el.classList.remove('field-error');}
+    });
+    var recList=document.getElementById('desk-recording-list');
+    if(recList)recList.innerHTML='';
+    var cwSection=document.getElementById('desk-cowriter-section');
+    if(cwSection){cwSection.style.display='none';cwSection.querySelectorAll('[id^="desk-cw-row-"]').forEach(function(r){r.remove();});}
+    var cwNo=document.getElementById('desk-cw-no-radio');
+    if(cwNo)cwNo.checked=true;
+    var totalEl=document.getElementById('desk-ownership-total');
+    if(totalEl){totalEl.textContent='0%';totalEl.style.color='#0A0A0A';}
+    _cwN=0;
+    var container=document.getElementById('dp-add-song');
+    if(container)container.querySelectorAll('.field-error-msg').forEach(function(m){m.remove();});
+  }
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // SONG SUBMISSION
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   function submitSong() {
@@ -3819,7 +3838,8 @@
     .then(function(res) {
       if (res.ok) {
         showToast('Song submitted for registration', 'success');
-        setTimeout(function() { showDashPage('catalog'); }, 1200);
+        deskResetAddSong();
+        setTimeout(function() { showDashPage('catalog'); }, 400);
       } else {
         showToast(res.data.error || 'Failed to submit song', 'error');
       }
@@ -4306,7 +4326,7 @@
           <div class="profile-section-title" style="font-size:26px">ISWC</div>
           <div class="profile-section-sub">If previously registered, enter the ISWC assigned by your home society.</div>
           <label class="field-label">ISWC <span style="font-weight:300;text-transform:none;letter-spacing:0;color:#94A3B8">(Optional)</span></label>
-          <input class="field" type="text" placeholder="T-123456789-1" style="max-width:240px;font-family:monospace">
+          <input class="field" type="text" placeholder="T-123456789-1" id="desk-iswc" style="max-width:240px;font-family:monospace">
         </div>
         <div style="display:flex;gap:14px;align-items:center;margin-bottom:48px">
           <button type="button" class="btn-blue" style="font-size:12px;letter-spacing:0.12em;text-transform:uppercase;padding:15px 40px" onclick="submitSong()">Submit for Registration →</button>
