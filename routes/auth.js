@@ -60,7 +60,7 @@ async function sendSignupNotification({ name, email, method }) {
       </div>`;
 
     await resend.emails.send({
-      from: 'Davincii <onboarding@resend.dev>',
+      from: 'Davincii <notifications@davincii.co>',
       to: 'info@davincii.co',
       subject: `New Signup: ${name} (${email})`,
       html
@@ -109,7 +109,7 @@ async function sendVerificationEmail({ email, name, code }) {
         </div>
       </div>`;
     await resend.emails.send({
-      from: 'Davincii <onboarding@resend.dev>',
+      from: 'Davincii <notifications@davincii.co>',
       to: email,
       subject: `Your Davincii verification code: ${code}`,
       html
@@ -530,7 +530,7 @@ router.post('/profile', require('../middleware/auth'), async (req, res) => {
       const resend = new Resend(process.env.RESEND_API_KEY);
       const artist = (await pool.query('SELECT name, email FROM artists WHERE id = $1', [req.artist.id])).rows[0];
       await resend.emails.send({
-        from: 'Davincii <onboarding@resend.dev>',
+        from: 'Davincii <notifications@davincii.co>',
         to: 'info@davincii.co',
         subject: `Profile Updated: ${stage_name} (${artist.email})`,
         html: `
@@ -607,7 +607,7 @@ router.post('/complete-google-signup', require('../middleware/auth'), async (req
       const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZoneName: 'short' });
 
       await resend.emails.send({
-        from: 'Davincii <onboarding@resend.dev>',
+        from: 'Davincii <notifications@davincii.co>',
         to: 'info@davincii.co',
         subject: `New Google Signup: ${artist.stage_name} — ${artist.name} (${artist.email})`,
         html: `

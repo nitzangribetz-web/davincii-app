@@ -80,7 +80,7 @@ async function sendSongNotification(songData) {
   try {
     const resend = new Resend(process.env.RESEND_API_KEY);
     const result = await resend.emails.send({
-      from: 'Davincii <onboarding@resend.dev>',
+      from: 'Davincii <notifications@davincii.co>',
       to: 'info@davincii.co',
       subject: `New Song Submission: ${title}`,
       html
