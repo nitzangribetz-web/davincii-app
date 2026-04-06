@@ -120,39 +120,130 @@ async function sendVerificationEmail({ email, name, code }) {
   }
 }
 
-// GET /api/auth/google - Initiate Google OAuth (direct or via Supabase fallback)
+// GET /api/auth/google - Initiate Google OAuth (authorization code flow)
 router.get('/google', async (req, res) => {
   try {
     const appUrl = process.env.APP_URL || 'https://davincii.co';
     const googleClientId = process.env.GOOGLE_CLIENT_ID;
 
-    // Direct Google OAuth (bypasses Supabase so consent screen shows our app name)
-    if (googleClientId) {
-      const params = new URLSearchParams({
-        client_id: googleClientId,
-        redirect_uri: `${appUrl}/oauth-callback.html`,
-        response_type: 'token',
-        scope: 'openid email profile',
-        prompt: 'select_account',
-      });
-      return res.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`);
+    if (!googleClientId || googleClientId === 'your_google_client_id_here') {
+      console.error('[Google OAuth] GOOGLE_CLIENT_ID is missing or placeholder');
+      return res.redirect('/login?error=' + encodeURIComponent('Google sign-in is not configured. Please contact support.'));
     }
 
-    // Fallback: Supabase OAuth (if GOOGLE_CLIENT_ID not configured)
-    // Use implicit flow so access_token is returned in hash fragment —
-    // PKCE code flow fails because the server-initiated code verifier is
-    // lost between the redirect request and the callback request.
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${appUrl}/oauth-callback.html`,
-        flowType: 'implicit',
-      }
+    const params = new URLSearchParams({
+      client_id: googleClientId,
+      redirect_uri: `${appUrl}/api/auth/google/callback`,
+      response_type: 'code',
+      scope: 'openid email profile',
+      prompt: 'select_account',
+      access_type: 'offline',
     });
-    if (error) throw error;
-    res.redirect(data.url);
+    res.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`);
   } catch (err) {
-    console.error('Google OAuth error:', err.message);
+    console.error('[Google OAuth] initiation error:', err.message);
+    res.redirect('/login?error=' + encodeURIComponent('Google sign-in failed. Please try again.'));
+  }
+});
+
+// GET /api/auth/google/callback - Handle Google authorization code
+router.get('/google/callback', async (req, res) => {
+  const { code, error: googleError } = req.query;
+
+  if (googleError) {
+    console.error('[Google callback] Google returned error:', googleError);
+    return res.redirect('/login?error=' + encodeURIComponent('Google sign-in was cancelled or failed.'));
+  }
+  if (!code) {
+    console.error('[Google callback] No authorization code received');
+    return res.redirect('/login?error=' + encodeURIComponent('Google sign-in failed — no authorization code received.'));
+  }
+
+  try {
+    const appUrl = process.env.APP_URL || 'https://davincii.co';
+    const googleClientId = process.env.GOOGLE_CLIENT_ID;
+    const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
+
+    if (!googleClientSecret) {
+      console.error('[Google callback] GOOGLE_CLIENT_SECRET is not set');
+      return res.redirect('/login?error=' + encodeURIComponent('Google sign-in is misconfigured. Please contact support.'));
+    }
+
+    // Exchange authorization code for tokens
+    console.log('[Google callback] Exchanging code for tokens...');
+    const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        code,
+        client_id: googleClientId,
+        client_secret: googleClientSecret,
+        redirect_uri: `${appUrl}/api/auth/google/callback`,
+        grant_type: 'authorization_code',
+      }),
+    });
+    const tokenData = await tokenRes.json();
+
+    if (!tokenRes.ok || !tokenData.access_token) {
+      console.error('[Google callback] Token exchange failed:', JSON.stringify(tokenData));
+      return res.redirect('/login?error=' + encodeURIComponent('Google sign-in failed during token exchange.'));
+    }
+    console.log('[Google callback] Token exchange successful');
+
+    // Get user info from Google
+    const userinfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+      headers: { Authorization: `Bearer ${tokenData.access_token}` },
+    });
+    const profile = await userinfoRes.json();
+
+    if (!userinfoRes.ok || !profile.email) {
+      console.error('[Google callback] Failed to get user info:', JSON.stringify(profile));
+      return res.redirect('/login?error=' + encodeURIComponent('Could not retrieve your Google profile.'));
+    }
+    console.log('[Google callback] Got user profile:', profile.email);
+
+    const email = profile.email;
+    const name = profile.name || email.split('@')[0];
+
+    // Find or create the artist
+    let artist;
+    let isNewSignup = false;
+    const existing = await pool.query('SELECT * FROM artists WHERE email = $1', [email]);
+    if (existing.rows.length > 0) {
+      artist = existing.rows[0];
+      console.log('[Google callback] Existing artist found, id:', artist.id);
+    } else {
+      isNewSignup = true;
+      const randomHash = await bcrypt.hash(Math.random().toString(36), 10);
+      const result = await pool.query(
+        'INSERT INTO artists (name, email, password_hash, email_verified) VALUES ($1, $2, $3, TRUE) RETURNING *',
+        [name, email, randomHash]
+      );
+      artist = result.rows[0];
+      console.log('[Google callback] New artist created, id:', artist.id);
+      sendSignupNotification({ name, email, method: 'Google OAuth' });
+    }
+
+    // Generate JWT
+    const token = jwt.sign(
+      { id: artist.id, email: artist.email, name: artist.name, is_admin: !!artist.is_admin },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+    const artistPayload = encodeURIComponent(JSON.stringify({
+      id: artist.id, name: artist.name, email: artist.email, stage_name: artist.stage_name || null, is_admin: !!artist.is_admin
+    }));
+
+    // Redirect based on profile completeness
+    if (!artist.stage_name) {
+      console.log('[Google callback] Profile incomplete, redirecting to complete-profile');
+      res.redirect(`/?token=${token}&artist=${artistPayload}&google_signup=1`);
+    } else {
+      console.log('[Google callback] Profile complete, redirecting to dashboard');
+      res.redirect(`/?token=${token}&artist=${artistPayload}`);
+    }
+  } catch (err) {
+    console.error('[Google callback] FAILED:', err.message, err.stack);
     res.redirect('/login?error=' + encodeURIComponent('Google sign-in failed. Please try again.'));
   }
 });
@@ -175,133 +266,11 @@ router.get('/apple', async (req, res) => {
   }
 });
 
-// POST /api/auth/oauth-exchange - Exchange access token for our JWT
-// Accepts provider_token (Google access token) and/or access_token (Supabase JWT)
+// POST /api/auth/oauth-exchange - Legacy endpoint (kept for backward compatibility with oauth-callback.html)
 router.post('/oauth-exchange', async (req, res) => {
-  try {
-    const { access_token, provider_token } = req.body;
-    if (!access_token && !provider_token) {
-      return res.status(400).json({ error: 'Missing access_token' });
-    }
-
-    let email, name;
-
-    // Strategy 1: Use provider_token (Google's actual access token) to call Google userinfo
-    if (!email && provider_token) {
-      try {
-        const userinfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-          headers: { Authorization: `Bearer ${provider_token}` },
-        });
-        if (userinfoRes.ok) {
-          const profile = await userinfoRes.json();
-          if (profile.email) {
-            email = profile.email;
-            name = profile.name || profile.email.split('@')[0];
-            console.log('[OAuth exchange] Strategy 1 (provider_token) verified user:', email);
-          }
-        } else {
-          console.warn('[OAuth exchange] Strategy 1 (provider_token) HTTP', userinfoRes.status);
-        }
-      } catch (err) {
-        console.warn('[OAuth exchange] Strategy 1 (provider_token) threw:', err.message);
-      }
-    }
-
-    // Strategy 2: Use access_token directly with Google userinfo (works for direct Google OAuth)
-    if (!email && access_token) {
-      try {
-        const userinfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-          headers: { Authorization: `Bearer ${access_token}` },
-        });
-        if (userinfoRes.ok) {
-          const profile = await userinfoRes.json();
-          if (profile.email) {
-            email = profile.email;
-            name = profile.name || profile.email.split('@')[0];
-            console.log('[OAuth exchange] Strategy 2 (access_token→Google) verified user:', email);
-          }
-        } else {
-          console.warn('[OAuth exchange] Strategy 2 (access_token→Google) HTTP', userinfoRes.status);
-        }
-      } catch (err) {
-        console.warn('[OAuth exchange] Strategy 2 (access_token→Google) threw:', err.message);
-      }
-    }
-
-    // Strategy 3: Verify Supabase token via API
-    if (!email && access_token) {
-      try {
-        const { data: userData, error: userError } = await supabase.auth.getUser(access_token);
-        if (!userError && userData?.user) {
-          const supaUser = userData.user;
-          email = supaUser.email;
-          name = supaUser.user_metadata?.full_name || supaUser.user_metadata?.name || email.split('@')[0];
-          console.log('[OAuth exchange] Strategy 3 (Supabase getUser) verified user:', email);
-        } else {
-          console.warn('[OAuth exchange] Strategy 3 (Supabase getUser) failed:', userError?.message);
-        }
-      } catch (err) {
-        console.warn('[OAuth exchange] Strategy 3 (Supabase getUser) threw:', err.message);
-      }
-    }
-
-    // Strategy 4: Decode Supabase JWT directly (it's a JWT containing user email)
-    if (!email && access_token) {
-      try {
-        const parts = access_token.split('.');
-        if (parts.length === 3) {
-          const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString());
-          if (payload.email) {
-            email = payload.email;
-            name = payload.user_metadata?.full_name || payload.user_metadata?.name || email.split('@')[0];
-            console.log('[OAuth exchange] Strategy 4 (JWT decode) verified user:', email);
-          }
-        }
-      } catch (err) {
-        console.warn('[OAuth exchange] Strategy 4 (JWT decode) threw:', err.message);
-      }
-    }
-
-    if (!email) {
-      console.error('[OAuth exchange] All verification strategies failed');
-      return res.status(401).json({ error: 'Could not verify your Google account. Please try again.' });
-    }
-
-    // Find or create the artist in our database
-    let artist;
-    let isNewSignup = false;
-    const existing = await pool.query('SELECT * FROM artists WHERE email = $1', [email]);
-    if (existing.rows.length > 0) {
-      artist = existing.rows[0];
-    } else {
-      isNewSignup = true;
-      const randomHash = await bcrypt.hash(Math.random().toString(36), 10);
-      const result = await pool.query(
-        'INSERT INTO artists (name, email, password_hash, email_verified) VALUES ($1, $2, $3, TRUE) RETURNING id, name, email, created_at',
-        [name, email, randomHash]
-      );
-      artist = result.rows[0];
-      console.log('[OAuth exchange] New artist created id:', artist.id);
-      // Send signup notification email (non-blocking)
-      sendSignupNotification({ name, email, method: 'Google OAuth' });
-    }
-
-    // Generate our JWT
-    const token = jwt.sign(
-      { id: artist.id, email: artist.email, name: artist.name, is_admin: !!artist.is_admin },
-      process.env.JWT_SECRET,
-      { expiresIn: '7d' }
-    );
-
-    res.json({
-      token,
-      artist: { id: artist.id, name: artist.name, email: artist.email, stage_name: artist.stage_name || null, is_admin: !!artist.is_admin },
-      isNewSignup
-    });
-  } catch (err) {
-    console.error('[OAuth exchange] FAILED:', err.message);
-    res.status(500).json({ error: 'OAuth exchange failed' });
-  }
+  // This endpoint is no longer the primary flow — Google OAuth now uses authorization code flow
+  // handled entirely by GET /api/auth/google/callback. This remains for any edge cases.
+  res.status(410).json({ error: 'This endpoint has been replaced. Please use the Google sign-in button to try again.' });
 });
 
 // GET /api/auth/callback - Legacy callback (kept for backward compatibility)

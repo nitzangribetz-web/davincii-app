@@ -2310,9 +2310,7 @@ footer.m-footer{
 // ── AUTH BOOTSTRAP ──
 // Same linear flow as desktop: detect → activate → validate → fallback
 (function() {
-  // OAuth redirects run immediately (leave the page — no DOM needed)
-  var h = window.location.hash;
-  if (h && h.indexOf('access_token') !== -1) { window.location.replace('/oauth-callback.html' + h); return; }
+  // Legacy OAuth redirect interception (code flow is now handled on the backend)
   var params = new URLSearchParams(window.location.search);
   var oauthCode = params.get('code');
   if (oauthCode && !params.get('token')) { window.location.replace('/api/auth/callback?code=' + encodeURIComponent(oauthCode)); return; }

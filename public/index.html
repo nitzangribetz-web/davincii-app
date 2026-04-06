@@ -2764,9 +2764,7 @@
   (function() {
     var params = new URLSearchParams(window.location.search);
 
-    // Step 1: OAuth redirect interception — these leave the page entirely (no DOM needed)
-    var hashParams = new URLSearchParams(window.location.hash.substring(1));
-    if (hashParams.get('access_token')) { window.location.replace('/oauth-callback.html' + window.location.hash); return; }
+    // Step 1: Legacy OAuth redirect interception (code flow is now handled on the backend)
     var oauthCode = params.get('code');
     if (oauthCode && !params.get('token')) { window.location.replace('/api/auth/callback?code=' + encodeURIComponent(oauthCode)); return; }
 
@@ -3355,7 +3353,11 @@
     const input = document.getElementById('pro-other-input');
     if (wrap) {
       wrap.style.display = val === 'Other' ? 'block' : 'none';
-      if (val === 'Other' && input) input.focus();
+      if (input) {
+        input.setAttribute('data-required', val === 'Other' ? 'true' : 'false');
+        if (val !== 'Other') { input.value = ''; input.classList.remove('field-error'); }
+        else input.focus();
+      }
     }
   }
   function openW9Modal(){document.getElementById('w9-modal-overlay').classList.add('open');}

@@ -14,63 +14,27 @@ body { margin:0; background:#F0F4FA; display:flex; align-items:center; justify-c
 <div class="loader"></div>
 <script>
 (function() {
-  // Parse hash fragment: #access_token=...&provider_token=...&token_type=bearer&...
-  var hash = window.location.hash.substring(1);
-  var params = new URLSearchParams(hash);
-  var accessToken = params.get('access_token');
-  var providerToken = params.get('provider_token');
+  // Legacy fallback — the primary Google OAuth flow now uses authorization code
+  // handled entirely on the backend (GET /api/auth/google/callback).
+  // If someone lands here, redirect them to try again.
 
-  // Also check query params (in case of code flow)
   var query = new URLSearchParams(window.location.search);
   var code = query.get('code');
-  var error = query.get('error') || query.get('error_description') || params.get('error_description');
+  var error = query.get('error') || query.get('error_description');
 
   if (error) {
     window.location.replace('/login?error=' + encodeURIComponent(error));
     return;
   }
 
-  if (accessToken || providerToken) {
-    // Send both tokens — server will try provider_token (Google) first, then Supabase token
-    fetch('/api/auth/oauth-exchange', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ access_token: accessToken, provider_token: providerToken })
-    })
-    .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
-    .then(function(result) {
-      if (!result.ok || !result.data.token) {
-        throw new Error(result.data.error || 'Exchange failed');
-      }
-      var d = result.data;
-      localStorage.setItem('dv_token', d.token);
-      localStorage.setItem('dv_artist', JSON.stringify(d.artist));
-
-      // If profile incomplete (no stage_name), show completion step in SPA signup screen
-      if (!d.artist.stage_name) {
-        if (d.isNewSignup) localStorage.setItem('dv_just_signed_up', '1');
-        var qs = '?token=' + encodeURIComponent(d.token) +
-                 '&artist=' + encodeURIComponent(JSON.stringify(d.artist)) +
-                 '&google_signup=1';
-        window.location.replace('/' + qs);
-      } else {
-        var qs = '?token=' + encodeURIComponent(d.token) +
-                 '&artist=' + encodeURIComponent(JSON.stringify(d.artist));
-        window.location.replace('/' + qs);
-      }
-    })
-    .catch(function(err) {
-      window.location.replace('/login?error=' + encodeURIComponent(err.message || 'Google sign-in failed. Please try again.'));
-    });
-    return;
-  }
-
+  // If a code arrived here (Supabase PKCE fallback), send to legacy callback
   if (code) {
     window.location.replace('/api/auth/callback?code=' + encodeURIComponent(code));
     return;
   }
 
-  window.location.replace('/login?error=' + encodeURIComponent('OAuth failed — no token or code received.'));
+  // No code, no useful tokens — redirect to login
+  window.location.replace('/login?error=' + encodeURIComponent('Sign-in failed. Please try again.'));
 })();
 </script>
 </body>
