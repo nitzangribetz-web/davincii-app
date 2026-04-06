@@ -2209,7 +2209,10 @@ function mobActivateDashboard(artist) {
   document.body.style.background = '#F0F4FA';
   document.body.style.color = '#0A0A0A';
   mobRemoveBootCSS();
-  window.history.replaceState({ screen: 'dashboard' }, '', '/dashboard');
+  var initialPage = getDashPageFromURL() || 'overview';
+  var url = initialPage === 'overview' ? '/dashboard' : '/dashboard/' + initialPage;
+  window.history.replaceState({ screen: 'dashboard', page: initialPage }, '', url);
+  showDP(initialPage, true);
   window.scrollTo(0, 0);
   mobUpdateArtistUI(artist);
 }
@@ -2228,14 +2231,16 @@ function mobUpdateArtistUI(artist) {
   }
 }
 
-// Back button: if authenticated, always go to dashboard
-window.addEventListener('popstate', function() {
+// Back/forward button handler
+window.addEventListener('popstate', function(e) {
   var token = localStorage.getItem('dv_token');
   if (token) {
     var dashScreen = document.getElementById('screen-dashboard');
     if (!dashScreen || !dashScreen.classList.contains('active')) {
       try { mobActivateDashboard(JSON.parse(localStorage.getItem('dv_artist') || '{}')); } catch(_) {}
     }
+    var page = (e.state && e.state.page) || getDashPageFromURL();
+    if (page) showDP(page, true);
   }
 });
 
@@ -2250,6 +2255,8 @@ window.addEventListener('scroll',()=>{
 
 // ── Screen navigation ──
 function go(key){
+  if(key==='login'){window.location.replace('/login.html');return;}
+  if(key==='signup'){window.location.replace('/signup.html');return;}
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const t=document.getElementById('screen-'+key);
   if(t){t.classList.add('active');window.scrollTo(0,0)}
@@ -2259,7 +2266,7 @@ function go(key){
 const ALL_DP=['overview','catalog','add-song','royalties','registration','statements','payouts','notifications','sync','profile','settings'];
 const TAB_DP=['overview','catalog','add-song','royalties','payouts','profile'];
 
-function showDP(page){
+function showDP(page, skipPush){
   ALL_DP.forEach(p=>{
     const el=document.getElementById('dp-'+p);
     if(el)el.style.display='none';
@@ -2270,6 +2277,18 @@ function showDP(page){
     document.getElementById('d-tab-'+p)?.classList.remove('active');
   });
   document.getElementById('d-tab-'+page)?.classList.add('active');
+  if(!skipPush){
+    var url = page === 'overview' ? '/dashboard' : '/dashboard/' + page;
+    window.history.pushState({ screen:'dashboard', page: page }, '', url);
+  }
+}
+
+function getDashPageFromURL(){
+  var path = window.location.pathname;
+  var match = path.match(/^\/dashboard\/(.+)$/);
+  if(match) return match[1];
+  if(path === '/dashboard' || path === '/dashboard/') return 'overview';
+  return null;
 }
 
 // ── Avatar menu ──
