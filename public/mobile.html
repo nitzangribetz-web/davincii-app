@@ -3082,23 +3082,18 @@ function mobSubmitSong() {
   var iswcField = document.getElementById('mob-iswc');
   if (iswcField && iswcField.value.trim()) songData.iswc = iswcField.value.trim();
 
-  // Recordings
+  // Recordings — read directly from input fields
   var recList = document.getElementById('mob-recording-list');
   if (recList && recList.children.length > 0) {
     songData.recordings = [];
     Array.from(recList.children).forEach(function(row) {
-      var divs = row.querySelectorAll('div div');
-      var titleDiv = divs[0];
-      var metaDiv = divs[1];
-      if (titleDiv) {
-        var recTitle = titleDiv.textContent.trim();
-        var isrc = '';
-        if (metaDiv) {
-          var span = metaDiv.querySelector('span');
-          if (span) isrc = span.textContent.trim();
-        }
-        songData.recordings.push({ title: recTitle, isrc: isrc });
-      }
+      var titleInput = row.querySelector('[id^="mob-rec-title-"]');
+      var isrcInput = row.querySelector('[id^="mob-rec-isrc-"]');
+      var artistInput = row.querySelector('[id^="mob-rec-artist-"]');
+      var recTitle = titleInput ? titleInput.value.trim() : '';
+      var isrc = isrcInput ? isrcInput.value.trim() : '';
+      var recArtist = artistInput ? artistInput.value.trim() : '';
+      if (recTitle) songData.recordings.push({ title: recTitle, isrc: isrc, artist: recArtist });
     });
     if (songData.recordings.length > 0) {
       songData.isrc = songData.recordings[0].isrc;

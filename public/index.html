@@ -3343,6 +3343,7 @@
     const list=document.getElementById('desk-recording-list');
     const d=document.createElement('div');
     d.style.cssText='display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border:1px solid #E2E8F0;border-radius:8px;margin-bottom:10px;background:#fff';
+    d.setAttribute('data-rec-title',title);d.setAttribute('data-rec-isrc',isrc);d.setAttribute('data-rec-artist',artist);
     d.innerHTML='<div><div style="font-family:\'DM Sans\',sans-serif;font-size:14px;font-weight:600;color:#0A0A0A">'+title+'</div><div style="font-family:\'DM Sans\',sans-serif;font-size:12px;color:#94A3B8;margin-top:2px">'+artist+' &middot; <span style="font-family:monospace">'+isrc+'</span></div></div><button onclick="this.closest(\'div\').remove()" style="border:none;background:none;font-size:18px;color:#CBD5E1;cursor:pointer">&times;</button>';
     list.appendChild(d);deskCloseRecording();
   }
@@ -3784,26 +3785,15 @@
     var iswcField = document.getElementById('desk-iswc');
     if (iswcField && iswcField.value.trim()) songData.iswc = iswcField.value.trim();
 
-    // Recordings
+    // Recordings — read from data attributes
     var recList = document.getElementById('desk-recording-list');
     if (recList && recList.children.length > 0) {
       songData.recordings = [];
       Array.from(recList.children).forEach(function(row) {
-        var divs = row.querySelectorAll('div div');
-        var titleDiv = divs[0];
-        var metaDiv = divs[1];
-        if (titleDiv) {
-          var recTitle = titleDiv.textContent.trim();
-          var isrc = '';
-          var recArtist = '';
-          if (metaDiv) {
-            var span = metaDiv.querySelector('span');
-            if (span) isrc = span.textContent.trim();
-            var metaText = metaDiv.textContent.replace(isrc, '').replace('·', '').trim();
-            recArtist = metaText;
-          }
-          songData.recordings.push({ title: recTitle, isrc: isrc, artist: recArtist });
-        }
+        var recTitle = row.getAttribute('data-rec-title') || '';
+        var isrc = row.getAttribute('data-rec-isrc') || '';
+        var recArtist = row.getAttribute('data-rec-artist') || '';
+        if (recTitle) songData.recordings.push({ title: recTitle, isrc: isrc, artist: recArtist });
       });
       if (songData.recordings.length > 0) {
         songData.isrc = songData.recordings[0].isrc;
