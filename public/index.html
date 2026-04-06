@@ -3085,6 +3085,9 @@
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   function go(key, skipPush) {
+    // Standalone pages for Safari credential autofill (real form POST + navigation)
+    if(key==='login'){window.location.href='/login.html';return;}
+    if(key==='signup'){window.location.href='/signup.html';return;}
     if(key==='catalog'){go('dashboard');setTimeout(()=>showDashPage('catalog'),50);return;}
     if(key==='royalties'){go('dashboard');setTimeout(()=>showDashPage('royalties'),50);return;}
     if(key==='payouts'){go('dashboard');setTimeout(()=>showDashPage('payouts'),50);return;}
