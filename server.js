@@ -42,6 +42,8 @@ const authLimiter = rateLimit({
 });
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/signup', authLimiter);
+app.use('/api/auth/verify-email', authLimiter);
+app.use('/api/auth/resend-verification', authLimiter);
 app.use('/api/passkeys/login', authLimiter);
 
 // Stripe webhook MUST receive raw body — register before express.json()
