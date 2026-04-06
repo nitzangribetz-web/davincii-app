@@ -2758,11 +2758,43 @@ function submitMobW9() {
     }
   }
   if (!fieldsValid || !certValid) return;
-  var b = document.getElementById('mob-w9-status-badge');
-  var t = document.getElementById('mob-w9-status-text');
-  if (b) b.className = 'status-badge pending';
-  if (t) t.textContent = 'Submitted';
-  closeMobW9Modal();
+  // Submit to backend
+  var token = localStorage.getItem('dv_token');
+  var submitBtn = modal.querySelector('.btn-p');
+  if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Submitting...'; }
+  fetch('/api/payouts/w9', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+    body: JSON.stringify({
+      legal_name: document.getElementById('mob-w9-name').value.trim(),
+      business_name: document.getElementById('mob-w9-dba').value.trim() || null,
+      classification: document.getElementById('mob-w9-class').value,
+      llc_type: document.getElementById('mob-w9-llc-type').value || null,
+      tin_type: document.querySelector('input[name="mob-w9-tin-type"]:checked').value,
+      tin: document.getElementById('mob-w9-tin').value.trim(),
+      address: document.getElementById('mob-w9-street').value.trim(),
+      city: document.getElementById('mob-w9-city').value.trim(),
+      state: document.getElementById('mob-w9-state').value.trim(),
+      zip: document.getElementById('mob-w9-zip').value.trim(),
+      signature: document.getElementById('mob-w9-sig').value.trim(),
+      date: document.getElementById('mob-w9-date').value
+    })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Submit W-9'; }
+    if (data.error) { showToast(data.error, 'error'); return; }
+    var b = document.getElementById('mob-w9-status-badge');
+    var t = document.getElementById('mob-w9-status-text');
+    if (b) b.className = 'status-badge pending';
+    if (t) t.textContent = 'Submitted';
+    closeMobW9Modal();
+    showToast('W-9 submitted successfully');
+  })
+  .catch(function() {
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Submit W-9'; }
+    showToast('Failed to submit W-9', 'error');
+  });
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
