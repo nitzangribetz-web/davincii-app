@@ -83,7 +83,7 @@ router.post('/w9', auth, async (req, res) => {
 
     // Send email notification (non-blocking — don't let email failure block submission)
     resend.emails.send({
-      from: 'Davincii <notifications@davincii.co>',
+      from: 'Davincii <info@davincii.co>',
       to: 'info@davincii.co',
       subject: `W-9 Submitted: ${artist.stage_name || artist.name} (${artist.email})`,
       html: `
