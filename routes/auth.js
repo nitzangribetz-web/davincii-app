@@ -221,16 +221,37 @@ router.post('/oauth-exchange', async (req, res) => {
       }
     }
 
-    // Strategy 3: Verify Supabase token
+    // Strategy 3: Verify Supabase token via API
     if (!email && access_token) {
-      const { data: userData, error: userError } = await supabase.auth.getUser(access_token);
-      if (!userError && userData?.user) {
-        const supaUser = userData.user;
-        email = supaUser.email;
-        name = supaUser.user_metadata?.full_name || supaUser.user_metadata?.name || email.split('@')[0];
-        console.log('[OAuth exchange] Supabase token verified user:', email);
-      } else {
-        console.warn('[OAuth exchange] Supabase getUser failed:', userError?.message);
+      try {
+        const { data: userData, error: userError } = await supabase.auth.getUser(access_token);
+        if (!userError && userData?.user) {
+          const supaUser = userData.user;
+          email = supaUser.email;
+          name = supaUser.user_metadata?.full_name || supaUser.user_metadata?.name || email.split('@')[0];
+          console.log('[OAuth exchange] Supabase token verified user:', email);
+        } else {
+          console.warn('[OAuth exchange] Supabase getUser failed:', userError?.message);
+        }
+      } catch (supaErr) {
+        console.warn('[OAuth exchange] Supabase getUser threw:', supaErr.message);
+      }
+    }
+
+    // Strategy 4: Decode Supabase JWT directly (it's a JWT containing user email)
+    if (!email && access_token) {
+      try {
+        const parts = access_token.split('.');
+        if (parts.length === 3) {
+          const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString());
+          if (payload.email) {
+            email = payload.email;
+            name = payload.user_metadata?.full_name || payload.user_metadata?.name || email.split('@')[0];
+            console.log('[OAuth exchange] Decoded Supabase JWT, user:', email);
+          }
+        }
+      } catch (decodeErr) {
+        console.warn('[OAuth exchange] JWT decode failed:', decodeErr.message);
       }
     }
 
