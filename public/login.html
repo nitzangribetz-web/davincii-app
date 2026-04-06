@@ -174,7 +174,7 @@ body { font-family:'DM Sans', system-ui, sans-serif; background:#fff; }
     <div class="auth-form-inner">
       <div class="auth-page-title">Welcome <em>back.</em></div>
 
-      <div class="error-box" id="login-error"></div>
+      <div class="error-box" id="login-error" hidden></div>
 
       <form method="POST" action="/api/auth/login">
         <input class="auth-field" type="email" name="email" id="email"
@@ -214,8 +214,9 @@ body { font-family:'DM Sans', system-ui, sans-serif; background:#fff; }
   if (error) {
     var el = document.getElementById('login-error');
     el.textContent = error;
+    el.removeAttribute('hidden');
     el.classList.add('visible');
-    window.history.replaceState({}, '', '/login.html');
+    window.history.replaceState({}, '', '/login');
   }
 })();
 </script>
