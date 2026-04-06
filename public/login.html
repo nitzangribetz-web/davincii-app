@@ -177,11 +177,11 @@ body { font-family:'DM Sans', system-ui, sans-serif; background:#fff; }
 
       <div class="error-box" id="login-error"></div>
 
-      <form method="POST" action="/api/auth/login" autocomplete="on">
-        <input class="auth-field" type="text" inputmode="email" name="email" id="login-email"
+      <form method="POST" action="/api/auth/login">
+        <input class="auth-field" type="email" name="email" id="email"
                autocomplete="username" placeholder="Email address" required>
 
-        <input class="auth-field" type="password" name="password" id="login-password"
+        <input class="auth-field" type="password" name="password" id="password"
                autocomplete="current-password" placeholder="Password" required>
 
         <a class="auth-forgot-link" href="/">Recover your account</a>
