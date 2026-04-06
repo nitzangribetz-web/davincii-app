@@ -187,26 +187,29 @@ router.post('/oauth-exchange', async (req, res) => {
     let email, name;
 
     // Strategy 1: Use provider_token (Google's actual access token) to call Google userinfo
-    if (provider_token) {
-      const userinfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-        headers: { Authorization: `Bearer ${provider_token}` },
-      });
-      if (userinfoRes.ok) {
-        const profile = await userinfoRes.json();
-        if (profile.email) {
-          email = profile.email;
-          name = profile.name || profile.email.split('@')[0];
-          console.log('[OAuth exchange] Google provider_token verified user:', email);
+    if (!email && provider_token) {
+      try {
+        const userinfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: `Bearer ${provider_token}` },
+        });
+        if (userinfoRes.ok) {
+          const profile = await userinfoRes.json();
+          if (profile.email) {
+            email = profile.email;
+            name = profile.name || profile.email.split('@')[0];
+            console.log('[OAuth exchange] Strategy 1 (provider_token) verified user:', email);
+          }
+        } else {
+          console.warn('[OAuth exchange] Strategy 1 (provider_token) HTTP', userinfoRes.status);
         }
-      } else {
-        console.warn('[OAuth exchange] Google provider_token failed:', userinfoRes.status);
+      } catch (err) {
+        console.warn('[OAuth exchange] Strategy 1 (provider_token) threw:', err.message);
       }
     }
 
-    // Strategy 2: Use access_token directly with Google userinfo (for direct Google OAuth)
+    // Strategy 2: Use access_token directly with Google userinfo (works for direct Google OAuth)
     if (!email && access_token) {
-      const googleClientId = process.env.GOOGLE_CLIENT_ID;
-      if (googleClientId) {
+      try {
         const userinfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
           headers: { Authorization: `Bearer ${access_token}` },
         });
@@ -215,9 +218,13 @@ router.post('/oauth-exchange', async (req, res) => {
           if (profile.email) {
             email = profile.email;
             name = profile.name || profile.email.split('@')[0];
-            console.log('[OAuth exchange] Google direct token verified user:', email);
+            console.log('[OAuth exchange] Strategy 2 (access_token→Google) verified user:', email);
           }
+        } else {
+          console.warn('[OAuth exchange] Strategy 2 (access_token→Google) HTTP', userinfoRes.status);
         }
+      } catch (err) {
+        console.warn('[OAuth exchange] Strategy 2 (access_token→Google) threw:', err.message);
       }
     }
 
@@ -229,12 +236,12 @@ router.post('/oauth-exchange', async (req, res) => {
           const supaUser = userData.user;
           email = supaUser.email;
           name = supaUser.user_metadata?.full_name || supaUser.user_metadata?.name || email.split('@')[0];
-          console.log('[OAuth exchange] Supabase token verified user:', email);
+          console.log('[OAuth exchange] Strategy 3 (Supabase getUser) verified user:', email);
         } else {
-          console.warn('[OAuth exchange] Supabase getUser failed:', userError?.message);
+          console.warn('[OAuth exchange] Strategy 3 (Supabase getUser) failed:', userError?.message);
         }
-      } catch (supaErr) {
-        console.warn('[OAuth exchange] Supabase getUser threw:', supaErr.message);
+      } catch (err) {
+        console.warn('[OAuth exchange] Strategy 3 (Supabase getUser) threw:', err.message);
       }
     }
 
@@ -247,11 +254,11 @@ router.post('/oauth-exchange', async (req, res) => {
           if (payload.email) {
             email = payload.email;
             name = payload.user_metadata?.full_name || payload.user_metadata?.name || email.split('@')[0];
-            console.log('[OAuth exchange] Decoded Supabase JWT, user:', email);
+            console.log('[OAuth exchange] Strategy 4 (JWT decode) verified user:', email);
           }
         }
-      } catch (decodeErr) {
-        console.warn('[OAuth exchange] JWT decode failed:', decodeErr.message);
+      } catch (err) {
+        console.warn('[OAuth exchange] Strategy 4 (JWT decode) threw:', err.message);
       }
     }
 
