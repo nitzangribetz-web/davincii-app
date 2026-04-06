@@ -2577,7 +2577,12 @@ function dPayout(m){
 // ── PRO Other ──
 function dTogglePro(v){
   const w=document.getElementById('d-pro-other');
+  const input=document.getElementById('mob-pro-other');
   if(w)w.style.display=v==='Other'?'block':'none';
+  if(input){
+    input.setAttribute('data-required', v==='Other'?'true':'false');
+    if(v!=='Other'){input.value='';input.classList.remove('field-error');}
+  }
 }
 
 // ── Admin: Load signups ──

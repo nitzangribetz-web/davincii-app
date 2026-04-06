@@ -3395,6 +3395,17 @@
     }
     input.value = '';
   }
+  function formatDobInput(el) {
+    var v = el.value.replace(/[^\d]/g, '');
+    if (v.length >= 4) v = v.slice(0,2) + '/' + v.slice(2,4) + '/' + v.slice(4,8);
+    else if (v.length >= 2) v = v.slice(0,2) + '/' + v.slice(2);
+    el.value = v;
+  }
+  function dobCalPick(cal, targetId) {
+    if (!cal.value) return;
+    var parts = cal.value.split('-');
+    document.getElementById(targetId).value = parts[1] + '/' + parts[2] + '/' + parts[0];
+  }
   function w9FormatTin(el) {
     var type = document.querySelector('input[name="w9-tin-type"]:checked').value;
     var v = el.value.replace(/[^\d]/g, '');
@@ -4845,7 +4856,11 @@
 
           <div>
             <label class="field-label">Date of Birth *</label>
-            <input class="field" type="date" id="pf-dob" data-required="true" style="margin-bottom:0;">
+            <div style="position:relative">
+              <input class="field" type="text" id="pf-dob" data-required="true" placeholder="MM/DD/YYYY" maxlength="10" inputmode="numeric" oninput="formatDobInput(this)" style="margin-bottom:0;padding-right:36px;">
+              <input type="date" id="pf-dob-cal" style="position:absolute;right:0;top:0;width:36px;height:100%;opacity:0;cursor:pointer" onchange="dobCalPick(this,'pf-dob')">
+              <svg style="position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;width:16px;height:16px;opacity:0.35" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </div>
           </div>
 
           <div>
