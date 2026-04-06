@@ -3272,7 +3272,7 @@
     const p=document.getElementById('signup-step-'+s);
     if(p){p.style.display='block';_sStep=s;}window.scrollTo(0,0);
   }
-  function signupBackDesktop(){if(_sStep>1)signupNextDesktop(_sStep-1);else go('landing');}
+  function signupBackDesktop(){go('landing');}
 
   // Google OAuth signup completion (inside SPA signup screen)
   function submitGoogleSignupDesktop() {
@@ -3992,7 +3992,7 @@
               <input type="checkbox" id="agree-check" required>
               <label for="agree-check">I agree to Davincii's <a onclick="go('terms')">Terms</a> and <a onclick="go('privacy')">Privacy Policy</a></label>
             </div>
-            <button class="auth-btn-primary" type="button" onclick="signupNextDesktop(2)">Continue</button>
+            <button class="auth-btn-primary" type="submit">Sign up</button>
           </form>
           <div class="auth-footer-link">Already have an account? <a onclick="go('login')">Sign in</a></div>
         </div>
@@ -4014,46 +4014,6 @@
           <div style="margin-top:16px;text-align:center">
             <button onclick="go('signup')" style="font-family:'DM Sans',sans-serif;font-size:13px;color:#94A3B8;background:none;border:none;cursor:pointer;padding:0">&larr; Use email instead</button>
           </div>
-        </div>
-        <!-- Step 2 — Agreement -->
-        <div class="signup-panel" id="signup-step-2" style="display:none">
-          <div class="auth-page-title">Publishing <em>Agreement.</em></div>
-          <div class="auth-agreement-box">
-            <div class="auth-agreement-box-head">
-              <span class="auth-agreement-box-title">Publishing Administration Agreement</span>
-              <span class="auth-agreement-box-badge">Davincii LLC</span>
-            </div>
-            <div class="auth-agreement-box-body">
-              <p>This agreement grants Davincii the right to register your compositions and collect royalties on your behalf.</p>
-              <p style="margin-top:10px"><strong style="font-weight:600;color:#374151">Key terms:</strong> 15% commission on collected royalties only. No upfront fees. 100% copyright stays yours. 30-day termination notice. 12-month collection tail.</p>
-            </div>
-            <div class="auth-agreement-box-footer">
-              <a style="cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:#1452CC;text-decoration:none">Read full agreement →</a>
-            </div>
-          </div>
-          <input class="auth-field" type="text" placeholder="Type your full legal name to sign">
-          <p class="auth-note">By typing your name, you agree to be bound by these terms.</p>
-          <button class="auth-btn-primary" onclick="signupNextDesktop(3)">I agree &amp; continue</button>
-        </div>
-        <!-- Step 3 — Artist Details -->
-        <div class="signup-panel" id="signup-step-3" style="display:none">
-          <div class="auth-page-title">Artist <em>details.</em></div>
-          <input class="auth-field" type="text" placeholder="Artist / stage name">
-          <select class="auth-field" style="-webkit-appearance:none">
-            <option value="" disabled selected>Select your PRO</option>
-            <option>ASCAP</option><option>BMI</option><option>SESAC</option>
-            <option>SOCAN</option><option>PRS for Music</option><option>SACEM</option>
-            <option>GEMA</option><option>APRA AMCOS</option><option>PPL</option>
-            <option>SIAE</option><option>Other</option><option>Not yet registered</option>
-          </select>
-          <input class="auth-field" type="text" placeholder="IPI / CAE number (optional)">
-          <input class="auth-field" type="date">
-          <input class="auth-field" type="text" placeholder="Street address">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
-            <input class="auth-field" style="margin-bottom:0" type="text" placeholder="City">
-            <input class="auth-field" style="margin-bottom:0" type="text" placeholder="State">
-          </div>
-          <button class="auth-btn-primary" onclick="go('dashboard')">Complete setup</button>
         </div>
       </div>
     </div>

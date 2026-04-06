@@ -1642,20 +1642,22 @@ footer.m-footer{
     <div class="m-signup-panel" id="ms-1">
 
       <div class="m-auth-title">Get <em>started.</em></div>
-      <form method="POST" action="/api/auth/signup" id="mob-signup-form">
+      <div class="error-box" id="mob-signup-error" hidden></div>
+      <form method="POST" action="/api/auth/signup" id="mob-signup-form" onsubmit="return mobValidateSignup()">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:0">
-          <input class="field" style="margin-bottom:0" type="text" name="first_name" placeholder="First name" required>
-          <input class="field" style="margin-bottom:0" type="text" name="last_name" placeholder="Last name" required>
+          <input class="field" style="margin-bottom:0" type="text" name="first_name" id="mob-sf-first" placeholder="First name" required>
+          <input class="field" style="margin-bottom:0" type="text" name="last_name" id="mob-sf-last" placeholder="Last name" required>
         </div>
         <div style="height:12px"></div>
-        <input class="field" type="email" name="email" placeholder="Email address" required>
-        <input class="field" type="password" name="password" placeholder="Create a password" required>
-        <input class="field" type="password" name="confirm_password" placeholder="Confirm password" required>
+        <input class="field" type="text" name="artist_name" id="mob-sf-artist" placeholder="Artist / stage name" required>
+        <input class="field" type="email" name="email" id="mob-sf-email" placeholder="Email address" required>
+        <input class="field" type="password" name="password" id="mob-sf-pass" placeholder="Create a password" required>
+        <input class="field" type="password" name="confirm_password" id="mob-sf-confirm" placeholder="Confirm password" required>
         <div class="m-agree-row">
           <input type="checkbox" id="mob-agree" required>
           <label for="mob-agree">I agree to Davincii's <a onclick="go('terms')">Terms</a> and <a onclick="go('privacy')">Privacy Policy</a></label>
         </div>
-        <button class="btn-p" type="button" onclick="signupStep(2)">Continue</button>
+        <button class="btn-p" type="submit">Sign up</button>
       </form>
       <div class="divider"><span>or</span></div>
       <a class="btn-social" href="/api/auth/google" style="text-decoration:none">
@@ -1686,45 +1688,6 @@ footer.m-footer{
       </div>
     </div>
 
-    <!-- Step 2 — Agreement -->
-    <div class="m-signup-panel" id="ms-2" style="display:none">
-
-      <div class="m-auth-title">Publishing <em>Agreement.</em></div>
-      <div class="m-agr">
-        <div class="m-agr-hd">
-          <span class="m-agr-title">Publishing Administration Agreement</span>
-          <span class="m-agr-badge">Davincii LLC</span>
-        </div>
-        <div class="m-agr-body">
-          <p>This agreement grants Davincii the right to register your compositions and collect royalties on your behalf.</p>
-          <p style="margin-top:10px"><strong>Key terms:</strong> 15% commission on collected royalties only. No upfront fees. 100% copyright stays yours. 30-day termination notice.</p>
-        </div>
-        <div class="m-agr-footer"><a onclick="go('terms')">Read full agreement →</a></div>
-      </div>
-      <input class="field" type="text" placeholder="Type your full legal name to sign">
-      <p class="m-auth-note">By typing your name you agree to be bound by these terms.</p>
-      <button class="btn-p" onclick="signupStep(3)">I agree &amp; continue</button>
-    </div>
-
-    <!-- Step 3 — Artist details -->
-    <div class="m-signup-panel" id="ms-3" style="display:none">
-
-      <div class="m-auth-title">Artist <em>details.</em></div>
-      <input class="field" type="text" name="artist_name" placeholder="Artist / stage name" form="mob-signup-form">
-      <select class="field" style="-webkit-appearance:none" name="pro" form="mob-signup-form">
-        <option value="" disabled selected>Select your PRO</option>
-        <option>ASCAP</option><option>BMI</option><option>SESAC</option>
-        <option>SOCAN</option><option>PRS for Music</option><option>GEMA</option>
-        <option>SIAE</option><option>Other</option><option>Not yet registered</option>
-      </select>
-      <input class="field" type="text" name="ipi" placeholder="IPI / CAE number">
-      <div style="position:relative">
-        <input class="field" type="text" name="dob" id="mob-signup-dob" placeholder="MM/DD/YYYY" maxlength="10" inputmode="numeric" oninput="formatDobInput(this)" style="padding-right:36px;margin-bottom:0">
-        <input type="date" style="position:absolute;right:0;top:0;width:36px;height:100%;opacity:0;cursor:pointer" onchange="dobCalPick(this,'mob-signup-dob')">
-        <svg style="position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;width:16px;height:16px;opacity:0.35" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-      </div>
-      <button class="btn-p" type="submit" onclick="document.getElementById('mob-signup-form').submit()">Complete setup →</button>
-    </div>
   </div>
 </div>
 
@@ -2541,8 +2504,25 @@ function signupStep(s){
   window.scrollTo(0,0);
 }
 function signupBack(){
-  if(_mStep>1)signupStep(_mStep-1);
-  else go('landing');
+  go('landing');
+}
+function mobValidateSignup(){
+  var errEl=document.getElementById('mob-signup-error');
+  errEl.setAttribute('hidden','');
+  var first=document.getElementById('mob-sf-first').value.trim();
+  var last=document.getElementById('mob-sf-last').value.trim();
+  var artist=document.getElementById('mob-sf-artist').value.trim();
+  var email=document.getElementById('mob-sf-email').value.trim();
+  var pass=document.getElementById('mob-sf-pass').value;
+  var confirm=document.getElementById('mob-sf-confirm').value;
+  var agree=document.getElementById('mob-agree').checked;
+  if(!first||!last){errEl.textContent='First and last name are required.';errEl.removeAttribute('hidden');return false;}
+  if(!artist){errEl.textContent='Artist / stage name is required.';errEl.removeAttribute('hidden');return false;}
+  if(!email){errEl.textContent='Email address is required.';errEl.removeAttribute('hidden');return false;}
+  if(!pass){errEl.textContent='Password is required.';errEl.removeAttribute('hidden');return false;}
+  if(pass!==confirm){errEl.textContent='Passwords do not match.';errEl.removeAttribute('hidden');return false;}
+  if(!agree){errEl.textContent='You must agree to the Terms and Privacy Policy.';errEl.removeAttribute('hidden');return false;}
+  return true;
 }
 
 // ── Google OAuth signup completion ──
