@@ -184,4 +184,35 @@ router.post('/login/verify', async (req, res) => {
   }
 });
 
+// GET /api/passkeys/list - List passkeys for authenticated user
+router.get('/list', authMiddleware, async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT id, device_type, backed_up, transports, created_at FROM passkeys WHERE artist_id = $1 ORDER BY created_at DESC',
+      [req.artist.id]
+    );
+    res.json({ passkeys: result.rows });
+  } catch (err) {
+    console.error('List passkeys error:', err.message);
+    res.status(500).json({ error: 'Failed to list passkeys' });
+  }
+});
+
+// DELETE /api/passkeys/:id - Delete a passkey
+router.delete('/:id', authMiddleware, async (req, res) => {
+  try {
+    const result = await pool.query(
+      'DELETE FROM passkeys WHERE id = $1 AND artist_id = $2 RETURNING id',
+      [req.params.id, req.artist.id]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Passkey not found' });
+    }
+    res.json({ deleted: true });
+  } catch (err) {
+    console.error('Delete passkey error:', err.message);
+    res.status(500).json({ error: 'Failed to delete passkey' });
+  }
+});
+
 module.exports = router;

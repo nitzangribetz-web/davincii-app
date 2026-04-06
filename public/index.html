@@ -2754,71 +2754,79 @@
 <!-- ══════════ SCRIPTS ══════════ -->
 <script>
   // ── AUTH BOOTSTRAP ──
-  // Single linear startup path:
-  //   1. Check for OAuth redirects (hash/code) → redirect away
-  //   2. Check for token in URL (from auth-complete.html) → store + activate dashboard
-  //   3. Check for token in localStorage → validate + activate dashboard
-  //   4. No token → remove boot CSS, show landing
-  (function authBoot() {
+  // OAuth redirects run immediately (they leave the page — no DOM needed).
+  // Everything else waits for DOMContentLoaded so all screen elements exist.
+  (function() {
     var params = new URLSearchParams(window.location.search);
 
-    // Step 1: OAuth redirect interception — these leave the page entirely
+    // Step 1: OAuth redirect interception — these leave the page entirely (no DOM needed)
     var hashParams = new URLSearchParams(window.location.hash.substring(1));
     if (hashParams.get('access_token')) { window.location.replace('/oauth-callback.html' + window.location.hash); return; }
     var oauthCode = params.get('code');
     if (oauthCode && !params.get('token')) { window.location.replace('/api/auth/callback?code=' + encodeURIComponent(oauthCode)); return; }
-    if (params.get('error')) { removeBootCSS(); window.history.replaceState({}, '', '/'); return; }
 
-    // Step 2: Token in URL (arriving from auth-complete.html after login/signup)
-    var token = params.get('token');
-    var artistParam = params.get('artist');
-    if (token && artistParam) {
-      try {
-        var artist;
-        try { artist = JSON.parse(artistParam); } catch(_) { artist = JSON.parse(decodeURIComponent(artistParam)); }
-        localStorage.setItem('dv_token', token);
-        localStorage.setItem('dv_artist', JSON.stringify(artist));
-        window.history.replaceState({ screen: 'dashboard' }, '', '/dashboard');
-        onAuthSuccess(artist, params.get('signup') === '1');
-      } catch (e) {
-        console.error('[Auth] parse error:', e);
-        removeBootCSS();
-      }
-      return;
-    }
+    // Steps 2-4 need DOM elements — wait for them
+    document.addEventListener('DOMContentLoaded', function() {
+      if (params.get('error')) { removeBootCSS(); window.history.replaceState({}, '', '/'); return; }
 
-    // Step 3: Token in localStorage (returning user or page refresh)
-    var savedToken = localStorage.getItem('dv_token');
-    var savedArtist = localStorage.getItem('dv_artist');
-    if (savedToken && savedArtist) {
-      // Immediately activate dashboard from cached data (no flash)
-      try {
-        var cachedArtist = JSON.parse(savedArtist);
-        onAuthSuccess(cachedArtist, false);
-      } catch(_) {}
-      // Then validate token in background — if expired, boot back to landing
-      fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + savedToken } })
-        .then(function(r) { if (r.ok) return r.json(); throw new Error('expired'); })
-        .then(function(freshArtist) {
-          // Update UI with fresh data from server
-          updateArtistUI(freshArtist);
-          localStorage.setItem('dv_artist', JSON.stringify(freshArtist));
-        })
-        .catch(function() {
-          // Token expired — clear auth and show landing
-          localStorage.removeItem('dv_token');
-          localStorage.removeItem('dv_artist');
+      // Step 2: Token in URL (arriving from auth-complete.html after login/signup)
+      var token = params.get('token');
+      var artistParam = params.get('artist');
+      if (token && artistParam) {
+        try {
+          var artist;
+          try { artist = JSON.parse(artistParam); } catch(_) { artist = JSON.parse(decodeURIComponent(artistParam)); }
+          localStorage.setItem('dv_token', token);
+          localStorage.setItem('dv_artist', JSON.stringify(artist));
+          onAuthSuccess(artist, params.get('signup') === '1');
+        } catch (e) {
+          console.error('[Auth] parse error:', e);
           removeBootCSS();
-          document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
-          document.getElementById('screen-landing').classList.add('active');
-          document.body.style.background = '#030912';
-          document.body.style.color = '#fff';
-        });
-      return;
-    }
+        }
+        return;
+      }
 
-    // Step 4: No token — show landing page (remove boot CSS if it was injected)
-    removeBootCSS();
+      // Step 3: Token in localStorage (returning user or page refresh)
+      var savedToken = localStorage.getItem('dv_token');
+      var savedArtist = localStorage.getItem('dv_artist');
+      if (savedToken && savedArtist) {
+        // Immediately activate dashboard from cached data (no flash)
+        try {
+          var cachedArtist = JSON.parse(savedArtist);
+          onAuthSuccess(cachedArtist, false);
+        } catch(e) { console.error('[Auth] cached artist parse error:', e); }
+        // Validate token in background — only log out if server confirms token is invalid
+        fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + savedToken } })
+          .then(function(r) {
+            if (r.ok) return r.json();
+            if (r.status === 401 || r.status === 403) throw new Error('unauthorized');
+            // Server error (500, network issue) — don't log the user out
+            return null;
+          })
+          .then(function(freshArtist) {
+            if (freshArtist) {
+              updateArtistUI(freshArtist);
+              localStorage.setItem('dv_artist', JSON.stringify(freshArtist));
+            }
+          })
+          .catch(function(err) {
+            if (err.message === 'unauthorized') {
+              // Token truly expired/invalid — clear auth and show landing
+              localStorage.removeItem('dv_token');
+              localStorage.removeItem('dv_artist');
+              removeBootCSS();
+              document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+              document.getElementById('screen-landing').classList.add('active');
+              document.body.style.background = '#030912';
+              document.body.style.color = '#fff';
+            }
+          });
+        return;
+      }
+
+      // Step 4: No token — show landing page (remove boot CSS if it was injected)
+      removeBootCSS();
+    });
   })();
 
   function removeBootCSS() {
