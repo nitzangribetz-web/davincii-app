@@ -40,13 +40,14 @@
       localStorage.setItem('dv_token', d.token);
       localStorage.setItem('dv_artist', JSON.stringify(d.artist));
 
-      var qs = '?token=' + encodeURIComponent(d.token) +
-               '&artist=' + encodeURIComponent(JSON.stringify(d.artist));
       if (d.isNewSignup) {
         localStorage.setItem('dv_just_signed_up', '1');
-        qs += '&signup=1';
+        window.location.replace('/google-signup.html');
+      } else {
+        var qs = '?token=' + encodeURIComponent(d.token) +
+                 '&artist=' + encodeURIComponent(JSON.stringify(d.artist));
+        window.location.replace('/' + qs);
       }
-      window.location.replace('/' + qs);
     })
     .catch(function() {
       window.location.replace('/?error=callback_failed');

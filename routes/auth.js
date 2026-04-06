@@ -288,8 +288,11 @@ router.get('/callback', async (req, res) => {
       { expiresIn: '7d' }
     );
     const artistPayload = encodeURIComponent(JSON.stringify({ id: artist.id, name: artist.name, email: artist.email }));
-    const signupFlag = isNewSignup ? '&signup=1' : '';
-    res.redirect(`/auth-complete.html?token=${token}&artist=${artistPayload}${signupFlag}`);
+    if (isNewSignup) {
+      res.redirect(`/auth-complete.html?token=${token}&artist=${artistPayload}&signup=1&redirect=google-signup`);
+    } else {
+      res.redirect(`/auth-complete.html?token=${token}&artist=${artistPayload}`);
+    }
   } catch (err) {
     console.error('[OAuth callback] FAILED:', err.message);
     res.redirect('/?error=callback_failed');
@@ -507,6 +510,108 @@ router.post('/profile', require('../middleware/auth'), async (req, res) => {
     console.error('Profile update error:', err.message);
     if (isFormSubmit) return res.redirect('/details.html?error=' + encodeURIComponent('Failed to save details'));
     res.status(500).json({ error: 'Failed to save details' });
+  }
+});
+
+// POST /api/auth/complete-google-signup — finish Google OAuth signup with name + artist details
+router.post('/complete-google-signup', require('../middleware/auth'), async (req, res) => {
+  const { first_name, last_name, stage_name } = req.body;
+
+  if (!first_name || !last_name) {
+    return res.status(400).json({ error: 'First and last name are required' });
+  }
+  if (!stage_name) {
+    return res.status(400).json({ error: 'Artist / stage name is required' });
+  }
+
+  const fullName = `${first_name.trim()} ${last_name.trim()}`;
+
+  try {
+    await pool.query(
+      'UPDATE artists SET name=$1, stage_name=$2, onboarded=TRUE WHERE id=$3',
+      [fullName, stage_name.trim(), req.artist.id]
+    );
+
+    // Get updated artist
+    const result = await pool.query(
+      'SELECT id, name, email, stage_name, created_at FROM artists WHERE id = $1',
+      [req.artist.id]
+    );
+    const artist = result.rows[0];
+
+    // Re-issue JWT with updated name
+    const token = jwt.sign(
+      { id: artist.id, email: artist.email, name: artist.name },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    // Send signup notification to admin with full details
+    try {
+      const resend = new Resend(process.env.RESEND_API_KEY);
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZoneName: 'short' });
+
+      await resend.emails.send({
+        from: 'Davincii <onboarding@resend.dev>',
+        to: 'info@davincii.co',
+        subject: `New Google Signup: ${artist.stage_name} — ${artist.name} (${artist.email})`,
+        html: `
+          <div style="font-family:'Inter',Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;color:#0A0A0A">
+            <div style="background:linear-gradient(135deg,#0E2A78 0%,#060E28 100%);padding:28px 36px;text-align:center">
+              <img src="https://davincii.co/logo-white-sm.png" alt="Davincii" style="height:26px">
+            </div>
+            <div style="padding:36px;background:#ffffff;border:1px solid #E2E8F0;border-top:none">
+              <h2 style="font-family:Georgia,serif;font-size:22px;font-weight:400;margin:0 0 6px;color:#0A0A0A">New Google Signup Complete</h2>
+              <div style="width:28px;height:2px;background:#2260CC;margin-bottom:20px"></div>
+              <p style="font-size:13px;color:#64748B;margin:0 0 28px;line-height:1.6">A new artist signed up via Google and completed their profile.</p>
+              <table style="width:100%;border-collapse:collapse;margin-bottom:24px">
+                <tr>
+                  <td style="padding:12px 0;border-bottom:1px solid #F1F5F9;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#94A3B8;width:120px">Name</td>
+                  <td style="padding:12px 0;border-bottom:1px solid #F1F5F9;font-size:15px;font-weight:600;color:#0A0A0A">${artist.name}</td>
+                </tr>
+                <tr>
+                  <td style="padding:12px 0;border-bottom:1px solid #F1F5F9;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#94A3B8">Artist Name</td>
+                  <td style="padding:12px 0;border-bottom:1px solid #F1F5F9;font-size:15px;font-weight:600;color:#0A0A0A">${artist.stage_name}</td>
+                </tr>
+                <tr>
+                  <td style="padding:12px 0;border-bottom:1px solid #F1F5F9;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#94A3B8">Email</td>
+                  <td style="padding:12px 0;border-bottom:1px solid #F1F5F9;font-size:14px;color:#0A0A0A">
+                    <a href="mailto:${artist.email}" style="color:#2563EB;text-decoration:none">${artist.email}</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:12px 0;border-bottom:1px solid #F1F5F9;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#94A3B8">Method</td>
+                  <td style="padding:12px 0;border-bottom:1px solid #F1F5F9;font-size:14px;color:#0A0A0A">Google OAuth</td>
+                </tr>
+                <tr>
+                  <td style="padding:12px 0;border-bottom:1px solid #F1F5F9;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#94A3B8">Date</td>
+                  <td style="padding:12px 0;border-bottom:1px solid #F1F5F9;font-size:14px;color:#0A0A0A">${dateStr}</td>
+                </tr>
+                <tr>
+                  <td style="padding:12px 0;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#94A3B8">Time</td>
+                  <td style="padding:12px 0;font-size:14px;color:#0A0A0A">${timeStr}</td>
+                </tr>
+              </table>
+            </div>
+            <div style="padding:18px 36px;text-align:center;font-size:11px;color:#94A3B8">
+              Davincii Publishing Administration &middot; davincii.co
+            </div>
+          </div>`
+      });
+      console.log(`[Google signup notification] Email sent for: ${artist.email}`);
+    } catch (emailErr) {
+      console.error('[Google signup notification] Failed:', emailErr.message);
+    }
+
+    res.json({
+      token,
+      artist: { id: artist.id, name: artist.name, email: artist.email, stage_name: artist.stage_name }
+    });
+  } catch (err) {
+    console.error('Complete Google signup error:', err.message);
+    res.status(500).json({ error: 'Failed to complete signup' });
   }
 });
 
