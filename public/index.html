@@ -2951,6 +2951,9 @@
       var greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
       greetingEl.innerHTML = greeting + ', <em id="dash-greeting-name">' + displayName + '.</em>';
     }
+    // Pre-populate profile form stage name
+    var pfStage = document.getElementById('pf-stage-name');
+    if (pfStage) pfStage.value = artist.stage_name || '';
   }
 
   // ── FILM GRAIN (canvas, highest quality) ──
@@ -3641,10 +3644,8 @@
     var form = document.getElementById('profile-form');
     if (!validateFields(form)) return;
 
-    // Get stage_name from stored artist data (set during signup)
-    var storedArtist = JSON.parse(localStorage.getItem('dv_artist') || '{}');
     var data = {
-      stage_name: storedArtist.stage_name || storedArtist.name || '',
+      stage_name: document.getElementById('pf-stage-name').value.trim(),
       dob: document.getElementById('pf-dob').value,
       pro: document.getElementById('pro-select').value,
       ipi: document.getElementById('pf-ipi').value.trim(),
@@ -3668,6 +3669,11 @@
     .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
     .then(function(res) {
       if (res.ok) {
+        // Update stored artist with new stage_name
+        var stored = JSON.parse(localStorage.getItem('dv_artist') || '{}');
+        stored.stage_name = data.stage_name;
+        localStorage.setItem('dv_artist', JSON.stringify(stored));
+        updateArtistUI(stored);
         showToast('Profile saved successfully', 'success');
       } else {
         showToast(res.data.error || 'Failed to save profile', 'error');
@@ -4811,6 +4817,12 @@
         <div class="page-rule"></div>
 
         <form id="profile-form" novalidate>
+        <!-- Artist / Stage Name -->
+        <div style="max-width:320px;margin-bottom:24px;">
+          <label class="field-label">Artist / Stage Name *</label>
+          <input class="field" type="text" placeholder="Your artist or stage name" id="pf-stage-name" data-required="true" style="margin-bottom:0;">
+        </div>
+
         <!-- Artist Details — two-column, wider, industry standard -->
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px 40px;max-width:680px;">
 
