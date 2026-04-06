@@ -92,6 +92,11 @@ app.use('/api/payouts', payoutRoutes);
 app.use('/api/stripe', stripeRoutes);
 app.use('/api/passkeys', passkeyRoutes);
 
+// Serve standalone auth pages for clean URLs (Safari requires real <form> for credential autofill)
+app.get('/login', (req, res) => res.sendFile('login.html', { root: publicDir }));
+app.get('/signup', (req, res) => res.sendFile('signup.html', { root: publicDir }));
+app.get('/verify-email', (req, res) => res.sendFile('verify-email.html', { root: publicDir }));
+
 // Serve SPA for all non-API, non-static routes (catch-all)
 // Detect mobile user-agents and serve mobile.html
 app.use((req, res, next) => {
