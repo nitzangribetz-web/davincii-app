@@ -40,10 +40,13 @@
       localStorage.setItem('dv_token', d.token);
       localStorage.setItem('dv_artist', JSON.stringify(d.artist));
 
-      // Send to completion page if new signup OR profile incomplete (no stage name)
-      if (d.isNewSignup || !d.artist.stage_name) {
+      // If profile incomplete (no stage_name), show completion step in SPA signup screen
+      if (!d.artist.stage_name) {
         if (d.isNewSignup) localStorage.setItem('dv_just_signed_up', '1');
-        window.location.replace('/google-signup.html');
+        var qs = '?token=' + encodeURIComponent(d.token) +
+                 '&artist=' + encodeURIComponent(JSON.stringify(d.artist)) +
+                 '&google_signup=1';
+        window.location.replace('/' + qs);
       } else {
         var qs = '?token=' + encodeURIComponent(d.token) +
                  '&artist=' + encodeURIComponent(JSON.stringify(d.artist));

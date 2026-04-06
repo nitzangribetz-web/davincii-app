@@ -2774,7 +2774,7 @@
     document.addEventListener('DOMContentLoaded', function() {
       if (params.get('error')) { removeBootCSS(); window.history.replaceState({}, '', '/'); return; }
 
-      // Step 2: Token in URL (arriving from auth-complete.html after login/signup)
+      // Step 2: Token in URL (arriving from auth-complete.html or oauth-callback)
       var token = params.get('token');
       var artistParam = params.get('artist');
       if (token && artistParam) {
@@ -2783,7 +2783,19 @@
           try { artist = JSON.parse(artistParam); } catch(_) { artist = JSON.parse(decodeURIComponent(artistParam)); }
           localStorage.setItem('dv_token', token);
           localStorage.setItem('dv_artist', JSON.stringify(artist));
-          onAuthSuccess(artist, params.get('signup') === '1');
+
+          // Google OAuth signup — show completion step instead of dashboard
+          if (params.get('google_signup') === '1') {
+            removeBootCSS();
+            go('signup');
+            // Hide step 1, show Google completion step
+            document.querySelectorAll('.signup-panel').forEach(function(p){ p.style.display='none'; });
+            var gsPanel = document.getElementById('signup-step-google');
+            if (gsPanel) gsPanel.style.display = 'block';
+            window.history.replaceState({}, '', '/signup');
+          } else {
+            onAuthSuccess(artist, params.get('signup') === '1');
+          }
         } catch (e) {
           console.error('[Auth] parse error:', e);
           removeBootCSS();
@@ -3203,6 +3215,7 @@
   window.deskAddCW = deskAddCW;
   window.deskOpenRecording = deskOpenRecording;
   window.submitSong = submitSong;
+  window.submitGoogleSignupDesktop = submitGoogleSignupDesktop;
   window.toggle2FA = toggle2FA;
   window.toggleFaqNew = toggleFaqNew;
   window.toggleFaq = toggleFaq;
@@ -3255,6 +3268,40 @@
     if(p){p.style.display='block';_sStep=s;}window.scrollTo(0,0);
   }
   function signupBackDesktop(){if(_sStep>1)signupNextDesktop(_sStep-1);else go('landing');}
+
+  // Google OAuth signup completion (inside SPA signup screen)
+  function submitGoogleSignupDesktop() {
+    var first = document.getElementById('gs-desk-first').value.trim();
+    var last = document.getElementById('gs-desk-last').value.trim();
+    var stage = document.getElementById('gs-desk-stage').value.trim();
+    var terms = document.getElementById('gs-desk-terms').checked;
+    var errEl = document.getElementById('google-signup-error');
+    errEl.removeAttribute('hidden');
+    errEl.classList.remove('visible');
+
+    if (!first || !last) { errEl.textContent='Please enter your first and last name.'; errEl.classList.add('visible'); return; }
+    if (!stage) { errEl.textContent='Please enter your artist or stage name.'; errEl.classList.add('visible'); return; }
+    if (!terms) { errEl.textContent='You must agree to the Terms and Privacy Policy.'; errEl.classList.add('visible'); return; }
+
+    var btn = event.target; btn.disabled=true; btn.textContent='Saving...';
+    var token = localStorage.getItem('dv_token');
+    fetch('/api/auth/complete-google-signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ first_name: first, last_name: last, stage_name: stage })
+    })
+    .then(function(r){ return r.json().then(function(d){ return {ok:r.ok,data:d}; }); })
+    .then(function(result){
+      if (!result.ok) throw new Error(result.data.error || 'Failed to complete signup');
+      if (result.data.token) localStorage.setItem('dv_token', result.data.token);
+      localStorage.setItem('dv_artist', JSON.stringify(result.data.artist));
+      onAuthSuccess(result.data.artist, true);
+    })
+    .catch(function(err){
+      btn.disabled=false; btn.textContent='Complete signup';
+      errEl.textContent=err.message; errEl.classList.add('visible');
+    });
+  }
 
   // Add Song
   let _cwN=0;
@@ -3764,6 +3811,21 @@
             <button class="auth-btn-primary" type="button" onclick="signupNextDesktop(2)">Continue</button>
           </form>
           <div class="auth-footer-link">Already have an account? <a onclick="go('login')">Sign in</a></div>
+        </div>
+        <!-- Google OAuth Completion Step -->
+        <div class="signup-panel" id="signup-step-google" style="display:none">
+          <div class="auth-page-title">Complete your <em>signup.</em></div>
+          <div class="error-box" id="google-signup-error" hidden></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+            <input class="auth-field" style="margin-bottom:0" type="text" id="gs-desk-first" placeholder="First name">
+            <input class="auth-field" style="margin-bottom:0" type="text" id="gs-desk-last" placeholder="Last name">
+          </div>
+          <input class="auth-field" type="text" id="gs-desk-stage" placeholder="Artist / stage name">
+          <div class="auth-agree">
+            <input type="checkbox" id="gs-desk-terms">
+            <label for="gs-desk-terms">I agree to Davincii's <a onclick="go('terms')">Terms</a> and <a onclick="go('privacy')">Privacy Policy</a></label>
+          </div>
+          <button class="auth-btn-primary" type="button" onclick="submitGoogleSignupDesktop()">Complete signup</button>
         </div>
         <!-- Step 2 — Agreement -->
         <div class="signup-panel" id="signup-step-2" style="display:none">
