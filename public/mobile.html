@@ -2193,8 +2193,10 @@ footer.m-footer{
       return;
     }
 
-    // No token — landing page
+    // No token — route to correct public screen from URL
     mobRemoveBootCSS();
+    var screen = getScreenFromURL();
+    if (screen && screen !== 'landing') go(screen, true);
   });
 })();
 
@@ -2233,6 +2235,12 @@ function mobUpdateArtistUI(artist) {
 
 // Back/forward button handler
 window.addEventListener('popstate', function(e) {
+  if (e.state && e.state.screen && e.state.screen !== 'dashboard') {
+    go(e.state.screen, true);
+    document.body.style.background = '';
+    document.body.style.color = '';
+    return;
+  }
   var token = localStorage.getItem('dv_token');
   if (token) {
     var dashScreen = document.getElementById('screen-dashboard');
@@ -2241,6 +2249,9 @@ window.addEventListener('popstate', function(e) {
     }
     var page = (e.state && e.state.page) || getDashPageFromURL();
     if (page) showDP(page, true);
+  } else {
+    var screen = getScreenFromURL();
+    if (screen) go(screen, true);
   }
 });
 
@@ -2254,12 +2265,16 @@ window.addEventListener('scroll',()=>{
 },{passive:true});
 
 // ── Screen navigation ──
-function go(key){
+function go(key, skipPush){
   if(key==='login'){window.location.replace('/login.html');return;}
   if(key==='signup'){window.location.replace('/signup.html');return;}
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const t=document.getElementById('screen-'+key);
   if(t){t.classList.add('active');window.scrollTo(0,0)}
+  if(!skipPush){
+    var url = key === 'landing' ? '/' : '/' + key;
+    window.history.pushState({ screen: key }, '', url);
+  }
 }
 
 // ── Dashboard page switching ──
@@ -2288,6 +2303,14 @@ function getDashPageFromURL(){
   var match = path.match(/^\/dashboard\/(.+)$/);
   if(match) return match[1];
   if(path === '/dashboard' || path === '/dashboard/') return 'overview';
+  return null;
+}
+
+function getScreenFromURL(){
+  var path = window.location.pathname.replace(/^\/|\/$/g, '');
+  if(!path || path === 'index.html' || path === 'mobile.html') return 'landing';
+  var screens = ['terms','privacy','recover'];
+  if(screens.indexOf(path) !== -1) return path;
   return null;
 }
 

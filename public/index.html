@@ -2824,8 +2824,10 @@
         return;
       }
 
-      // Step 4: No token — show landing page (remove boot CSS if it was injected)
+      // Step 4: No token — route to correct public screen from URL
       removeBootCSS();
+      var screen = getScreenFromURL();
+      if (screen && screen !== 'landing') go(screen, true);
     });
   })();
 
@@ -2869,6 +2871,10 @@
 
   // Back/forward button handler
   window.addEventListener('popstate', function(e) {
+    if (e.state && e.state.screen && e.state.screen !== 'dashboard') {
+      go(e.state.screen, true);
+      return;
+    }
     var token = localStorage.getItem('dv_token');
     if (token) {
       var dashScreen = document.getElementById('screen-dashboard');
@@ -2878,6 +2884,9 @@
       // Restore the correct dashboard page from state or URL
       var page = (e.state && e.state.page) || getDashPageFromURL();
       if (page) showDashPage(page, true);
+    } else {
+      var screen = getScreenFromURL();
+      if (screen) go(screen, true);
     }
   });
 
@@ -2886,6 +2895,14 @@
     var match = path.match(/^\/dashboard\/(.+)$/);
     if (match) return match[1];
     if (path === '/dashboard' || path === '/dashboard/') return 'overview';
+    return null;
+  }
+
+  function getScreenFromURL(){
+    var path = window.location.pathname.replace(/^\/|\/$/g, '');
+    if(!path || path === 'index.html') return 'landing';
+    var screens = ['terms','privacy','recover'];
+    if(screens.indexOf(path) !== -1) return path;
     return null;
   }
 
@@ -3062,7 +3079,7 @@
   // SCREEN NAVIGATION
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  function go(key) {
+  function go(key, skipPush) {
     if (key === 'login') { window.location.replace('/login.html'); return; }
     if (key === 'signup') { window.location.replace('/signup.html'); return; }
     if(key==='catalog'){go('dashboard');setTimeout(()=>showDashPage('catalog'),50);return;}
@@ -3082,6 +3099,10 @@
       if (grain) grain.style.display = '';
       if (noise) noise.style.display = '';
       document.body.style.background = '#030912';
+    }
+    if(!skipPush){
+      var url = key === 'landing' ? '/' : '/' + key;
+      window.history.pushState({ screen: key }, '', url);
     }
   }
   document.addEventListener('click',e=>{
@@ -4682,39 +4703,199 @@
   <div class="legal-body">
     <div class="legal-eyebrow">Legal</div>
     <div class="legal-title">Terms of Service</div>
-    <div class="legal-date">Effective: January 1, 2025 &nbsp;·&nbsp; Davincii LLC</div>
+    <div class="legal-date">Terms of Service v6 &nbsp;·&nbsp; Davincii LLC &nbsp;·&nbsp; New York, NY</div>
+
+    <div class="legal-highlight" style="margin-bottom:40px">
+      <p class="legal-p" style="margin-bottom:0">We find your missing royalties and make sure you get paid. No upfront fees. No ownership grab. You keep 100% of your music.</p>
+    </div>
+
+    <p class="legal-p">By clicking "Accept" or completing onboarding, you're entering into an agreement with Davincii LLC ("Davincii"), a music publishing administration company based in New York. You are the "Artist" — or an Authorized Representative acting on the Artist's behalf. Here's exactly how this works:</p>
+
+    <!-- Section 1 -->
+    <div class="legal-section">
+      <div class="legal-section-title">Section 1. What Davincii Does For You</div>
+      <p class="legal-p">Davincii handles the administrative side of your publishing so you can focus on making music. That includes:</p>
+      <ul class="legal-list">
+        <li>Registering your songs with PROs (ASCAP, BMI, SESAC, and others), mechanical agencies, and collection societies — everywhere your music earns money.</li>
+        <li>Hunting down royalties you've already earned but haven't been paid — including money sitting uncollected before you joined Davincii.</li>
+        <li>Collecting and sending you your share of every dollar we find.</li>
+        <li>Handling registration paperwork on your behalf so you don't have to.</li>
+      </ul>
+      <p class="legal-p">We only administer your share of each song. We have zero authority over any co-writer's interest. And we will never license your sync rights without your explicit written approval.</p>
+      <div class="legal-highlight"><p class="legal-p" style="margin-bottom:0"><strong>Your ownership is untouched.</strong> This agreement gives Davincii the exclusive right to administer your submitted catalog — nothing more. You keep 100% of your copyright, always. The writer's share of performance income that PROs pay directly to you as a songwriter is yours entirely and is never touched by Davincii.</p></div>
+      <p class="legal-p"><strong>Historical royalties.</strong> If we find and recover money you earned before signing up — through gap analysis, audit work, or registration corrections — that money is treated the same as any other royalty we collect. We take our standard 15% and send you the rest.</p>
+    </div>
+
+    <!-- 1.1 -->
+    <div class="legal-section">
+      <div class="legal-section-title">1.1 Metadata</div>
+      <p class="legal-p">To maximize what we recover, you agree to give us accurate song info: writer splits, co-writer details, ISWC and ISRC codes, and release dates. If we receive incomplete or inaccurate data, we can't be held responsible for any resulting gaps.</p>
+    </div>
+
+    <!-- 1.2 -->
+    <div class="legal-section">
+      <div class="legal-section-title">1.2 Limited Power of Attorney</div>
+      <p class="legal-p">To register your songs, we need a narrow power of attorney — strictly limited to filing registrations with PROs, mechanical agencies, and collection societies for your submitted catalog. This cannot be used to transfer ownership or encumber your rights in any way, and it expires the moment this agreement ends (except to wrap up any in-progress collections).</p>
+    </div>
+
+    <!-- 1.3 -->
+    <div class="legal-section">
+      <div class="legal-section-title">1.3 Digital Performance Royalties</div>
+      <p class="legal-p">If you own or control the sound recording rights and haven't directed collection elsewhere, you can separately authorize Davincii to register with SoundExchange or similar organizations. That requires a signed Letter of Direction from you — we won't touch digital performance royalties without it.</p>
+    </div>
+
+    <!-- 1.4 -->
+    <div class="legal-section">
+      <div class="legal-section-title">1.4 Exclusive Administration Grant</div>
+      <p class="legal-p">The rights granted to Davincii under this agreement are exclusive. For each Composition you submit, Davincii is your sole and exclusive publishing administrator. During the term, you may not appoint any other party to administer, collect, or register the same rights in the submitted Compositions without Davincii's prior written consent. This exclusivity applies only to Compositions you have specifically submitted — songs never submitted to Davincii remain entirely your own to deal with as you choose.</p>
+    </div>
+
+    <!-- 1.5 -->
+    <div class="legal-section">
+      <div class="legal-section-title">1.5 Sub-Publishing</div>
+      <p class="legal-p">Davincii may appoint sub-publishers or affiliated collection societies to administer your Compositions in specific territories, where necessary to maximize collection. Any such appointment: (a) does not reduce your 85% share; (b) does not transfer copyright; and (c) is subject to the same limitations on sync licensing as set out above. We will notify you of any material sub-publishing arrangement within 30 days of it taking effect.</p>
+    </div>
+
+    <!-- 1.6 -->
+    <div class="legal-section">
+      <div class="legal-section-title">1.6 Davincii's Service Warranties</div>
+      <p class="legal-p">Davincii warrants and undertakes that it will:</p>
+      <ul class="legal-list">
+        <li>Perform all registration and administration services with reasonable skill and care, consistent with industry practice;</li>
+        <li>Register submitted Compositions with the relevant PROs and collection societies within 60 days of receiving complete and accurate metadata;</li>
+        <li>Maintain accurate records of all Compositions, registrations, and royalties collected on your behalf;</li>
+        <li>Promptly notify you if any registration is rejected or if any issue arises that materially affects collection for your catalog.</li>
+      </ul>
+    </div>
+
+    <!-- Section 2 -->
+    <div class="legal-section">
+      <div class="legal-section-title">Section 2. Your Catalog</div>
+      <p class="legal-p">Your catalog is yours to define. It includes songs you've specifically submitted to Davincii, songs we've accepted for registration, and in certain circumstances, songs that Davincii submits on your behalf as set out in Section 2.3 below.</p>
+      <p class="legal-p">"Compositions" means any musical work you authored or co-authored, whether it existed when you signed up or was submitted later. "Royalty Income" means publishing income from those songs: performance royalties (publisher's share), mechanical royalties, sync income, micro-sync income, and related publishing revenue. It does not include master recording income or label-side royalties.</p>
+    </div>
+
+    <!-- 2.1 -->
+    <div class="legal-section">
+      <div class="legal-section-title">2.1 Reversion Right</div>
+      <p class="legal-p">If Davincii fails to register a submitted Composition with the applicable PRO or mechanical society within 90 days of receiving complete and accurate metadata from you, and fails to cure that failure within 30 days of written notice from you, you may remove that specific Composition from your submitted catalog by written notice. Upon removal: (a) Davincii's administration rights in that Composition terminate immediately; (b) Davincii will promptly de-register or reassign the Composition with all relevant societies; and (c) any royalties already collected for that Composition remain subject to the standard 15% / 85% split. This reversion right applies to individual Compositions and does not affect the rest of your catalog or this agreement.</p>
+    </div>
+
+    <!-- 2.2 -->
+    <div class="legal-section">
+      <div class="legal-section-title">2.2 Unmatched Royalties</div>
+      <p class="legal-p">If Davincii receives royalty income that cannot be matched to a specific Composition in your submitted catalog ("Unmatched Income"), Davincii will: (a) hold that income in a separate account for a period of 24 months; (b) make reasonable efforts to identify the source and match it to the correct Composition; and (c) report Unmatched Income separately in your quarterly statement. If Unmatched Income cannot be matched within 24 months, Davincii will notify you and the parties will agree in good faith on its disposition. Unmatched Income is never retained by Davincii without your written agreement.</p>
+    </div>
+
+    <!-- 2.3 -->
+    <div class="legal-section">
+      <div class="legal-section-title">2.3 Davincii-Initiated Submissions</div>
+      <p class="legal-p">In certain circumstances, Davincii may identify and submit Compositions into your catalog on your behalf without waiting for you to initiate. This includes: (a) Compositions discovered through gap analysis or royalty audit work that appear to be unregistered or misregistered; (b) previously released Compositions in your back catalog that were not submitted at onboarding; and (c) any Composition Davincii identifies as generating unmatched or unclaimed royalty income in your name. All royalties collected on Davincii-initiated Compositions are treated identically to the rest of your catalog.</p>
+    </div>
+
+    <!-- Section 3 -->
+    <div class="legal-section">
+      <div class="legal-section-title">Section 3. Fees — Simple and Transparent</div>
+      <div class="legal-highlight"><p class="legal-p" style="margin-bottom:0">No upfront costs.</p></div>
+    </div>
+
+    <!-- 3.1 -->
+    <div class="legal-section">
+      <div class="legal-section-title">3.1 Administration Fee</div>
+      <p class="legal-p">Davincii retains 15% of all royalties collected on your behalf — including money recovered through gap analysis or audit work. You receive 85% of everything we bring in.</p>
+    </div>
+
+    <!-- 3.2 -->
+    <div class="legal-section">
+      <div class="legal-section-title">3.2 Co-Writer Registration Fee</div>
+      <p class="legal-p">When a song has co-writers that require actual registration work, a one-time fee of $100.00 per co-writer per song applies. This is charged once — never again for the same co-writer on the same song. No Co-Writer Registration Fee is ever charged without your prior written approval. No other costs are passed through to you.</p>
+    </div>
+
+    <!-- 3.3 -->
+    <div class="legal-section">
+      <div class="legal-section-title">3.3 Accounting and Payment</div>
+      <p class="legal-p">Every quarter, within 45 days of the quarter closing, you'll receive a clear statement showing what was collected, what was deducted, and what's yours. We send your money at the same time. If your balance is under $50, it rolls to the next quarter. You can check your statements and request payment anytime through the Davincii dashboard. We pay via ACH, wire, PayPal, or another method we agree on.</p>
+    </div>
+
+    <!-- 3.4 -->
+    <div class="legal-section">
+      <div class="legal-section-title">3.4 Your Audit Right</div>
+      <p class="legal-p">Once per year, with 30 days' notice, you have the right to audit our records at your expense. Statements are considered final if no written objection is raised within 180 days of receipt.</p>
+    </div>
+
+    <!-- Section 4 -->
+    <div class="legal-section">
+      <div class="legal-section-title">Section 4. Term and What Happens When You Leave</div>
+      <p class="legal-p">This agreement starts on the date you complete onboarding and runs for one year, renewing automatically each year unless either of us gives 30 days' written notice before the renewal date. Either party can exit early only if the other commits a material breach and doesn't fix it within 30 days of written notice.</p>
+      <p class="legal-p"><strong>After you leave.</strong> For 12 months after this agreement ends, Davincii continues collecting royalties you earned during the term — making sure you get paid for work already done. Our 15% fee applies only during that window. Once the 12 months are up, Davincii has no further right to collect, receive, or take any fees — period, regardless of when the money arrives. We'll send you a final accounting and everything owed within 60 days of termination.</p>
+    </div>
+
+    <!-- Section 5 -->
+    <div class="legal-section">
+      <div class="legal-section-title">Section 5. Your Promises to Us</div>
+      <p class="legal-p">By signing up, you confirm that: (a) you have the authority to enter this agreement; (b) you own or co-own the songs you submit and haven't already committed those rights to someone else; and (c) your songs don't infringe anyone else's rights.</p>
+      <p class="legal-p">If a claim arises because one of those things turns out to be untrue, you agree to cover us. Both of us also agree to keep each other's private financial and business information confidential — during this agreement and for three years after it ends.</p>
+    </div>
+
+    <!-- Section 6 -->
+    <div class="legal-section">
+      <div class="legal-section-title">Section 6. The Legal Stuff</div>
+    </div>
+
+    <!-- 6.1 -->
+    <div class="legal-section">
+      <div class="legal-section-title">6.1 Liability</div>
+      <p class="legal-p">Royalty amounts are controlled by third-party organizations — we can't guarantee a specific outcome. If Davincii is ever found liable for a claim, our liability is capped at the fees we retained in the 12 months before the claim. That cap doesn't apply in cases of gross negligence or willful misconduct on our part.</p>
+    </div>
+
+    <!-- 6.2 -->
+    <div class="legal-section">
+      <div class="legal-section-title">6.2 Force Majeure</div>
+      <p class="legal-p">Neither of us is on the hook for delays or failures caused by things outside our control — acts of God, government action, platform outages, pandemics. We'll notify each other quickly and get back on track as soon as reasonably possible.</p>
+    </div>
+
+    <!-- 6.3 -->
+    <div class="legal-section">
+      <div class="legal-section-title">6.3 Disputes</div>
+      <p class="legal-p">If we have a disagreement, we'll try to resolve it through mediation in New York, NY first. If that doesn't work within 30 days, it goes to binding arbitration under the AAA Commercial Arbitration Rules, also in New York. Whoever wins recovers their attorneys' fees. New York law governs this agreement.</p>
+    </div>
+
+    <!-- Section 7 -->
+    <div class="legal-section">
+      <div class="legal-section-title">Section 7. Everything Else</div>
+    </div>
+
+    <!-- 7.1 -->
+    <div class="legal-section">
+      <div class="legal-section-title">7.1 Assignment</div>
+      <p class="legal-p">Davincii may transfer this agreement to an affiliate or successor, as long as they take on all obligations and you're notified within 10 days. Your rights and protections carry over fully. You may not transfer this agreement without our written consent.</p>
+    </div>
+
+    <!-- 7.2 -->
+    <div class="legal-section">
+      <div class="legal-section-title">7.2 Notices</div>
+      <p class="legal-p">We'll reach each other by email (with read confirmation) or certified mail, using the contact info provided at onboarding or updated later in writing.</p>
+    </div>
+
+    <!-- 7.3 -->
+    <div class="legal-section">
+      <div class="legal-section-title">7.3 Full Agreement</div>
+      <p class="legal-p">This is the complete agreement between us. Any changes require written sign-off from both parties — no surprises, no unilateral edits.</p>
+    </div>
+
+    <!-- 7.4 -->
+    <div class="legal-section">
+      <div class="legal-section-title">7.4 Severability</div>
+      <p class="legal-p">If any part of this is found unenforceable, everything else stays in effect. Electronic signatures are valid and binding.</p>
+    </div>
+
+    <!-- 7.5 -->
+    <div class="legal-section">
+      <div class="legal-section-title">7.5 Metadata Delivery Format</div>
+      <p class="legal-p">You agree to deliver song metadata in a format reasonably requested by Davincii (such as a completed intake form, spreadsheet, or digital upload). Davincii will provide a template. Timelines for registration under Section 1.6 and reversion rights under Section 2.1 begin only once complete and accurate metadata has been received in the requested format.</p>
+    </div>
 
     <div class="legal-section">
-      <div class="legal-section-title">Agreement Overview</div>
-      <p class="legal-p">These Terms of Service ("Terms") govern your use of the Davincii platform and music publishing administration services provided by Davincii LLC ("Davincii"). By creating an account, you agree to be bound by these Terms and our Publishing Administration Agreement.</p>
-    </div>
-    <div class="legal-section">
-      <div class="legal-section-title">Services</div>
-      <p class="legal-p">Davincii provides music publishing administration services including composition registration with performing rights organizations (PROs), mechanical licensing societies, and digital performance rights organizations; royalty collection and quarterly distribution; and an artist portal for catalog and earnings management.</p>
-    </div>
-    <div class="legal-section">
-      <div class="legal-section-title">Commission &amp; Fees</div>
-      <p class="legal-p">Davincii charges a commission of 15% on royalties actually collected on your behalf. No upfront fees, no monthly subscription fees, and no registration costs. You are only charged when Davincii successfully collects royalties for you.</p>
-      <div class="legal-highlight"><p class="legal-p" style="margin-bottom:0">If Davincii collects nothing, you owe nothing.</p></div>
-    </div>
-    <div class="legal-section">
-      <div class="legal-section-title">Copyright Ownership</div>
-      <p class="legal-p">You retain 100% copyright ownership of all your compositions at all times. Davincii is granted a limited, non-exclusive license to register and administer your compositions solely for the purpose of collecting royalties on your behalf. Davincii does not acquire any ownership interest in your music.</p>
-    </div>
-    <div class="legal-section">
-      <div class="legal-section-title">Term &amp; Termination</div>
-      <p class="legal-p">Either party may terminate this agreement with 30 days written notice. Following termination, Davincii will continue collecting royalties generated during your term for 12 months (the "Collection Tail"), then remit your final balance less any applicable commission.</p>
-    </div>
-    <div class="legal-section">
-      <div class="legal-section-title">Payouts</div>
-      <p class="legal-p">Davincii renders quarterly accounting statements and distributes collected royalties via ACH, PayPal, or Stripe. Payouts are processed when your available balance exceeds <span class="cs">$</span>50. You are responsible for completing all required tax documentation (W-9 or W-8BEN) before your first payout can be processed.</p>
-    </div>
-    <div class="legal-section">
-      <div class="legal-section-title">Representations</div>
-      <p class="legal-p">By using Davincii, you represent that you have the right and authority to enter into this agreement, that the compositions you register are original works you created or co-created, and that registering them will not infringe any third-party rights.</p>
-    </div>
-    <div class="legal-section">
-      <div class="legal-section-title">Contact</div>
       <div class="legal-contact">
         <div class="legal-contact-name">Davincii LLC</div>
         <div class="legal-contact-line"><a href="mailto:info@davincii.co">info@davincii.co</a></div>
