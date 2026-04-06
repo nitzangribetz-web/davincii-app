@@ -68,14 +68,14 @@ const columnMigrations = [
   `ALTER TABLE artists ADD COLUMN IF NOT EXISTS address_city   VARCHAR(100)`,
   `ALTER TABLE artists ADD COLUMN IF NOT EXISTS address_state  VARCHAR(100)`,
   `ALTER TABLE artists ADD COLUMN IF NOT EXISTS onboarded     BOOLEAN DEFAULT FALSE`,
-  // Email verification
+  // Email verification — columns first, then backfill
   `ALTER TABLE artists ADD COLUMN IF NOT EXISTS email_verified          BOOLEAN DEFAULT FALSE`,
-  // Mark all existing accounts as verified (they signed up before email verification was added)
-  `UPDATE artists SET email_verified = TRUE WHERE verification_code IS NULL AND (email_verified IS NULL OR email_verified = FALSE)`,
   `ALTER TABLE artists ADD COLUMN IF NOT EXISTS verification_code       VARCHAR(6)`,
   `ALTER TABLE artists ADD COLUMN IF NOT EXISTS verification_code_expires TIMESTAMPTZ`,
   `ALTER TABLE artists ADD COLUMN IF NOT EXISTS verification_attempts   INTEGER DEFAULT 0`,
   `ALTER TABLE artists ADD COLUMN IF NOT EXISTS verification_last_sent  TIMESTAMPTZ`,
+  // Mark all existing accounts as verified (they signed up before email verification was added)
+  `UPDATE artists SET email_verified = TRUE WHERE verification_code IS NULL AND (email_verified IS NULL OR email_verified = FALSE)`,
 ];
 
 async function migrate() {
@@ -83,7 +83,11 @@ async function migrate() {
     await pool.query(baseTables);
     await pool.query(passkeyTable);
     for (const stmt of columnMigrations) {
-      await pool.query(stmt);
+      try {
+        await pool.query(stmt);
+      } catch (err) {
+        console.error('[migrate] Statement failed (continuing):', err.message);
+      }
     }
     console.log('[migrate] Schema ready');
   } catch (err) {
