@@ -81,7 +81,8 @@ router.post('/w9', auth, async (req, res) => {
     const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZoneName: 'short' });
 
-    await resend.emails.send({
+    // Send email notification (non-blocking — don't let email failure block submission)
+    resend.emails.send({
       from: 'Davincii <onboarding@resend.dev>',
       to: 'info@davincii.co',
       subject: `W-9 Submitted: ${artist.stage_name || artist.name} (${artist.email})`,
@@ -115,8 +116,11 @@ router.post('/w9', auth, async (req, res) => {
             Submitted: ${dateStr} at ${timeStr}
           </div>
         </div>`
+    }).then(() => {
+      console.log(`[W-9 notification] Email sent for: ${artist.email}`);
+    }).catch(emailErr => {
+      console.error('[W-9 notification] Email failed (non-blocking):', emailErr.message);
     });
-    console.log(`[W-9 notification] Email sent for: ${artist.email}`);
 
     res.json({ success: true });
   } catch (err) {
