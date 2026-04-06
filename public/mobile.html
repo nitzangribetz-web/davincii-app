@@ -1717,7 +1717,7 @@ footer.m-footer{
         <option>SIAE</option><option>Other</option><option>Not yet registered</option>
       </select>
       <input class="field" type="text" name="ipi" placeholder="IPI / CAE number">
-      <input class="field" type="text" name="dob" placeholder="MM/DD/YYYY" maxlength="10" inputmode="numeric" oninput="formatDobInput(this)">
+      <input class="field" type="date" name="dob">
       <button class="btn-p" type="submit" onclick="document.getElementById('mob-signup-form').submit()">Complete setup →</button>
     </div>
   </div>
@@ -2053,7 +2053,7 @@ footer.m-footer{
       </select>
       <div id="d-pro-other" style="display:none"><label class="field-label">Specify your PRO *</label><input class="field" type="text" id="mob-pro-other" placeholder="e.g. SABAM, ICMP…"></div>
       <label class="field-label">IPI / CAE Number *</label><input class="field" type="text" placeholder="e.g. 00123456789" id="mob-pf-ipi" data-required="true">
-      <label class="field-label">Date of Birth *</label><input class="field" type="text" id="mob-pf-dob" data-required="true" placeholder="MM/DD/YYYY" maxlength="10" inputmode="numeric" oninput="formatDobInput(this)" style="font-size:16px;color:var(--black)">
+      <label class="field-label">Date of Birth *</label><input class="field" type="date" id="mob-pf-dob" data-required="true" style="font-size:16px;color:var(--black)">
     </div>
     <div class="d-form-card">
       <div class="d-form-title" style="margin-bottom:16px">Mailing Address</div>
@@ -2847,12 +2847,6 @@ function mobW9TinTypeChange(type) {
     input.maxLength = 11;
   }
   input.value = '';
-}
-function formatDobInput(el) {
-  var v = el.value.replace(/[^\d]/g, '');
-  if (v.length >= 4) v = v.slice(0,2) + '/' + v.slice(2,4) + '/' + v.slice(4,8);
-  else if (v.length >= 2) v = v.slice(0,2) + '/' + v.slice(2);
-  el.value = v;
 }
 function mobW9FormatTin(el) {
   var type = document.querySelector('input[name="mob-w9-tin-type"]:checked').value;

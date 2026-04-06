@@ -3393,12 +3393,6 @@
     }
     input.value = '';
   }
-  function formatDobInput(el) {
-    var v = el.value.replace(/[^\d]/g, '');
-    if (v.length >= 4) v = v.slice(0,2) + '/' + v.slice(2,4) + '/' + v.slice(4,8);
-    else if (v.length >= 2) v = v.slice(0,2) + '/' + v.slice(2);
-    el.value = v;
-  }
   function w9FormatTin(el) {
     var type = document.querySelector('input[name="w9-tin-type"]:checked').value;
     var v = el.value.replace(/[^\d]/g, '');
@@ -4849,7 +4843,7 @@
 
           <div>
             <label class="field-label">Date of Birth *</label>
-            <input class="field" type="text" id="pf-dob" data-required="true" placeholder="MM/DD/YYYY" maxlength="10" inputmode="numeric" oninput="formatDobInput(this)" style="margin-bottom:0;">
+            <input class="field" type="date" id="pf-dob" data-required="true" style="margin-bottom:0;">
           </div>
 
           <div>
