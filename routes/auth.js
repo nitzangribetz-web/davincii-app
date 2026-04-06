@@ -540,9 +540,9 @@ router.post('/profile', require('../middleware/auth'), async (req, res) => {
     if (isFormSubmit) return res.redirect('/');
     res.json({ success: true });
   } catch (err) {
-    console.error('Profile update error:', err.message);
+    console.error('Profile update error:', err.message, err.stack);
     if (isFormSubmit) return res.redirect('/details.html?error=' + encodeURIComponent('Failed to save details'));
-    res.status(500).json({ error: 'Failed to save details' });
+    res.status(500).json({ error: 'Failed to save details: ' + err.message });
   }
 });
 
