@@ -3234,7 +3234,19 @@
   function closeW9Modal(){document.getElementById('w9-modal-overlay').classList.remove('open');}
   function submitW9(){
     var modal = document.getElementById('w9-modal-overlay');
-    if (!validateFields(modal)) return;
+    var fieldsValid = validateFields(modal);
+    var cert = document.getElementById('w9-certify');
+    var certErr = document.getElementById('w9-cert-error');
+    var certValid = cert && cert.checked;
+    if (certErr) {
+      certErr.classList.remove('visible');
+      certErr.textContent = '';
+    }
+    if (!certValid && certErr) {
+      certErr.textContent = 'You must certify the information is correct';
+      certErr.classList.add('visible');
+    }
+    if (!fieldsValid || !certValid) return;
     const b=document.getElementById('w9-status-badge');
     const t=document.getElementById('w9-status-text');
     if(b)b.className='status-badge pending';if(t)t.textContent='Submitted';
@@ -3295,6 +3307,14 @@
     container.querySelectorAll('.field-error').forEach(function(f) { f.classList.remove('field-error'); });
     container.querySelectorAll('.field-error-msg').forEach(function(m) { m.remove(); });
   }
+
+  // Clear cert error on check
+  document.addEventListener('change', function(e) {
+    if (e.target.id === 'w9-certify' && e.target.checked) {
+      var certErr = document.getElementById('w9-cert-error');
+      if (certErr) { certErr.classList.remove('visible'); certErr.textContent = ''; }
+    }
+  });
 
   // Clear error on input
   document.addEventListener('input', function(e) {
@@ -4564,10 +4584,15 @@
       <label class="field-label">Street Address *</label>
       <input class="field" type="text" placeholder="Street address" id="w9-addr" data-required="true">
       <div class="field-grid-3">
-        <div><input class="field" type="text" placeholder="City" style="margin-bottom:0"></div>
-        <div><input class="field" type="text" placeholder="State" style="margin-bottom:0"></div>
-        <div><input class="field" type="text" placeholder="ZIP" style="margin-bottom:0"></div>
+        <div><label class="field-label">City *</label><input class="field" type="text" placeholder="City" id="w9-city" data-required="true" style="margin-bottom:0"></div>
+        <div><label class="field-label">State *</label><input class="field" type="text" placeholder="State" id="w9-state" data-required="true" style="margin-bottom:0"></div>
+        <div><label class="field-label">ZIP *</label><input class="field" type="text" placeholder="ZIP" id="w9-zip" data-required="true" style="margin-bottom:0"></div>
       </div>
+      <div class="w9-cert" style="display:flex;align-items:flex-start;gap:10px;margin-top:18px;padding:14px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:8px">
+        <input type="checkbox" id="w9-certify" style="margin-top:3px;accent-color:#3B82F6;cursor:pointer">
+        <label for="w9-certify" style="font-family:'DM Sans',sans-serif;font-size:12.5px;color:#94A3B8;line-height:1.5;cursor:pointer">Under penalties of perjury, I certify that the number shown on this form is my correct taxpayer identification number and that I am not subject to backup withholding.</label>
+      </div>
+      <div id="w9-cert-error" class="field-error-msg" style="margin-top:4px"></div>
     </div>
     <div class="modal-foot">
       <button onclick="closeW9Modal()" class="btn-ghost-dark">Cancel</button>

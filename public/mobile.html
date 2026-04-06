@@ -2209,7 +2209,10 @@ function mobActivateDashboard(artist) {
   document.body.style.background = '#F0F4FA';
   document.body.style.color = '#0A0A0A';
   mobRemoveBootCSS();
-  window.history.replaceState({ screen: 'dashboard' }, '', '/dashboard');
+  var initialPage = getDashPageFromURL() || 'overview';
+  var url = initialPage === 'overview' ? '/dashboard' : '/dashboard/' + initialPage;
+  window.history.replaceState({ screen: 'dashboard', page: initialPage }, '', url);
+  showDP(initialPage, true);
   window.scrollTo(0, 0);
   mobUpdateArtistUI(artist);
 }
@@ -2228,14 +2231,16 @@ function mobUpdateArtistUI(artist) {
   }
 }
 
-// Back button: if authenticated, always go to dashboard
-window.addEventListener('popstate', function() {
+// Back/forward button handler
+window.addEventListener('popstate', function(e) {
   var token = localStorage.getItem('dv_token');
   if (token) {
     var dashScreen = document.getElementById('screen-dashboard');
     if (!dashScreen || !dashScreen.classList.contains('active')) {
       try { mobActivateDashboard(JSON.parse(localStorage.getItem('dv_artist') || '{}')); } catch(_) {}
     }
+    var page = (e.state && e.state.page) || getDashPageFromURL();
+    if (page) showDP(page, true);
   }
 });
 
@@ -2259,7 +2264,7 @@ function go(key){
 const ALL_DP=['overview','catalog','add-song','royalties','registration','statements','payouts','notifications','sync','profile','settings'];
 const TAB_DP=['overview','catalog','add-song','royalties','payouts','profile'];
 
-function showDP(page){
+function showDP(page, skipPush){
   ALL_DP.forEach(p=>{
     const el=document.getElementById('dp-'+p);
     if(el)el.style.display='none';
@@ -2270,6 +2275,18 @@ function showDP(page){
     document.getElementById('d-tab-'+p)?.classList.remove('active');
   });
   document.getElementById('d-tab-'+page)?.classList.add('active');
+  if(!skipPush){
+    var url = page === 'overview' ? '/dashboard' : '/dashboard/' + page;
+    window.history.pushState({ screen:'dashboard', page: page }, '', url);
+  }
+}
+
+function getDashPageFromURL(){
+  var path = window.location.pathname;
+  var match = path.match(/^\/dashboard\/(.+)$/);
+  if(match) return match[1];
+  if(path === '/dashboard' || path === '/dashboard/') return 'overview';
+  return null;
 }
 
 // ── Avatar menu ──
@@ -2437,23 +2454,24 @@ function closeMobW9Modal() {
   document.body.style.overflow = '';
 }
 function submitMobW9() {
-  var name = document.getElementById('mob-w9-name').value.trim();
-  var cls = document.getElementById('mob-w9-class').value;
-  var tin = document.getElementById('mob-w9-tin').value.trim();
-  var street = document.getElementById('mob-w9-street').value.trim();
-  var city = document.getElementById('mob-w9-city').value.trim();
-  var state = document.getElementById('mob-w9-state').value.trim();
-  var zip = document.getElementById('mob-w9-zip').value.trim();
-  var cert = document.getElementById('mob-w9-certify').checked;
-  if (!name || !cls || !tin || !street || !city || !state || !zip) {
-    alert('Please complete all required fields.');
-    return;
+  var modal = document.getElementById('mob-w9-overlay');
+  var fieldsValid = mobValidateFields(modal);
+  var cert = document.getElementById('mob-w9-certify');
+  var certErr = document.getElementById('mob-w9-cert-error');
+  var certValid = cert && cert.checked;
+  if (certErr) {
+    certErr.classList.remove('visible');
+    certErr.textContent = '';
   }
-  if (!cert) {
-    alert('Please certify the information is correct.');
-    return;
+  if (!certValid && certErr) {
+    certErr.textContent = 'You must certify the information is correct';
+    certErr.classList.add('visible');
   }
-  alert('W-9 submitted successfully.');
+  if (!fieldsValid || !certValid) return;
+  var b = document.getElementById('mob-w9-status-badge');
+  var t = document.getElementById('mob-w9-status-text');
+  if (b) b.className = 'status-badge pending';
+  if (t) t.textContent = 'Submitted';
   closeMobW9Modal();
 }
 
@@ -2528,6 +2546,10 @@ document.addEventListener('change', function(e) {
     e.target.classList.remove('field-error');
     var msg = e.target.parentElement.querySelector('.field-error-msg');
     if (msg) msg.remove();
+  }
+  if (e.target.id === 'mob-w9-certify' && e.target.checked) {
+    var certErr = document.getElementById('mob-w9-cert-error');
+    if (certErr) { certErr.classList.remove('visible'); certErr.textContent = ''; }
   }
 });
 
@@ -2604,19 +2626,20 @@ function mobSubmitSong() {
 
   var recList = document.getElementById('mob-recording-list');
   if (!recList || recList.children.length === 0) {
-    var recCard = recList ? recList.closest('.d-form-card') : null;
-    if (recCard) {
-      recCard.style.borderColor = '#EF4444';
-      recCard.style.boxShadow = '0 0 0 2px rgba(239,68,68,0.10)';
-      var existingMsg = recCard.querySelector('.field-error-msg');
+    var addRecBtn = recList ? recList.nextElementSibling : null;
+    if (addRecBtn && addRecBtn.tagName === 'BUTTON') {
+      addRecBtn.style.borderColor = '#EF4444';
+      addRecBtn.style.color = '#EF4444';
+      addRecBtn.style.boxShadow = '0 0 0 2px rgba(239,68,68,0.10)';
+      var existingMsg = recList.parentElement.querySelector('.field-error-msg');
       if (!existingMsg) {
         var msg = document.createElement('div');
         msg.className = 'field-error-msg visible';
         msg.textContent = 'At least one recording is required';
         msg.style.marginTop = '10px';
-        recList.parentElement.insertBefore(msg, recList.nextSibling);
+        addRecBtn.parentElement.insertBefore(msg, addRecBtn.nextSibling);
       }
-      setTimeout(function() { recCard.style.borderColor = ''; recCard.style.boxShadow = ''; }, 4000);
+      setTimeout(function() { addRecBtn.style.borderColor = ''; addRecBtn.style.color = ''; addRecBtn.style.boxShadow = ''; }, 4000);
     }
     valid = false;
   }
@@ -2732,11 +2755,11 @@ function mobToggle2FA() {
     </div>
     <div class="mob-w9-body">
       <label class="field-label">Legal Name *</label>
-      <input class="field" type="text" id="mob-w9-name" placeholder="As shown on your income tax return">
+      <input class="field" type="text" id="mob-w9-name" data-required="true" placeholder="As shown on your income tax return">
       <label class="field-label">Business Name / DBA</label>
       <input class="field" type="text" id="mob-w9-dba" placeholder="If different from above (optional)">
       <label class="field-label">Federal Tax Classification *</label>
-      <select class="field" id="mob-w9-class">
+      <select class="field" id="mob-w9-class" data-required="true">
         <option value="">Select classification</option>
         <option value="individual">Individual / Sole proprietor</option>
         <option value="c-corp">C Corporation</option>
@@ -2749,27 +2772,28 @@ function mobToggle2FA() {
         <option value="other">Other</option>
       </select>
       <label class="field-label">Taxpayer Identification Number (TIN) *</label>
-      <input class="field" type="text" id="mob-w9-tin" placeholder="SSN or EIN" maxlength="11">
+      <input class="field" type="text" id="mob-w9-tin" data-required="true" placeholder="SSN or EIN" maxlength="11">
       <label class="field-label">Street Address *</label>
-      <input class="field" type="text" id="mob-w9-street" placeholder="Street address">
+      <input class="field" type="text" id="mob-w9-street" data-required="true" placeholder="Street address">
       <div style="display:grid;grid-template-columns:1fr 80px 90px;gap:10px">
         <div>
           <label class="field-label">City *</label>
-          <input class="field" type="text" id="mob-w9-city" placeholder="City" style="margin-bottom:0">
+          <input class="field" type="text" id="mob-w9-city" data-required="true" placeholder="City" style="margin-bottom:0">
         </div>
         <div>
           <label class="field-label">State *</label>
-          <input class="field" type="text" id="mob-w9-state" placeholder="ST" maxlength="2" style="margin-bottom:0">
+          <input class="field" type="text" id="mob-w9-state" data-required="true" placeholder="ST" maxlength="2" style="margin-bottom:0">
         </div>
         <div>
           <label class="field-label">ZIP *</label>
-          <input class="field" type="text" id="mob-w9-zip" placeholder="ZIP" maxlength="10" style="margin-bottom:0">
+          <input class="field" type="text" id="mob-w9-zip" data-required="true" placeholder="ZIP" maxlength="10" style="margin-bottom:0">
         </div>
       </div>
       <div class="mob-w9-cert">
         <input type="checkbox" id="mob-w9-certify">
         <label for="mob-w9-certify">Under penalties of perjury, I certify that the number shown on this form is my correct taxpayer identification number and that I am not subject to backup withholding.</label>
       </div>
+      <div id="mob-w9-cert-error" class="field-error-msg"></div>
     </div>
     <div class="mob-w9-actions">
       <button class="btn-s" onclick="closeMobW9Modal()">Cancel</button>
