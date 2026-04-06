@@ -20,7 +20,7 @@
   var error = query.get('error') || query.get('error_description') || params.get('error_description');
 
   if (error) {
-    window.location.replace('/?error=oauth_failed');
+    window.location.replace('/login?error=' + encodeURIComponent(error));
     return;
   }
 
@@ -49,8 +49,8 @@
         window.location.replace('/' + qs);
       }
     })
-    .catch(function() {
-      window.location.replace('/?error=callback_failed');
+    .catch(function(err) {
+      window.location.replace('/login?error=' + encodeURIComponent(err.message || 'Google sign-in failed. Please try again.'));
     });
     return;
   }
@@ -60,7 +60,7 @@
     return;
   }
 
-  window.location.replace('/?error=oauth_failed');
+  window.location.replace('/login?error=' + encodeURIComponent('OAuth failed — no token or code received.'));
 })();
 </script>
 </body>

@@ -139,17 +139,21 @@ router.get('/google', async (req, res) => {
     }
 
     // Fallback: Supabase OAuth (if GOOGLE_CLIENT_ID not configured)
+    // Use implicit flow so access_token is returned in hash fragment —
+    // PKCE code flow fails because the server-initiated code verifier is
+    // lost between the redirect request and the callback request.
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: `${appUrl}/oauth-callback.html`,
+        flowType: 'implicit',
       }
     });
     if (error) throw error;
     res.redirect(data.url);
   } catch (err) {
     console.error('Google OAuth error:', err.message);
-    res.redirect('/?error=oauth_failed');
+    res.redirect('/login?error=' + encodeURIComponent('Google sign-in failed. Please try again.'));
   }
 });
 
@@ -167,7 +171,7 @@ router.get('/apple', async (req, res) => {
     res.redirect(data.url);
   } catch (err) {
     console.error('Apple OAuth error:', err.message);
-    res.redirect('/?error=oauth_failed');
+    res.redirect('/login?error=' + encodeURIComponent('Google sign-in failed. Please try again.'));
   }
 });
 
@@ -235,14 +239,14 @@ router.post('/oauth-exchange', async (req, res) => {
 
     // Generate our JWT
     const token = jwt.sign(
-      { id: artist.id, email: artist.email, name: artist.name },
+      { id: artist.id, email: artist.email, name: artist.name, is_admin: !!artist.is_admin },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
 
     res.json({
       token,
-      artist: { id: artist.id, name: artist.name, email: artist.email, stage_name: artist.stage_name || null },
+      artist: { id: artist.id, name: artist.name, email: artist.email, stage_name: artist.stage_name || null, is_admin: !!artist.is_admin },
       isNewSignup
     });
   } catch (err) {
@@ -255,7 +259,7 @@ router.post('/oauth-exchange', async (req, res) => {
 router.get('/callback', async (req, res) => {
   const code = req.query.code;
   if (!code) {
-    return res.redirect('/?error=no_code');
+    return res.redirect('/login?error=' + encodeURIComponent('Sign-in failed — no authorization code received.'));
   }
   try {
     const { data: sessionData, error: sessionError } = await supabase.auth.exchangeCodeForSession(code);
@@ -283,7 +287,7 @@ router.get('/callback', async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: artist.id, email: artist.email, name: artist.name },
+      { id: artist.id, email: artist.email, name: artist.name, is_admin: !!artist.is_admin },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
@@ -295,7 +299,7 @@ router.get('/callback', async (req, res) => {
     }
   } catch (err) {
     console.error('[OAuth callback] FAILED:', err.message);
-    res.redirect('/?error=callback_failed');
+    res.redirect('/login?error=' + encodeURIComponent('Sign-in failed. Please try again.'));
   }
 });
 
@@ -310,7 +314,7 @@ function authSuccessRedirect(artist, isSignup) {
     { expiresIn: '7d' }
   );
   const artistPayload = encodeURIComponent(JSON.stringify({
-    id: artist.id, name: artist.name, email: artist.email, stage_name: artist.stage_name || null
+    id: artist.id, name: artist.name, email: artist.email, stage_name: artist.stage_name || null, is_admin: !!artist.is_admin
   }));
   const signupFlag = isSignup ? '&signup=1' : '';
   return `/?token=${token}&artist=${artistPayload}${signupFlag}`;
@@ -425,11 +429,11 @@ router.post('/login', async (req, res) => {
       return res.redirect(authSuccessRedirect(artist, false));
     }
     const token = jwt.sign(
-      { id: artist.id, email: artist.email, name: artist.name },
+      { id: artist.id, email: artist.email, name: artist.name, is_admin: !!artist.is_admin },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
-    res.json({ token, artist: { id: artist.id, name: artist.name, email: artist.email, stage_name: artist.stage_name || null, created_at: artist.created_at } });
+    res.json({ token, artist: { id: artist.id, name: artist.name, email: artist.email, stage_name: artist.stage_name || null, is_admin: !!artist.is_admin, created_at: artist.created_at } });
   } catch (err) {
     console.error('Login error:', err.message);
     if (isFormSubmit) return res.redirect('/login.html?error=' + encodeURIComponent('Login failed'));
@@ -440,7 +444,7 @@ router.post('/login', async (req, res) => {
 // GET /api/auth/me
 router.get('/me', require('../middleware/auth'), async (req, res) => {
   try {
-    const result = await pool.query('SELECT id, name, email, stage_name, email_verified, created_at FROM artists WHERE id = $1', [req.artist.id]);
+    const result = await pool.query('SELECT id, name, email, stage_name, email_verified, is_admin, created_at FROM artists WHERE id = $1', [req.artist.id]);
     const artist = result.rows[0];
     if (!artist) return res.status(404).json({ error: 'Artist not found' });
     res.json(artist);
@@ -541,7 +545,7 @@ router.post('/complete-google-signup', require('../middleware/auth'), async (req
 
     // Re-issue JWT with updated name
     const token = jwt.sign(
-      { id: artist.id, email: artist.email, name: artist.name },
+      { id: artist.id, email: artist.email, name: artist.name, is_admin: !!artist.is_admin },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
@@ -607,7 +611,7 @@ router.post('/complete-google-signup', require('../middleware/auth'), async (req
 
     res.json({
       token,
-      artist: { id: artist.id, name: artist.name, email: artist.email, stage_name: artist.stage_name }
+      artist: { id: artist.id, name: artist.name, email: artist.email, stage_name: artist.stage_name, is_admin: !!artist.is_admin }
     });
   } catch (err) {
     console.error('Complete Google signup error:', err.message);
@@ -662,11 +666,11 @@ router.post('/verify-email', async (req, res) => {
       return res.redirect(authSuccessRedirect(artist, true));
     }
     const token = jwt.sign(
-      { id: artist.id, email: artist.email, name: artist.name },
+      { id: artist.id, email: artist.email, name: artist.name, is_admin: !!artist.is_admin },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
-    res.json({ token, artist: { id: artist.id, name: artist.name, email: artist.email, stage_name: artist.stage_name || null } });
+    res.json({ token, artist: { id: artist.id, name: artist.name, email: artist.email, stage_name: artist.stage_name || null, is_admin: !!artist.is_admin } });
   } catch (err) {
     console.error('Verify email error:', err.message);
     if (isFormSubmit) return res.redirect('/verify-email.html?email=' + encodeURIComponent(email) + '&error=' + encodeURIComponent('Verification failed'));
