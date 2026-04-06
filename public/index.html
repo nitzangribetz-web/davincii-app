@@ -3253,6 +3253,50 @@
   }
   function openW9Modal(){document.getElementById('w9-modal-overlay').classList.add('open');}
   function closeW9Modal(){document.getElementById('w9-modal-overlay').classList.remove('open');}
+  function w9ClassChange(val) {
+    var wrap = document.getElementById('w9-llc-wrap');
+    var llcSelect = document.getElementById('w9-llc-type');
+    if (val === 'llc') {
+      wrap.style.display = '';
+      llcSelect.setAttribute('data-required', 'true');
+    } else {
+      wrap.style.display = 'none';
+      llcSelect.removeAttribute('data-required');
+      llcSelect.value = '';
+    }
+    if (val === 'individual') {
+      document.querySelector('input[name="w9-tin-type"][value="ssn"]').checked = true;
+      w9TinTypeChange('ssn');
+    } else if (val === 'c-corp' || val === 's-corp' || val === 'partnership' || val === 'trust') {
+      document.querySelector('input[name="w9-tin-type"][value="ein"]').checked = true;
+      w9TinTypeChange('ein');
+    }
+  }
+  function w9TinTypeChange(type) {
+    var label = document.getElementById('w9-tin-label');
+    var input = document.getElementById('w9-tin');
+    if (type === 'ein') {
+      label.textContent = 'Employer Identification Number (EIN) *';
+      input.placeholder = 'XX-XXXXXXX';
+      input.maxLength = 10;
+    } else {
+      label.textContent = 'Social Security Number (SSN) *';
+      input.placeholder = 'XXX-XX-XXXX';
+      input.maxLength = 11;
+    }
+    input.value = '';
+  }
+  function w9FormatTin(el) {
+    var type = document.querySelector('input[name="w9-tin-type"]:checked').value;
+    var v = el.value.replace(/[^\d]/g, '');
+    if (type === 'ssn') {
+      if (v.length > 3 && v.length <= 5) v = v.slice(0,3) + '-' + v.slice(3);
+      else if (v.length > 5) v = v.slice(0,3) + '-' + v.slice(3,5) + '-' + v.slice(5,9);
+    } else {
+      if (v.length > 2) v = v.slice(0,2) + '-' + v.slice(2,9);
+    }
+    el.value = v;
+  }
   function submitW9(){
     var modal = document.getElementById('w9-modal-overlay');
     var fieldsValid = validateFields(modal);
@@ -3266,6 +3310,38 @@
     if (!certValid && certErr) {
       certErr.textContent = 'You must certify the information is correct';
       certErr.classList.add('visible');
+    }
+    // Validate TIN format
+    var tinType = document.querySelector('input[name="w9-tin-type"]:checked').value;
+    var tinVal = document.getElementById('w9-tin').value.replace(/[^\d]/g, '');
+    var tinInput = document.getElementById('w9-tin');
+    if (tinType === 'ssn' && tinVal.length !== 9) {
+      tinInput.classList.add('field-error');
+      if (!tinInput.parentElement.querySelector('.field-error-msg')) {
+        var msg = document.createElement('div');
+        msg.className = 'field-error-msg visible';
+        msg.textContent = 'SSN must be 9 digits (XXX-XX-XXXX)';
+        tinInput.parentElement.insertBefore(msg, tinInput.nextSibling);
+      }
+      fieldsValid = false;
+    } else if (tinType === 'ein' && tinVal.length !== 9) {
+      tinInput.classList.add('field-error');
+      if (!tinInput.parentElement.querySelector('.field-error-msg')) {
+        var msg2 = document.createElement('div');
+        msg2.className = 'field-error-msg visible';
+        msg2.textContent = 'EIN must be 9 digits (XX-XXXXXXX)';
+        tinInput.parentElement.insertBefore(msg2, tinInput.nextSibling);
+      }
+      fieldsValid = false;
+    }
+    // Validate LLC subtype
+    var classVal = document.getElementById('w9-class').value;
+    if (classVal === 'llc') {
+      var llcType = document.getElementById('w9-llc-type');
+      if (!llcType.value) {
+        llcType.classList.add('field-error');
+        fieldsValid = false;
+      }
     }
     if (!fieldsValid || !certValid) return;
     const b=document.getElementById('w9-status-badge');
@@ -4599,15 +4675,52 @@
       <button class="modal-close" onclick="closeW9Modal()">&times;</button>
     </div>
     <div class="modal-body">
-      <div class="note-box">Under penalties of perjury, you certify that the information you provide is accurate and that you are a U.S. person.</div>
+      <div class="note-box">Request for Taxpayer Identification Number and Certification (Form W-9).</div>
       <div class="field-grid-2" style="margin-bottom:16px">
         <div><label class="field-label">Legal Name *</label><input class="field" type="text" placeholder="As shown on tax return" id="w9-name" data-required="true" style="margin-bottom:0"></div>
         <div><label class="field-label">Business / DBA <span style="font-weight:300;text-transform:none;letter-spacing:0;color:#94A3B8">if different</span></label><input class="field" type="text" placeholder="e.g. SwuM LLC" id="w9-biz" style="margin-bottom:0"></div>
       </div>
+
       <div class="field-grid-2" style="margin-bottom:16px">
-        <div><label class="field-label">Federal Tax Classification *</label><select class="field" style="-webkit-appearance:none;margin-bottom:0" id="w9-class" data-required="true"><option value="" disabled selected>Select classification</option><option>Individual / Sole proprietor</option><option>C Corporation</option><option>S Corporation</option><option>Partnership</option><option>LLC</option><option>Other</option></select></div>
-        <div><label class="field-label">Taxpayer ID (SSN or EIN) *</label><input class="field" type="text" placeholder="XXX-XX-XXXX" id="w9-tin" data-required="true" style="font-family:monospace;margin-bottom:0"></div>
+        <div>
+          <label class="field-label">Federal Tax Classification *</label>
+          <select class="field" style="-webkit-appearance:none;margin-bottom:0" id="w9-class" data-required="true" onchange="w9ClassChange(this.value)">
+            <option value="" disabled selected>Select classification</option>
+            <option value="individual">Individual / Sole proprietor</option>
+            <option value="c-corp">C Corporation</option>
+            <option value="s-corp">S Corporation</option>
+            <option value="partnership">Partnership</option>
+            <option value="trust">Trust / Estate</option>
+            <option value="llc">LLC</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div id="w9-llc-wrap" style="display:none">
+          <label class="field-label">LLC Tax Classification *</label>
+          <select class="field" style="-webkit-appearance:none;margin-bottom:0" id="w9-llc-type">
+            <option value="">Select how your LLC is taxed</option>
+            <option value="llc-c">C Corporation</option>
+            <option value="llc-s">S Corporation</option>
+            <option value="llc-p">Partnership</option>
+            <option value="llc-d">Disregarded entity (single-member)</option>
+          </select>
+        </div>
       </div>
+
+      <div style="margin-bottom:16px">
+        <label class="field-label">Taxpayer ID Type *</label>
+        <div style="display:flex;gap:20px;margin-bottom:10px">
+          <label style="display:flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:13px;color:#CBD5E1;cursor:pointer">
+            <input type="radio" name="w9-tin-type" value="ssn" checked onchange="w9TinTypeChange('ssn')" style="accent-color:#3B82F6;cursor:pointer"> SSN
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:13px;color:#CBD5E1;cursor:pointer">
+            <input type="radio" name="w9-tin-type" value="ein" onchange="w9TinTypeChange('ein')" style="accent-color:#3B82F6;cursor:pointer"> EIN
+          </label>
+        </div>
+        <label class="field-label" id="w9-tin-label">Social Security Number (SSN) *</label>
+        <input class="field" type="text" placeholder="XXX-XX-XXXX" id="w9-tin" data-required="true" maxlength="11" oninput="w9FormatTin(this)" style="font-family:monospace;margin-bottom:0">
+      </div>
+
       <label class="field-label">Street Address *</label>
       <input class="field" type="text" placeholder="Street address" id="w9-addr" data-required="true">
       <div class="field-grid-3">
@@ -4615,11 +4728,19 @@
         <div><label class="field-label">State *</label><input class="field" type="text" placeholder="State" id="w9-state" data-required="true" style="margin-bottom:0"></div>
         <div><label class="field-label">ZIP *</label><input class="field" type="text" placeholder="ZIP" id="w9-zip" data-required="true" style="margin-bottom:0"></div>
       </div>
+
       <div class="w9-cert" style="display:flex;align-items:flex-start;gap:10px;margin-top:18px;padding:14px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:8px">
-        <input type="checkbox" id="w9-certify" style="margin-top:3px;accent-color:#3B82F6;cursor:pointer">
-        <label for="w9-certify" style="font-family:'DM Sans',sans-serif;font-size:12.5px;color:#94A3B8;line-height:1.5;cursor:pointer">Under penalties of perjury, I certify that the number shown on this form is my correct taxpayer identification number and that I am not subject to backup withholding.</label>
+        <input type="checkbox" id="w9-certify" style="margin-top:3px;accent-color:#3B82F6;cursor:pointer;flex-shrink:0">
+        <label for="w9-certify" style="font-family:'DM Sans',sans-serif;font-size:12px;color:#94A3B8;line-height:1.6;cursor:pointer">Under penalties of perjury, I certify that: (1) the number shown on this form is my correct taxpayer identification number (or I am waiting for a number to be issued to me); (2) I am not subject to backup withholding because (a) I am exempt from backup withholding, or (b) I have not been notified by the IRS that I am subject to backup withholding as a result of a failure to report all interest or dividends, or (c) the IRS has notified me that I am no longer subject to backup withholding; and (3) I am a U.S. citizen or other U.S. person.</label>
       </div>
       <div id="w9-cert-error" class="field-error-msg" style="margin-top:4px"></div>
+
+      <div style="margin-top:18px;padding-top:18px;border-top:1px solid rgba(255,255,255,0.06)">
+        <div class="field-grid-2">
+          <div><label class="field-label">Signature (type your full legal name) *</label><input class="field" type="text" id="w9-sig" data-required="true" placeholder="Type your full legal name" style="margin-bottom:0"></div>
+          <div><label class="field-label">Date *</label><input class="field" type="date" id="w9-date" data-required="true" style="margin-bottom:0"></div>
+        </div>
+      </div>
     </div>
     <div class="modal-foot">
       <button onclick="closeW9Modal()" class="btn-ghost-dark">Cancel</button>
