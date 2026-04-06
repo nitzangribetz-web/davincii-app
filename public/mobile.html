@@ -1328,12 +1328,14 @@ footer.m-footer{
 </head>
 <body>
 <script>
-// Early auth detection: prevent dark flash when redirecting from login
+// Auth boot: inject CSS to hide landing + show dashboard before HTML renders
 (function(){
-  var p = new URLSearchParams(window.location.search);
-  if (p.get('token') || (localStorage.getItem('dv_token') && (window.location.pathname === '/dashboard' || window.location.pathname.indexOf('/dashboard/') === 0))) {
-    document.body.style.background = '#F0F4FA';
-    document.body.style.color = '#0A0A0A';
+  var params = new URLSearchParams(window.location.search);
+  if (params.get('token') || localStorage.getItem('dv_token')) {
+    var s = document.createElement('style');
+    s.id = 'auth-boot';
+    s.textContent = '#screen-landing{display:none!important}#screen-dashboard{display:block!important}body{background:#F0F4FA!important;color:#0A0A0A!important}';
+    document.head.appendChild(s);
   }
 })();
 </script>
@@ -2131,61 +2133,80 @@ footer.m-footer{
 </div>
 
 <script>
-// ── AUTH CALLBACK + AUTO-LOGIN ──
-(function checkAuthCallback() {
-  // Hash fragment interception (implicit OAuth flow)
+// ── AUTH BOOTSTRAP ──
+// Same linear flow as desktop: detect → activate → validate → fallback
+(function authBoot() {
+  // OAuth redirects
   var h = window.location.hash;
-  if (h && h.indexOf('access_token') !== -1) {
-    window.location.href = '/oauth-callback.html' + h;
-    return;
-  }
+  if (h && h.indexOf('access_token') !== -1) { window.location.replace('/oauth-callback.html' + h); return; }
   var params = new URLSearchParams(window.location.search);
-  // PKCE code fallback
   var oauthCode = params.get('code');
   if (oauthCode && !params.get('token')) { window.location.replace('/api/auth/callback?code=' + encodeURIComponent(oauthCode)); return; }
-  // Token from auth callback redirect
+  if (params.get('error')) { mobRemoveBootCSS(); return; }
+
+  // Token in URL (from auth-complete.html)
   var token = params.get('token');
   var artistParam = params.get('artist');
-  var isSignup = params.get('signup') === '1';
   if (token && artistParam) {
     try {
       var artist;
       try { artist = JSON.parse(artistParam); } catch(_) { artist = JSON.parse(decodeURIComponent(artistParam)); }
       localStorage.setItem('dv_token', token);
       localStorage.setItem('dv_artist', JSON.stringify(artist));
-      window.history.replaceState({ screen: 'dashboard' }, '', '/dashboard');
-      document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
-      document.getElementById('screen-dashboard').classList.add('active');
-      window.scrollTo(0, 0);
-      mobUpdateSettingsEmail(artist);
-    } catch (e) { console.error('[Auth] parse error:', e); }
+      mobActivateDashboard(artist);
+    } catch (e) { console.error('[Auth] parse error:', e); mobRemoveBootCSS(); }
     return;
   }
-  // Auto-login if token exists in localStorage (validate only, stay on landing)
+
+  // Token in localStorage (returning user)
   var savedToken = localStorage.getItem('dv_token');
   var savedArtist = localStorage.getItem('dv_artist');
   if (savedToken && savedArtist) {
+    try { mobActivateDashboard(JSON.parse(savedArtist)); } catch(_) {}
+    // Validate in background
     fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + savedToken } })
       .then(function(r) { if (r.ok) return r.json(); throw new Error('expired'); })
-      .then(function(artist) {
-        mobUpdateSettingsEmail(artist);
-        // Only switch to dashboard if on /dashboard route
-        var p = window.location.pathname;
-        if (p === '/dashboard' || p.startsWith('/dashboard/')) {
-          window.history.replaceState({ screen: 'dashboard' }, '', '/dashboard');
-          document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
-          document.getElementById('screen-dashboard').classList.add('active');
-          window.scrollTo(0, 0);
-        }
+      .then(function(freshArtist) {
+        mobUpdateArtistUI(freshArtist);
+        localStorage.setItem('dv_artist', JSON.stringify(freshArtist));
       })
-      .catch(function() { localStorage.removeItem('dv_token'); localStorage.removeItem('dv_artist'); });
+      .catch(function() {
+        localStorage.removeItem('dv_token');
+        localStorage.removeItem('dv_artist');
+        mobRemoveBootCSS();
+        document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+        document.getElementById('screen-landing').classList.add('active');
+        document.body.style.background = '';
+        document.body.style.color = '';
+      });
+    return;
   }
+
+  // No token — landing page
+  mobRemoveBootCSS();
 })();
 
-function mobUpdateSettingsEmail(artist) {
+function mobRemoveBootCSS() {
+  var s = document.getElementById('auth-boot');
+  if (s) s.remove();
+}
+
+function mobActivateDashboard(artist) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  document.getElementById('screen-dashboard').classList.add('active');
+  document.body.style.background = '#F0F4FA';
+  document.body.style.color = '#0A0A0A';
+  mobRemoveBootCSS();
+  window.history.replaceState({ screen: 'dashboard' }, '', '/dashboard');
+  window.scrollTo(0, 0);
+  mobUpdateArtistUI(artist);
+}
+
+function mobUpdateArtistUI(artist) {
+  // Settings email
   var el = document.getElementById('mob-settings-email');
   if (el && artist && artist.email) el.textContent = artist.email;
-  // Update greeting
+  // Greeting
   var displayName = (artist && (artist.stage_name || artist.name)) || '';
   var greetingEl = document.getElementById('mob-dash-greeting');
   if (greetingEl && displayName) {
@@ -2195,15 +2216,13 @@ function mobUpdateSettingsEmail(artist) {
   }
 }
 
-// Back button handler
+// Back button: if authenticated, always go to dashboard
 window.addEventListener('popstate', function() {
   var token = localStorage.getItem('dv_token');
   if (token) {
     var dashScreen = document.getElementById('screen-dashboard');
     if (!dashScreen || !dashScreen.classList.contains('active')) {
-      document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
-      document.getElementById('screen-dashboard').classList.add('active');
-      window.history.replaceState({ screen: 'dashboard' }, '', '/dashboard');
+      try { mobActivateDashboard(JSON.parse(localStorage.getItem('dv_artist') || '{}')); } catch(_) {}
     }
   }
 });
