@@ -483,7 +483,6 @@ router.post('/profile', require('../middleware/auth'), async (req, res) => {
 
   const proValue = pro === 'Other' && pro_other ? pro_other : (pro || null);
   const addressStreet = [address1, address2].filter(Boolean).join(', ');
-  const addressCity = [city, state, postal].filter(Boolean).join(', ');
 
   // Convert MM/DD/YYYY → YYYY-MM-DD for PostgreSQL DATE column
   let dobValue = null;
@@ -499,10 +498,10 @@ router.post('/profile', require('../middleware/auth'), async (req, res) => {
   try {
     await pool.query(
       `UPDATE artists SET stage_name=$1, pro=$2, ipi=$3, dob=$4,
-       address_street=$5, address_city=$6, address_state=$7, onboarded=TRUE
-       WHERE id=$8`,
+       address_street=$5, address_city=$6, address_state=$7, address_postal=$8, address_country=$9, onboarded=TRUE
+       WHERE id=$10`,
       [stage_name, proValue, ipi || null, dobValue,
-       addressStreet || null, addressCity || null, country || null, req.artist.id]
+       addressStreet || null, city || null, state || null, postal || null, country || null, req.artist.id]
     );
 
     // Send profile update notification to admin
