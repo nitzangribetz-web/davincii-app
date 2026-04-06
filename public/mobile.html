@@ -2135,55 +2135,67 @@ footer.m-footer{
 <script>
 // ── AUTH BOOTSTRAP ──
 // Same linear flow as desktop: detect → activate → validate → fallback
-(function authBoot() {
-  // OAuth redirects
+(function() {
+  // OAuth redirects run immediately (leave the page — no DOM needed)
   var h = window.location.hash;
   if (h && h.indexOf('access_token') !== -1) { window.location.replace('/oauth-callback.html' + h); return; }
   var params = new URLSearchParams(window.location.search);
   var oauthCode = params.get('code');
   if (oauthCode && !params.get('token')) { window.location.replace('/api/auth/callback?code=' + encodeURIComponent(oauthCode)); return; }
-  if (params.get('error')) { mobRemoveBootCSS(); return; }
 
-  // Token in URL (from auth-complete.html)
-  var token = params.get('token');
-  var artistParam = params.get('artist');
-  if (token && artistParam) {
-    try {
-      var artist;
-      try { artist = JSON.parse(artistParam); } catch(_) { artist = JSON.parse(decodeURIComponent(artistParam)); }
-      localStorage.setItem('dv_token', token);
-      localStorage.setItem('dv_artist', JSON.stringify(artist));
-      mobActivateDashboard(artist);
-    } catch (e) { console.error('[Auth] parse error:', e); mobRemoveBootCSS(); }
-    return;
-  }
+  // Steps 2-4 need DOM — wait for DOMContentLoaded
+  document.addEventListener('DOMContentLoaded', function() {
+    if (params.get('error')) { mobRemoveBootCSS(); return; }
 
-  // Token in localStorage (returning user)
-  var savedToken = localStorage.getItem('dv_token');
-  var savedArtist = localStorage.getItem('dv_artist');
-  if (savedToken && savedArtist) {
-    try { mobActivateDashboard(JSON.parse(savedArtist)); } catch(_) {}
-    // Validate in background
-    fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + savedToken } })
-      .then(function(r) { if (r.ok) return r.json(); throw new Error('expired'); })
-      .then(function(freshArtist) {
-        mobUpdateArtistUI(freshArtist);
-        localStorage.setItem('dv_artist', JSON.stringify(freshArtist));
-      })
-      .catch(function() {
-        localStorage.removeItem('dv_token');
-        localStorage.removeItem('dv_artist');
-        mobRemoveBootCSS();
-        document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
-        document.getElementById('screen-landing').classList.add('active');
-        document.body.style.background = '';
-        document.body.style.color = '';
-      });
-    return;
-  }
+    // Token in URL (from auth-complete.html)
+    var token = params.get('token');
+    var artistParam = params.get('artist');
+    if (token && artistParam) {
+      try {
+        var artist;
+        try { artist = JSON.parse(artistParam); } catch(_) { artist = JSON.parse(decodeURIComponent(artistParam)); }
+        localStorage.setItem('dv_token', token);
+        localStorage.setItem('dv_artist', JSON.stringify(artist));
+        mobActivateDashboard(artist);
+      } catch (e) { console.error('[Auth] parse error:', e); mobRemoveBootCSS(); }
+      return;
+    }
 
-  // No token — landing page
-  mobRemoveBootCSS();
+    // Token in localStorage (returning user)
+    var savedToken = localStorage.getItem('dv_token');
+    var savedArtist = localStorage.getItem('dv_artist');
+    if (savedToken && savedArtist) {
+      try { mobActivateDashboard(JSON.parse(savedArtist)); } catch(e) { console.error('[Auth] cached artist parse error:', e); }
+      // Validate in background — only log out on explicit auth rejection
+      fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + savedToken } })
+        .then(function(r) {
+          if (r.ok) return r.json();
+          if (r.status === 401 || r.status === 403) throw new Error('unauthorized');
+          return null;
+        })
+        .then(function(freshArtist) {
+          if (freshArtist) {
+            mobUpdateArtistUI(freshArtist);
+            localStorage.setItem('dv_artist', JSON.stringify(freshArtist));
+          }
+        })
+        .catch(function(err) {
+          if (err.message === 'unauthorized') {
+            localStorage.removeItem('dv_token');
+            localStorage.removeItem('dv_artist');
+            mobRemoveBootCSS();
+            document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+            document.getElementById('screen-landing').classList.add('active');
+            document.body.style.background = '';
+            document.body.style.color = '';
+          }
+        });
+      return;
+    }
+
+    // No token — landing page
+    mobRemoveBootCSS();
+  });
 })();
 
 function mobRemoveBootCSS() {
