@@ -2488,6 +2488,7 @@ function showDP(page, skipPush){
     window.history.pushState({ screen:'dashboard', page: page }, '', url);
   }
   if(page === 'signups') mobLoadSignups();
+  if(page === 'add-song') mobResetAddSong();
 }
 
 function getDashPageFromURL(){
