@@ -2782,15 +2782,10 @@
           localStorage.setItem('dv_token', token);
           localStorage.setItem('dv_artist', JSON.stringify(artist));
 
-          // Google OAuth signup — show completion step instead of dashboard
+          // Google OAuth signup — redirect to completion page
           if (params.get('google_signup') === '1') {
-            removeBootCSS();
-            go('signup');
-            // Hide step 1, show Google completion step
-            document.querySelectorAll('.signup-panel').forEach(function(p){ p.style.display='none'; });
-            var gsPanel = document.getElementById('signup-step-google');
-            if (gsPanel) gsPanel.style.display = 'block';
-            window.history.replaceState({}, '', '/signup');
+            window.location.replace('/google-signup.html');
+            return;
           } else {
             onAuthSuccess(artist, params.get('signup') === '1');
           }

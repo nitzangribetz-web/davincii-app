@@ -2302,14 +2302,10 @@ footer.m-footer{
         localStorage.setItem('dv_token', token);
         localStorage.setItem('dv_artist', JSON.stringify(artist));
 
-        // Google OAuth signup — show completion step instead of dashboard
+        // Google OAuth signup — redirect to completion page
         if (params.get('google_signup') === '1') {
-          mobRemoveBootCSS();
-          go('signup');
-          document.querySelectorAll('.m-signup-panel').forEach(function(p){ p.style.display='none'; });
-          var gsPanel = document.getElementById('ms-google');
-          if (gsPanel) gsPanel.style.display = 'block';
-          window.history.replaceState({}, '', '/signup');
+          window.location.replace('/google-signup.html');
+          return;
         } else {
           mobActivateDashboard(artist);
         }
@@ -2341,6 +2337,7 @@ footer.m-footer{
             localStorage.removeItem('dv_artist');
             mobRemoveBootCSS();
             document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+            document.body.classList.remove('dashboard-active');
             document.getElementById('screen-landing').classList.add('active');
             document.body.style.background = '';
             document.body.style.color = '';
@@ -2373,6 +2370,7 @@ function mobRemoveBootCSS() {
 function mobActivateDashboard(artist) {
   document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
   document.getElementById('screen-dashboard').classList.add('active');
+  document.body.classList.add('dashboard-active');
   document.body.style.background = '#F0F4FA';
   document.body.style.color = '#0A0A0A';
   mobRemoveBootCSS();
@@ -2437,6 +2435,7 @@ window.addEventListener('scroll',()=>{
 // ── Screen navigation ──
 function go(key, skipPush){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  if(key !== 'dashboard') document.body.classList.remove('dashboard-active');
   const t=document.getElementById('screen-'+key);
   if(t){t.classList.add('active');window.scrollTo(0,0)}
   if(!skipPush){
