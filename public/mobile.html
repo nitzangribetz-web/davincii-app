@@ -1265,6 +1265,14 @@ footer.m-footer{
     }
 
 /* W-9 Modal */
+/* Withdraw modal */
+.mob-wd-overlay{
+  position:fixed;inset:0;z-index:9998;
+  background:rgba(0,0,0,0.5);
+  display:none;align-items:flex-end;justify-content:center;
+}
+.mob-wd-overlay.open{display:flex}
+
 .mob-w9-overlay{
   position:fixed;inset:0;z-index:9999;
   background:rgba(0,0,0,0.5);
@@ -1804,7 +1812,7 @@ footer.m-footer{
       <div class="d-bal-note">Next distribution: Q2 2025</div>
       <div class="d-bal-row">
         <span class="d-bal-pending">+ $0.00 pending</span>
-        <button class="d-withdraw" onclick="showDP('payouts')">Withdraw →</button>
+        <button class="d-withdraw" onclick="openMobWithdraw()">Withdraw →</button>
       </div>
     </div>
     <div class="d-stats">
@@ -1967,7 +1975,7 @@ footer.m-footer{
     <div class="d-pg-rule"></div>
     <div class="d-bal" style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:14px">
       <div><div class="d-bal-lbl">Available Balance</div><div class="d-bal-amt"><span class="d-cs">$</span>0.00</div><div class="d-bal-note">Min. withdrawal: $50</div></div>
-      <button class="d-withdraw">Withdraw →</button>
+      <button class="d-withdraw" onclick="openMobWithdraw()">Withdraw →</button>
     </div>
     <div class="d-sbox" style="margin-bottom:12px">
       <div class="d-sbox-hd"><div><div class="d-sbox-title">Select Payout Method</div><div class="d-sbox-sub">Choose how to receive royalties</div></div></div>
@@ -2538,6 +2546,76 @@ function mobLoadSignups() {
 
 
 
+// ── Withdraw modal ──
+function openMobWithdraw(){
+  var modal = document.getElementById('mob-wd-overlay');
+  var errEl = document.getElementById('mob-wd-error');
+  var sucEl = document.getElementById('mob-wd-success');
+  var amtInput = document.getElementById('mob-wd-amount');
+  var btn = document.getElementById('mob-wd-btn');
+  errEl.style.display = 'none';
+  sucEl.style.display = 'none';
+  amtInput.value = '';
+  amtInput.disabled = false;
+  btn.disabled = false;
+  btn.textContent = 'WITHDRAW';
+  btn.style.display = '';
+  modal.classList.add('open');
+  var token = localStorage.getItem('dv_token');
+  if (token) {
+    fetch('/api/stripe/balance', { headers: { 'Authorization': 'Bearer ' + token } })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var balEl = document.getElementById('mob-wd-balance');
+        if (balEl) balEl.textContent = '$' + (parseFloat(data.available) || 0).toFixed(2);
+      }).catch(function(){});
+  }
+}
+function closeMobWithdraw(){
+  document.getElementById('mob-wd-overlay').classList.remove('open');
+}
+function confirmMobWithdraw(){
+  var token = localStorage.getItem('dv_token');
+  var amount = parseFloat(document.getElementById('mob-wd-amount').value);
+  var errEl = document.getElementById('mob-wd-error');
+  var sucEl = document.getElementById('mob-wd-success');
+  var btn = document.getElementById('mob-wd-btn');
+  errEl.style.display = 'none';
+  sucEl.style.display = 'none';
+  if (!amount || amount < 10) {
+    errEl.textContent = 'Minimum withdrawal is $10.00';
+    errEl.style.display = 'block';
+    return;
+  }
+  btn.disabled = true;
+  btn.textContent = 'PROCESSING...';
+  fetch('/api/stripe/payout', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ amount: amount })
+  })
+  .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+  .then(function(res) {
+    if (!res.ok) {
+      errEl.textContent = res.data.error || 'Withdrawal failed';
+      errEl.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'WITHDRAW';
+    } else {
+      sucEl.textContent = '$' + amount.toFixed(2) + ' withdrawal initiated. Arrives in 2\u20135 business days.';
+      sucEl.style.display = 'block';
+      btn.style.display = 'none';
+      document.getElementById('mob-wd-amount').disabled = true;
+    }
+  })
+  .catch(function() {
+    errEl.textContent = 'Network error. Please try again.';
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'WITHDRAW';
+  });
+}
+
 // ── Scroll reveal ──
 (function(){
   const io = new IntersectionObserver((entries) => {
@@ -3067,6 +3145,31 @@ function mobToggle2FA() {
 }
 
 </script>
+
+<!-- ── WITHDRAW MODAL ── -->
+<div class="mob-wd-overlay" id="mob-wd-overlay" onclick="if(event.target===this)closeMobWithdraw()">
+  <div class="mob-w9-sheet" style="max-height:70vh">
+    <div class="mob-w9-hd">
+      <div class="mob-w9-title">Withdraw</div>
+      <button onclick="closeMobWithdraw()" style="font-size:20px;background:none;border:none;color:#94A3B8;cursor:pointer">&times;</button>
+    </div>
+    <div style="padding:20px">
+      <div style="background:#F0F4FA;border-radius:10px;padding:18px;margin-bottom:18px;text-align:center">
+        <div style="font-size:10px;font-weight:600;letter-spacing:0.10em;text-transform:uppercase;color:#64748B;margin-bottom:4px">Available Balance</div>
+        <div id="mob-wd-balance" style="font-family:var(--serif);font-size:36px;font-weight:300;color:var(--black)">$0.00</div>
+      </div>
+      <label class="field-label">Amount to withdraw</label>
+      <div style="position:relative">
+        <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;color:#94A3B8;pointer-events:none">$</span>
+        <input class="field" type="number" id="mob-wd-amount" placeholder="0.00" min="10" step="0.01" style="padding-left:28px;margin-bottom:6px">
+      </div>
+      <div style="font-size:11px;color:#64748B;margin-bottom:14px">Minimum withdrawal: $10.00</div>
+      <div id="mob-wd-error" style="display:none;font-size:12px;color:#DC2626;background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:10px 12px;margin-bottom:14px"></div>
+      <div id="mob-wd-success" style="display:none;font-size:12px;color:#16A34A;background:#DCFCE7;border:1px solid #BBF7D0;border-radius:8px;padding:10px 12px;margin-bottom:14px"></div>
+      <button class="btn-p" id="mob-wd-btn" onclick="confirmMobWithdraw()">Withdraw</button>
+    </div>
+  </div>
+</div>
 
 <!-- ── W-9 MODAL ── -->
 <div class="mob-w9-overlay" id="mob-w9-overlay" onclick="if(event.target===this)closeMobW9Modal()">

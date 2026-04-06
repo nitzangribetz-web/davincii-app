@@ -3485,6 +3485,77 @@
     const s=document.getElementById(m+'-option');if(s)s.classList.add('selected');
   }
 
+  // ── Withdraw modal ──
+  function openWithdrawModal(){
+    var modal = document.getElementById('withdraw-modal');
+    var errEl = document.getElementById('withdraw-error');
+    var sucEl = document.getElementById('withdraw-success');
+    var amtInput = document.getElementById('withdraw-amount');
+    var btn = document.getElementById('withdraw-confirm-btn');
+    errEl.style.display = 'none';
+    sucEl.style.display = 'none';
+    amtInput.value = '';
+    btn.disabled = false;
+    btn.textContent = 'Withdraw';
+    modal.classList.add('open');
+    var token = localStorage.getItem('dv_token');
+    if (token) {
+      fetch('/api/stripe/balance', { headers: { 'Authorization': 'Bearer ' + token } })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          var balEl = document.getElementById('withdraw-balance');
+          if (balEl) balEl.textContent = '$' + (parseFloat(data.available) || 0).toFixed(2);
+        }).catch(function(){});
+    }
+  }
+  function closeWithdrawModal(){
+    document.getElementById('withdraw-modal').classList.remove('open');
+  }
+  function confirmWithdraw(){
+    var token = localStorage.getItem('dv_token');
+    var amount = parseFloat(document.getElementById('withdraw-amount').value);
+    var errEl = document.getElementById('withdraw-error');
+    var sucEl = document.getElementById('withdraw-success');
+    var btn = document.getElementById('withdraw-confirm-btn');
+    errEl.style.display = 'none';
+    sucEl.style.display = 'none';
+    if (!amount || amount < 10) {
+      errEl.textContent = 'Minimum withdrawal is $10.00';
+      errEl.style.display = 'block';
+      return;
+    }
+    btn.disabled = true;
+    btn.textContent = 'Processing...';
+    fetch('/api/stripe/payout', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ amount: amount })
+    })
+    .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+    .then(function(res) {
+      if (!res.ok) {
+        errEl.textContent = res.data.error || 'Withdrawal failed';
+        errEl.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Withdraw';
+      } else {
+        sucEl.textContent = '$' + amount.toFixed(2) + ' withdrawal initiated. It will arrive in 2–5 business days.';
+        sucEl.style.display = 'block';
+        btn.style.display = 'none';
+        document.getElementById('withdraw-amount').disabled = true;
+      }
+    })
+    .catch(function() {
+      errEl.textContent = 'Network error. Please try again.';
+      errEl.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Withdraw';
+    });
+  }
+  window.openWithdrawModal = openWithdrawModal;
+  window.closeWithdrawModal = closeWithdrawModal;
+  window.confirmWithdraw = confirmWithdraw;
+
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // TOAST NOTIFICATIONS
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -4055,7 +4126,7 @@
             <div class="bal-note">Next distribution: Q2 2025</div>
           </div>
           <div style="position:relative;z-index:1;flex-shrink:0;">
-            <button class="btn-withdraw" onclick="showDashPage('payouts')">
+            <button class="btn-withdraw" onclick="openWithdrawModal()">
               Withdraw →
             </button>
           </div>
@@ -4602,7 +4673,7 @@
             <div class="bal-note">Next distribution: Q2 2025 · Minimum withdrawal: <span class="cs">$</span>50</div>
           </div>
           <div style="position:relative;z-index:1;flex-shrink:0;">
-            <button class="btn-withdraw">
+            <button class="btn-withdraw" onclick="openWithdrawModal()">
               Withdraw →
             </button>
           </div>
@@ -4936,6 +5007,37 @@
   </div>
 </div>
 
+
+<!-- ════════════ WITHDRAW MODAL ════════════ -->
+<div class="modal-overlay" id="withdraw-modal">
+  <div class="modal-box" style="max-width:420px">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">Withdraw</div>
+        <div class="modal-sub">Transfer royalties to your connected account</div>
+      </div>
+      <button class="modal-close" onclick="closeWithdrawModal()">&times;</button>
+    </div>
+    <div class="modal-body" style="padding:24px 28px">
+      <div style="background:#F0F4FA;border-radius:10px;padding:20px;margin-bottom:20px;text-align:center">
+        <div style="font-size:11px;font-weight:600;letter-spacing:0.10em;text-transform:uppercase;color:#64748B;margin-bottom:6px">Available Balance</div>
+        <div id="withdraw-balance" style="font-family:'Playfair Display',serif;font-size:42px;font-weight:300;color:#0A0A0A;letter-spacing:-0.02em">$0.00</div>
+      </div>
+      <label class="field-label">Amount to withdraw</label>
+      <div style="position:relative">
+        <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-family:'DM Sans',sans-serif;font-size:16px;color:#94A3B8;pointer-events:none">$</span>
+        <input class="field" type="number" id="withdraw-amount" placeholder="0.00" min="10" step="0.01" style="padding-left:28px;margin-bottom:8px">
+      </div>
+      <div style="font-size:12px;color:#64748B;margin-bottom:16px">Minimum withdrawal: $10.00</div>
+      <div id="withdraw-error" style="display:none;font-size:13px;color:#DC2626;background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:10px 14px;margin-bottom:16px"></div>
+      <div id="withdraw-success" style="display:none;font-size:13px;color:#16A34A;background:#DCFCE7;border:1px solid #BBF7D0;border-radius:8px;padding:10px 14px;margin-bottom:16px"></div>
+    </div>
+    <div class="modal-foot">
+      <button onclick="closeWithdrawModal()" class="btn-ghost-dark">Cancel</button>
+      <button onclick="confirmWithdraw()" class="btn-blue" id="withdraw-confirm-btn">Withdraw</button>
+    </div>
+  </div>
+</div>
 
 <!-- ════════════ PRIVACY ════════════ -->
 <div class="screen legal-screen" id="screen-privacy">
