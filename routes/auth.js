@@ -335,7 +335,9 @@ function authSuccessRedirect(artist, isSignup) {
     id: artist.id, name: artist.name, email: artist.email, stage_name: artist.stage_name || null, is_admin: !!artist.is_admin
   }));
   const signupFlag = isSignup ? '&signup=1' : '';
-  return `/?token=${token}&artist=${artistPayload}${signupFlag}`;
+  // Redirect through auth-complete.html so Safari detects the
+  // POST → 302 → new-page cycle and offers to save credentials
+  return `/auth-complete.html?token=${token}&artist=${artistPayload}${signupFlag}`;
 }
 
 // POST /api/auth/signup

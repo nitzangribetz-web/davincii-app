@@ -5,11 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#F0F4FA">
 <title>Davincii</title>
-<style>html,body{margin:0;background:#F0F4FA;min-height:100vh}</style>
+<style>
+html,body{margin:0;background:#F0F4FA;min-height:100vh;display:flex;align-items:center;justify-content:center}
+.loader{width:28px;height:28px;border:3px solid #E2E8F0;border-top-color:#2260CC;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<!-- Safari requires the page to render before it triggers "Save Password".
+     A visible body + short delay ensures the credential-save prompt fires. -->
+<div class="loader"></div>
 <script>
-// Runs in <head> — redirects BEFORE body renders, so nothing is ever visible.
-// This page exists only so Safari detects the form POST → 302 → navigation
-// cycle and offers to save credentials to iCloud Keychain.
 (function() {
   var params = new URLSearchParams(window.location.search);
   var token = params.get('token');
@@ -31,12 +37,13 @@
     var qs = '?token=' + encodeURIComponent(token) + '&artist=' + encodeURIComponent(artistParam);
     if (isSignup) { qs += '&signup=1'; }
     if (params.get('google_signup') === '1') { qs += '&google_signup=1'; }
-    window.location.replace('/' + qs);
+    // Short delay so Safari's password manager detects the successful
+    // POST → 302 → page-render cycle and offers to save credentials
+    setTimeout(function() { window.location.replace('/' + qs); }, 200);
   } else {
     window.location.replace('/login');
   }
 })();
 </script>
-</head>
-<body></body>
+</body>
 </html>
