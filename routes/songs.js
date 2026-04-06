@@ -35,28 +35,20 @@ async function sendSongNotification(songData) {
         <table style="width:100%;border-collapse:collapse;margin-bottom:24px">
           <tr><td style="padding:10px 0;border-bottom:1px solid #eee;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#888;width:140px">Song Title</td>
           <td style="padding:10px 0;border-bottom:1px solid #eee;font-size:15px;font-weight:600">${title}</td></tr>
+          <tr><td style="padding:10px 0;border-bottom:1px solid #eee;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#888">Artist</td>
+          <td style="padding:10px 0;border-bottom:1px solid #eee;font-size:14px">${artistName || '—'} (${artistEmail || '—'})</td></tr>
+          ${recordings && recordings.length > 0 ? recordings.map((r, i) => `
+          <tr><td style="padding:10px 0;border-bottom:1px solid #eee;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#888">Recording Title${recordings.length > 1 ? ' ' + (i+1) : ''}</td>
+          <td style="padding:10px 0;border-bottom:1px solid #eee;font-size:14px;font-weight:600">${r.title || '—'}</td></tr>
+          <tr><td style="padding:10px 0;border-bottom:1px solid #eee;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#888">Recording ISRC${recordings.length > 1 ? ' ' + (i+1) : ''}</td>
+          <td style="padding:10px 0;border-bottom:1px solid #eee;font-size:14px;font-family:monospace">${r.isrc || '—'}</td></tr>
+          <tr><td style="padding:10px 0;border-bottom:1px solid #eee;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#888">Recording Artist${recordings.length > 1 ? ' ' + (i+1) : ''}</td>
+          <td style="padding:10px 0;border-bottom:1px solid #eee;font-size:14px">${r.artist || '—'}</td></tr>`).join('') : ''}
           <tr><td style="padding:10px 0;border-bottom:1px solid #eee;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#888">ISRC Code</td>
           <td style="padding:10px 0;border-bottom:1px solid #eee;font-size:14px;font-family:monospace">${isrc || 'Not provided'}</td></tr>
           <tr><td style="padding:10px 0;border-bottom:1px solid #eee;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#888">ISWC</td>
           <td style="padding:10px 0;border-bottom:1px solid #eee;font-size:14px;font-family:monospace">${iswc || 'Not provided'}</td></tr>
-          <tr><td style="padding:10px 0;border-bottom:1px solid #eee;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#888">Artist</td>
-          <td style="padding:10px 0;border-bottom:1px solid #eee;font-size:14px">${artistName || '—'} (${artistEmail || '—'})</td></tr>
         </table>
-
-        ${recordings && recordings.length > 0 ? `
-        <h3 style="font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#888;margin:0 0 12px">Recordings / ISRCs (${recordings.length})</h3>
-        <table style="width:100%;border-collapse:collapse;margin-bottom:24px;font-size:14px">
-          <tr style="background:#f8f8f6">
-            <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#888">Recording Title</th>
-            <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#888">ISRC</th>
-            <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#888">Artist</th>
-          </tr>
-          ${recordings.map(r => `<tr>
-            <td style="padding:8px 12px;border-bottom:1px solid #eee;font-weight:600">${r.title || '—'}</td>
-            <td style="padding:8px 12px;border-bottom:1px solid #eee;font-family:monospace">${r.isrc || '—'}</td>
-            <td style="padding:8px 12px;border-bottom:1px solid #eee">${r.artist || '—'}</td>
-          </tr>`).join('')}
-        </table>` : ''}
 
         <h3 style="font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#888;margin:0 0 12px">Writers &amp; Splits (${totalPct}%)</h3>
         <table style="width:100%;border-collapse:collapse;margin-bottom:28px;font-size:14px">
