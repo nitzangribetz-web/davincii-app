@@ -95,7 +95,7 @@ router.post('/', auth, async (req, res) => {
   if (cowriters && Array.isArray(cowriters)) {
     cowriters.forEach(cw => { totalPct += parseFloat(cw.pct) || 0; });
   }
-  if (totalPct !== 100) {
+  if (Math.abs(totalPct - 100) > 0.01) {
     return res.status(400).json({ error: 'Ownership splits must total exactly 100%' });
   }
 

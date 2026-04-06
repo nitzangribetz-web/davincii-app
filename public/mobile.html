@@ -3058,9 +3058,53 @@ function mobSubmitSong() {
 
   var songData = {
     title: titleField.value.trim(),
-    songwriter: writerField.value.trim(),
-    songwriter_pct: pctField.value.trim()
+    primary_writer: writerField.value.trim(),
+    primary_pct: parseFloat(pctField.value) || 0
   };
+
+  // ISWC
+  var iswcField = document.getElementById('mob-iswc');
+  if (iswcField && iswcField.value.trim()) songData.iswc = iswcField.value.trim();
+
+  // Recordings
+  var recList = document.getElementById('mob-recording-list');
+  if (recList && recList.children.length > 0) {
+    songData.recordings = [];
+    Array.from(recList.children).forEach(function(row) {
+      var divs = row.querySelectorAll('div div');
+      var titleDiv = divs[0];
+      var metaDiv = divs[1];
+      if (titleDiv) {
+        var recTitle = titleDiv.textContent.trim();
+        var isrc = '';
+        if (metaDiv) {
+          var span = metaDiv.querySelector('span');
+          if (span) isrc = span.textContent.trim();
+        }
+        songData.recordings.push({ title: recTitle, isrc: isrc });
+      }
+    });
+    if (songData.recordings.length > 0) {
+      songData.isrc = songData.recordings[0].isrc;
+      songData.recording_title = songData.recordings[0].title;
+    }
+  }
+
+  // Cowriters
+  var cwYes = document.getElementById('mob-cw-yes');
+  if (cwYes && cwYes.checked) {
+    songData.cowriters = [];
+    document.querySelectorAll('[id^="mob-cw-row-"]').forEach(function(row) {
+      var nameInput = row.querySelector('input[type="text"]');
+      var pctInput = row.querySelector('.mob-cw-pct');
+      if (nameInput && nameInput.value.trim()) {
+        songData.cowriters.push({
+          name: nameInput.value.trim(),
+          pct: parseFloat(pctInput ? pctInput.value : 0) || 0
+        });
+      }
+    });
+  }
 
   var token = localStorage.getItem('dv_token');
   fetch('/api/songs', {

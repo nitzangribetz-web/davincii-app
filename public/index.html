@@ -3751,9 +3751,57 @@
     // Collect data and submit
     var songData = {
       title: titleField.value.trim(),
-      songwriter: writerField.value.trim(),
-      songwriter_pct: pctField.value.trim()
+      primary_writer: writerField.value.trim(),
+      primary_pct: parseFloat(pctField.value) || 0
     };
+
+    // ISWC
+    var iswcField = document.getElementById('desk-iswc');
+    if (iswcField && iswcField.value.trim()) songData.iswc = iswcField.value.trim();
+
+    // Recordings
+    var recList = document.getElementById('desk-recording-list');
+    if (recList && recList.children.length > 0) {
+      songData.recordings = [];
+      Array.from(recList.children).forEach(function(row) {
+        var divs = row.querySelectorAll('div div');
+        var titleDiv = divs[0];
+        var metaDiv = divs[1];
+        if (titleDiv) {
+          var recTitle = titleDiv.textContent.trim();
+          var isrc = '';
+          var recArtist = '';
+          if (metaDiv) {
+            var span = metaDiv.querySelector('span');
+            if (span) isrc = span.textContent.trim();
+            var metaText = metaDiv.textContent.replace(isrc, '').replace('·', '').trim();
+            recArtist = metaText;
+          }
+          songData.recordings.push({ title: recTitle, isrc: isrc, artist: recArtist });
+        }
+      });
+      if (songData.recordings.length > 0) {
+        songData.isrc = songData.recordings[0].isrc;
+        songData.recording_title = songData.recordings[0].title;
+      }
+    }
+
+    // Cowriters
+    var cwSection = document.getElementById('desk-cowriter-section');
+    var cwYes = document.getElementById('desk-cw-yes-radio');
+    if (cwYes && cwYes.checked && cwSection) {
+      songData.cowriters = [];
+      cwSection.querySelectorAll('[id^="desk-cw-row-"]').forEach(function(row) {
+        var nameInput = row.querySelector('[id^="desk-cw-name-"]');
+        var pctInput = row.querySelector('[id^="desk-cw-pct-"]');
+        if (nameInput && nameInput.value.trim()) {
+          songData.cowriters.push({
+            name: nameInput.value.trim(),
+            pct: parseFloat(pctInput ? pctInput.value : 0) || 0
+          });
+        }
+      });
+    }
 
     var token = localStorage.getItem('dv_token');
     fetch('/api/songs', {
