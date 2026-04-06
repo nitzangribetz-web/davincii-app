@@ -40,8 +40,9 @@
       localStorage.setItem('dv_token', d.token);
       localStorage.setItem('dv_artist', JSON.stringify(d.artist));
 
-      if (d.isNewSignup) {
-        localStorage.setItem('dv_just_signed_up', '1');
+      // Send to completion page if new signup OR profile incomplete (no stage name)
+      if (d.isNewSignup || !d.artist.stage_name) {
+        if (d.isNewSignup) localStorage.setItem('dv_just_signed_up', '1');
         window.location.replace('/google-signup.html');
       } else {
         var qs = '?token=' + encodeURIComponent(d.token) +

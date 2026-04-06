@@ -291,8 +291,9 @@ router.get('/callback', async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
-    const artistPayload = encodeURIComponent(JSON.stringify({ id: artist.id, name: artist.name, email: artist.email }));
-    if (isNewSignup) {
+    const artistPayload = encodeURIComponent(JSON.stringify({ id: artist.id, name: artist.name, email: artist.email, stage_name: artist.stage_name || null }));
+    // Send to google-signup completion if new OR profile incomplete (no stage_name)
+    if (isNewSignup || !artist.stage_name) {
       res.redirect(`/auth-complete.html?token=${token}&artist=${artistPayload}&signup=1&redirect=google-signup`);
     } else {
       res.redirect(`/auth-complete.html?token=${token}&artist=${artistPayload}`);
