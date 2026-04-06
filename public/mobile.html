@@ -1664,6 +1664,27 @@ footer.m-footer{
       <div class="auth-link">Already have an account? <a onclick="go('login')">Sign in</a></div>
     </div>
 
+    <!-- Google Profile Step — shown after Google OAuth for new signups -->
+    <div class="m-signup-panel" id="ms-google" style="display:none">
+      <div class="m-auth-title">Complete your <em>profile.</em></div>
+      <p style="font-family:var(--sans);font-size:13.5px;font-weight:300;color:var(--muted);line-height:1.70;margin-bottom:24px">You're almost in. Just a few details so we can set up your account.</p>
+      <div class="error-box" id="mob-google-signup-error" hidden></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:0">
+        <input class="field" style="margin-bottom:0" type="text" id="mob-g-first" placeholder="First name" autocomplete="given-name">
+        <input class="field" style="margin-bottom:0" type="text" id="mob-g-last" placeholder="Last name" autocomplete="family-name">
+      </div>
+      <div style="height:12px"></div>
+      <input class="field" type="text" id="mob-g-artist" placeholder="Artist / stage name">
+      <div class="m-agree-row">
+        <input type="checkbox" id="mob-g-agree">
+        <label for="mob-g-agree">I agree to Davincii's <a onclick="go('terms')">Terms</a> and <a onclick="go('privacy')">Privacy Policy</a></label>
+      </div>
+      <button class="btn-p" onclick="mobGoogleComplete()">Create account &rarr;</button>
+      <div style="margin-top:14px;text-align:center">
+        <button onclick="mobGoogleBack()" style="font-family:var(--sans);font-size:12px;color:var(--muted);background:none;border:none;cursor:pointer">&larr; Use email instead</button>
+      </div>
+    </div>
+
     <!-- Step 2 — Agreement -->
     <div class="m-signup-panel" id="ms-2" style="display:none">
 
@@ -2300,7 +2321,7 @@ footer.m-footer{
   document.addEventListener('DOMContentLoaded', function() {
     if (params.get('error')) { mobRemoveBootCSS(); return; }
 
-    // Token in URL (from auth-complete.html)
+    // Token in URL (from auth-complete.html or oauth-callback)
     var token = params.get('token');
     var artistParam = params.get('artist');
     if (token && artistParam) {
@@ -2309,7 +2330,18 @@ footer.m-footer{
         try { artist = JSON.parse(artistParam); } catch(_) { artist = JSON.parse(decodeURIComponent(artistParam)); }
         localStorage.setItem('dv_token', token);
         localStorage.setItem('dv_artist', JSON.stringify(artist));
-        mobActivateDashboard(artist);
+
+        // Google OAuth signup — show completion step instead of dashboard
+        if (params.get('google_signup') === '1') {
+          mobRemoveBootCSS();
+          go('signup');
+          document.querySelectorAll('.m-signup-panel').forEach(function(p){ p.style.display='none'; });
+          var gsPanel = document.getElementById('ms-google');
+          if (gsPanel) gsPanel.style.display = 'block';
+          window.history.replaceState({}, '', '/signup');
+        } else {
+          mobActivateDashboard(artist);
+        }
       } catch (e) { console.error('[Auth] parse error:', e); mobRemoveBootCSS(); }
       return;
     }
@@ -2496,6 +2528,45 @@ function signupStep(s){
 function signupBack(){
   if(_mStep>1)signupStep(_mStep-1);
   else go('landing');
+}
+
+// ── Google OAuth signup completion ──
+function mobGoogleComplete() {
+  var first = document.getElementById('mob-g-first').value.trim();
+  var last = document.getElementById('mob-g-last').value.trim();
+  var stage = document.getElementById('mob-g-artist').value.trim();
+  var terms = document.getElementById('mob-g-agree').checked;
+  var errEl = document.getElementById('mob-google-signup-error');
+  errEl.setAttribute('hidden','');
+
+  if (!first || !last) { errEl.textContent='Please enter your first and last name.'; errEl.removeAttribute('hidden'); return; }
+  if (!stage) { errEl.textContent='Please enter your artist or stage name.'; errEl.removeAttribute('hidden'); return; }
+  if (!terms) { errEl.textContent='You must agree to the Terms and Privacy Policy.'; errEl.removeAttribute('hidden'); return; }
+
+  var btn = event.target; btn.disabled=true; btn.textContent='Saving...';
+  var token = localStorage.getItem('dv_token');
+  fetch('/api/auth/complete-google-signup', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+    body: JSON.stringify({ first_name: first, last_name: last, stage_name: stage })
+  })
+  .then(function(r){ return r.json().then(function(d){ return {ok:r.ok,data:d}; }); })
+  .then(function(result){
+    if (!result.ok) throw new Error(result.data.error || 'Failed to complete signup');
+    if (result.data.token) localStorage.setItem('dv_token', result.data.token);
+    localStorage.setItem('dv_artist', JSON.stringify(result.data.artist));
+    mobActivateDashboard(result.data.artist);
+  })
+  .catch(function(err){
+    btn.disabled=false; btn.textContent='Create account →';
+    errEl.textContent=err.message; errEl.removeAttribute('hidden');
+  });
+}
+function mobGoogleBack() {
+  localStorage.removeItem('dv_token');
+  localStorage.removeItem('dv_artist');
+  go('signup');
+  signupStep(1);
 }
 
 // ── Payout selection ──

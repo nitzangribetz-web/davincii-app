@@ -3304,7 +3304,7 @@
       onAuthSuccess(result.data.artist, true);
     })
     .catch(function(err){
-      btn.disabled=false; btn.textContent='Complete signup';
+      btn.disabled=false; btn.textContent='Create account →';
       errEl.textContent=err.message; errEl.classList.add('visible');
     });
   }
@@ -3984,18 +3984,22 @@
         </div>
         <!-- Google OAuth Completion Step -->
         <div class="signup-panel" id="signup-step-google" style="display:none">
-          <div class="auth-page-title">Complete your <em>signup.</em></div>
+          <div class="auth-page-title">Complete your <em>profile.</em></div>
+          <p style="font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:300;color:#64748B;line-height:1.70;margin-bottom:28px">You're almost in. Just a few details so we can set up your account.</p>
           <div class="error-box" id="google-signup-error" hidden></div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
-            <input class="auth-field" style="margin-bottom:0" type="text" id="gs-desk-first" placeholder="First name">
-            <input class="auth-field" style="margin-bottom:0" type="text" id="gs-desk-last" placeholder="Last name">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+            <input class="auth-field" style="margin-bottom:0" type="text" id="gs-desk-first" placeholder="First name" autocomplete="given-name">
+            <input class="auth-field" style="margin-bottom:0" type="text" id="gs-desk-last" placeholder="Last name" autocomplete="family-name">
           </div>
           <input class="auth-field" type="text" id="gs-desk-stage" placeholder="Artist / stage name">
           <div class="auth-agree">
             <input type="checkbox" id="gs-desk-terms">
             <label for="gs-desk-terms">I agree to Davincii's <a onclick="go('terms')">Terms</a> and <a onclick="go('privacy')">Privacy Policy</a></label>
           </div>
-          <button class="auth-btn-primary" type="button" onclick="submitGoogleSignupDesktop()">Complete signup</button>
+          <button class="auth-btn-primary" type="button" onclick="submitGoogleSignupDesktop()">Create account &rarr;</button>
+          <div style="margin-top:16px;text-align:center">
+            <button onclick="go('signup')" style="font-family:'DM Sans',sans-serif;font-size:13px;color:#94A3B8;background:none;border:none;cursor:pointer;padding:0">&larr; Use email instead</button>
+          </div>
         </div>
         <!-- Step 2 — Agreement -->
         <div class="signup-panel" id="signup-step-2" style="display:none">
