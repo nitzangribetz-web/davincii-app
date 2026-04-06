@@ -1612,6 +1612,7 @@ footer.m-footer{
   </div>
   <div class="m-auth-body">
     <div class="m-auth-title">Sign <em>in.</em></div>
+    <div class="error-box" id="mob-login-error" hidden></div>
     <form method="POST" action="/api/auth/login">
       <input class="field" type="email" name="email" placeholder="Email address" autocomplete="email" required>
       <input class="field" type="password" name="password" placeholder="Password" autocomplete="current-password" required>
@@ -2389,6 +2390,15 @@ footer.m-footer{
     mobRemoveBootCSS();
     var screen = getScreenFromURL();
     if (screen && screen !== 'landing') go(screen, true);
+
+    // Show login/signup errors from URL params
+    var params = new URLSearchParams(window.location.search);
+    var error = params.get('error');
+    if (error) {
+      var errEl = document.getElementById('mob-login-error');
+      if (errEl) { errEl.textContent = error; errEl.removeAttribute('hidden'); }
+      window.history.replaceState({}, '', window.location.pathname);
+    }
   });
 })();
 
@@ -2463,9 +2473,6 @@ window.addEventListener('scroll',()=>{
 
 // ── Screen navigation ──
 function go(key, skipPush){
-  // Standalone pages for Safari credential autofill (real form POST + navigation)
-  if(key==='login'){window.location.href='/login.html';return;}
-  if(key==='signup'){window.location.href='/signup.html';return;}
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const t=document.getElementById('screen-'+key);
   if(t){t.classList.add('active');window.scrollTo(0,0)}

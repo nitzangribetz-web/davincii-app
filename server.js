@@ -93,9 +93,18 @@ app.use('/api/stripe', stripeRoutes);
 app.use('/api/passkeys', passkeyRoutes);
 app.use('/api/admin', require('./routes/admin'));
 
-// Serve standalone auth pages for clean URLs (Safari requires real <form> for credential autofill)
-app.get('/login', (req, res) => res.sendFile('login.html', { root: publicDir }));
-app.get('/signup', (req, res) => res.sendFile('signup.html', { root: publicDir }));
+// Serve standalone auth pages for clean URLs
+// Mobile gets SPA (mobile.html), desktop gets standalone pages (Safari credential autofill)
+app.get('/login', (req, res) => {
+  const ua = req.headers['user-agent'] || '';
+  const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+  res.sendFile(isMobile ? 'mobile.html' : 'login.html', { root: publicDir });
+});
+app.get('/signup', (req, res) => {
+  const ua = req.headers['user-agent'] || '';
+  const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+  res.sendFile(isMobile ? 'mobile.html' : 'signup.html', { root: publicDir });
+});
 app.get('/verify-email', (req, res) => res.sendFile('verify-email.html', { root: publicDir }));
 
 // Serve SPA for all non-API, non-static routes (catch-all)

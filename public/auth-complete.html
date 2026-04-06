@@ -25,7 +25,7 @@
         localStorage.setItem('dv_just_signed_up', '1');
       }
     } catch (e) {
-      window.location.replace('/login.html');
+      window.location.replace('/login');
       return;
     }
     var qs = '?token=' + encodeURIComponent(token) + '&artist=' + encodeURIComponent(artistParam);
@@ -33,7 +33,7 @@
     if (params.get('google_signup') === '1') { qs += '&google_signup=1'; }
     window.location.replace('/' + qs);
   } else {
-    window.location.replace('/login.html');
+    window.location.replace('/login');
   }
 })();
 </script>

@@ -351,11 +351,11 @@ router.post('/signup', async (req, res) => {
   const artistName = req.body.artist_name ? req.body.artist_name.trim() : null;
 
   if (!name || !email || !password) {
-    if (isFormSubmit) return res.redirect('/signup.html?error=' + encodeURIComponent('Name, email, and password are required'));
+    if (isFormSubmit) return res.redirect('/signup?error=' + encodeURIComponent('Name, email, and password are required'));
     return res.status(400).json({ error: 'Name, email, and password are required' });
   }
   if (isFormSubmit && confirmPassword && password !== confirmPassword) {
-    return res.redirect('/signup.html?error=' + encodeURIComponent('Passwords do not match'));
+    return res.redirect('/signup?error=' + encodeURIComponent('Passwords do not match'));
   }
   try {
     const existing = await pool.query('SELECT * FROM artists WHERE email = $1', [email]);
@@ -375,7 +375,7 @@ router.post('/signup', async (req, res) => {
         if (isFormSubmit) return res.redirect('/verify-email.html?email=' + encodeURIComponent(email));
         return res.json({ requiresVerification: true, email });
       }
-      if (isFormSubmit) return res.redirect('/signup.html?error=' + encodeURIComponent('An account with this email already exists'));
+      if (isFormSubmit) return res.redirect('/signup?error=' + encodeURIComponent('An account with this email already exists'));
       return res.status(409).json({ error: 'An account with this email already exists' });
     }
     const password_hash = await bcrypt.hash(password, 10);
@@ -402,7 +402,7 @@ router.post('/signup', async (req, res) => {
     res.status(201).json({ requiresVerification: true, email });
   } catch (err) {
     console.error('Signup error:', err.message);
-    if (isFormSubmit) return res.redirect('/signup.html?error=' + encodeURIComponent('Failed to create account'));
+    if (isFormSubmit) return res.redirect('/signup?error=' + encodeURIComponent('Failed to create account'));
     res.status(500).json({ error: 'Failed to create account' });
   }
 });
@@ -415,19 +415,19 @@ router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    if (isFormSubmit) return res.redirect('/login.html?error=' + encodeURIComponent('Email and password are required'));
+    if (isFormSubmit) return res.redirect('/login?error=' + encodeURIComponent('Email and password are required'));
     return res.status(400).json({ error: 'Email and password are required' });
   }
   try {
     const result = await pool.query('SELECT * FROM artists WHERE email = $1', [email]);
     const artist = result.rows[0];
     if (!artist) {
-      if (isFormSubmit) return res.redirect('/login.html?error=' + encodeURIComponent('Invalid email or password'));
+      if (isFormSubmit) return res.redirect('/login?error=' + encodeURIComponent('Invalid email or password'));
       return res.status(401).json({ error: 'Invalid email or password' });
     }
     const validPassword = await bcrypt.compare(password, artist.password_hash);
     if (!validPassword) {
-      if (isFormSubmit) return res.redirect('/login.html?error=' + encodeURIComponent('Invalid email or password'));
+      if (isFormSubmit) return res.redirect('/login?error=' + encodeURIComponent('Invalid email or password'));
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
@@ -454,7 +454,7 @@ router.post('/login', async (req, res) => {
     res.json({ token, artist: { id: artist.id, name: artist.name, email: artist.email, stage_name: artist.stage_name || null, is_admin: !!artist.is_admin, created_at: artist.created_at } });
   } catch (err) {
     console.error('Login error:', err.message);
-    if (isFormSubmit) return res.redirect('/login.html?error=' + encodeURIComponent('Login failed'));
+    if (isFormSubmit) return res.redirect('/login?error=' + encodeURIComponent('Login failed'));
     res.status(500).json({ error: 'Login failed' });
   }
 });
@@ -664,7 +664,7 @@ router.post('/verify-email', async (req, res) => {
     const result = await pool.query('SELECT * FROM artists WHERE email = $1', [email]);
     const artist = result.rows[0];
     if (!artist || artist.email_verified) {
-      if (isFormSubmit) return res.redirect('/login.html');
+      if (isFormSubmit) return res.redirect('/login');
       return res.status(400).json({ error: 'Invalid request' });
     }
 
