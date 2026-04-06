@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const crypto = require('crypto');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const pool = require('../db/pool');
@@ -68,6 +69,54 @@ async function sendSignupNotification({ name, email, method }) {
   } catch (err) {
     console.error('[Signup notification] Failed:', err.message);
     // Don't throw — email failure shouldn't block signup
+  }
+}
+
+// Generate a 6-digit verification code and store it for the artist
+async function generateVerificationCode(artistId) {
+  const code = crypto.randomInt(100000, 999999).toString();
+  await pool.query(
+    `UPDATE artists SET verification_code=$1, verification_code_expires=NOW()+INTERVAL '10 minutes',
+     verification_attempts=0, verification_last_sent=NOW() WHERE id=$2`,
+    [code, artistId]
+  );
+  return code;
+}
+
+// Send verification code email
+async function sendVerificationEmail({ email, name, code }) {
+  try {
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    const html = `
+      <div style="font-family:'Inter',Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;color:#0A0A0A">
+        <div style="background:linear-gradient(135deg,#0E2A78 0%,#060E28 100%);padding:28px 36px;text-align:center">
+          <img src="https://davincii.co/logo-white-sm.png" alt="Davincii" style="height:26px">
+        </div>
+        <div style="padding:36px;background:#ffffff;border:1px solid #E2E8F0;border-top:none">
+          <h2 style="font-family:Georgia,serif;font-size:22px;font-weight:400;margin:0 0 6px;color:#0A0A0A">Verify your email</h2>
+          <div style="width:28px;height:2px;background:#2260CC;margin-bottom:20px"></div>
+          <p style="font-size:13px;color:#64748B;margin:0 0 28px;line-height:1.6">Enter this code to verify your email address and complete your registration.</p>
+          <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:24px;text-align:center;margin-bottom:24px">
+            <div style="font-family:'Inter',monospace;font-size:36px;font-weight:600;letter-spacing:0.3em;color:#0A0A0A">${code}</div>
+          </div>
+          <p style="font-size:12px;color:#94A3B8;margin:0 0 20px;line-height:1.6">This code expires in 10 minutes.</p>
+          <div style="background:#F8FAFC;border:1px solid #E2E8F0;padding:14px 18px;font-size:12px;color:#475569;line-height:1.7;border-radius:6px">
+            If you didn't create a Davincii account, you can safely ignore this email.
+          </div>
+        </div>
+        <div style="padding:18px 36px;text-align:center;font-size:11px;color:#94A3B8">
+          Davincii Publishing Administration &middot; davincii.co
+        </div>
+      </div>`;
+    await resend.emails.send({
+      from: 'Davincii <onboarding@resend.dev>',
+      to: email,
+      subject: `Your Davincii verification code: ${code}`,
+      html
+    });
+    console.log(`[Verification] Code sent to: ${email}`);
+  } catch (err) {
+    console.error('[Verification] Email failed:', err.message);
   }
 }
 
@@ -175,7 +224,7 @@ router.post('/oauth-exchange', async (req, res) => {
       isNewSignup = true;
       const randomHash = await bcrypt.hash(Math.random().toString(36), 10);
       const result = await pool.query(
-        'INSERT INTO artists (name, email, password_hash) VALUES ($1, $2, $3) RETURNING id, name, email, created_at',
+        'INSERT INTO artists (name, email, password_hash, email_verified) VALUES ($1, $2, $3, TRUE) RETURNING id, name, email, created_at',
         [name, email, randomHash]
       );
       artist = result.rows[0];
@@ -225,7 +274,7 @@ router.get('/callback', async (req, res) => {
       isNewSignup = true;
       const randomHash = await bcrypt.hash(Math.random().toString(36), 10);
       const result = await pool.query(
-        'INSERT INTO artists (name, email, password_hash) VALUES ($1, $2, $3) RETURNING id, name, email, created_at',
+        'INSERT INTO artists (name, email, password_hash, email_verified) VALUES ($1, $2, $3, TRUE) RETURNING id, name, email, created_at',
         [name, email, randomHash]
       );
       artist = result.rows[0];
@@ -248,6 +297,9 @@ router.get('/callback', async (req, res) => {
 });
 
 // Helper: generate JWT and build redirect URL for successful auth
+// Redirects directly to / (not auth-complete.html) so Safari can anchor
+// the "Save Password?" prompt on the destination page without an intermediate
+// JavaScript redirect killing it.
 function authSuccessRedirect(artist, isSignup) {
   const token = jwt.sign(
     { id: artist.id, email: artist.email, name: artist.name },
@@ -258,15 +310,13 @@ function authSuccessRedirect(artist, isSignup) {
     id: artist.id, name: artist.name, email: artist.email, stage_name: artist.stage_name || null
   }));
   const signupFlag = isSignup ? '&signup=1' : '';
-  return `/auth-complete.html?token=${token}&artist=${artistPayload}${signupFlag}`;
+  return `/?token=${token}&artist=${artistPayload}${signupFlag}`;
 }
 
 // POST /api/auth/signup
-// Form POST → 302 redirect (Safari saves credentials on real navigation)
-// JSON POST → JSON response (for passkey/API use)
+// Creates account (unverified), sends verification code, redirects to verify page
 router.post('/signup', async (req, res) => {
   const isFormSubmit = req.is('application/x-www-form-urlencoded');
-  // Support both "name" (legacy/JSON) and "first_name"+"last_name" (new form)
   const first = req.body.first_name;
   const last = req.body.last_name;
   const name = (first && last) ? `${first.trim()} ${last.trim()}` : req.body.name;
@@ -283,31 +333,37 @@ router.post('/signup', async (req, res) => {
     return res.redirect('/signup.html?error=' + encodeURIComponent('Passwords do not match'));
   }
   try {
-    const existing = await pool.query('SELECT id FROM artists WHERE email = $1', [email]);
+    const existing = await pool.query('SELECT id, email_verified FROM artists WHERE email = $1', [email]);
     if (existing.rows.length > 0) {
+      if (!existing.rows[0].email_verified) {
+        // Unverified account exists — resend code and redirect to verify
+        const artist = existing.rows[0];
+        const code = await generateVerificationCode(artist.id);
+        await sendVerificationEmail({ email, name: name || email, code });
+        if (isFormSubmit) return res.redirect('/verify-email.html?email=' + encodeURIComponent(email));
+        return res.json({ requiresVerification: true, email });
+      }
       if (isFormSubmit) return res.redirect('/signup.html?error=' + encodeURIComponent('An account with this email already exists'));
       return res.status(409).json({ error: 'An account with this email already exists' });
     }
     const password_hash = await bcrypt.hash(password, 10);
     const result = await pool.query(
-      'INSERT INTO artists (name, email, password_hash, stage_name) VALUES ($1, $2, $3, $4) RETURNING id, name, email, stage_name, created_at',
+      'INSERT INTO artists (name, email, password_hash, stage_name, email_verified) VALUES ($1, $2, $3, $4, FALSE) RETURNING id, name, email, stage_name',
       [name, email, password_hash, artistName]
     );
     const artist = result.rows[0];
 
-    // Send signup notification email (non-blocking)
+    // Generate verification code and send email
+    const code = await generateVerificationCode(artist.id);
+    sendVerificationEmail({ email, name, code });
+
+    // Send signup notification to admin (non-blocking)
     sendSignupNotification({ name, email, method: 'Email / Password' });
 
     if (isFormSubmit) {
-      // 302 redirect → Safari detects successful form submission + navigation → saves credentials
-      return res.redirect(authSuccessRedirect(artist, true));
+      return res.redirect('/verify-email.html?email=' + encodeURIComponent(email));
     }
-    const token = jwt.sign(
-      { id: artist.id, email: artist.email, name: artist.name },
-      process.env.JWT_SECRET,
-      { expiresIn: '7d' }
-    );
-    res.status(201).json({ token, artist });
+    res.status(201).json({ requiresVerification: true, email });
   } catch (err) {
     console.error('Signup error:', err.message);
     if (isFormSubmit) return res.redirect('/signup.html?error=' + encodeURIComponent('Failed to create account'));
@@ -339,8 +395,15 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
+    // If email not verified, send a new code and redirect to verification
+    if (!artist.email_verified) {
+      const code = await generateVerificationCode(artist.id);
+      sendVerificationEmail({ email, name: artist.name, code });
+      if (isFormSubmit) return res.redirect('/verify-email.html?email=' + encodeURIComponent(email));
+      return res.json({ requiresVerification: true, email });
+    }
+
     if (isFormSubmit) {
-      // 302 redirect → Safari detects successful form submission + navigation → saves credentials
       return res.redirect(authSuccessRedirect(artist, false));
     }
     const token = jwt.sign(
@@ -359,7 +422,7 @@ router.post('/login', async (req, res) => {
 // GET /api/auth/me
 router.get('/me', require('../middleware/auth'), async (req, res) => {
   try {
-    const result = await pool.query('SELECT id, name, email, stage_name, created_at FROM artists WHERE id = $1', [req.artist.id]);
+    const result = await pool.query('SELECT id, name, email, stage_name, email_verified, created_at FROM artists WHERE id = $1', [req.artist.id]);
     const artist = result.rows[0];
     if (!artist) return res.status(404).json({ error: 'Artist not found' });
     res.json(artist);
@@ -429,6 +492,97 @@ router.post('/profile', require('../middleware/auth'), async (req, res) => {
     console.error('Profile update error:', err.message);
     if (isFormSubmit) return res.redirect('/details.html?error=' + encodeURIComponent('Failed to save details'));
     res.status(500).json({ error: 'Failed to save details' });
+  }
+});
+
+// POST /api/auth/verify-email — validate 6-digit code and activate account
+router.post('/verify-email', async (req, res) => {
+  const isFormSubmit = req.is('application/x-www-form-urlencoded');
+  const { email, code } = req.body;
+
+  if (!email || !code) {
+    if (isFormSubmit) return res.redirect('/verify-email.html?email=' + encodeURIComponent(email || '') + '&error=' + encodeURIComponent('Please enter your verification code'));
+    return res.status(400).json({ error: 'Email and code are required' });
+  }
+  try {
+    const result = await pool.query('SELECT * FROM artists WHERE email = $1', [email]);
+    const artist = result.rows[0];
+    if (!artist || artist.email_verified) {
+      if (isFormSubmit) return res.redirect('/login.html');
+      return res.status(400).json({ error: 'Invalid request' });
+    }
+
+    // Check max attempts
+    if (artist.verification_attempts >= 5) {
+      if (isFormSubmit) return res.redirect('/verify-email.html?email=' + encodeURIComponent(email) + '&error=' + encodeURIComponent('Too many attempts. Please request a new code.'));
+      return res.status(429).json({ error: 'Too many attempts. Please request a new code.' });
+    }
+
+    // Check expiry
+    if (!artist.verification_code_expires || new Date(artist.verification_code_expires) < new Date()) {
+      if (isFormSubmit) return res.redirect('/verify-email.html?email=' + encodeURIComponent(email) + '&error=' + encodeURIComponent('Code expired. Please request a new one.'));
+      return res.status(400).json({ error: 'Code expired. Please request a new one.' });
+    }
+
+    // Check code
+    if (artist.verification_code !== code.trim()) {
+      await pool.query('UPDATE artists SET verification_attempts = verification_attempts + 1 WHERE id = $1', [artist.id]);
+      if (isFormSubmit) return res.redirect('/verify-email.html?email=' + encodeURIComponent(email) + '&error=' + encodeURIComponent('Incorrect code. Please try again.'));
+      return res.status(400).json({ error: 'Incorrect code. Please try again.' });
+    }
+
+    // Code correct — verify the account
+    await pool.query(
+      'UPDATE artists SET email_verified=TRUE, verification_code=NULL, verification_code_expires=NULL, verification_attempts=0 WHERE id=$1',
+      [artist.id]
+    );
+
+    // Issue JWT and redirect to dashboard
+    if (isFormSubmit) {
+      return res.redirect(authSuccessRedirect(artist, true));
+    }
+    const token = jwt.sign(
+      { id: artist.id, email: artist.email, name: artist.name },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+    res.json({ token, artist: { id: artist.id, name: artist.name, email: artist.email, stage_name: artist.stage_name || null } });
+  } catch (err) {
+    console.error('Verify email error:', err.message);
+    if (isFormSubmit) return res.redirect('/verify-email.html?email=' + encodeURIComponent(email) + '&error=' + encodeURIComponent('Verification failed'));
+    res.status(500).json({ error: 'Verification failed' });
+  }
+});
+
+// POST /api/auth/resend-verification — send a new code (60s cooldown)
+router.post('/resend-verification', async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ error: 'Email is required' });
+
+  try {
+    const result = await pool.query('SELECT id, name, email_verified, verification_last_sent FROM artists WHERE email = $1', [email]);
+    const artist = result.rows[0];
+
+    // Generic response to prevent email enumeration
+    if (!artist || artist.email_verified) {
+      return res.json({ success: true });
+    }
+
+    // 60-second cooldown
+    if (artist.verification_last_sent) {
+      const elapsed = Date.now() - new Date(artist.verification_last_sent).getTime();
+      if (elapsed < 60000) {
+        const wait = Math.ceil((60000 - elapsed) / 1000);
+        return res.status(429).json({ error: `Please wait ${wait} seconds before requesting another code` });
+      }
+    }
+
+    const code = await generateVerificationCode(artist.id);
+    await sendVerificationEmail({ email, name: artist.name, code });
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Resend verification error:', err.message);
+    res.status(500).json({ error: 'Failed to resend code' });
   }
 });
 
