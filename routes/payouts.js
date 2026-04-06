@@ -70,18 +70,27 @@ router.post('/w9', auth, async (req, res) => {
   }
 
   try {
-    const artist = (await pool.query('SELECT name, email, stage_name FROM artists WHERE id = $1', [req.artist.id])).rows[0];
+    // Get artist info — try DB first, fall back to JWT token data
+    let artist;
+    try {
+      artist = (await pool.query('SELECT name, email, stage_name FROM artists WHERE id = $1', [req.artist.id])).rows[0];
+    } catch (_) {
+      artist = { name: req.artist.name, email: req.artist.email, stage_name: null };
+    }
+    if (!artist) artist = { name: req.artist.name, email: req.artist.email, stage_name: null };
 
     const classLabel = classification === 'llc' && llc_type
       ? 'LLC — ' + llc_type
       : classification;
 
-    const resend = new Resend(process.env.RESEND_API_KEY);
-    const now = new Date();
-    const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-    const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZoneName: 'short' });
-
     // Send email notification (non-blocking — don't let email failure block submission)
+    const apiKey = process.env.RESEND_API_KEY;
+    if (apiKey) {
+      const resend = new Resend(apiKey);
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZoneName: 'short' });
+
     resend.emails.send({
       from: 'Davincii <info@davincii.co>',
       to: 'info@davincii.co',
@@ -121,6 +130,9 @@ router.post('/w9', auth, async (req, res) => {
     }).catch(emailErr => {
       console.error('[W-9 notification] Email failed (non-blocking):', emailErr.message);
     });
+    } else {
+      console.log('[W-9 notification] RESEND_API_KEY not set, skipping email');
+    }
 
     res.json({ success: true });
   } catch (err) {
