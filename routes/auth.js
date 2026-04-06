@@ -333,13 +333,20 @@ router.post('/signup', async (req, res) => {
     return res.redirect('/signup.html?error=' + encodeURIComponent('Passwords do not match'));
   }
   try {
-    const existing = await pool.query('SELECT id, email_verified FROM artists WHERE email = $1', [email]);
+    const existing = await pool.query('SELECT * FROM artists WHERE email = $1', [email]);
     if (existing.rows.length > 0) {
-      if (!existing.rows[0].email_verified) {
-        // Unverified account exists — resend code and redirect to verify
-        const artist = existing.rows[0];
-        const code = await generateVerificationCode(artist.id);
-        await sendVerificationEmail({ email, name: name || email, code });
+      const existingArtist = existing.rows[0];
+      if (existingArtist.email_verified === false) {
+        // Unverified account exists — update password and resend code
+        const newHash = await bcrypt.hash(password, 10);
+        await pool.query('UPDATE artists SET password_hash=$1, name=$2, stage_name=COALESCE($3, stage_name) WHERE id=$4',
+          [newHash, name, artistName, existingArtist.id]);
+        try {
+          const code = await generateVerificationCode(existingArtist.id);
+          sendVerificationEmail({ email, name: name || email, code });
+        } catch (verifyErr) {
+          console.error('Signup verification code error (continuing):', verifyErr.message);
+        }
         if (isFormSubmit) return res.redirect('/verify-email.html?email=' + encodeURIComponent(email));
         return res.json({ requiresVerification: true, email });
       }
@@ -354,8 +361,12 @@ router.post('/signup', async (req, res) => {
     const artist = result.rows[0];
 
     // Generate verification code and send email
-    const code = await generateVerificationCode(artist.id);
-    sendVerificationEmail({ email, name, code });
+    try {
+      const code = await generateVerificationCode(artist.id);
+      sendVerificationEmail({ email, name, code });
+    } catch (verifyErr) {
+      console.error('Signup verification code error (continuing):', verifyErr.message);
+    }
 
     // Send signup notification to admin (non-blocking)
     sendSignupNotification({ name, email, method: 'Email / Password' });
@@ -396,9 +407,13 @@ router.post('/login', async (req, res) => {
     }
 
     // If email not verified, send a new code and redirect to verification
-    if (!artist.email_verified) {
-      const code = await generateVerificationCode(artist.id);
-      sendVerificationEmail({ email, name: artist.name, code });
+    if (artist.email_verified === false) {
+      try {
+        const code = await generateVerificationCode(artist.id);
+        sendVerificationEmail({ email, name: artist.name, code });
+      } catch (verifyErr) {
+        console.error('Login verification code error (continuing):', verifyErr.message);
+      }
       if (isFormSubmit) return res.redirect('/verify-email.html?email=' + encodeURIComponent(email));
       return res.json({ requiresVerification: true, email });
     }
