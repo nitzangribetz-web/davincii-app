@@ -107,6 +107,10 @@
     .nav-right.authed .nav-guest { display:none !important; }
     .nav-right .nav-authed { display:none; align-items:center; gap:12px; margin-right:36px; }
     .nav-right.authed .nav-authed { display:flex; }
+    /* Hero CTA — swap guest buttons for a single Dashboard button when authed */
+    .hero-authed { display:none !important; }
+    body.is-authed .hero-guest { display:none !important; }
+    body.is-authed .hero-authed { display:inline-flex !important; }
     .nav-dash-btn {
       padding:11px 22px; font-family:'Inter',sans-serif;
       font-size:13.5px; font-weight:600; color:#fff;
@@ -2700,8 +2704,9 @@
     </h1>
 
     <div id="hero-cta" style="margin-top:52px; display:flex; align-items:center; gap:20px; justify-content:center;">
-      <button class="btn-cta-hero" onclick="go('signup')">Get started →</button>
-      <button class="btn-ghost-hero" onclick="go('login')">Login to portal</button>
+      <button class="btn-cta-hero hero-guest" onclick="go('signup')">Get started →</button>
+      <button class="btn-ghost-hero hero-guest" onclick="go('login')">Login to portal</button>
+      <button class="btn-cta-hero hero-authed" onclick="enterDashboardFromLanding()">Dashboard →</button>
     </div>
   </div>
 </section>
@@ -3117,10 +3122,12 @@
   function markLandingAsAuthed() {
     var nr = document.getElementById('landing-nav-right');
     if (nr) nr.classList.add('authed');
+    document.body.classList.add('is-authed');
   }
   function markLandingAsGuest() {
     var nr = document.getElementById('landing-nav-right');
     if (nr) nr.classList.remove('authed');
+    document.body.classList.remove('is-authed');
   }
 
   // From the landing page (logged in), open the dashboard at a specific sub-page.
