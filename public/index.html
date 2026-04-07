@@ -2417,7 +2417,8 @@
 (function(){
   var params = new URLSearchParams(window.location.search);
   var hasTokenInURL = params.get('token');
-  var hasTokenInStorage = localStorage.getItem('dv_token');
+  // Auth lives in HttpOnly cookie — use cached artist as the "probably logged in" hint
+  var hasTokenInStorage = localStorage.getItem('dv_artist');
   if (hasTokenInURL || hasTokenInStorage) {
     var s = document.createElement('style');
     s.id = 'auth-boot';
@@ -2801,7 +2802,6 @@
         try {
           var artist;
           try { artist = JSON.parse(artistParam); } catch(_) { artist = JSON.parse(decodeURIComponent(artistParam)); }
-          localStorage.setItem('dv_token', token);
           localStorage.setItem('dv_artist', JSON.stringify(artist));
 
           // Google OAuth signup — redirect to completion page
@@ -2819,7 +2819,6 @@
       }
 
       // Step 3: Token in localStorage (returning user or page refresh)
-      var savedToken = localStorage.getItem('dv_token');
       var savedArtist = localStorage.getItem('dv_artist');
       if (savedToken && savedArtist) {
         // Immediately activate dashboard from cached data (no flash)
@@ -2828,7 +2827,7 @@
           onAuthSuccess(cachedArtist, false);
         } catch(e) { console.error('[Auth] cached artist parse error:', e); }
         // Validate token in background — only log out if server confirms token is invalid
-        fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + savedToken } })
+        fetch('/api/auth/me', { headers: {} })
           .then(function(r) {
             if (r.ok) return r.json();
             if (r.status === 401 || r.status === 403) throw new Error('unauthorized');
@@ -2897,7 +2896,6 @@
   }
 
   function logoClick() {
-    var token = localStorage.getItem('dv_token');
     if (token) {
       go('dashboard');
       showDashPage('overview', false);
@@ -2912,7 +2910,6 @@
       go(e.state.screen, true);
       return;
     }
-    var token = localStorage.getItem('dv_token');
     if (token) {
       var dashScreen = document.getElementById('screen-dashboard');
       if (!dashScreen || !dashScreen.classList.contains('active')) {
@@ -3194,8 +3191,7 @@
     var body = document.getElementById('catalog-body');
     var count = document.getElementById('catalog-count');
     if (!body) return;
-    var token = localStorage.getItem('dv_token');
-    fetch('/api/songs', { headers: { 'Authorization': 'Bearer ' + token } })
+    fetch('/api/songs', { headers: {} })
       .then(function(r) { return r.ok ? r.json() : []; })
       .then(function(songs) {
         if (!Array.isArray(songs) || songs.length === 0) {
@@ -3303,12 +3299,11 @@
   window.go = go;
   // ── Admin: Load signups ──
   function loadSignups() {
-    var token = localStorage.getItem('dv_token');
     if (!token) return;
     var tbody = document.getElementById('signups-tbody');
     var countEl = document.getElementById('signups-count');
     if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="padding:32px;text-align:center;color:#94A3B8">Loading...</td></tr>';
-    fetch('/api/admin/signups', { headers: { 'Authorization': 'Bearer ' + token } })
+    fetch('/api/admin/signups', { headers: {} })
       .then(function(r) { if (!r.ok) throw new Error('Not authorized'); return r.json(); })
       .then(function(artists) {
         if (countEl) countEl.textContent = artists.length + ' artist' + (artists.length !== 1 ? 's' : '');
@@ -3421,16 +3416,14 @@
     if (!terms) { errEl.textContent='You must agree to the Terms and Privacy Policy.'; errEl.classList.add('visible'); return; }
 
     var btn = event.target; btn.disabled=true; btn.textContent='Saving...';
-    var token = localStorage.getItem('dv_token');
     fetch('/api/auth/complete-google-signup', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ first_name: first, last_name: last, stage_name: stage })
     })
     .then(function(r){ return r.json().then(function(d){ return {ok:r.ok,data:d}; }); })
     .then(function(result){
       if (!result.ok) throw new Error(result.data.error || 'Failed to complete signup');
-      if (result.data.token) localStorage.setItem('dv_token', result.data.token);
       localStorage.setItem('dv_artist', JSON.stringify(result.data.artist));
       onAuthSuccess(result.data.artist, true);
     })
@@ -3598,12 +3591,11 @@
     }
     if (!fieldsValid || !certValid) return;
     // Submit to backend
-    var token = localStorage.getItem('dv_token');
     var submitBtn = modal.querySelector('.btn-blue');
     if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Submitting...'; }
     fetch('/api/payouts/w9', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         legal_name: document.getElementById('w9-name').value.trim(),
         business_name: document.getElementById('w9-biz').value.trim() || null,
@@ -3654,9 +3646,8 @@
     btn.disabled = false;
     btn.textContent = 'Withdraw';
     modal.classList.add('open');
-    var token = localStorage.getItem('dv_token');
     if (token) {
-      fetch('/api/stripe/balance', { headers: { 'Authorization': 'Bearer ' + token } })
+      fetch('/api/stripe/balance', { headers: {} })
         .then(function(r) { return r.json(); })
         .then(function(data) {
           var balEl = document.getElementById('withdraw-balance');
@@ -3668,7 +3659,6 @@
     document.getElementById('withdraw-modal').classList.remove('open');
   }
   function confirmWithdraw(){
-    var token = localStorage.getItem('dv_token');
     var amount = parseFloat(document.getElementById('withdraw-amount').value);
     var errEl = document.getElementById('withdraw-error');
     var sucEl = document.getElementById('withdraw-success');
@@ -3684,7 +3674,7 @@
     btn.textContent = 'Processing...';
     fetch('/api/stripe/payout', {
       method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ amount: amount })
     })
     .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
@@ -3836,10 +3826,9 @@
       data.pro_other = (document.getElementById('pro-other-input').value || '').trim();
     }
 
-    var token = localStorage.getItem('dv_token');
     fetch('/api/auth/profile', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
     })
     .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
@@ -3997,10 +3986,9 @@
       });
     }
 
-    var token = localStorage.getItem('dv_token');
     fetch('/api/songs', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(songData)
     })
     .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
@@ -4049,10 +4037,9 @@
       return;
     }
 
-    var token = localStorage.getItem('dv_token');
     fetch('/api/auth/change-password', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ current_password: curr, new_password: newPw })
     })
     .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })

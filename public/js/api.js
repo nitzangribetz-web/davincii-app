@@ -1,22 +1,14 @@
 /* Davincii shared API fetch wrapper.
    Exposed as window.Dv.api. Depends on nothing.
 
-   Auth now lives in an HttpOnly cookie (`dv_token`), so we always send
-   `credentials: 'include'`. For backward compatibility we still forward a
-   Bearer token if one is present in localStorage — this keeps any half-
-   migrated flow working during the cleanup window. */
+   Auth lives in an HttpOnly cookie (`dv_token`). We always send
+   `credentials: 'include'` and never read tokens from localStorage. */
 (function () {
   var Dv = window.Dv = window.Dv || {};
 
   function buildHeaders(userHeaders, hasBody) {
     var h = {};
     if (hasBody) h['Content-Type'] = 'application/json';
-    try {
-      var tok = localStorage.getItem('dv_token');
-      if (tok && tok !== 'null' && tok !== 'undefined') {
-        h['Authorization'] = 'Bearer ' + tok;
-      }
-    } catch (_) {}
     if (userHeaders) {
       for (var k in userHeaders) if (Object.prototype.hasOwnProperty.call(userHeaders, k)) h[k] = userHeaders[k];
     }
@@ -52,10 +44,7 @@
           // Global 401 handling — only redirect for truly unauthenticated sessions,
           // and never for auth endpoints themselves (which legitimately return 401).
           if (res.status === 401 && !opts.skipAuthRedirect && url.indexOf('/api/auth/') !== 0) {
-            try {
-              localStorage.removeItem('dv_token');
-              localStorage.removeItem('dv_artist');
-            } catch (_) {}
+            try { localStorage.removeItem('dv_artist'); } catch (_) {}
             if (location.pathname !== '/login' && location.pathname !== '/login.html') {
               location.replace('/login');
             }

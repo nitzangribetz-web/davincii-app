@@ -195,7 +195,6 @@ body{
   }
 
   // Must have token and artist from OAuth
-  var token = localStorage.getItem('dv_token');
   var artistStr = localStorage.getItem('dv_artist');
   if (!token || !artistStr) {
     window.location.replace('/');
@@ -240,12 +239,11 @@ function submitGoogleSignup() {
   btn.disabled = true;
   btn.textContent = 'Saving...';
 
-  var token = localStorage.getItem('dv_token');
   fetch('/api/auth/complete-google-signup', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + token
+      
     },
     body: JSON.stringify({
       first_name: first,
@@ -258,7 +256,6 @@ function submitGoogleSignup() {
     if (!result.ok) throw new Error(result.data.error || 'Failed to complete signup');
 
     // Update localStorage with new artist data and new token
-    if (result.data.token) localStorage.setItem('dv_token', result.data.token);
     localStorage.setItem('dv_artist', JSON.stringify(result.data.artist));
 
     // Redirect to dashboard with token
