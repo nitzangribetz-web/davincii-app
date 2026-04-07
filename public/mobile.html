@@ -799,28 +799,40 @@ footer.m-footer{
 }
 /* Bell */
 .d-bell{
-  width:33px;height:33px;border-radius:7px;
-  background:none;border:none;cursor:pointer;
+  width:38px;height:38px;border-radius:50%;
+  background:#fff;border:1px solid rgba(255,255,255,0.85);
+  cursor:pointer;
   display:flex;align-items:center;justify-content:center;
-  color:rgba(255,255,255,0.50);position:relative;
+  color:#0A0F1F;position:relative;
+  box-shadow:0 4px 14px rgba(0,0,0,0.35);
+  transition:transform 0.15s, box-shadow 0.22s, background 0.18s;
 }
-.d-bell svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.d-bell:hover{background:#F1F5F9;box-shadow:0 6px 20px rgba(0,0,0,0.45)}
+.d-bell:active{transform:scale(0.94)}
+.d-bell svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .d-bell-dot{
-  position:absolute;top:5px;right:5px;
-  width:7px;height:7px;border-radius:50%;
-  background:var(--blue-lt);
-  border:2px solid var(--navy);display:none;
+  position:absolute;top:-5px;right:-5px;
+  min-width:17px;height:17px;padding:0 5px;
+  border-radius:9px;background:#EF4444;
+  border:2px solid var(--navy);
+  box-shadow:0 0 0 1px rgba(239,68,68,0.55), 0 0 14px rgba(239,68,68,0.65);
+  font-family:var(--sans);font-size:10px;font-weight:700;
+  color:#fff;line-height:13px;text-align:center;
+  display:none;align-items:center;justify-content:center;
 }
 /* Avatar */
 .d-av-wrap{position:relative}
 .d-av{
-  width:31px;height:31px;border-radius:50%;
-  background:rgba(255,255,255,0.06);
+  width:38px;height:38px;border-radius:50%;
+  background:#fff;border:1px solid rgba(255,255,255,0.85);
   display:flex;align-items:center;justify-content:center;
-  color:rgba(255,255,255,0.75);
-  cursor:pointer;border:1.5px solid rgba(255,255,255,0.15);
+  color:#0A0F1F;cursor:pointer;
+  box-shadow:0 4px 14px rgba(0,0,0,0.35);
+  transition:transform 0.15s, box-shadow 0.22s, background 0.18s;
 }
-.d-av svg{width:17px;height:17px;display:block}
+.d-av:hover{background:#F1F5F9;box-shadow:0 6px 20px rgba(0,0,0,0.45)}
+.d-av:active{transform:scale(0.94)}
+.d-av svg{width:18px;height:18px;display:block;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .d-av-dd{
   display:none;position:absolute;right:0;top:calc(100% + 8px);
   width:216px;background:#fff;
