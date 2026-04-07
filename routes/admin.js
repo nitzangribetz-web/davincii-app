@@ -29,7 +29,8 @@ async function adminOnly(req, res, next) {
 router.get('/signups', auth, adminOnly, async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT id, name, email, stage_name, email_verified, onboarded, created_at
+      `SELECT id, name, email, stage_name, email_verified, onboarded,
+              stripe_account_id, stripe_onboarded, created_at
        FROM artists ORDER BY created_at DESC`
     );
     res.json(result.rows);

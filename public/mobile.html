@@ -2131,6 +2131,17 @@ footer.m-footer{
     <div class="d-pg-rule"></div>
     <div class="d-sbox">
       <div class="d-sbox-hd"><div><div class="d-sbox-title">Registered Artists</div><div class="d-sbox-sub" id="mob-signups-count"></div></div></div>
+      <div style="padding:10px 12px;border-bottom:1px solid #E8EDF5;display:flex;flex-direction:column;gap:8px">
+        <input id="mob-signups-search" type="search" placeholder="Search name or email" style="width:100%;padding:8px 10px;border:1px solid #CBD5E1;border-radius:6px;font-family:var(--sans);font-size:12px;background:#fff">
+        <select id="mob-signups-filter" style="width:100%;padding:8px 10px;border:1px solid #CBD5E1;border-radius:6px;font-family:var(--sans);font-size:12px;background:#fff">
+          <option value="all">All artists</option>
+          <option value="newest">Newest (7 days)</option>
+          <option value="unverified">Email unverified</option>
+          <option value="incomplete">Profile incomplete</option>
+          <option value="no_stripe">No Stripe</option>
+          <option value="stripe_incomplete">Stripe incomplete</option>
+        </select>
+      </div>
       <div style="overflow-x:auto">
         <table style="width:100%;border-collapse:collapse;font-family:var(--sans);font-size:12px">
           <thead>
@@ -2676,36 +2687,66 @@ function dTogglePro(v){
   }
 }
 
-// ── Admin: Load signups ──
-function mobLoadSignups() {
+// ── Admin: Load signups (with client-side search + filter) ──
+var _mobSignupsData = [];
+var _mobSignupsFilter = 'all';
+var _mobSignupsQuery = '';
+function _mobSignupsMatches(a) {
+  if (_mobSignupsFilter === 'newest') {
+    if (new Date(a.created_at).getTime() < Date.now() - 7*24*60*60*1000) return false;
+  } else if (_mobSignupsFilter === 'unverified') { if (a.email_verified) return false; }
+  else if (_mobSignupsFilter === 'incomplete') { if (a.onboarded) return false; }
+  else if (_mobSignupsFilter === 'no_stripe') { if (a.stripe_account_id) return false; }
+  else if (_mobSignupsFilter === 'stripe_incomplete') { if (!a.stripe_account_id || a.stripe_onboarded) return false; }
+  if (_mobSignupsQuery) {
+    var q = _mobSignupsQuery.toLowerCase();
+    var hay = ((a.name||'') + ' ' + (a.email||'') + ' ' + (a.stage_name||'')).toLowerCase();
+    if (hay.indexOf(q) === -1) return false;
+  }
+  return true;
+}
+function _mobRenderSignups() {
   var tbody = document.getElementById('mob-signups-tbody');
   var countEl = document.getElementById('mob-signups-count');
+  if (!tbody) return;
+  var filtered = _mobSignupsData.filter(_mobSignupsMatches);
+  if (countEl) countEl.textContent = filtered.length + ' of ' + _mobSignupsData.length + ' artist' + (_mobSignupsData.length !== 1 ? 's' : '');
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="padding:24px;text-align:center;color:#94A3B8">No matching artists.</td></tr>';
+    return;
+  }
+  var _esc = Dv.format.escapeHtml;
+  tbody.innerHTML = filtered.map(function(a) {
+    var d = new Date(a.created_at);
+    var date = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    return '<tr style="border-top:1px solid #E8EDF5">'
+      + '<td style="padding:8px 10px;font-weight:500">' + _esc(a.name || '—') + '</td>'
+      + '<td style="padding:8px 10px;color:#374151;font-size:11px;word-break:break-all">' + _esc(a.email || '—') + '</td>'
+      + '<td style="padding:8px 10px"><span style="display:inline-block;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600;'
+      + (a.email_verified ? 'background:#DCFCE7;color:#16A34A' : 'background:#FEF2F2;color:#DC2626') + '">'
+      + (a.email_verified ? 'Yes' : 'No') + '</span></td>'
+      + '<td style="padding:8px 10px;color:#64748B;font-size:11px">' + date + '</td>'
+      + '</tr>';
+  }).join('');
+}
+function mobLoadSignups() {
+  var tbody = document.getElementById('mob-signups-tbody');
   if (tbody) tbody.innerHTML = '<tr><td colspan="4" style="padding:24px;text-align:center;color:#94A3B8">Loading...</td></tr>';
   Dv.api.fetch('/admin/signups', { skipAuthRedirect: true })
-    .then(function(artists) {
-      if (countEl) countEl.textContent = artists.length + ' artist' + (artists.length !== 1 ? 's' : '');
-      if (!tbody) return;
-      if (artists.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" style="padding:24px;text-align:center;color:#94A3B8">No signups yet.</td></tr>';
-        return;
-      }
-      var _esc = Dv.format.escapeHtml;
-      tbody.innerHTML = artists.map(function(a) {
-        var d = new Date(a.created_at);
-        var date = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-        return '<tr style="border-top:1px solid #E8EDF5">'
-          + '<td style="padding:8px 10px;font-weight:500">' + _esc(a.name || '—') + '</td>'
-          + '<td style="padding:8px 10px;color:#374151;font-size:11px;word-break:break-all">' + _esc(a.email || '—') + '</td>'
-          + '<td style="padding:8px 10px"><span style="display:inline-block;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600;'
-          + (a.email_verified ? 'background:#DCFCE7;color:#16A34A' : 'background:#FEF2F2;color:#DC2626') + '">'
-          + (a.email_verified ? 'Yes' : 'No') + '</span></td>'
-          + '<td style="padding:8px 10px;color:#64748B;font-size:11px">' + date + '</td>'
-          + '</tr>';
-      }).join('');
-    })
-    .catch(function(err) {
+    .then(function(artists) { _mobSignupsData = artists || []; _mobRenderSignups(); })
+    .catch(function() {
       if (tbody) tbody.innerHTML = '<tr><td colspan="4" style="padding:24px;text-align:center;color:#DC2626">Access denied.</td></tr>';
     });
+  var search = document.getElementById('mob-signups-search');
+  if (search && !search._wired) {
+    search._wired = true;
+    search.addEventListener('input', function() { _mobSignupsQuery = search.value.trim(); _mobRenderSignups(); });
+  }
+  var sel = document.getElementById('mob-signups-filter');
+  if (sel && !sel._wired) {
+    sel._wired = true;
+    sel.addEventListener('change', function() { _mobSignupsFilter = sel.value; _mobRenderSignups(); });
+  }
 }
 
 
