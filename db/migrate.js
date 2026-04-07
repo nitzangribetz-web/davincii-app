@@ -58,6 +58,10 @@ const columnMigrations = [
   `ALTER TABLE artists ADD COLUMN IF NOT EXISTS stripe_account_id VARCHAR(255)`,
   `ALTER TABLE artists ADD COLUMN IF NOT EXISTS stripe_onboarded  BOOLEAN DEFAULT FALSE`,
   `ALTER TABLE payouts ADD COLUMN IF NOT EXISTS stripe_transfer_id VARCHAR(255)`,
+  // PayPal Payouts
+  `ALTER TABLE artists ADD COLUMN IF NOT EXISTS paypal_email VARCHAR(255)`,
+  `ALTER TABLE payouts ADD COLUMN IF NOT EXISTS paypal_batch_id VARCHAR(255)`,
+  `ALTER TABLE payouts ADD COLUMN IF NOT EXISTS paypal_item_id  VARCHAR(255)`,
   // Artist profile / onboarding details
   `ALTER TABLE artists ADD COLUMN IF NOT EXISTS stage_name    VARCHAR(255)`,
   `ALTER TABLE artists ADD COLUMN IF NOT EXISTS pro           VARCHAR(50)`,
