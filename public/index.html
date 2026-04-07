@@ -343,6 +343,10 @@
     .badge-dot { width:6px; height:6px; border-radius:50%; background:#3B82F6; animation:pulse 2s ease-in-out infinite; }
     @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.4)} }
 
+    /* Single-bar dollar sign: Playfair Display renders $ with two bars.
+       Wrap the $ in <span class="dollar-sign"> to force a sans glyph. */
+    .dollar-sign { font-family: 'DM Sans', system-ui, sans-serif; font-weight: 300; }
+
     .hero-headline {
       font-family:'Playfair Display',serif;
       font-weight:300;
@@ -4060,7 +4064,7 @@
         .then(function(r) { return r.json(); })
         .then(function(data) {
           var balEl = document.getElementById('withdraw-balance');
-          if (balEl) balEl.textContent = '$' + (parseFloat(data.available) || 0).toFixed(2);
+          if (balEl) balEl.innerHTML = '<span class="dollar-sign">$</span>' + (parseFloat(data.available) || 0).toFixed(2);
         }).catch(function(){});
     }
   }
@@ -5679,7 +5683,7 @@
     <div class="modal-body" style="padding:24px 28px">
       <div style="background:#F0F4FA;border-radius:10px;padding:20px;margin-bottom:20px;text-align:center">
         <div style="font-size:11px;font-weight:600;letter-spacing:0.10em;text-transform:uppercase;color:#64748B;margin-bottom:6px">Available Balance</div>
-        <div id="withdraw-balance" style="font-family:'Playfair Display',serif;font-size:42px;font-weight:300;color:#0A0A0A;letter-spacing:-0.02em">$0.00</div>
+        <div id="withdraw-balance" style="font-family:'Playfair Display',serif;font-size:42px;font-weight:300;color:#0A0A0A;letter-spacing:-0.02em"><span class="dollar-sign">$</span>0.00</div>
       </div>
       <label class="field-label">Amount to withdraw</label>
       <div style="position:relative">
