@@ -1335,6 +1335,11 @@ footer.m-footer{
 .error-box{background:rgba(239,68,68,0.06);border-left:2px solid #EF4444;padding:11px 14px;margin-bottom:14px;font-family:var(--sans);font-size:13px;color:#DC2626}
 
 </style>
+<!-- Shared Davincii frontend layer (load order matters: format → api → auth → notifications) -->
+<script src="/js/format.js"></script>
+<script src="/js/api.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/notifications.js"></script>
 </head>
 <body>
 <script>
@@ -2396,7 +2401,11 @@ function mobUpdateArtistUI(artist) {
   if (greetingEl && displayName) {
     var hour = new Date().getHours();
     var greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
-    greetingEl.innerHTML = greeting + ', <em id="mob-greeting-name">' + displayName + '.</em>';
+    greetingEl.textContent = greeting + ', ';
+    var _em = document.createElement('em');
+    _em.id = 'mob-greeting-name';
+    _em.textContent = displayName + '.';
+    greetingEl.appendChild(_em);
   }
 }
 
@@ -2605,12 +2614,13 @@ function mobLoadSignups() {
         tbody.innerHTML = '<tr><td colspan="4" style="padding:24px;text-align:center;color:#94A3B8">No signups yet.</td></tr>';
         return;
       }
+      var _esc=function(s){return String(s||'').replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
       tbody.innerHTML = artists.map(function(a) {
         var d = new Date(a.created_at);
         var date = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         return '<tr style="border-top:1px solid #E8EDF5">'
-          + '<td style="padding:8px 10px;font-weight:500">' + (a.name || '—') + '</td>'
-          + '<td style="padding:8px 10px;color:#374151;font-size:11px;word-break:break-all">' + (a.email || '—') + '</td>'
+          + '<td style="padding:8px 10px;font-weight:500">' + _esc(a.name || '—') + '</td>'
+          + '<td style="padding:8px 10px;color:#374151;font-size:11px;word-break:break-all">' + _esc(a.email || '—') + '</td>'
           + '<td style="padding:8px 10px"><span style="display:inline-block;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600;'
           + (a.email_verified ? 'background:#DCFCE7;color:#16A34A' : 'background:#FEF2F2;color:#DC2626') + '">'
           + (a.email_verified ? 'Yes' : 'No') + '</span></td>'

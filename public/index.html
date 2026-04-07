@@ -2402,6 +2402,11 @@
     .error-box.visible { display: block; }
 
   </style>
+  <!-- Shared Davincii frontend layer (load order matters: format → api → auth → notifications) -->
+  <script src="/js/format.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/notifications.js"></script>
 </head>
 <body>
 <script>
@@ -2963,7 +2968,11 @@
     if (greetingEl) {
       var hour = new Date().getHours();
       var greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
-      greetingEl.innerHTML = greeting + ', <em id="dash-greeting-name">' + displayName + '.</em>';
+      greetingEl.textContent = greeting + ', ';
+      var _em = document.createElement('em');
+      _em.id = 'dash-greeting-name';
+      _em.textContent = displayName + '.';
+      greetingEl.appendChild(_em);
     }
     // Pre-populate profile form stage name
     var pfStage = document.getElementById('pf-stage-name');
@@ -3313,9 +3322,9 @@
           var date = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
           var time = d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
           return '<tr style="border-top:1px solid #E8EDF5">'
-            + '<td style="padding:10px 14px;font-weight:500">' + (a.name || '—') + '</td>'
-            + '<td style="padding:10px 14px;color:#374151">' + (a.email || '—') + '</td>'
-            + '<td style="padding:10px 14px;color:#64748B">' + (a.stage_name || '—') + '</td>'
+            + '<td style="padding:10px 14px;font-weight:500">' + _escape(a.name || '—') + '</td>'
+            + '<td style="padding:10px 14px;color:#374151">' + _escape(a.email || '—') + '</td>'
+            + '<td style="padding:10px 14px;color:#64748B">' + _escape(a.stage_name || '—') + '</td>'
             + '<td style="padding:10px 14px"><span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;'
             + (a.email_verified ? 'background:#DCFCE7;color:#16A34A' : 'background:#FEF2F2;color:#DC2626') + '">'
             + (a.email_verified ? 'Yes' : 'No') + '</span></td>'
@@ -3466,7 +3475,8 @@
     const d=document.createElement('div');
     d.style.cssText='display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border:1px solid #E2E8F0;border-radius:8px;margin-bottom:10px;background:#fff';
     d.setAttribute('data-rec-title',title);d.setAttribute('data-rec-isrc',isrc);d.setAttribute('data-rec-artist',artist);
-    d.innerHTML='<div><div style="font-family:\'DM Sans\',sans-serif;font-size:14px;font-weight:600;color:#0A0A0A">'+title+'</div><div style="font-family:\'DM Sans\',sans-serif;font-size:12px;color:#94A3B8;margin-top:2px">'+artist+' &middot; <span style="font-family:monospace">'+isrc+'</span></div></div><button onclick="this.closest(\'div\').remove()" style="border:none;background:none;font-size:18px;color:#CBD5E1;cursor:pointer">&times;</button>';
+    var _esc=function(s){return String(s||'').replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
+    d.innerHTML='<div><div style="font-family:\'DM Sans\',sans-serif;font-size:14px;font-weight:600;color:#0A0A0A">'+_esc(title)+'</div><div style="font-family:\'DM Sans\',sans-serif;font-size:12px;color:#94A3B8;margin-top:2px">'+_esc(artist)+' &middot; <span style="font-family:monospace">'+_esc(isrc)+'</span></div></div><button onclick="this.closest(\'div\').remove()" style="border:none;background:none;font-size:18px;color:#CBD5E1;cursor:pointer">&times;</button>';
     list.appendChild(d);deskCloseRecording();
   }
 
