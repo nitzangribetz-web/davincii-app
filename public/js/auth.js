@@ -3,7 +3,7 @@
 (function () {
   var Dv = window.Dv = window.Dv || {};
   var ARTIST_KEY = 'dv_artist';
-  var TOKEN_KEY = 'dv_token';
+  // Auth token lives in an HttpOnly cookie; we never read/write it from JS.
 
   function getStoredArtist() {
     try { return JSON.parse(localStorage.getItem(ARTIST_KEY) || 'null'); }
@@ -15,10 +15,7 @@
   }
 
   function clearStoredArtist() {
-    try {
-      localStorage.removeItem(ARTIST_KEY);
-      localStorage.removeItem(TOKEN_KEY);
-    } catch (_) {}
+    try { localStorage.removeItem(ARTIST_KEY); } catch (_) {}
   }
 
   /** Fetch current artist from /api/auth/me. Resolves null on failure. */

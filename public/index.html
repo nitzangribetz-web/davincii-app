@@ -2826,25 +2826,23 @@
           var cachedArtist = JSON.parse(savedArtist);
           onAuthSuccess(cachedArtist, false);
         } catch(e) { console.error('[Auth] cached artist parse error:', e); }
-        // Validate token in background — only log out if server confirms token is invalid
-        fetch('/api/auth/me', { headers: {} })
+        // Validate session in background via shared Dv.api.
+        // Only log out if server confirms 401/403; tolerate 5xx/network.
+        Dv.api.fetch('/auth/me', { skipAuthRedirect: true, raw: true })
           .then(function(r) {
-            if (r.ok) return r.json();
+            if (r.ok) return r.json().then(function(data){ return (data && data.artist) || data; });
             if (r.status === 401 || r.status === 403) throw new Error('unauthorized');
-            // Server error (500, network issue) — don't log the user out
             return null;
           })
           .then(function(freshArtist) {
-            if (freshArtist) {
+            if (freshArtist && freshArtist.id) {
               updateArtistUI(freshArtist);
-              localStorage.setItem('dv_artist', JSON.stringify(freshArtist));
+              Dv.auth.setStoredArtist(freshArtist);
             }
           })
           .catch(function(err) {
-            if (err.message === 'unauthorized') {
-              // Token truly expired/invalid — clear auth and show landing
-              localStorage.removeItem('dv_token');
-              localStorage.removeItem('dv_artist');
+            if (err && err.message === 'unauthorized') {
+              Dv.auth.clearStoredArtist();
               removeBootCSS();
               document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
               document.getElementById('screen-landing').classList.add('active');
@@ -3125,11 +3123,13 @@
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   function logout() {
+    // Delegates to shared Dv.auth (clears storage + POSTs /auth/logout + redirects).
+    if (window.Dv && Dv.auth) return Dv.auth.logout();
+    // Fallback (should never hit): do the old thing.
     fetch('/api/auth/logout', { method: 'POST', credentials: 'include' })
       .catch(function(){})
       .finally(function(){
-        localStorage.removeItem('dv_token');
-        localStorage.removeItem('dv_artist');
+        try { localStorage.removeItem('dv_artist'); } catch(_){}
         window.location.href = '/';
       });
   }
@@ -3182,6 +3182,7 @@
       window.history.pushState({ screen:'dashboard', page: page }, '', url);
     }
     if(page === 'signups') loadSignups();
+    if(page === 'payouts') { try { loadStripeStatus(); } catch(e) {} }
     if(page === 'add-song') deskResetAddSong();
     if(page === 'overview') { try { applySetupCompletion(); } catch(e) {} }
     if(page === 'catalog') { try { loadCatalog(); } catch(e) {} }
@@ -3191,8 +3192,8 @@
     var body = document.getElementById('catalog-body');
     var count = document.getElementById('catalog-count');
     if (!body) return;
-    fetch('/api/songs', { headers: {} })
-      .then(function(r) { return r.ok ? r.json() : []; })
+    Dv.api.fetch('/songs', { skipAuthRedirect: true })
+      .catch(function(){ return []; })
       .then(function(songs) {
         if (!Array.isArray(songs) || songs.length === 0) {
           if (count) count.textContent = '0 compositions registered';
@@ -3232,20 +3233,11 @@
     }
   }
 
-  function _loadNotifs() {
-    try { return JSON.parse(localStorage.getItem('dv_notifs') || '[]'); } catch(e) { return []; }
-  }
-  function _saveNotifs(arr) {
-    try { localStorage.setItem('dv_notifs', JSON.stringify(arr.slice(0, 50))); } catch(e) {}
-  }
-  function _timeAgo(ts) {
-    var s = Math.floor((Date.now() - ts) / 1000);
-    if (s < 60) return 'Just now';
-    if (s < 3600) return Math.floor(s/60) + 'm ago';
-    if (s < 86400) return Math.floor(s/3600) + 'h ago';
-    return Math.floor(s/86400) + 'd ago';
-  }
-  function _escape(s) { return String(s || '').replace(/[&<>"']/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  // Shared helpers from /js/notifications.js + /js/format.js
+  var _loadNotifs = function(){ return Dv.notifications.load(); };
+  var _saveNotifs = function(a){ return Dv.notifications.save(a); };
+  var _timeAgo    = Dv.format.timeAgo;
+  var _escape     = Dv.format.escapeHtml;
   function renderNotifications() {
     var notifs = _loadNotifs();
     _unreadCount = notifs.filter(function(n){return !n.read;}).length;
@@ -3288,9 +3280,7 @@
     updateBadge();
   }
   function addNotification(title, body, icon) {
-    var notifs = _loadNotifs();
-    notifs.unshift({ title: title, body: body || '', icon: icon || 'blue', ts: Date.now(), read: false });
-    _saveNotifs(notifs);
+    Dv.notifications.add(title, body, icon || 'blue');
     renderNotifications();
   }
   window.addNotification = addNotification;
@@ -3299,12 +3289,10 @@
   window.go = go;
   // ── Admin: Load signups ──
   function loadSignups() {
-    if (!token) return;
     var tbody = document.getElementById('signups-tbody');
     var countEl = document.getElementById('signups-count');
     if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="padding:32px;text-align:center;color:#94A3B8">Loading...</td></tr>';
-    fetch('/api/admin/signups', { headers: {} })
-      .then(function(r) { if (!r.ok) throw new Error('Not authorized'); return r.json(); })
+    Dv.api.fetch('/admin/signups', { skipAuthRedirect: true })
       .then(function(artists) {
         if (countEl) countEl.textContent = artists.length + ' artist' + (artists.length !== 1 ? 's' : '');
         if (!tbody) return;
@@ -3628,6 +3616,98 @@
       showToast('Failed to submit W-9', 'error');
     });
   }
+  // ── Stripe Connect payout onboarding state ──
+  // State labels: not_connected | incomplete | restricted | ready
+  function deriveStripeState(d){
+    if(!d || !d.connected) return 'not_connected';
+    if(!d.details_submitted) return 'incomplete';
+    var reqs = Array.isArray(d.requirements_due) ? d.requirements_due : [];
+    if(!d.charges_enabled || !d.payouts_enabled || reqs.length > 0) return 'restricted';
+    return 'ready';
+  }
+  function renderStripeStatus(d){
+    var box = document.getElementById('stripe-status-box');
+    if(!box) return;
+    box.style.display = 'block';
+    var state = deriveStripeState(d);
+    var badge = document.getElementById('stripe-status-badge');
+    var label = document.getElementById('stripe-status-label');
+    var sub   = document.getElementById('stripe-status-sub');
+    var desc  = document.getElementById('stripe-status-desc');
+    var reqs  = document.getElementById('stripe-status-reqs');
+    var btn   = document.getElementById('stripe-status-action');
+    reqs.style.display = 'none';
+    reqs.textContent = '';
+    btn.style.display = 'inline-flex';
+    btn.disabled = false;
+    if(state === 'not_connected'){
+      badge.className = 'status-badge error';
+      label.textContent = 'Not connected';
+      sub.textContent = 'Connect Stripe to receive royalty payouts.';
+      desc.textContent = 'You haven\u2019t connected a payout account yet. Connect Stripe to receive your royalties by direct deposit.';
+      btn.textContent = 'Connect payout account';
+    } else if(state === 'incomplete'){
+      badge.className = 'status-badge pending';
+      label.textContent = 'Setup incomplete';
+      sub.textContent = 'Finish your Stripe onboarding to enable payouts.';
+      desc.textContent = 'Your Stripe account was created but onboarding isn\u2019t finished. Complete the remaining steps to unlock payouts.';
+      btn.textContent = 'Continue Stripe setup';
+    } else if(state === 'restricted'){
+      badge.className = 'status-badge pending';
+      label.textContent = 'Under review';
+      sub.textContent = 'Stripe needs more information before payouts can be enabled.';
+      desc.textContent = 'Stripe is reviewing your account or has requested additional information. Once resolved, payouts will be enabled automatically.';
+      var list = (d.requirements_due || []).slice(0,6);
+      if(list.length){
+        reqs.style.display = 'block';
+        reqs.innerHTML = '<b style="color:#0A0A0A">Needed:</b> ' + list.map(function(r){return String(r).replace(/_/g,' ');}).join(', ');
+      }
+      btn.textContent = 'Update Stripe details';
+    } else {
+      badge.className = 'status-badge success';
+      label.textContent = 'Ready for payouts';
+      sub.textContent = 'Your Stripe account is connected and ready.';
+      desc.textContent = 'Your payout account is verified and ready to receive royalties. Use the Withdraw button above to initiate a payout.';
+      btn.style.display = 'none';
+    }
+  }
+  function loadStripeStatus(){
+    var box = document.getElementById('stripe-status-box');
+    if(!box) return;
+    box.style.display = 'block';
+    document.getElementById('stripe-status-label').textContent = 'Loading';
+    fetch('/api/stripe/connect/status')
+      .then(function(r){ return r.json().then(function(d){ return { ok:r.ok, d:d }; }); })
+      .then(function(res){
+        if(!res.ok){
+          renderStripeStatus({ connected:false });
+          return;
+        }
+        renderStripeStatus(res.d);
+      })
+      .catch(function(){ renderStripeStatus({ connected:false }); });
+  }
+  function stripeConnectStart(){
+    var btn = document.getElementById('stripe-status-action');
+    if(btn){ btn.disabled = true; btn.textContent = 'Opening Stripe\u2026'; }
+    fetch('/api/stripe/connect', { method:'POST', headers:{ 'Content-Type':'application/json' } })
+      .then(function(r){ return r.json().then(function(d){ return { ok:r.ok, d:d }; }); })
+      .then(function(res){
+        if(!res.ok || !res.d.url){
+          showToast(res.d.error || 'Unable to start Stripe onboarding', 'error');
+          if(btn){ btn.disabled = false; btn.textContent = 'Try again'; }
+          return;
+        }
+        window.location.href = res.d.url;
+      })
+      .catch(function(){
+        showToast('Network error starting Stripe', 'error');
+        if(btn){ btn.disabled = false; btn.textContent = 'Try again'; }
+      });
+  }
+  window.loadStripeStatus = loadStripeStatus;
+  window.stripeConnectStart = stripeConnectStart;
+
   function selectPayout(m){
     document.querySelectorAll('.payout-option').forEach(e=>e.classList.remove('selected'));
     const s=document.getElementById(m+'-option');if(s)s.classList.add('selected');
@@ -4878,6 +4958,28 @@
             </button>
           </div>
         </div>
+
+        <!-- ── STRIPE CONNECT STATUS CARD ── -->
+        <div class="sbox" id="stripe-status-box" style="margin-bottom:22px;display:none">
+          <div class="sbox-head">
+            <div>
+              <div class="sbox-title">Payout Account</div>
+              <div class="sbox-sub" id="stripe-status-sub">Checking your payout account status…</div>
+            </div>
+            <div class="status-badge pending" id="stripe-status-badge">
+              <span class="status-dot"></span>
+              <span id="stripe-status-label">Loading</span>
+            </div>
+          </div>
+          <div class="sbox-body" style="padding:22px 24px">
+            <div style="font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:300;color:#64748B;line-height:1.6;margin-bottom:16px" id="stripe-status-desc">
+              Connect a payout account to receive your royalties via direct deposit.
+            </div>
+            <div id="stripe-status-reqs" style="display:none;font-family:'DM Sans',sans-serif;font-size:12.5px;color:#64748B;margin-bottom:14px"></div>
+            <button id="stripe-status-action" class="btn-blue" style="font-size:11px;letter-spacing:0.10em;text-transform:uppercase;padding:10px 22px" onclick="stripeConnectStart()">Connect payout account</button>
+          </div>
+        </div>
+
         <div class="sbox" style="margin-bottom:22px">
           <div class="sbox-head"><div><div class="sbox-title">Select Payout Method</div><div class="sbox-sub">Choose how you'd like to receive your royalties</div></div></div>
 

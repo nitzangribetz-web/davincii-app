@@ -1970,6 +1970,23 @@ footer.m-footer{
       <div><div class="d-bal-lbl">Available Balance</div><div class="d-bal-amt"><span class="d-cs">$</span>0.00</div><div class="d-bal-note">Min. withdrawal: $50</div></div>
       <button class="d-withdraw" onclick="openMobWithdraw()">Withdraw →</button>
     </div>
+
+    <!-- ── STRIPE CONNECT STATUS ── -->
+    <div class="d-sbox" id="m-stripe-status-box" style="margin-bottom:12px;display:none">
+      <div class="d-sbox-hd">
+        <div>
+          <div class="d-sbox-title">Payout Account</div>
+          <div class="d-sbox-sub" id="m-stripe-status-sub">Checking status…</div>
+        </div>
+        <span class="d-pill pending" id="m-stripe-status-badge"><span class="d-pill-dot"></span><span id="m-stripe-status-label">Loading</span></span>
+      </div>
+      <div style="padding:14px 16px">
+        <div id="m-stripe-status-desc" style="font-family:var(--sans);font-size:12.5px;font-weight:300;color:var(--muted);line-height:1.65;margin-bottom:12px">Connect a payout account to receive your royalties.</div>
+        <div id="m-stripe-status-reqs" style="display:none;font-family:var(--sans);font-size:11.5px;color:var(--muted);margin-bottom:12px"></div>
+        <button id="m-stripe-status-action" class="btn-s" style="max-width:220px" onclick="mobStripeConnectStart()">Connect payout account</button>
+      </div>
+    </div>
+
     <div class="d-sbox" style="margin-bottom:12px">
       <div class="d-sbox-hd"><div><div class="d-sbox-title">Select Payout Method</div><div class="d-sbox-sub">Choose how to receive royalties</div></div></div>
       <div style="padding:14px 16px">
@@ -2321,22 +2338,21 @@ footer.m-footer{
     if (savedToken && savedArtist) {
       try { mobActivateDashboard(JSON.parse(savedArtist)); } catch(e) { console.error('[Auth] cached artist parse error:', e); }
       // Validate in background — only log out on explicit auth rejection
-      fetch('/api/auth/me', { headers: {} })
+      Dv.api.fetch('/auth/me', { skipAuthRedirect: true, raw: true })
         .then(function(r) {
-          if (r.ok) return r.json();
+          if (r.ok) return r.json().then(function(data){ return (data && data.artist) || data; });
           if (r.status === 401 || r.status === 403) throw new Error('unauthorized');
           return null;
         })
         .then(function(freshArtist) {
-          if (freshArtist) {
+          if (freshArtist && freshArtist.id) {
             mobUpdateArtistUI(freshArtist);
-            localStorage.setItem('dv_artist', JSON.stringify(freshArtist));
+            Dv.auth.setStoredArtist(freshArtist);
           }
         })
         .catch(function(err) {
-          if (err.message === 'unauthorized') {
-            localStorage.removeItem('dv_token');
-            localStorage.removeItem('dv_artist');
+          if (err && err.message === 'unauthorized') {
+            Dv.auth.clearStoredArtist();
             mobRemoveBootCSS();
             document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
             document.body.classList.remove('dashboard-active');
@@ -2439,11 +2455,12 @@ window.addEventListener('scroll',()=>{
 
 // ── Screen navigation ──
 function mobLogout(){
+  if (window.Dv && Dv.auth) return Dv.auth.logout();
+  // Fallback (should never hit).
   fetch('/api/auth/logout', { method: 'POST', credentials: 'include' })
     .catch(function(){})
     .finally(function(){
-      localStorage.removeItem('dv_token');
-      localStorage.removeItem('dv_artist');
+      try { localStorage.removeItem('dv_artist'); } catch(_){}
       window.location.href = '/';
     });
 }
@@ -2479,6 +2496,7 @@ function showDP(page, skipPush){
     window.history.pushState({ screen:'dashboard', page: page }, '', url);
   }
   if(page === 'signups') mobLoadSignups();
+  if(page === 'payouts') { try { mobLoadStripeStatus(); } catch(e) {} }
   if(page === 'add-song') mobResetAddSong();
 }
 
@@ -2595,12 +2613,10 @@ function dTogglePro(v){
 
 // ── Admin: Load signups ──
 function mobLoadSignups() {
-  if (!token) return;
   var tbody = document.getElementById('mob-signups-tbody');
   var countEl = document.getElementById('mob-signups-count');
   if (tbody) tbody.innerHTML = '<tr><td colspan="4" style="padding:24px;text-align:center;color:#94A3B8">Loading...</td></tr>';
-  fetch('/api/admin/signups', { headers: {} })
-    .then(function(r) { if (!r.ok) throw new Error('Not authorized'); return r.json(); })
+  Dv.api.fetch('/admin/signups', { skipAuthRedirect: true })
     .then(function(artists) {
       if (countEl) countEl.textContent = artists.length + ' artist' + (artists.length !== 1 ? 's' : '');
       if (!tbody) return;
@@ -2608,7 +2624,7 @@ function mobLoadSignups() {
         tbody.innerHTML = '<tr><td colspan="4" style="padding:24px;text-align:center;color:#94A3B8">No signups yet.</td></tr>';
         return;
       }
-      var _esc=function(s){return String(s||'').replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
+      var _esc = Dv.format.escapeHtml;
       tbody.innerHTML = artists.map(function(a) {
         var d = new Date(a.created_at);
         var date = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
