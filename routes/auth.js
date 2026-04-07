@@ -266,13 +266,6 @@ router.get('/apple', async (req, res) => {
   }
 });
 
-// POST /api/auth/oauth-exchange - Legacy endpoint (kept for backward compatibility with oauth-callback.html)
-router.post('/oauth-exchange', async (req, res) => {
-  // This endpoint is no longer the primary flow — Google OAuth now uses authorization code flow
-  // handled entirely by GET /api/auth/google/callback. This remains for any edge cases.
-  res.status(410).json({ error: 'This endpoint has been replaced. Please use the Google sign-in button to try again.' });
-});
-
 // GET /api/auth/callback - Legacy callback (kept for backward compatibility)
 router.get('/callback', async (req, res) => {
   const code = req.query.code;
