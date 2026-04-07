@@ -105,33 +105,116 @@
     .nav-right { display:flex; align-items:center; gap:10px; }
     /* Authed nav variant — shown when user has a session, hides Login/Get-started */
     .nav-right.authed .nav-guest { display:none !important; }
-    .nav-right .nav-authed { display:none; align-items:center; gap:12px; }
+    .nav-right .nav-authed { display:none; align-items:center; gap:14px; margin-right:14px; }
     .nav-right.authed .nav-authed { display:flex; }
     .nav-dash-btn {
-      padding:9px 18px; font-family:'Inter',sans-serif;
+      padding:10px 20px; font-family:'Inter',sans-serif;
       font-size:13px; font-weight:600; color:#fff;
-      background:rgba(255,255,255,0.06);
-      border:1px solid rgba(255,255,255,0.14);
+      background:rgba(255,255,255,0.14);
+      border:1px solid rgba(255,255,255,0.32);
       border-radius:8px; cursor:pointer; letter-spacing:0.01em;
-      transition:background 0.18s, border-color 0.18s;
+      transition:background 0.18s, border-color 0.18s, transform 0.15s;
     }
-    .nav-dash-btn:hover { background:rgba(255,255,255,0.12); border-color:rgba(255,255,255,0.28); }
+    .nav-dash-btn:hover { background:rgba(255,255,255,0.22); border-color:rgba(255,255,255,0.48); }
+    .nav-dash-btn:active { transform:scale(0.97); }
     .nav-bell, .nav-avatar {
-      width:36px; height:36px; border-radius:50%;
-      background:rgba(255,255,255,0.06);
-      border:1px solid rgba(255,255,255,0.14);
+      width:38px; height:38px; border-radius:50%;
+      background:rgba(255,255,255,0.14);
+      border:1px solid rgba(255,255,255,0.32);
       display:flex; align-items:center; justify-content:center;
-      color:rgba(255,255,255,0.78); cursor:pointer; position:relative;
-      transition:background 0.18s, border-color 0.18s;
+      color:#fff; cursor:pointer; position:relative;
+      transition:background 0.18s, border-color 0.18s, transform 0.15s;
     }
-    .nav-bell:hover, .nav-avatar:hover { background:rgba(255,255,255,0.12); border-color:rgba(255,255,255,0.28); }
-    .nav-bell svg, .nav-avatar svg { width:17px; height:17px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+    .nav-bell:hover, .nav-avatar:hover { background:rgba(255,255,255,0.22); border-color:rgba(255,255,255,0.48); }
+    .nav-bell:active, .nav-avatar:active { transform:scale(0.94); }
+    .nav-bell svg, .nav-avatar svg { width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
     .nav-bell-dot {
-      position:absolute; top:6px; right:7px;
-      min-width:8px; height:8px; padding:0 3px;
-      border-radius:6px; background:#3B82F6;
+      position:absolute; top:-3px; right:-3px;
+      min-width:16px; height:16px; padding:0 5px;
+      border-radius:8px; background:#EF4444;
       border:2px solid #050C1A;
+      box-shadow:0 0 0 1px rgba(239,68,68,0.45), 0 0 12px rgba(239,68,68,0.55);
+      font-family:'Inter',sans-serif; font-size:10px; font-weight:700;
+      color:#fff; line-height:12px; text-align:center;
+      display:flex; align-items:center; justify-content:center;
     }
+    .nav-bell-wrap, .nav-avatar-wrap { position:relative; }
+    /* Landing dropdowns (dark, sit beneath the bell + avatar) */
+    .ln-dd {
+      display:none; position:absolute; top:calc(100% + 12px); right:0;
+      width:300px; background:rgba(10,18,38,0.96);
+      border:1px solid rgba(255,255,255,0.10);
+      border-radius:12px;
+      box-shadow:0 24px 64px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.04) inset;
+      backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px);
+      overflow:hidden; z-index:300;
+      animation:lnDdIn 0.18s ease;
+    }
+    @keyframes lnDdIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
+    .nav-bell-wrap.open .ln-dd, .nav-avatar-wrap.open .ln-dd { display:block; }
+    .ln-dd-hdr {
+      padding:14px 16px; border-bottom:1px solid rgba(255,255,255,0.08);
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    .ln-dd-title {
+      font-family:'Inter',sans-serif; font-size:13px; font-weight:600;
+      color:#fff; letter-spacing:0.01em;
+    }
+    .ln-dd-mark {
+      font-family:'Inter',sans-serif; font-size:11px; font-weight:500;
+      color:rgba(255,255,255,0.55); background:none; border:none;
+      cursor:pointer; padding:0; transition:color 0.18s;
+    }
+    .ln-dd-mark:hover { color:#3B82F6; }
+    .ln-dd-body { padding:18px 16px; max-height:300px; overflow-y:auto; }
+    .ln-dd-empty-t {
+      font-family:'Inter',sans-serif; font-size:13px; font-weight:500;
+      color:rgba(255,255,255,0.85); margin-bottom:4px;
+    }
+    .ln-dd-empty-s {
+      font-family:'Inter',sans-serif; font-size:11.5px; font-weight:300;
+      color:rgba(255,255,255,0.45); line-height:1.5;
+    }
+    .ln-dd-foot {
+      padding:10px 14px; border-top:1px solid rgba(255,255,255,0.08);
+    }
+    .ln-dd-foot-btn {
+      width:100%; background:none; border:none;
+      padding:8px; font-family:'Inter',sans-serif;
+      font-size:11.5px; font-weight:600; color:#3B82F6;
+      cursor:pointer; border-radius:6px; letter-spacing:0.01em;
+      transition:background 0.18s;
+    }
+    .ln-dd-foot-btn:hover { background:rgba(59,130,246,0.10); }
+    /* Avatar dropdown — user info + actions */
+    .ln-dd-user { padding:16px; }
+    .ln-dd-name {
+      font-family:'Inter',sans-serif; font-size:14px; font-weight:600;
+      color:#fff; margin-bottom:3px;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .ln-dd-email {
+      font-family:'Inter',sans-serif; font-size:12px; font-weight:300;
+      color:rgba(255,255,255,0.50);
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .ln-dd-sec { padding:6px 8px; border-top:1px solid rgba(255,255,255,0.08); }
+    .ln-dd-btn {
+      display:flex; align-items:center; gap:12px; width:100%;
+      padding:10px 12px; font-family:'Inter',sans-serif;
+      font-size:13px; font-weight:500; color:rgba(255,255,255,0.85);
+      background:none; border:none; cursor:pointer; text-align:left;
+      border-radius:7px; transition:background 0.14s, color 0.14s;
+    }
+    .ln-dd-btn:hover { background:rgba(255,255,255,0.06); color:#fff; }
+    .ln-dd-btn.danger { color:#F87171; }
+    .ln-dd-btn.danger:hover { background:rgba(248,113,113,0.10); color:#FCA5A5; }
+    .ln-dd-btn svg {
+      width:16px; height:16px; fill:none; stroke:currentColor;
+      stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round;
+      flex-shrink:0; opacity:0.7;
+    }
+    .ln-dd-btn:hover svg { opacity:1; }
     .btn-nav-ghost {
       padding:8px 15px; font-size:13.5px; font-weight:400;
       color:rgba(255,255,255,0.50); background:none; border:none; cursor:pointer; transition:color 0.18s;
@@ -2495,13 +2578,56 @@
     <button class="btn-primary nav-guest" onclick="go('signup')">Get started</button>
     <div class="nav-authed">
       <button class="nav-dash-btn" onclick="enterDashboardFromLanding()">Dashboard</button>
-      <button class="nav-bell" aria-label="Notifications" onclick="enterDashboardFromLanding('notifications')">
-        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        <span class="nav-bell-dot"></span>
-      </button>
-      <button class="nav-avatar" aria-label="Account" onclick="enterDashboardFromLanding('settings')">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
-      </button>
+      <div class="nav-bell-wrap" id="ln-bell-wrap">
+        <button class="nav-bell" aria-label="Notifications" onclick="toggleLnBell(event)">
+          <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="nav-bell-dot">0</span>
+        </button>
+        <div class="ln-dd" role="menu">
+          <div class="ln-dd-hdr">
+            <span class="ln-dd-title">Notifications</span>
+            <button class="ln-dd-mark">Mark all read</button>
+          </div>
+          <div class="ln-dd-body">
+            <div class="ln-dd-empty-t">You're all caught up.</div>
+            <div class="ln-dd-empty-s">We'll let you know the moment royalties, registrations, or payouts move.</div>
+          </div>
+          <div class="ln-dd-foot">
+            <button class="ln-dd-foot-btn" onclick="enterDashboardFromLanding('notifications')">View all notifications →</button>
+          </div>
+        </div>
+      </div>
+      <div class="nav-avatar-wrap" id="ln-av-wrap">
+        <button class="nav-avatar" aria-label="Account" onclick="toggleLnAvatar(event)">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+        </button>
+        <div class="ln-dd" role="menu">
+          <div class="ln-dd-user">
+            <div class="ln-dd-name artist-display-name" id="ln-dd-name">—</div>
+            <div class="ln-dd-email artist-email" id="ln-dd-email">—</div>
+          </div>
+          <div class="ln-dd-sec">
+            <button class="ln-dd-btn" onclick="enterDashboardFromLanding()">
+              <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+              Dashboard
+            </button>
+            <button class="ln-dd-btn" onclick="enterDashboardFromLanding('profile')">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+              Artist Profile
+            </button>
+            <button class="ln-dd-btn" onclick="enterDashboardFromLanding('settings')">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5h0a1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+              Settings
+            </button>
+          </div>
+          <div class="ln-dd-sec">
+            <button class="ln-dd-btn danger" onclick="logout()">
+              <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+              Log out
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
     <!-- Hamburger — mobile only -->
     <button class="nav-hamburger" id="nav-hamburger" onclick="toggleMobileNav()" aria-label="Menu">
@@ -2789,11 +2915,11 @@
       <div>
         <div class="footer-col-h">Navigate</div>
         <div class="footer-links">
-          <button class="footer-lnk">Home</button>
+          <button class="footer-lnk" onclick="window.scrollTo({top:0,behavior:'smooth'})">Home</button>
           <button class="footer-lnk" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">How it works</button>
-          <button class="footer-lnk">About</button>
-          <button class="footer-lnk">Sign in</button>
-          <button class="footer-lnk">Get started</button>
+          <button class="footer-lnk" onclick="document.getElementById('why').scrollIntoView({behavior:'smooth'})">About</button>
+          <button class="footer-lnk" onclick="go('login')">Sign in</button>
+          <button class="footer-lnk" onclick="go('signup')">Get started</button>
         </div>
       </div>
       <div>
@@ -2968,6 +3094,7 @@
 
   // From the landing page (logged in), open the dashboard at a specific sub-page.
   function enterDashboardFromLanding(page) {
+    closeLnMenus();
     var savedArtist = localStorage.getItem('dv_artist');
     if (!savedArtist) { go('login'); return; }
     try {
@@ -2977,6 +3104,36 @@
     } catch(_) { go('login'); }
   }
   window.enterDashboardFromLanding = enterDashboardFromLanding;
+
+  // Landing-page bell + avatar dropdowns
+  function toggleLnBell(e) {
+    if (e) e.stopPropagation();
+    var bell = document.getElementById('ln-bell-wrap');
+    var av = document.getElementById('ln-av-wrap');
+    if (av) av.classList.remove('open');
+    if (bell) bell.classList.toggle('open');
+  }
+  function toggleLnAvatar(e) {
+    if (e) e.stopPropagation();
+    var bell = document.getElementById('ln-bell-wrap');
+    var av = document.getElementById('ln-av-wrap');
+    if (bell) bell.classList.remove('open');
+    if (av) av.classList.toggle('open');
+  }
+  function closeLnMenus() {
+    var bell = document.getElementById('ln-bell-wrap');
+    var av = document.getElementById('ln-av-wrap');
+    if (bell) bell.classList.remove('open');
+    if (av) av.classList.remove('open');
+  }
+  document.addEventListener('click', function(e) {
+    var bell = document.getElementById('ln-bell-wrap');
+    var av = document.getElementById('ln-av-wrap');
+    if (bell && bell.classList.contains('open') && !bell.contains(e.target)) bell.classList.remove('open');
+    if (av && av.classList.contains('open') && !av.contains(e.target)) av.classList.remove('open');
+  });
+  window.toggleLnBell = toggleLnBell;
+  window.toggleLnAvatar = toggleLnAvatar;
 
   function onAuthSuccess(artist, isSignup) {
     markLandingAsAuthed();
