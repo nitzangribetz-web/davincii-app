@@ -1002,12 +1002,12 @@
     }
     .faq-row.open .faq-plus { transform:rotate(45deg); color:#60A5FA; }
     .faq-row-a {
-      max-height:0; overflow:hidden;
+      display:none;
       font-size:13.5px; font-weight:400;
       color:rgba(255,255,255,0.72); line-height:1.82;
-      transition:max-height 0.3s ease, padding 0.22s;
+      padding-bottom:22px;
     }
-    .faq-row.open .faq-row-a { max-height:200px; padding-bottom:22px; }
+    .faq-row.open .faq-row-a { display:block; }
 
     /* ── CTA ── */
     #cta {
@@ -3368,16 +3368,8 @@
   }
   function toggleFaqRow(el){
     const open = el.classList.contains('open');
-    document.querySelectorAll('.faq-row.open').forEach(i=>{
-      i.classList.remove('open');
-      const ans = i.querySelector('.faq-row-a');
-      if(ans) ans.style.maxHeight = '0px';
-    });
-    if(!open){
-      el.classList.add('open');
-      const ans = el.querySelector('.faq-row-a');
-      if(ans) ans.style.maxHeight = ans.scrollHeight + 40 + 'px';
-    }
+    document.querySelectorAll('.faq-row.open').forEach(i=>i.classList.remove('open'));
+    if(!open) el.classList.add('open');
   }
 
 
