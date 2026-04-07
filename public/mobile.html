@@ -758,11 +758,12 @@ footer.m-footer{
 .d-av-wrap{position:relative}
 .d-av{
   width:31px;height:31px;border-radius:50%;
-  background:linear-gradient(135deg,#2563EB,#1D4ED8);
+  background:rgba(255,255,255,0.06);
   display:flex;align-items:center;justify-content:center;
-  font-family:var(--sans);font-size:11px;font-weight:700;color:#fff;
+  color:rgba(255,255,255,0.75);
   cursor:pointer;border:1.5px solid rgba(255,255,255,0.15);
 }
+.d-av svg{width:17px;height:17px;display:block}
 .d-av-dd{
   display:none;position:absolute;right:0;top:calc(100% + 8px);
   width:216px;background:#fff;
@@ -1742,7 +1743,9 @@ footer.m-footer{
         </div>
       </div>
       <div class="d-av-wrap" id="d-av-wrap">
-        <div class="d-av" onclick="toggleDMenu()">SW</div>
+        <div class="d-av" onclick="toggleDMenu()" aria-label="Account">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+        </div>
         <div class="d-av-dd">
           <div class="d-dd-hdr">
             <div class="d-dd-name artist-display-name" id="mob-dd-name"></div>
@@ -1750,16 +1753,11 @@ footer.m-footer{
           </div>
           <div class="d-dd-sec">
             <button class="d-dd-btn" onclick="showDP('overview');closeDMenu()"><span class="d-dd-icon">▦</span>Dashboard</button>
-            <button class="d-dd-btn" onclick="showDP('notifications');closeDMenu()"><span class="d-dd-icon">◉</span>Notifications</button>
           </div>
           <div class="d-dd-sec">
             <button class="d-dd-btn" onclick="showDP('profile');closeDMenu()"><span class="d-dd-icon">◎</span>Artist Profile</button>
             <button class="d-dd-btn" onclick="showDP('statements');closeDMenu()"><span class="d-dd-icon">≡</span>Statements</button>
-            <button class="d-dd-btn" onclick="showDP('payouts');closeDMenu()"><span class="d-dd-icon">↑</span>Payouts</button>
-          </div>
-          <div class="d-dd-sec">
-            <button class="d-dd-btn" onclick="showDP('registration');closeDMenu()"><span class="d-dd-icon">⊙</span>Registration</button>
-            <button class="d-dd-btn" onclick="showDP('sync');closeDMenu()"><span class="d-dd-icon">◈</span>Sync Licensing</button>
+            <button class="d-dd-btn" onclick="showDP('payouts');closeDMenu()"><span class="d-dd-icon">⬆</span>Payouts</button>
           </div>
           <div class="d-dd-sec">
             <button class="d-dd-btn" onclick="showDP('settings');closeDMenu()"><span class="d-dd-icon">⚙</span>Settings</button>
