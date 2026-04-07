@@ -17,6 +17,10 @@ html,body{margin:0;background:#F0F4FA;min-height:100vh;display:flex;align-items:
 <div class="loader"></div>
 <script>
 (function() {
+  // [LOGIN-PERF] temporary
+  var _tEnter = Date.now();
+  var _tSubmit = parseInt(sessionStorage.getItem('dv_perf_submit') || '0', 10) || null;
+  console.log('[LOGIN-PERF][frontend] auth-complete.enter at', _tEnter, _tSubmit ? '(' + (_tEnter - _tSubmit) + 'ms since submit — covers POST /login + 302 + auth-complete page load)' : '');
   var params = new URLSearchParams(window.location.search);
   var artistParam = params.get('artist');
   var isSignup = params.get('signup') === '1';
@@ -24,7 +28,17 @@ html,body{margin:0;background:#F0F4FA;min-height:100vh;display:flex;align-items:
   if (artistParam) {
     try {
       var artist = JSON.parse(decodeURIComponent(artistParam));
-      // Auth token now lives in HttpOnly cookie; only cache artist for UI display
+      // Auth token now lives in HttpOnly cookie; only cache artist for UI display.
+      // Clear any prior user's Get Started flags if this is a different account.
+      try {
+        var prev = JSON.parse(localStorage.getItem('dv_artist') || 'null');
+        if (prev && prev.id && artist && artist.id && prev.id !== artist.id) {
+          for (var i = localStorage.length - 1; i >= 0; i--) {
+            var k = localStorage.key(i);
+            if (k && (k.indexOf('dv_setup_') === 0 || k === 'dv_just_signed_up')) localStorage.removeItem(k);
+          }
+        }
+      } catch (_) {}
       localStorage.setItem('dv_artist', JSON.stringify(artist));
       if (isSignup) {
         localStorage.setItem('dv_just_signed_up', '1');
@@ -38,7 +52,12 @@ html,body{margin:0;background:#F0F4FA;min-height:100vh;display:flex;align-items:
     if (params.get('google_signup') === '1') { qs += '&google_signup=1'; }
     // Short delay so Safari's password manager detects the successful
     // POST → 302 → page-render cycle and offers to save credentials
-    setTimeout(function() { window.location.replace('/' + qs); }, 200);
+    // [LOGIN-PERF] this 200ms timeout is a known fixed cost
+    console.log('[LOGIN-PERF][frontend] auth-complete waiting 200ms before redirecting to / (Safari password-save delay)');
+    setTimeout(function() {
+      console.log('[LOGIN-PERF][frontend] auth-complete.redirect at', Date.now(), '(after 200ms wait)');
+      window.location.replace('/' + qs);
+    }, 200);
   } else {
     window.location.replace('/login');
   }

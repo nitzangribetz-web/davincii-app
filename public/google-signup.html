@@ -256,7 +256,8 @@ function submitGoogleSignup() {
     if (!result.ok) throw new Error(result.data.error || 'We couldn\u2019t complete your signup right now. Please try again.');
 
     // Update localStorage with new artist data and new token
-    localStorage.setItem('dv_artist', JSON.stringify(result.data.artist));
+    if (window.Dv && Dv.auth) Dv.auth.setStoredArtist(result.data.artist);
+    else localStorage.setItem('dv_artist', JSON.stringify(result.data.artist));
 
     // Redirect to dashboard with token
     var qs = '?token=' + encodeURIComponent(result.data.token || token) +

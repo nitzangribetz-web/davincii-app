@@ -2474,7 +2474,8 @@ try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; 
       try {
         var artist;
         try { artist = JSON.parse(artistParam); } catch(_) { artist = JSON.parse(decodeURIComponent(artistParam)); }
-        localStorage.setItem('dv_artist', JSON.stringify(artist));
+        if (window.Dv && Dv.auth) Dv.auth.setStoredArtist(artist);
+        else localStorage.setItem('dv_artist', JSON.stringify(artist));
         if (params.get('signup') === '1') {
           try { localStorage.setItem('dv_just_signed_up', '1'); } catch(_){}
         }
@@ -2904,7 +2905,8 @@ function mobGoogleComplete() {
   .then(function(r){ return r.json().then(function(d){ return {ok:r.ok,data:d}; }); })
   .then(function(result){
     if (!result.ok) throw new Error(result.data.error || 'We couldn\u2019t complete your signup right now. Please try again.');
-    localStorage.setItem('dv_artist', JSON.stringify(result.data.artist));
+    if (window.Dv && Dv.auth) Dv.auth.setStoredArtist(result.data.artist);
+    else localStorage.setItem('dv_artist', JSON.stringify(result.data.artist));
     mobActivateDashboard(result.data.artist);
   })
   .catch(function(err){

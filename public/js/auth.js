@@ -10,12 +10,36 @@
     catch (_) { return null; }
   }
 
+  // Wipe all per-user UI state (Get Started completion flags, etc.) so a
+  // new account signing in on the same browser doesn't inherit the previous
+  // user's "already done" markers.
+  function clearPerUserState() {
+    try {
+      var toRemove = [];
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (k && (k.indexOf('dv_setup_') === 0 || k === 'dv_just_signed_up')) {
+          toRemove.push(k);
+        }
+      }
+      toRemove.forEach(function (k) { localStorage.removeItem(k); });
+    } catch (_) {}
+  }
+
   function setStoredArtist(artist) {
-    try { localStorage.setItem(ARTIST_KEY, JSON.stringify(artist || {})); } catch (_) {}
+    try {
+      var prev = null;
+      try { prev = JSON.parse(localStorage.getItem(ARTIST_KEY) || 'null'); } catch (_) {}
+      if (artist && prev && prev.id && artist.id && prev.id !== artist.id) {
+        clearPerUserState();
+      }
+      localStorage.setItem(ARTIST_KEY, JSON.stringify(artist || {}));
+    } catch (_) {}
   }
 
   function clearStoredArtist() {
     try { localStorage.removeItem(ARTIST_KEY); } catch (_) {}
+    clearPerUserState();
   }
 
   /** Fetch current artist from /api/auth/me. Resolves null on failure. */
