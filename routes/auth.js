@@ -658,9 +658,19 @@ router.post('/verify-email', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM artists WHERE email = $1', [email]);
     const artist = result.rows[0];
-    if (!artist || artist.email_verified) {
+    if (!artist) {
       if (isFormSubmit) return res.redirect('/login');
       return res.status(400).json({ error: 'Invalid request' });
+    }
+    // Already verified — log them in instead of bouncing to /login
+    if (artist.email_verified) {
+      if (isFormSubmit) return res.redirect(authSuccessRedirect(artist, true));
+      const token = jwt.sign(
+        { id: artist.id, email: artist.email, name: artist.name, is_admin: !!artist.is_admin },
+        process.env.JWT_SECRET,
+        { expiresIn: '7d' }
+      );
+      return res.json({ token, artist: { id: artist.id, name: artist.name, email: artist.email, stage_name: artist.stage_name || null, is_admin: !!artist.is_admin } });
     }
 
     // Check max attempts

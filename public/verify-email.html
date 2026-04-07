@@ -235,6 +235,9 @@ body { font-family:'DM Sans', system-ui, sans-serif; background:#fff; }
   codeInput.addEventListener('input', function() {
     this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);
     if (this.value.length === 6 && !submitted) {
+      submitted = true;
+      var btn = form.querySelector('button[type="submit"]');
+      if (btn) { btn.disabled = true; btn.textContent = 'Verifying...'; }
       form.submit();
     }
   });
