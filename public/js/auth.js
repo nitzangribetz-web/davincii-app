@@ -30,7 +30,7 @@
     try {
       var prev = null;
       try { prev = JSON.parse(localStorage.getItem(ARTIST_KEY) || 'null'); } catch (_) {}
-      if (artist && prev && prev.id && artist.id && prev.id !== artist.id) {
+      if (artist && artist.id && (!prev || !prev.id || prev.id !== artist.id)) {
         clearPerUserState();
       }
       localStorage.setItem(ARTIST_KEY, JSON.stringify(artist || {}));
