@@ -3223,6 +3223,69 @@
     }
   }
 
+  function _loadNotifs() {
+    try { return JSON.parse(localStorage.getItem('dv_notifs') || '[]'); } catch(e) { return []; }
+  }
+  function _saveNotifs(arr) {
+    try { localStorage.setItem('dv_notifs', JSON.stringify(arr.slice(0, 50))); } catch(e) {}
+  }
+  function _timeAgo(ts) {
+    var s = Math.floor((Date.now() - ts) / 1000);
+    if (s < 60) return 'Just now';
+    if (s < 3600) return Math.floor(s/60) + 'm ago';
+    if (s < 86400) return Math.floor(s/3600) + 'h ago';
+    return Math.floor(s/86400) + 'd ago';
+  }
+  function _escape(s) { return String(s || '').replace(/[&<>"']/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  function renderNotifications() {
+    var notifs = _loadNotifs();
+    _unreadCount = notifs.filter(function(n){return !n.read;}).length;
+    var panelList = document.getElementById('notif-panel-list');
+    var pageList = document.getElementById('notif-page-list');
+    if (panelList) {
+      if (notifs.length === 0) {
+        panelList.innerHTML = '<div id="notif-panel-empty" style="padding:40px 24px;text-align:center;"><div style="font-family:\'DM Sans\',sans-serif;font-size:14px;font-weight:300;color:#CBD5E1;line-height:1.6;">No notifications yet.</div></div>';
+      } else {
+        panelList.innerHTML = notifs.slice(0, 6).map(function(n) {
+          return '<div class="notif-panel-item' + (n.read ? '' : ' unread') + '">' +
+            '<div class="notif-panel-dot' + (n.read ? ' read' : '') + '"></div>' +
+            '<div class="notif-panel-icon ' + (n.icon || 'blue') + '">♪</div>' +
+            '<div class="notif-panel-text">' +
+              '<div class="notif-panel-msg">' + _escape(n.title) + '</div>' +
+              '<div class="notif-panel-time">' + _timeAgo(n.ts) + '</div>' +
+            '</div>' +
+          '</div>';
+        }).join('');
+      }
+    }
+    if (pageList) {
+      if (notifs.length === 0) {
+        pageList.innerHTML = '<div class="empty-state" id="notif-page-empty"><div class="empty-state-title">No notifications yet.</div><div class="empty-state-sub">You\'ll be notified here when your compositions are registered, royalties are collected, and payouts are processed.</div></div>';
+      } else {
+        pageList.innerHTML = notifs.map(function(n) {
+          return '<div class="notif-item' + (n.read ? '' : ' unread') + '" style="display:flex;gap:14px;padding:18px 24px;border-bottom:1px solid #F1F5F9">' +
+            '<div class="notif-icon ' + (n.icon || 'blue') + '">♪</div>' +
+            '<div style="flex:1;min-width:0">' +
+              '<div class="notif-title" style="font-family:\'DM Sans\',sans-serif;font-size:14px;font-weight:600;color:#0A0A0A">' + _escape(n.title) + '</div>' +
+              '<div class="notif-body" style="font-family:\'DM Sans\',sans-serif;font-size:12.5px;font-weight:300;color:#64748B;margin-top:3px">' + _escape(n.body) + '</div>' +
+              '<div class="notif-time" style="font-family:\'DM Sans\',sans-serif;font-size:11px;color:#94A3B8;margin-top:6px">' + _timeAgo(n.ts) + '</div>' +
+            '</div>' +
+          '</div>';
+        }).join('');
+      }
+    }
+    var markBtn = document.getElementById('notif-mark-all');
+    if (markBtn) markBtn.style.display = notifs.length > 0 ? '' : 'none';
+    updateBadge();
+  }
+  function addNotification(title, body, icon) {
+    var notifs = _loadNotifs();
+    notifs.unshift({ title: title, body: body || '', icon: icon || 'blue', ts: Date.now(), read: false });
+    _saveNotifs(notifs);
+    renderNotifications();
+  }
+  window.addNotification = addNotification;
+
   // Expose closure functions to global scope for inline onclick handlers
   window.go = go;
   // ── Admin: Load signups ──
@@ -3304,13 +3367,9 @@
   }
 
   function markAllRead() {
-    _unreadCount = 0;
-    document.querySelectorAll('.notif-panel-item').forEach(el => el.classList.remove('unread'));
-    document.querySelectorAll('.notif-panel-dot').forEach(el => el.classList.add('read'));
-    // Also update full notifications page
-    document.querySelectorAll('.notif-item').forEach(el => el.classList.remove('unread'));
-    document.querySelectorAll('.notif-dot').forEach(el => el.style.display = 'none');
-    updateBadge();
+    var notifs = _loadNotifs().map(function(n){ n.read = true; return n; });
+    _saveNotifs(notifs);
+    renderNotifications();
   }
 
   // Close bell panel when clicking outside
@@ -3319,8 +3378,8 @@
     if (wrap && !wrap.contains(e.target)) wrap.classList.remove('open');
   });
 
-  // Init badge on load
-  setTimeout(updateBadge, 150);
+  // Init notifications on load
+  setTimeout(renderNotifications, 150);
 
   function toggleAvatarMenu(){document.getElementById('avatar-wrap').classList.toggle('open');}
   function closeAvatarMenu(){document.getElementById('avatar-wrap').classList.remove('open');}
@@ -3934,6 +3993,7 @@
     .then(function(res) {
       if (res.ok) {
         showToast('Song submitted for registration', 'success');
+        addNotification('Song submitted: ' + songData.title, 'Your composition is now in processing.', 'blue');
         deskResetAddSong();
         setTimeout(function() { showDashPage('catalog'); }, 400);
       } else {
@@ -4155,10 +4215,12 @@
         <div class="notif-panel" id="notif-panel">
           <div class="notif-panel-head">
             <span class="notif-panel-title">Notifications</span>
-            <button class="notif-panel-mark" onclick="markAllRead()" style="display:none;">Mark all read</button>
+            <button class="notif-panel-mark" id="notif-mark-all" onclick="markAllRead()" style="display:none;">Mark all read</button>
           </div>
-          <div style="padding:40px 24px;text-align:center;">
-            <div style="font-family:'DM Sans',sans-serif;font-size:14px;font-weight:300;color:#CBD5E1;line-height:1.6;">No notifications yet.</div>
+          <div id="notif-panel-list">
+            <div id="notif-panel-empty" style="padding:40px 24px;text-align:center;">
+              <div style="font-family:'DM Sans',sans-serif;font-size:14px;font-weight:300;color:#CBD5E1;line-height:1.6;">No notifications yet.</div>
+            </div>
           </div>
           <div class="notif-panel-footer">
             <button onclick="showDashPage('notifications');closeNotifPanel()">View all notifications →</button>
@@ -4408,13 +4470,11 @@
           <div class="sbox-head">
             <div><div class="sbox-title">Recent Activity</div><div class="sbox-sub">Your latest updates</div></div>
           </div>
-          <div class="sbox-body" style="padding:0">
-
-            <div class="empty-state">
+          <div class="sbox-body" style="padding:0" id="notif-page-list">
+            <div class="empty-state" id="notif-page-empty">
               <div class="empty-state-title">No notifications yet.</div>
               <div class="empty-state-sub">You'll be notified here when your compositions are registered, royalties are collected, and payouts are processed.</div>
             </div>
-
           </div>
         </div>
       </div>
