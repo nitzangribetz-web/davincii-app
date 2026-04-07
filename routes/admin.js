@@ -3,12 +3,26 @@ const router = express.Router();
 const pool = require('../db/pool');
 const auth = require('../middleware/auth');
 
-// Admin guard — must come after auth middleware
-function adminOnly(req, res, next) {
-  if (!req.artist || !req.artist.is_admin) {
-    return res.status(403).json({ error: 'Admin access required' });
+// Admin guard — must come after auth middleware.
+// Verifies is_admin from the DB rather than trusting the JWT claim, so that
+// (a) tokens issued by flows that omit is_admin still work, and
+// (b) admin revocation takes effect immediately without waiting for token expiry.
+async function adminOnly(req, res, next) {
+  try {
+    if (!req.artist || !req.artist.id) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    const result = await pool.query('SELECT is_admin FROM artists WHERE id = $1', [req.artist.id]);
+    const row = result.rows[0];
+    if (!row || !row.is_admin) {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+    req.artist.is_admin = true;
+    next();
+  } catch (err) {
+    console.error('[admin] adminOnly check failed:', err.message);
+    return res.status(500).json({ error: 'Admin check failed' });
   }
-  next();
 }
 
 // GET /api/admin/signups

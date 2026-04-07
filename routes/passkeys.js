@@ -163,7 +163,7 @@ router.post('/login/verify', async (req, res) => {
 
     // Get the artist and generate JWT
     const artistResult = await pool.query(
-      'SELECT id, name, email, created_at FROM artists WHERE id = $1',
+      'SELECT id, name, email, is_admin, created_at FROM artists WHERE id = $1',
       [passkey.artist_id]
     );
     const artist = artistResult.rows[0];
@@ -172,7 +172,7 @@ router.post('/login/verify', async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: artist.id, email: artist.email, name: artist.name },
+      { id: artist.id, email: artist.email, name: artist.name, is_admin: !!artist.is_admin },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
@@ -184,7 +184,7 @@ router.post('/login/verify', async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
       path: '/',
     });
-    res.json({ verified: true, artist });
+    res.json({ verified: true, artist: { id: artist.id, name: artist.name, email: artist.email, is_admin: !!artist.is_admin } });
   } catch (err) {
     console.error('Passkey login verify error:', err.message);
     res.status(500).json({ error: 'Failed to verify passkey authentication' });
