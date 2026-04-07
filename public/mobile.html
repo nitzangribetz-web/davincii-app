@@ -155,27 +155,33 @@ body{
   letter-spacing:0.02em;
 }
 /* Logged-in landing nav (bell + avatar) */
-.nav-authed-m{display:none;align-items:center;gap:8px}
+.nav-authed-m{display:none;align-items:center;gap:10px}
 body.user-authed-landing .nav-authed-m{display:flex}
 body.user-authed-landing .nav-right-m .guest-only{display:none}
 body.user-authed-landing .m-hero-cta .guest-only{display:none}
 .m-hero-cta .authed-only{display:none}
 body.user-authed-landing .m-hero-cta .authed-only{display:flex;align-items:center;justify-content:center;gap:8px}
 .m-ln-bell,.m-ln-av{
-  width:33px;height:33px;border-radius:50%;
-  background:rgba(255,255,255,0.06);
-  border:1.5px solid rgba(255,255,255,0.15);
+  width:36px;height:36px;border-radius:50%;
+  background:#0A0F1F;border:1px solid rgba(255,255,255,0.18);
   display:flex;align-items:center;justify-content:center;
-  color:rgba(255,255,255,0.85);cursor:pointer;
+  color:#fff;cursor:pointer;
   position:relative;padding:0;
+  box-shadow:0 4px 14px rgba(0,0,0,0.45);
+  transition:transform 0.15s, background 0.18s, border-color 0.18s;
 }
-.m-ln-bell svg,.m-ln-av svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.m-ln-bell:hover,.m-ln-av:hover{background:#161B2E;border-color:rgba(255,255,255,0.30)}
+.m-ln-bell:active,.m-ln-av:active{transform:scale(0.94)}
+.m-ln-bell svg,.m-ln-av svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .m-ln-bell-dot{
-  position:absolute;top:5px;right:5px;
-  width:7px;height:7px;border-radius:50%;
-  background:#5B9BFF;
-  border:2px solid #060E28;display:none;
+  position:absolute;top:-2px;right:-2px;
+  width:10px;height:10px;border-radius:50%;
+  background:#EF4444;
+  border:2px solid #060E28;
+  box-shadow:0 0 0 1px rgba(239,68,68,0.35);
+  display:none;
 }
+.m-ln-bell.has-notif .m-ln-bell-dot{display:block}
 
 /* ══════════════════════════════════════
    HERO
@@ -822,39 +828,38 @@ footer.m-footer{
 /* Bell */
 .d-bell{
   width:38px;height:38px;border-radius:50%;
-  background:#CBD5E1;border:1px solid rgba(255,255,255,0.55);
+  background:#0A0F1F;border:1px solid rgba(255,255,255,0.18);
   cursor:pointer;
   display:flex;align-items:center;justify-content:center;
-  color:#0A0F1F;position:relative;
-  box-shadow:0 4px 14px rgba(0,0,0,0.35);
-  transition:transform 0.15s, box-shadow 0.22s, background 0.18s;
+  color:#fff;position:relative;
+  box-shadow:0 4px 14px rgba(0,0,0,0.45);
+  transition:transform 0.15s, box-shadow 0.22s, background 0.18s, border-color 0.18s;
 }
-.d-bell:hover{background:#E2E8F0;box-shadow:0 6px 20px rgba(0,0,0,0.45)}
+.d-bell:hover{background:#161B2E;border-color:rgba(255,255,255,0.30);box-shadow:0 6px 20px rgba(0,0,0,0.55)}
 .d-bell:active{transform:scale(0.94)}
-.d-bell svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.d-bell svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .d-bell-dot{
-  position:absolute;top:-3px;right:-3px;
-  min-width:14px;height:14px;padding:0 4px;
-  border-radius:7px;background:#EF4444;
+  position:absolute;top:-2px;right:-2px;
+  min-width:10px;height:10px;
+  border-radius:50%;background:#EF4444;
   border:2px solid var(--navy);
-  box-shadow:none;
-  font-family:var(--sans);font-size:9px;font-weight:700;
-  color:#fff;line-height:10px;text-align:center;
-  display:none;align-items:center;justify-content:center;
+  box-shadow:0 0 0 1px rgba(239,68,68,0.35);
+  display:none;
 }
+.d-bell.has-notif .d-bell-dot{display:block}
 /* Avatar */
 .d-av-wrap{position:relative}
 .d-av{
   width:38px;height:38px;border-radius:50%;
-  background:#CBD5E1;border:1px solid rgba(255,255,255,0.55);
+  background:#0A0F1F;border:1px solid rgba(255,255,255,0.18);
   display:flex;align-items:center;justify-content:center;
-  color:#0A0F1F;cursor:pointer;
-  box-shadow:0 4px 14px rgba(0,0,0,0.35);
-  transition:transform 0.15s, box-shadow 0.22s, background 0.18s;
+  color:#fff;cursor:pointer;
+  box-shadow:0 4px 14px rgba(0,0,0,0.45);
+  transition:transform 0.15s, box-shadow 0.22s, background 0.18s, border-color 0.18s;
 }
-.d-av:hover{background:#E2E8F0;box-shadow:0 6px 20px rgba(0,0,0,0.45)}
+.d-av:hover{background:#161B2E;border-color:rgba(255,255,255,0.30);box-shadow:0 6px 20px rgba(0,0,0,0.55)}
 .d-av:active{transform:scale(0.94)}
-.d-av svg{width:18px;height:18px;display:block;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.d-av svg{width:18px;height:18px;display:block;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .d-av-dd{
   display:none;position:absolute;right:0;top:calc(100% + 8px);
   width:216px;background:#fff;
@@ -1490,7 +1495,8 @@ footer.m-footer{
         Collect<br><em>royalties.</em>
       </h1>
       <div class="m-hero-cta">
-        <button class="btn-hero-m" onclick="go('signup')">Get started</button>
+        <button class="btn-hero-m guest-only" onclick="go('signup')">Get started</button>
+        <button class="btn-hero-m authed-only" onclick="mobEnterDashboard('overview')">Dashboard →</button>
       </div>
     </div>
 
@@ -2478,7 +2484,25 @@ footer.m-footer{
     // Returning user / page refresh — cached artist in localStorage; cookie auth handles the session.
     var savedArtist = localStorage.getItem('dv_artist');
     if (savedArtist) {
-      try { mobActivateDashboard(JSON.parse(savedArtist)); } catch(e) { console.error('[Auth] cached artist parse error:', e); }
+      // If the URL points at a dashboard route, render the dashboard.
+      // Otherwise stay on the landing page in its logged-in state (bell + avatar in nav, "Dashboard →" CTA in hero).
+      var wantsDashboard = /^\/dashboard(\/|$)/.test(location.pathname) || DP_PAGES.indexOf(location.pathname.replace(/^\/|\/$/g,'')) !== -1;
+      try {
+        var _cachedArtist = JSON.parse(savedArtist);
+        if (wantsDashboard) {
+          mobActivateDashboard(_cachedArtist);
+        } else {
+          mobRemoveBootCSS();
+          mobMarkLandingAuthed();
+          mobUpdateArtistUI(_cachedArtist);
+          try { mobSyncNotifDot(); } catch(_){}
+          // Make sure the landing screen is the visible one
+          document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+          document.getElementById('screen-landing').classList.add('active');
+          var pubScreen = getScreenFromURL();
+          if (pubScreen && pubScreen !== 'landing') go(pubScreen, true);
+        }
+      } catch(e) { console.error('[Auth] cached artist parse error:', e); }
       // Validate in background — only log out on explicit auth rejection
       Dv.api.fetch('/auth/me', { skipAuthRedirect: true, raw: true })
         .then(function(r) {
@@ -2526,9 +2550,40 @@ function mobRemoveBootCSS() {
   if (s) s.remove();
 }
 
+// Sync the red unread-notification dot on both bells (dashboard top-nav + landing-authed nav).
+function mobSyncNotifDot() {
+  var has = false;
+  try { has = (window.Dv && Dv.notifications && Dv.notifications.unreadCount() > 0); } catch(_){}
+  ['.d-bell', '.m-ln-bell'].forEach(function(sel){
+    document.querySelectorAll(sel).forEach(function(el){ el.classList.toggle('has-notif', has); });
+  });
+}
+window.mobSyncNotifDot = mobSyncNotifDot;
+
+// Enter the mobile dashboard from the landing page (when already authed).
+// Falls back to login if no cached artist exists.
+function mobEnterDashboard(page) {
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem('dv_artist') || 'null'); } catch(_) {}
+  if (!saved) { go('login'); return; }
+  mobActivateDashboard(saved);
+  if (page && page !== 'overview') { try { showDP(page); } catch(_){} }
+}
+window.mobEnterDashboard = mobEnterDashboard;
+
+// Mark the landing page as authed so the bell + avatar replace the
+// guest Login / Get-started buttons and the hero CTA flips to "Dashboard →".
+function mobMarkLandingAuthed() {
+  document.body.classList.add('user-authed-landing');
+}
+function mobMarkLandingGuest() {
+  document.body.classList.remove('user-authed-landing');
+}
+
 function mobActivateDashboard(artist) {
   document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
   document.getElementById('screen-dashboard').classList.add('active');
+  document.body.classList.remove('user-authed-landing');
   document.body.classList.add('dashboard-active');
   document.body.style.background = '#F0F4FA';
   document.body.style.color = '#0A0A0A';
@@ -2546,6 +2601,7 @@ function mobActivateDashboard(artist) {
   showDP(initialPage, true);
   window.scrollTo(0, 0);
   mobUpdateArtistUI(artist);
+  try { mobSyncNotifDot(); } catch(_){}
   // Reflect any setup state already completed elsewhere (desktop, prior session)
   try { mobApplySetupCompletion(); } catch(_){}
   try { mobLoadSongs(); } catch(_){}
