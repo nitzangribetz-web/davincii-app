@@ -1651,13 +1651,21 @@
       background: #FEF2F2; color: #EF4444; border-color: #FCA5A5;
     }
     .catalog-row {
-      display: flex; align-items: center; justify-content: space-between;
+      display: flex; align-items: center; gap: 12px;
       padding: 18px 24px; border-bottom: 1px solid #F1F5F9;
     }
     .catalog-row:last-child { border-bottom: none; }
+    .catalog-row-main {
+      flex: 1 1 auto; min-width: 0;
+      overflow: hidden;
+    }
     .catalog-row-title {
       font-family: 'DM Sans', sans-serif; font-size: 14.5px;
       font-weight: 600; color: #0A0A0A; letter-spacing: -0.005em;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .catalog-row .status-badge {
+      flex-shrink: 0; min-width: 96px; justify-content: center;
     }
     .catalog-row-meta {
       font-family: 'DM Sans', sans-serif; font-size: 12px;
@@ -3523,7 +3531,37 @@
     if(page === 'add-song') deskResetAddSong();
     if(page === 'overview') { try { applySetupCompletion(); } catch(e) {} }
     if(page === 'catalog') { try { loadCatalog(); } catch(e) {} }
+    if(page === 'registration') { try { loadRegistration(); } catch(e) {} }
   }
+
+  function loadRegistration() {
+    var body = document.getElementById('reg-status-body');
+    var count = document.getElementById('reg-status-count');
+    if (!body) return;
+    Dv.api.fetch('/songs', { skipAuthRedirect: true })
+      .catch(function(){ return []; })
+      .then(function(songs) {
+        if (!Array.isArray(songs) || songs.length === 0) {
+          if (count) count.textContent = '0 songs registered';
+          body.innerHTML = '<div class="empty-state"><div class="empty-state-title">No compositions registered yet.</div><div class="empty-state-sub">Register your first song to see its status across all major performing rights organizations and collection societies.</div><button onclick="showDashPage(\'add-song\')" class="btn-blue" style="font-size:11px;letter-spacing:0.10em;text-transform:uppercase;padding:10px 22px;">Register a Composition →</button></div>';
+          return;
+        }
+        if (count) count.textContent = songs.length + ' song' + (songs.length === 1 ? '' : 's') + ' registered';
+        var esc = Dv.format.escapeHtml;
+        var rows = songs.map(function(s) {
+          var title = esc(s.title || 'Untitled');
+          var status = (s.status || 'processing').toLowerCase();
+          var statusLabel = status === 'registered' ? 'Registered' : (status === 'rejected' ? 'Rejected' : 'Processing');
+          var statusClass = status === 'registered' ? 'success' : (status === 'rejected' ? 'error' : 'pending');
+          return '<div class="catalog-row">' +
+            '<div class="catalog-row-main"><div class="catalog-row-title">' + title + '</div></div>' +
+            '<span class="status-badge ' + statusClass + '">' + statusLabel + '</span>' +
+          '</div>';
+        }).join('');
+        body.innerHTML = '<div class="catalog-list">' + rows + '</div>';
+      });
+  }
+  window.loadRegistration = loadRegistration;
 
   function deleteSong(id, title) {
     if (!id) return;
@@ -4952,15 +4990,9 @@
         <div class="page-rule"></div>
         <div class="sbox">
           <div class="sbox-head">
-            <div><div class="sbox-title">All Compositions</div><div class="sbox-sub">0 songs registered</div></div>
+            <div><div class="sbox-title">All Compositions</div><div class="sbox-sub" id="reg-status-count">0 songs registered</div></div>
           </div>
-          <div class="sbox-body" style="padding:0">
-            <div class="reg-table-head">
-              <div class="reg-table-label">Composition</div>
-              <div class="reg-table-label">Society</div>
-              <div class="reg-table-label">Status</div>
-              <div class="reg-table-label">Registered</div>
-            </div>
+          <div class="sbox-body" style="padding:0" id="reg-status-body">
             <div class="empty-state">
               <div class="empty-state-title">No compositions registered yet.</div>
               <div class="empty-state-sub">Register your first song to see its status across all major performing rights organizations and collection societies.</div>
