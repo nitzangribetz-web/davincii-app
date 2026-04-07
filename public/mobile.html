@@ -2663,12 +2663,13 @@ function mobLoadSongs() {
     .catch(function(){});
 }
 
-// Pull W-9 status so the alert hides as soon as it's been submitted on either device
+// W-9 completion is derived from Stripe Connect status (details_submitted).
+// The legacy /api/payouts/w9 endpoint is intentionally a 410.
 function mobLoadW9Status() {
-  if (!window.Dv || !Dv.api) return;
-  Dv.api.fetch('/payouts/w9', { skipAuthRedirect: true })
-    .then(function(data) {
-      if (data && (data.submitted || data.status === 'submitted' || data.status === 'pending' || data.status === 'approved' || data.legal_name)) {
+  if (!window.Dv || !Dv.stripe) return;
+  Dv.stripe.fetchStatus()
+    .then(function(d) {
+      if (d && d.details_submitted) {
         try { localStorage.setItem('dv_setup_w9', '1'); } catch(_){}
         mobMarkSetupComplete('w9');
       }
@@ -3209,8 +3210,24 @@ document.addEventListener('click', e => {
   }
 });
 
-// ── W-9 Modal ──
+// ── W-9 → Stripe Connect ──
+// Tax identity (W-9) is collected and stored entirely by Stripe Connect
+// onboarding. The legacy in-app W-9 modal is no longer used; this entry
+// point now redirects the user to the Stripe-hosted onboarding URL.
 function openMobW9Modal() {
+  if (!window.Dv || !Dv.stripe) {
+    showToast('Stripe is still loading — try again in a moment.', 'error');
+    return;
+  }
+  showToast('Opening Stripe to complete your tax info…');
+  Dv.stripe.startConnect()
+    .then(function(d){
+      if (d && d.url) { window.location.href = d.url; }
+      else { showToast('Could not start Stripe onboarding. Please try again.', 'error'); }
+    })
+    .catch(function(){ showToast('Could not start Stripe onboarding. Please try again.', 'error'); });
+}
+function _legacyOpenMobW9Modal() {
   document.getElementById('mob-w9-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
 }

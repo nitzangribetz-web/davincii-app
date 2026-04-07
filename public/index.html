@@ -3903,7 +3903,23 @@
       }
     }
   }
-  function openW9Modal(){document.getElementById('w9-modal-overlay').classList.add('open');}
+  // W-9 collection now happens entirely inside Stripe Connect onboarding.
+  // Davincii never sees or stores the SSN/EIN/legal name. The legacy in-app
+  // W-9 modal is no longer used; openW9Modal() redirects the user to Stripe
+  // so the data lands on the connected account directly.
+  function openW9Modal(){
+    if (!window.Dv || !Dv.stripe) {
+      showToast('Stripe is still loading — try again in a moment.', 'error');
+      return;
+    }
+    showToast('Opening Stripe to complete your tax info…', 'success');
+    Dv.stripe.startConnect()
+      .then(function(d){
+        if (d && d.url) { window.location.href = d.url; }
+        else { showToast('Could not start Stripe onboarding. Please try again.', 'error'); }
+      })
+      .catch(function(){ showToast('Could not start Stripe onboarding. Please try again.', 'error'); });
+  }
   function closeW9Modal(){document.getElementById('w9-modal-overlay').classList.remove('open');}
   function w9ClassChange(val) {
     var wrap = document.getElementById('w9-llc-wrap');
@@ -4294,15 +4310,20 @@
         var box = document.getElementById('get-started-box');
         if (box) box.style.display = 'none';
       }
-      // Live-check W-9 + songs from the API so the desktop reflects mobile actions
-      if (window.Dv && Dv.api) {
-        Dv.api.fetch('/payouts/w9', { skipAuthRedirect: true })
-          .then(function(d) {
-            if (d && (d.submitted || d.status === 'submitted' || d.status === 'pending' || d.status === 'approved' || d.legal_name)) {
-              try { localStorage.setItem('dv_setup_w9', '1'); } catch(_){}
-              markSetupComplete('w9');
-            }
-          }).catch(function(){});
+      // W-9 completion is now derived from Stripe Connect: once Stripe has
+      // collected the tax identity (details_submitted=true and no outstanding
+      // requirements), the in-app W-9 alert is hidden.
+      if (window.Dv && Dv.stripe) {
+        Dv.stripe.fetchStatus().then(function(d) {
+          var vm = Dv.stripe.describeState(d);
+          var done = vm.state === 'connected_ready'
+                  || vm.state === 'connected_incomplete' && d && d.details_submitted
+                  || (d && d.details_submitted);
+          if (done) {
+            try { localStorage.setItem('dv_setup_w9', '1'); } catch(_){}
+            markSetupComplete('w9');
+          }
+        }).catch(function(){});
       }
     } catch(e) {}
   }
