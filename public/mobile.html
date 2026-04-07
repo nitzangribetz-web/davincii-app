@@ -1886,7 +1886,7 @@ footer.m-footer{
     <div class="d-pg-title" id="mob-dash-greeting">Good morning, <em id="mob-greeting-name">—</em></div>
     <div class="d-pg-sub">Here's your publishing overview.</div>
     <div class="d-pg-rule"></div>
-    <div class="d-alert">
+    <div class="d-alert" id="mob-alert-profile">
       <div class="d-alert-icon">!</div>
       <div style="flex:1;min-width:0">
         <div class="d-alert-title">Complete your artist profile</div>
@@ -1894,7 +1894,7 @@ footer.m-footer{
         <button class="d-alert-btn" onclick="showDP('profile')">Complete →</button>
       </div>
     </div>
-    <div class="d-alert" style="margin-bottom:16px">
+    <div class="d-alert" id="mob-alert-w9" style="margin-bottom:16px">
       <div class="d-alert-icon" style="font-size:9px;font-weight:700">W-9</div>
       <div style="flex:1;min-width:0">
         <div class="d-alert-title">Submit your W-9 form</div>
@@ -1912,14 +1912,15 @@ footer.m-footer{
       </div>
     </div>
     <div class="d-stats">
-      <div class="d-stat"><div class="d-stat-num">0</div><div class="d-stat-lbl">Songs</div></div>
+      <div class="d-stat"><div class="d-stat-num" id="mob-stat-songs">0</div><div class="d-stat-lbl">Songs</div></div>
       <div class="d-stat"><div class="d-stat-num"><span class="d-cs">$</span>0</div><div class="d-stat-lbl">Collected</div></div>
-      <div class="d-stat"><div class="d-stat-num">—</div><div class="d-stat-lbl">PRO</div></div>
+      <div class="d-stat"><div class="d-stat-num" id="mob-stat-pro">—</div><div class="d-stat-lbl">PRO</div></div>
     </div>
-    <div class="d-sbox">
+    <div class="d-sbox" id="mob-get-started-box">
       <div class="d-sbox-hd"><div><div class="d-sbox-title">Get started</div><div class="d-sbox-sub">Complete your setup</div></div></div>
-      <div class="d-setup-row"><span class="d-setup-lbl">Complete artist profile</span><button class="d-setup-cta" onclick="showDP('profile')">Complete →</button></div>
-      <div class="d-setup-row"><span class="d-setup-lbl">Submit W-9 tax form</span><button class="d-setup-cta" onclick="showDP('payouts')">Complete →</button></div>
+      <div class="d-setup-row" id="mob-setup-row-profile"><span class="d-setup-lbl">Complete artist profile</span><button class="d-setup-cta" onclick="showDP('profile')">Complete →</button></div>
+      <div class="d-setup-row" id="mob-setup-row-w9"><span class="d-setup-lbl">Submit W-9 tax form</span><button class="d-setup-cta" onclick="showDP('payouts')">Complete →</button></div>
+      <div class="d-setup-row" id="mob-setup-row-song"><span class="d-setup-lbl">Register first composition</span><button class="d-setup-cta" onclick="showDP('add-song')">Register →</button></div>
     </div>
   </div>
 
@@ -1932,8 +1933,9 @@ footer.m-footer{
     <div class="d-pg-sub">Your registered compositions.</div>
     <div class="d-pg-rule"></div>
     <div class="d-sbox">
-      <div class="d-sbox-hd"><div><div class="d-sbox-title">Catalog</div><div class="d-sbox-sub">0 compositions</div></div></div>
-      <div class="d-empty"><div class="d-empty-title">No songs yet.</div><div class="d-empty-sub">Register your first composition to start collecting royalties worldwide.</div><button class="btn-p" style="max-width:250px;margin:0 auto" onclick="showDP('add-song')">Register a Composition →</button></div>
+      <div class="d-sbox-hd"><div><div class="d-sbox-title">Catalog</div><div class="d-sbox-sub" id="mob-catalog-count">0 compositions</div></div></div>
+      <div id="mob-catalog-list"></div>
+      <div class="d-empty" id="mob-catalog-empty"><div class="d-empty-title">No songs yet.</div><div class="d-empty-sub">Register your first composition to start collecting royalties worldwide.</div><button class="btn-p" style="max-width:250px;margin:0 auto" onclick="showDP('add-song')">Register a Composition →</button></div>
     </div>
   </div>
 
@@ -2514,6 +2516,78 @@ function mobActivateDashboard(artist) {
   showDP(initialPage, true);
   window.scrollTo(0, 0);
   mobUpdateArtistUI(artist);
+  // Reflect any setup state already completed elsewhere (desktop, prior session)
+  try { mobApplySetupCompletion(); } catch(_){}
+  try { mobLoadSongs(); } catch(_){}
+  try { mobLoadW9Status(); } catch(_){}
+}
+
+// ── Setup-completion sync (mirrors desktop's applySetupCompletion) ──
+// Source of truth:
+//   - profile: artist.stage_name + artist.pro present (or dv_setup_profile flag)
+//   - w9     : dv_setup_w9 flag (set after a successful W-9 submit on either device)
+//   - song   : songs count > 0 from /api/songs (or dv_setup_song flag)
+function mobMarkSetupComplete(kind) {
+  var alertEl = document.getElementById('mob-alert-' + kind);
+  if (alertEl) alertEl.style.display = 'none';
+  var rowEl = document.getElementById('mob-setup-row-' + kind);
+  if (rowEl) rowEl.style.display = 'none';
+  try { localStorage.setItem('dv_setup_' + kind, '1'); } catch(_){}
+}
+function mobApplySetupCompletion() {
+  var artist = {};
+  try { artist = JSON.parse(localStorage.getItem('dv_artist') || '{}'); } catch(_){}
+  var profileDone = (artist && artist.stage_name && artist.pro)
+    || localStorage.getItem('dv_setup_profile') === '1';
+  if (profileDone) mobMarkSetupComplete('profile');
+  if (localStorage.getItem('dv_setup_w9') === '1') mobMarkSetupComplete('w9');
+  if (localStorage.getItem('dv_setup_song') === '1') mobMarkSetupComplete('song');
+  // Hide entire Get Started box once everything is done
+  var box = document.getElementById('mob-get-started-box');
+  if (box) {
+    var rows = box.querySelectorAll('.d-setup-row');
+    var visible = 0;
+    rows.forEach(function(r){ if (r.style.display !== 'none') visible++; });
+    if (visible === 0) box.style.display = 'none';
+  }
+  // Mirror PRO into the overview stat card
+  var proEl = document.getElementById('mob-stat-pro');
+  if (proEl && artist && artist.pro) proEl.textContent = artist.pro;
+}
+
+// Pull the live song count from the backend so the mobile catalog mirrors desktop
+function mobLoadSongs() {
+  if (!window.Dv || !Dv.api) return;
+  Dv.api.fetch('/songs', { skipAuthRedirect: true })
+    .then(function(data) {
+      var songs = (data && (data.songs || data)) || [];
+      if (!Array.isArray(songs)) songs = [];
+      var stat = document.getElementById('mob-stat-songs');
+      if (stat) stat.textContent = String(songs.length);
+      var count = document.getElementById('mob-catalog-count');
+      if (count) count.textContent = songs.length + ' composition' + (songs.length === 1 ? '' : 's');
+      var empty = document.getElementById('mob-catalog-empty');
+      if (empty) empty.style.display = songs.length ? 'none' : '';
+      if (songs.length > 0) {
+        try { localStorage.setItem('dv_setup_song', '1'); } catch(_){}
+        var row = document.getElementById('mob-setup-row-song');
+        if (row) row.style.display = 'none';
+      }
+    })
+    .catch(function(){});
+}
+
+// Pull W-9 status so the alert hides as soon as it's been submitted on either device
+function mobLoadW9Status() {
+  if (!window.Dv || !Dv.api) return;
+  Dv.api.fetch('/payouts/w9', { skipAuthRedirect: true })
+    .then(function(data) {
+      if (data && (data.submitted || data.status === 'submitted' || data.status === 'pending' || data.status === 'approved' || data.legal_name)) {
+        try { localStorage.setItem('dv_setup_w9', '1'); } catch(_){}
+        mobMarkSetupComplete('w9');
+      }
+    })
+    .catch(function(){});
 }
 
 function mobUpdateArtistUI(artist) {
@@ -3181,6 +3255,9 @@ function submitMobW9() {
     var t = document.getElementById('mob-w9-status-text');
     if (b) b.className = 'status-badge pending';
     if (t) t.textContent = 'Submitted';
+    try { localStorage.setItem('dv_setup_w9', '1'); } catch(_){}
+    mobMarkSetupComplete('w9');
+    mobApplySetupCompletion();
     closeMobW9Modal();
     showToast('W-9 submitted successfully');
   })
@@ -3323,8 +3400,22 @@ function mobSaveProfile() {
   })
   .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
   .then(function(res) {
-    if (res.ok) showToast('Profile saved successfully', 'success');
-    else showToast(res.data.error || 'Failed to save profile', 'error');
+    if (res.ok) {
+      // Update cached artist so the setup-completion check picks it up
+      try {
+        var stored = JSON.parse(localStorage.getItem('dv_artist') || '{}');
+        if (data.stage_name) stored.stage_name = data.stage_name;
+        if (data.pro) stored.pro = data.pro;
+        if (data.pro_other) stored.pro_other = data.pro_other;
+        localStorage.setItem('dv_artist', JSON.stringify(stored));
+      } catch(_){}
+      try { localStorage.setItem('dv_setup_profile', '1'); } catch(_){}
+      mobMarkSetupComplete('profile');
+      mobApplySetupCompletion();
+      showToast('Profile saved successfully', 'success');
+    } else {
+      showToast(res.data.error || 'Failed to save profile', 'error');
+    }
   })
   .catch(function() { showToast('Network error — please try again', 'error'); });
 }
@@ -3475,6 +3566,10 @@ function mobSubmitSong() {
   .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
   .then(function(res) {
     if (res.ok) {
+      try { localStorage.setItem('dv_setup_song', '1'); } catch(_){}
+      mobMarkSetupComplete('song');
+      mobApplySetupCompletion();
+      mobLoadSongs();
       showToast('Song submitted for registration', 'success');
       mobResetAddSong();
       setTimeout(function() { releaseLock(); showDP('catalog'); }, 400);
