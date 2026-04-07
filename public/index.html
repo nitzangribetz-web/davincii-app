@@ -105,10 +105,26 @@
     .nav-right { display:flex; align-items:center; gap:10px; }
     /* Authed nav variant — shown when user has a session, hides Login/Get-started */
     .nav-right.authed .nav-guest { display:none !important; }
-    .nav-right .nav-authed { display:none; align-items:center; gap:12px; margin-right:120px; }
+    .nav-right .nav-authed { display:none; align-items:center; gap:12px; margin-right:480px; }
     .nav-right.authed .nav-authed { display:flex; }
+    @media (max-width: 1100px) { .nav-right .nav-authed { margin-right: 240px; } }
+    @media (max-width: 880px)  { .nav-right .nav-authed { margin-right: 60px; } }
+    /* When logged in and viewing the landing page, drop the blue hero gradient
+       so the page matches the dark navy of the dashboard top corner. */
+    body.is-authed #hero { background: #030912 !important; }
+    body.is-authed #hero::after { display: none; }
+    body.is-authed .hero-backlight { display: none !important; }
     /* Hero CTA — swap guest buttons for a single Dashboard button when authed */
     .hero-authed { display:none !important; }
+    body.is-authed .btn-cta-hero.hero-authed {
+      background:#0A0F1F;
+      border:1px solid rgba(255,255,255,0.28);
+      box-shadow:0 4px 14px rgba(0,0,0,0.35);
+    }
+    body.is-authed .btn-cta-hero.hero-authed:hover {
+      background:#121A33; border-color:rgba(255,255,255,0.50);
+      box-shadow:0 6px 20px rgba(0,0,0,0.45);
+    }
     body.is-authed .hero-guest { display:none !important; }
     body.is-authed .hero-authed { display:inline-flex !important; }
     .nav-dash-btn {
@@ -1226,23 +1242,23 @@
     }
     .avatar-wrap { position: relative; }
     .avatar {
-      width: 46px; height: 46px; border-radius: 50%;
-      background: #475569;
+      width: 36px; height: 36px; border-radius: 50%;
+      background: #fff;
       display: flex; align-items: center; justify-content: center;
-      color: #fff;
+      color: #0A0F1F;
       cursor: pointer; user-select: none;
-      border: 2px solid rgba(255,255,255,0.85);
-      box-shadow: 0 4px 16px rgba(0,0,0,0.45);
+      border: 1px solid rgba(255,255,255,0.85);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.35);
       transition: transform 0.15s, box-shadow 0.22s, background 0.18s;
     }
     .avatar:hover {
-      background: #64748B;
-      box-shadow: 0 6px 22px rgba(0,0,0,0.55);
+      background: #F1F5F9;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.45);
     }
     .avatar:active { transform: scale(0.94); }
     .avatar svg {
-      width: 23px; height: 23px; display: block;
-      fill: none; stroke: currentColor; stroke-width: 2.2;
+      width: 17px; height: 17px; display: block;
+      fill: none; stroke: currentColor; stroke-width: 2;
       stroke-linecap: round; stroke-linejoin: round;
     }
     .avatar-dropdown {
@@ -2412,9 +2428,9 @@
       position: relative;
     }
     .notif-bell {
-      width: 46px; height: 46px; border-radius: 50%;
-      background: #CBD5E1;
-      border: 2px solid #fff;
+      width: 36px; height: 36px; border-radius: 50%;
+      background: #fff;
+      border: 1px solid rgba(255,255,255,0.85);
       cursor: pointer;
       display: flex; align-items: center; justify-content: center;
       color: #0A0F1F;
@@ -2423,14 +2439,14 @@
       position: relative;
     }
     .notif-bell:hover {
-      background: #E2E8F0;
+      background: #F1F5F9;
       box-shadow: 0 6px 20px rgba(0,0,0,0.45);
     }
     .notif-bell:active { transform: scale(0.94); }
     .notif-bell svg {
-      width: 23px; height: 23px;
+      width: 17px; height: 17px;
       fill: none; stroke: currentColor;
-      stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;
+      stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
     }
     /* Unread badge — red, with count */
     .notif-bell-badge {
