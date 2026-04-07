@@ -1522,6 +1522,19 @@
       transition: color 0.18s;
     }
     .setup-action:hover { color: #2563EB; }
+    .setup-row.completed .setup-row-label {
+      text-decoration: line-through;
+      color: #94A3B8;
+    }
+    .setup-row.completed .setup-row-label::before {
+      content: '✓ ';
+      color: #10B981;
+      font-weight: 700;
+      text-decoration: none;
+      display: inline-block;
+      margin-right: 4px;
+    }
+    .setup-row.completed .setup-action { display: none; }
 
     /* Badge / status */
     .status-badge {
@@ -4322,9 +4335,15 @@
         if (btn) btn.disabled = true;
       }
     }
-    if (kind === 'profile') {
-      var row = document.getElementById('setup-row-profile');
-      if (row && expired) row.style.display = 'none';
+    var row = document.getElementById('setup-row-' + kind);
+    if (row) {
+      if (expired) {
+        row.style.display = 'none';
+      } else {
+        row.classList.add('completed');
+        var btn = row.querySelector('.setup-action');
+        if (btn) btn.disabled = true;
+      }
     }
   }
   function applySetupCompletion() {
@@ -4337,13 +4356,27 @@
         markSetupComplete('profile');
       }
       if (localStorage.getItem('dv_setup_w9') === '1') markSetupComplete('w9');
+      if (localStorage.getItem('dv_setup_song') === '1') markSetupComplete('song');
+      // Detect first registered composition via /songs API, then mark song complete.
+      if (window.Dv && Dv.api && localStorage.getItem('dv_setup_song') !== '1') {
+        Dv.api.fetch('/songs', { skipAuthRedirect: true })
+          .then(function(songs){
+            if (Array.isArray(songs) && songs.length > 0) {
+              try { localStorage.setItem('dv_setup_song', '1'); } catch(_){}
+              markSetupComplete('song');
+            }
+          })
+          .catch(function(){});
+      }
       // Hide entire Get Started box once all items have been completed
       // for more than the 2-day grace period.
       var pAt = parseInt(localStorage.getItem('dv_setup_profile_at') || '0', 10);
       var wAt = parseInt(localStorage.getItem('dv_setup_w9_at') || '0', 10);
-      var allExpired = pAt && wAt
+      var sAt = parseInt(localStorage.getItem('dv_setup_song_at') || '0', 10);
+      var allExpired = pAt && wAt && sAt
         && (Date.now() - pAt) > SETUP_HIDE_MS
-        && (Date.now() - wAt) > SETUP_HIDE_MS;
+        && (Date.now() - wAt) > SETUP_HIDE_MS
+        && (Date.now() - sAt) > SETUP_HIDE_MS;
       if (allExpired) {
         var box = document.getElementById('get-started-box');
         if (box) box.style.display = 'none';
@@ -4939,7 +4972,7 @@
               <span class="setup-row-label">Complete your artist profile</span>
               <button class="setup-action" onclick="showDashPage('profile')">Complete →</button>
             </div>
-            <div class="setup-row" style="border-bottom:none">
+            <div class="setup-row" id="setup-row-song" style="border-bottom:none">
               <span class="setup-row-label">Register your first composition</span>
               <button class="setup-action" onclick="showDashPage('add-song')">Register →</button>
             </div>

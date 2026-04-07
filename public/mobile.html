@@ -2683,9 +2683,7 @@ function mobLoadSongs() {
       var empty = document.getElementById('mob-catalog-empty');
       if (empty) empty.style.display = songs.length ? 'none' : '';
       if (songs.length > 0) {
-        try { localStorage.setItem('dv_setup_song', '1'); } catch(_){}
-        var row = document.getElementById('mob-setup-row-song');
-        if (row) row.style.display = 'none';
+        mobMarkSetupComplete('song');
       }
     })
     .catch(function(){});
