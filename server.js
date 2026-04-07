@@ -119,7 +119,7 @@ app.use((req, res, next) => {
 // Global error handler
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err.message, err.stack);
-  res.status(500).json({ error: 'Internal server error' });
+  res.status(500).json({ error: err.message || 'Internal server error', stack: err.stack });
 });
 
 const PORT = process.env.PORT || 3000;
