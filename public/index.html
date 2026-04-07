@@ -2895,8 +2895,13 @@
   }
 
   function logoClick() {
-    if (token) {
-      go('dashboard');
+    var loggedIn = false;
+    try { loggedIn = !!localStorage.getItem('dv_artist'); } catch(_) {}
+    if (loggedIn) {
+      var dash = document.getElementById('screen-dashboard');
+      if (dash && !dash.classList.contains('active')) {
+        try { onAuthSuccess(JSON.parse(localStorage.getItem('dv_artist') || '{}'), false); } catch(_) {}
+      }
       showDashPage('overview', false);
     } else {
       go('landing');
@@ -2909,14 +2914,16 @@
       go(e.state.screen, true);
       return;
     }
-    if (token) {
+    var loggedIn = false;
+    try { loggedIn = !!localStorage.getItem('dv_artist'); } catch(_) {}
+    if (loggedIn) {
       var dashScreen = document.getElementById('screen-dashboard');
       if (!dashScreen || !dashScreen.classList.contains('active')) {
         onAuthSuccess(JSON.parse(localStorage.getItem('dv_artist') || '{}'), false);
       }
       // Restore the correct dashboard page from state or URL
-      var page = (e.state && e.state.page) || getDashPageFromURL();
-      if (page) showDashPage(page, true);
+      var page = (e.state && e.state.page) || getDashPageFromURL() || 'overview';
+      showDashPage(page, true);
     } else {
       var screen = getScreenFromURL();
       if (screen) go(screen, true);
