@@ -3246,7 +3246,7 @@
     var pageList = document.getElementById('notif-page-list');
     if (panelList) {
       if (notifs.length === 0) {
-        panelList.innerHTML = '<div id="notif-panel-empty" style="padding:40px 24px;text-align:center;"><div style="font-family:\'DM Sans\',sans-serif;font-size:14px;font-weight:300;color:#CBD5E1;line-height:1.6;">No notifications yet.</div></div>';
+        panelList.innerHTML = '<div id="notif-panel-empty" class="empty-state" style="padding:36px 24px"><div class="empty-state-title" style="font-size:17px">You\u2019re all caught up.</div><div class="empty-state-sub" style="margin-bottom:0">We\u2019ll let you know the moment royalties, registrations, or payouts move.</div></div>';
       } else {
         panelList.innerHTML = notifs.slice(0, 6).map(function(n) {
           return '<div class="notif-panel-item' + (n.read ? '' : ' unread') + '">' +
@@ -3288,40 +3288,84 @@
 
   // Expose closure functions to global scope for inline onclick handlers
   window.go = go;
-  // ── Admin: Load signups ──
-  function loadSignups() {
+  // ── Admin: Load signups (with client-side search + filters) ──
+  var _signupsData = [];
+  var _signupsFilter = 'all';
+  var _signupsQuery = '';
+  function _signupsMatches(a) {
+    if (_signupsFilter === 'newest') {
+      if (new Date(a.created_at).getTime() < Date.now() - 7*24*60*60*1000) return false;
+    } else if (_signupsFilter === 'unverified') { if (a.email_verified) return false; }
+    else if (_signupsFilter === 'incomplete') { if (a.onboarded) return false; }
+    else if (_signupsFilter === 'no_stripe') { if (a.stripe_account_id) return false; }
+    else if (_signupsFilter === 'stripe_incomplete') { if (!a.stripe_account_id || a.stripe_onboarded) return false; }
+    if (_signupsQuery) {
+      var q = _signupsQuery.toLowerCase();
+      var hay = ((a.name||'') + ' ' + (a.email||'') + ' ' + (a.stage_name||'')).toLowerCase();
+      if (hay.indexOf(q) === -1) return false;
+    }
+    return true;
+  }
+  function _renderSignups() {
     var tbody = document.getElementById('signups-tbody');
     var countEl = document.getElementById('signups-count');
-    if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="padding:32px;text-align:center;color:#94A3B8">Loading...</td></tr>';
+    if (!tbody) return;
+    var filtered = _signupsData.filter(_signupsMatches);
+    if (countEl) countEl.textContent = filtered.length + ' of ' + _signupsData.length + ' artist' + (_signupsData.length !== 1 ? 's' : '');
+    if (filtered.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="padding:32px;text-align:center;color:#94A3B8">No matching artists.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = filtered.map(function(a) {
+      var d = new Date(a.created_at);
+      var date = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      var time = d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+      var sLabel, sStyle;
+      if (!a.stripe_account_id) { sLabel='Not connected'; sStyle='background:#F1F5F9;color:#64748B'; }
+      else if (a.stripe_onboarded) { sLabel='Active'; sStyle='background:#DCFCE7;color:#16A34A'; }
+      else { sLabel='Incomplete'; sStyle='background:#FEF9C3;color:#A16207'; }
+      return '<tr style="border-top:1px solid #E8EDF5">'
+        + '<td style="padding:10px 14px;font-weight:500">' + _escape(a.name || '—') + '</td>'
+        + '<td style="padding:10px 14px;color:#374151">' + _escape(a.email || '—') + '</td>'
+        + '<td style="padding:10px 14px;color:#64748B">' + _escape(a.stage_name || '—') + '</td>'
+        + '<td style="padding:10px 14px"><span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;'
+        + (a.email_verified ? 'background:#DCFCE7;color:#16A34A' : 'background:#FEF2F2;color:#DC2626') + '">'
+        + (a.email_verified ? 'Yes' : 'No') + '</span></td>'
+        + '<td style="padding:10px 14px"><span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;'
+        + (a.onboarded ? 'background:#DCFCE7;color:#16A34A' : 'background:#FEF9C3;color:#A16207') + '">'
+        + (a.onboarded ? 'Yes' : 'No') + '</span></td>'
+        + '<td style="padding:10px 14px"><span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;' + sStyle + '">' + sLabel + '</span></td>'
+        + '<td style="padding:10px 14px;color:#64748B;font-size:12px">' + date + '<br>' + time + '</td>'
+        + '</tr>';
+    }).join('');
+  }
+  function loadSignups() {
+    var tbody = document.getElementById('signups-tbody');
+    if (tbody) tbody.innerHTML = '<tr><td colspan="7" style="padding:32px;text-align:center;color:#94A3B8">Loading...</td></tr>';
     Dv.api.fetch('/admin/signups', { skipAuthRedirect: true })
-      .then(function(artists) {
-        if (countEl) countEl.textContent = artists.length + ' artist' + (artists.length !== 1 ? 's' : '');
-        if (!tbody) return;
-        if (artists.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="6" style="padding:32px;text-align:center;color:#94A3B8">No signups yet.</td></tr>';
-          return;
-        }
-        tbody.innerHTML = artists.map(function(a) {
-          var d = new Date(a.created_at);
-          var date = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-          var time = d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-          return '<tr style="border-top:1px solid #E8EDF5">'
-            + '<td style="padding:10px 14px;font-weight:500">' + _escape(a.name || '—') + '</td>'
-            + '<td style="padding:10px 14px;color:#374151">' + _escape(a.email || '—') + '</td>'
-            + '<td style="padding:10px 14px;color:#64748B">' + _escape(a.stage_name || '—') + '</td>'
-            + '<td style="padding:10px 14px"><span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;'
-            + (a.email_verified ? 'background:#DCFCE7;color:#16A34A' : 'background:#FEF2F2;color:#DC2626') + '">'
-            + (a.email_verified ? 'Yes' : 'No') + '</span></td>'
-            + '<td style="padding:10px 14px"><span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;'
-            + (a.onboarded ? 'background:#DCFCE7;color:#16A34A' : 'background:#FEF9C3;color:#A16207') + '">'
-            + (a.onboarded ? 'Yes' : 'No') + '</span></td>'
-            + '<td style="padding:10px 14px;color:#64748B;font-size:12px">' + date + '<br>' + time + '</td>'
-            + '</tr>';
-        }).join('');
-      })
-      .catch(function(err) {
-        if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="padding:32px;text-align:center;color:#DC2626">Access denied or error loading signups.</td></tr>';
+      .then(function(artists) { _signupsData = artists || []; _renderSignups(); })
+      .catch(function() {
+        if (tbody) tbody.innerHTML = '<tr><td colspan="7" style="padding:32px;text-align:center;color:#DC2626">Access denied or error loading signups.</td></tr>';
       });
+    var search = document.getElementById('signups-search');
+    if (search && !search._wired) {
+      search._wired = true;
+      search.addEventListener('input', function() { _signupsQuery = search.value.trim(); _renderSignups(); });
+    }
+    var bar = document.getElementById('signups-filters');
+    if (bar && !bar._wired) {
+      bar._wired = true;
+      var chips = bar.querySelectorAll('.sg-chip');
+      chips.forEach(function(chip) {
+        if (chip.dataset.filter === 'all') chip.classList.add('active');
+        chip.addEventListener('click', function() {
+          chips.forEach(function(c) { c.classList.remove('active'); });
+          chip.classList.add('active');
+          _signupsFilter = chip.dataset.filter;
+          _renderSignups();
+        });
+      });
+    }
   }
 
   window.loadSignups = loadSignups;
@@ -3619,88 +3663,64 @@
     });
   }
   // ── Stripe Connect payout onboarding state ──
-  // State labels: not_connected | incomplete | restricted | ready
-  function deriveStripeState(d){
-    if(!d || !d.connected) return 'not_connected';
-    if(!d.details_submitted) return 'incomplete';
-    var reqs = Array.isArray(d.requirements_due) ? d.requirements_due : [];
-    if(!d.charges_enabled || !d.payouts_enabled || reqs.length > 0) return 'restricted';
-    return 'ready';
-  }
+  // Canonical state + view-model from Dv.stripe (see /js/stripe-state.js).
+  // This renderer is a thin binder: no branching on state shape.
   function renderStripeStatus(d){
     var box = document.getElementById('stripe-status-box');
     if(!box) return;
     box.style.display = 'block';
-    var state = deriveStripeState(d);
+    var vm = Dv.stripe.describeState(d);
+
     var badge = document.getElementById('stripe-status-badge');
     var label = document.getElementById('stripe-status-label');
     var sub   = document.getElementById('stripe-status-sub');
     var desc  = document.getElementById('stripe-status-desc');
     var reqs  = document.getElementById('stripe-status-reqs');
     var btn   = document.getElementById('stripe-status-action');
-    reqs.style.display = 'none';
-    reqs.textContent = '';
-    btn.style.display = 'inline-flex';
-    btn.disabled = false;
-    if(state === 'not_connected'){
-      badge.className = 'status-badge error';
-      label.textContent = 'Not connected';
-      sub.textContent = 'Connect Stripe to receive royalty payouts.';
-      desc.textContent = 'You haven\u2019t connected a payout account yet. Connect Stripe to receive your royalties by direct deposit.';
-      btn.textContent = 'Connect payout account';
-    } else if(state === 'incomplete'){
-      badge.className = 'status-badge pending';
-      label.textContent = 'Setup incomplete';
-      sub.textContent = 'Finish your Stripe onboarding to enable payouts.';
-      desc.textContent = 'Your Stripe account was created but onboarding isn\u2019t finished. Complete the remaining steps to unlock payouts.';
-      btn.textContent = 'Continue Stripe setup';
-    } else if(state === 'restricted'){
-      badge.className = 'status-badge pending';
-      label.textContent = 'Under review';
-      sub.textContent = 'Stripe needs more information before payouts can be enabled.';
-      desc.textContent = 'Stripe is reviewing your account or has requested additional information. Once resolved, payouts will be enabled automatically.';
-      var list = (d.requirements_due || []).slice(0,6);
-      if(list.length){
-        reqs.style.display = 'block';
-        reqs.innerHTML = '<b style="color:#0A0A0A">Needed:</b> ' + list.map(function(r){return String(r).replace(/_/g,' ');}).join(', ');
-      }
-      btn.textContent = 'Update Stripe details';
+
+    badge.className = 'status-badge ' + vm.badgeTone;
+    label.textContent = vm.label;
+    sub.textContent = vm.sub;
+    desc.textContent = vm.desc;
+
+    if (vm.requirements.length) {
+      reqs.style.display = 'block';
+      reqs.innerHTML = '<b style="color:#0A0A0A">Needed:</b> ' +
+        vm.requirements.map(function(r){ return Dv.format.escapeHtml(String(r).replace(/_/g,' ')); }).join(', ');
     } else {
-      badge.className = 'status-badge success';
-      label.textContent = 'Ready for payouts';
-      sub.textContent = 'Your Stripe account is connected and ready.';
-      desc.textContent = 'Your payout account is verified and ready to receive royalties. Use the Withdraw button above to initiate a payout.';
+      reqs.style.display = 'none';
+      reqs.textContent = '';
+    }
+
+    if (vm.showAction) {
+      btn.style.display = 'inline-flex';
+      btn.disabled = false;
+      btn.textContent = vm.actionText;
+    } else {
       btn.style.display = 'none';
     }
+
+    // Expose current state so other callers / CSS can react without re-deriving.
+    box.setAttribute('data-stripe-state', vm.state);
   }
   function loadStripeStatus(){
     var box = document.getElementById('stripe-status-box');
     if(!box) return;
     box.style.display = 'block';
     document.getElementById('stripe-status-label').textContent = 'Loading';
-    fetch('/api/stripe/connect/status')
-      .then(function(r){ return r.json().then(function(d){ return { ok:r.ok, d:d }; }); })
-      .then(function(res){
-        if(!res.ok){
-          renderStripeStatus({ connected:false });
-          return;
-        }
-        renderStripeStatus(res.d);
-      })
-      .catch(function(){ renderStripeStatus({ connected:false }); });
+    Dv.stripe.fetchStatus().then(renderStripeStatus);
   }
   function stripeConnectStart(){
     var btn = document.getElementById('stripe-status-action');
     if(btn){ btn.disabled = true; btn.textContent = 'Opening Stripe\u2026'; }
-    fetch('/api/stripe/connect', { method:'POST', headers:{ 'Content-Type':'application/json' } })
-      .then(function(r){ return r.json().then(function(d){ return { ok:r.ok, d:d }; }); })
+    Dv.stripe.startConnect()
       .then(function(res){
-        if(!res.ok || !res.d.url){
+        if(!res || !res.url){
           showToast('We couldn\u2019t connect your payout account right now. Please try again.', 'error');
           if(btn){ btn.disabled = false; btn.textContent = 'Try again'; }
           return;
         }
-        window.location.href = res.d.url;
+        window.location.href = res.url;
       })
       .catch(function(){
         showToast('We couldn\u2019t connect your payout account right now. Please try again.', 'error');
@@ -4301,8 +4321,9 @@
             <button class="notif-panel-mark" id="notif-mark-all" onclick="markAllRead()" style="display:none;">Mark all read</button>
           </div>
           <div id="notif-panel-list">
-            <div id="notif-panel-empty" style="padding:40px 24px;text-align:center;">
-              <div style="font-family:'DM Sans',sans-serif;font-size:14px;font-weight:300;color:#CBD5E1;line-height:1.6;">No notifications yet.</div>
+            <div id="notif-panel-empty" class="empty-state" style="padding:36px 24px">
+              <div class="empty-state-title" style="font-size:17px">You're all caught up.</div>
+              <div class="empty-state-sub" style="margin-bottom:0">We'll let you know the moment royalties, registrations, or payouts move.</div>
             </div>
           </div>
           <div class="notif-panel-footer">
@@ -5034,7 +5055,7 @@
         <div class="sbox" style="margin-bottom:20px">
           <div class="sbox-head"><div class="sbox-title">Payout History</div></div>
           <div class="sbox-body">
-            <div class="empty-state"><div class="empty-state-title">No payouts yet.</div><div class="empty-state-sub">Your payout history will appear here.</div></div>
+            <div class="empty-state"><div class="empty-state-title">No payouts yet.</div><div class="empty-state-sub">Payouts are issued each quarter after royalties are collected and distributed. Your history will appear here once your first payment is processed.</div></div>
           </div>
         </div>
         <div class="sbox">
