@@ -2594,6 +2594,94 @@ function mobGoogleBack() {
   signupStep(1);
 }
 
+// ── Stripe Connect payout onboarding state (mobile) ──
+// States: not_connected | incomplete | restricted | ready
+function mobDeriveStripeState(d){
+  if(!d || !d.connected) return 'not_connected';
+  if(!d.details_submitted) return 'incomplete';
+  var reqs = Array.isArray(d.requirements_due) ? d.requirements_due : [];
+  if(!d.charges_enabled || !d.payouts_enabled || reqs.length > 0) return 'restricted';
+  return 'ready';
+}
+function mobRenderStripeStatus(d){
+  var box = document.getElementById('m-stripe-status-box');
+  if(!box) return;
+  box.style.display = 'block';
+  var state = mobDeriveStripeState(d);
+  var badge = document.getElementById('m-stripe-status-badge');
+  var label = document.getElementById('m-stripe-status-label');
+  var sub   = document.getElementById('m-stripe-status-sub');
+  var desc  = document.getElementById('m-stripe-status-desc');
+  var reqs  = document.getElementById('m-stripe-status-reqs');
+  var btn   = document.getElementById('m-stripe-status-action');
+  reqs.style.display = 'none';
+  reqs.textContent = '';
+  btn.style.display = 'inline-flex';
+  btn.disabled = false;
+  if(state === 'not_connected'){
+    badge.className = 'd-pill error';
+    label.textContent = 'Not connected';
+    sub.textContent = 'Connect Stripe to receive royalties.';
+    desc.textContent = 'You haven\u2019t connected a payout account yet. Connect Stripe to receive royalties by direct deposit.';
+    btn.textContent = 'Connect payout account';
+  } else if(state === 'incomplete'){
+    badge.className = 'd-pill pending';
+    label.textContent = 'Setup incomplete';
+    sub.textContent = 'Finish onboarding to enable payouts.';
+    desc.textContent = 'Your Stripe account was created but onboarding isn\u2019t finished. Complete the remaining steps to unlock payouts.';
+    btn.textContent = 'Continue Stripe setup';
+  } else if(state === 'restricted'){
+    badge.className = 'd-pill pending';
+    label.textContent = 'Under review';
+    sub.textContent = 'Stripe needs more information.';
+    desc.textContent = 'Stripe is reviewing your account or has requested additional information. Once resolved, payouts will be enabled automatically.';
+    var list = (d.requirements_due || []).slice(0,6);
+    if(list.length){
+      reqs.style.display = 'block';
+      reqs.textContent = 'Needed: ' + list.map(function(r){return String(r).replace(/_/g,' ');}).join(', ');
+    }
+    btn.textContent = 'Update Stripe details';
+  } else {
+    badge.className = 'd-pill success';
+    label.textContent = 'Ready';
+    sub.textContent = 'Connected and ready.';
+    desc.textContent = 'Your payout account is verified and ready to receive royalties. Use Withdraw above to initiate a payout.';
+    btn.style.display = 'none';
+  }
+}
+function mobLoadStripeStatus(){
+  var box = document.getElementById('m-stripe-status-box');
+  if(!box) return;
+  box.style.display = 'block';
+  var lbl = document.getElementById('m-stripe-status-label');
+  if(lbl) lbl.textContent = 'Loading';
+  fetch('/api/stripe/connect/status')
+    .then(function(r){ return r.json().then(function(d){ return { ok:r.ok, d:d }; }); })
+    .then(function(res){
+      if(!res.ok){ mobRenderStripeStatus({ connected:false }); return; }
+      mobRenderStripeStatus(res.d);
+    })
+    .catch(function(){ mobRenderStripeStatus({ connected:false }); });
+}
+function mobStripeConnectStart(){
+  var btn = document.getElementById('m-stripe-status-action');
+  if(btn){ btn.disabled = true; btn.textContent = 'Opening Stripe\u2026'; }
+  fetch('/api/stripe/connect', { method:'POST', headers:{ 'Content-Type':'application/json' } })
+    .then(function(r){ return r.json().then(function(d){ return { ok:r.ok, d:d }; }); })
+    .then(function(res){
+      if(!res.ok || !res.d.url){
+        if(btn){ btn.disabled = false; btn.textContent = 'Try again'; }
+        return;
+      }
+      window.location.href = res.d.url;
+    })
+    .catch(function(){
+      if(btn){ btn.disabled = false; btn.textContent = 'Try again'; }
+    });
+}
+window.mobLoadStripeStatus = mobLoadStripeStatus;
+window.mobStripeConnectStart = mobStripeConnectStart;
+
 // ── Payout selection ──
 function dPayout(m){
   ['stripe','paypal'].forEach(p=>document.getElementById('d-'+p)?.classList.remove('selected'));
