@@ -1820,6 +1820,24 @@
       flex-shrink: 0;
     }
     .setup-alert-btn:hover { background: #DC2626; transform: translateY(-1px); }
+    .setup-alert.completed {
+      border-color: #D1D5DB;
+      border-left-color: #10B981;
+      box-shadow: none;
+      opacity: 0.72;
+    }
+    .setup-alert.completed .setup-alert-icon {
+      background: #ECFDF5;
+      border-color: #A7F3D0;
+      color: #10B981;
+    }
+    .setup-alert.completed .setup-alert-title,
+    .setup-alert.completed .setup-alert-body {
+      text-decoration: line-through;
+      text-decoration-color: rgba(10,10,10,0.45);
+      color: #6B7280;
+    }
+    .setup-alert.completed .setup-alert-btn { display: none; }
 
 
     /* ── Currency sign — DM Sans for clean single-line $ ── */
@@ -3348,6 +3366,19 @@
     document.querySelectorAll('.faq-item.open').forEach(i=>i.classList.remove('open'));
     if(!open) el.classList.add('open');
   }
+  function toggleFaqRow(el){
+    const open = el.classList.contains('open');
+    document.querySelectorAll('.faq-row.open').forEach(i=>{
+      i.classList.remove('open');
+      const ans = i.querySelector('.faq-row-a');
+      if(ans) ans.style.maxHeight = '0px';
+    });
+    if(!open){
+      el.classList.add('open');
+      const ans = el.querySelector('.faq-row-a');
+      if(ans) ans.style.maxHeight = ans.scrollHeight + 40 + 'px';
+    }
+  }
 
 
   function toggleMobileNav() {
@@ -4279,14 +4310,30 @@
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // PROFILE SAVE
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  var SETUP_HIDE_MS = 2 * 24 * 60 * 60 * 1000; // 2 days
   function markSetupComplete(kind) {
+    try { localStorage.setItem('dv_setup_' + kind, '1'); } catch(e) {}
+    try {
+      if (!localStorage.getItem('dv_setup_' + kind + '_at')) {
+        localStorage.setItem('dv_setup_' + kind + '_at', String(Date.now()));
+      }
+    } catch(e) {}
+    var doneAt = parseInt(localStorage.getItem('dv_setup_' + kind + '_at') || '0', 10);
+    var expired = doneAt && (Date.now() - doneAt) > SETUP_HIDE_MS;
     var alertEl = document.getElementById('setup-alert-' + kind);
-    if (alertEl) alertEl.style.display = 'none';
+    if (alertEl) {
+      if (expired) {
+        alertEl.style.display = 'none';
+      } else {
+        alertEl.classList.add('completed');
+        var btn = alertEl.querySelector('.setup-alert-btn');
+        if (btn) btn.disabled = true;
+      }
+    }
     if (kind === 'profile') {
       var row = document.getElementById('setup-row-profile');
-      if (row) row.style.display = 'none';
+      if (row && expired) row.style.display = 'none';
     }
-    try { localStorage.setItem('dv_setup_' + kind, '1'); } catch(e) {}
   }
   function applySetupCompletion() {
     try {
@@ -4298,13 +4345,14 @@
         markSetupComplete('profile');
       }
       if (localStorage.getItem('dv_setup_w9') === '1') markSetupComplete('w9');
-      // Stamp completion time the first time profile is done
-      if (localStorage.getItem('dv_setup_profile') === '1' && !localStorage.getItem('dv_setup_done_at')) {
-        localStorage.setItem('dv_setup_done_at', String(Date.now()));
-      }
-      // Hide entire Get Started box 24h after profile completion
-      var doneAt = parseInt(localStorage.getItem('dv_setup_done_at') || '0', 10);
-      if (doneAt && (Date.now() - doneAt) > 24 * 60 * 60 * 1000) {
+      // Hide entire Get Started box once all items have been completed
+      // for more than the 2-day grace period.
+      var pAt = parseInt(localStorage.getItem('dv_setup_profile_at') || '0', 10);
+      var wAt = parseInt(localStorage.getItem('dv_setup_w9_at') || '0', 10);
+      var allExpired = pAt && wAt
+        && (Date.now() - pAt) > SETUP_HIDE_MS
+        && (Date.now() - wAt) > SETUP_HIDE_MS;
+      if (allExpired) {
         var box = document.getElementById('get-started-box');
         if (box) box.style.display = 'none';
       }

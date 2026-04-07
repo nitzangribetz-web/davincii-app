@@ -1026,6 +1026,11 @@ footer.m-footer{
   padding:13px 16px;border-bottom:1px solid var(--border-lt);
 }
 .d-setup-row:last-child{border-bottom:none}
+.d-setup-row.completed .d-setup-lbl{text-decoration:line-through;color:#94A3B8}
+.d-setup-row.completed .d-setup-cta{display:none}
+.d-alert.completed{opacity:0.7;border-left-color:#10B981}
+.d-alert.completed .d-alert-title,.d-alert.completed .d-alert-body{text-decoration:line-through;color:#6B7280}
+.d-alert.completed .d-alert-btn,.d-alert.completed button{display:none}
 .d-setup-lbl{font-family:var(--sans);font-size:13px;font-weight:400;color:var(--slate)}
 .d-setup-cta{
   font-family:var(--sans);font-size:10.5px;font-weight:700;
@@ -2445,6 +2450,11 @@ footer.m-footer{
 </div>
 
 <script>
+// Take manual control of scroll restoration so back/forward navigation
+// always lands at the top of the landing page (otherwise the browser
+// snaps to the prior scroll position, e.g. the pricing section).
+try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch(_){}
+
 // ── AUTH BOOTSTRAP ──
 // Same linear flow as desktop: detect → activate → validate → fallback
 (function() {
@@ -2617,12 +2627,26 @@ function mobActivateDashboard(artist) {
 //   - profile: artist.stage_name + artist.pro present (or dv_setup_profile flag)
 //   - w9     : dv_setup_w9 flag (set after a successful W-9 submit on either device)
 //   - song   : songs count > 0 from /api/songs (or dv_setup_song flag)
+var MOB_SETUP_HIDE_MS = 2 * 24 * 60 * 60 * 1000; // 2 days
 function mobMarkSetupComplete(kind) {
-  var alertEl = document.getElementById('mob-alert-' + kind);
-  if (alertEl) alertEl.style.display = 'none';
-  var rowEl = document.getElementById('mob-setup-row-' + kind);
-  if (rowEl) rowEl.style.display = 'none';
   try { localStorage.setItem('dv_setup_' + kind, '1'); } catch(_){}
+  try {
+    if (!localStorage.getItem('dv_setup_' + kind + '_at')) {
+      localStorage.setItem('dv_setup_' + kind + '_at', String(Date.now()));
+    }
+  } catch(_){}
+  var doneAt = parseInt(localStorage.getItem('dv_setup_' + kind + '_at') || '0', 10);
+  var expired = doneAt && (Date.now() - doneAt) > MOB_SETUP_HIDE_MS;
+  var alertEl = document.getElementById('mob-alert-' + kind);
+  if (alertEl) {
+    if (expired) alertEl.style.display = 'none';
+    else alertEl.classList.add('completed');
+  }
+  var rowEl = document.getElementById('mob-setup-row-' + kind);
+  if (rowEl) {
+    if (expired) rowEl.style.display = 'none';
+    else rowEl.classList.add('completed');
+  }
 }
 function mobApplySetupCompletion() {
   var artist = {};
