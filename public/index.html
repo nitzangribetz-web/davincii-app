@@ -103,6 +103,35 @@
     }
     .nav-lnk:hover { color:#fff; }
     .nav-right { display:flex; align-items:center; gap:10px; }
+    /* Authed nav variant — shown when user has a session, hides Login/Get-started */
+    .nav-right.authed .nav-guest { display:none !important; }
+    .nav-right .nav-authed { display:none; align-items:center; gap:12px; }
+    .nav-right.authed .nav-authed { display:flex; }
+    .nav-dash-btn {
+      padding:9px 18px; font-family:'Inter',sans-serif;
+      font-size:13px; font-weight:600; color:#fff;
+      background:rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.14);
+      border-radius:8px; cursor:pointer; letter-spacing:0.01em;
+      transition:background 0.18s, border-color 0.18s;
+    }
+    .nav-dash-btn:hover { background:rgba(255,255,255,0.12); border-color:rgba(255,255,255,0.28); }
+    .nav-bell, .nav-avatar {
+      width:36px; height:36px; border-radius:50%;
+      background:rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.14);
+      display:flex; align-items:center; justify-content:center;
+      color:rgba(255,255,255,0.78); cursor:pointer; position:relative;
+      transition:background 0.18s, border-color 0.18s;
+    }
+    .nav-bell:hover, .nav-avatar:hover { background:rgba(255,255,255,0.12); border-color:rgba(255,255,255,0.28); }
+    .nav-bell svg, .nav-avatar svg { width:17px; height:17px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+    .nav-bell-dot {
+      position:absolute; top:6px; right:7px;
+      min-width:8px; height:8px; padding:0 3px;
+      border-radius:6px; background:#3B82F6;
+      border:2px solid #050C1A;
+    }
     .btn-nav-ghost {
       padding:8px 15px; font-size:13.5px; font-weight:400;
       color:rgba(255,255,255,0.50); background:none; border:none; cursor:pointer; transition:color 0.18s;
@@ -2461,9 +2490,19 @@
     <button class="nav-lnk" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'})">Pricing</button>
     <button class="nav-lnk" onclick="document.getElementById('faq').scrollIntoView({behavior:'smooth'})">FAQ</button>
   </div>
-  <div class="nav-right">
-    <button class="btn-nav-ghost" onclick="go('login')">Login</button>
-    <button class="btn-primary" onclick="go('signup')">Get started</button>
+  <div class="nav-right" id="landing-nav-right">
+    <button class="btn-nav-ghost nav-guest" onclick="go('login')">Login</button>
+    <button class="btn-primary nav-guest" onclick="go('signup')">Get started</button>
+    <div class="nav-authed">
+      <button class="nav-dash-btn" onclick="enterDashboardFromLanding()">Dashboard</button>
+      <button class="nav-bell" aria-label="Notifications" onclick="enterDashboardFromLanding('notifications')">
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="nav-bell-dot"></span>
+      </button>
+      <button class="nav-avatar" aria-label="Account" onclick="enterDashboardFromLanding('settings')">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+      </button>
+    </div>
     <!-- Hamburger — mobile only -->
     <button class="nav-hamburger" id="nav-hamburger" onclick="toggleMobileNav()" aria-label="Menu">
       <span></span><span></span><span></span>
@@ -2786,6 +2825,12 @@
   // OAuth redirects run immediately (they leave the page — no DOM needed).
   // Everything else waits for DOMContentLoaded so all screen elements exist.
   (function() {
+    // [LOGIN-PERF] temporary
+    window.__dvPerf = { tScriptStart: Date.now() };
+    try {
+      var _s = parseInt(sessionStorage.getItem('dv_perf_submit') || '0', 10);
+      if (_s) console.log('[LOGIN-PERF][frontend] index.script-start at', window.__dvPerf.tScriptStart, '(' + (window.__dvPerf.tScriptStart - _s) + 'ms since login.submit)');
+    } catch(_){}
     var params = new URLSearchParams(window.location.search);
 
     // Step 1: Legacy OAuth redirect interception (code flow is now handled on the backend)
@@ -2794,16 +2839,40 @@
 
     // Steps 2-4 need DOM elements — wait for them
     document.addEventListener('DOMContentLoaded', function() {
+      // [LOGIN-PERF]
+      window.__dvPerf.tDcl = Date.now();
+      try {
+        var _s = parseInt(sessionStorage.getItem('dv_perf_submit') || '0', 10);
+        if (_s) console.log('[LOGIN-PERF][frontend] index.DOMContentLoaded at', window.__dvPerf.tDcl, '(' + (window.__dvPerf.tDcl - _s) + 'ms since submit, ' + (window.__dvPerf.tDcl - window.__dvPerf.tScriptStart) + 'ms since script-start)');
+      } catch(_){}
       if (params.get('error')) { removeBootCSS(); window.history.replaceState({}, '', '/'); return; }
 
-      // Step 2: Token in URL (arriving from auth-complete.html or oauth-callback)
-      var token = params.get('token');
+      // Step 2: Artist payload in URL (arriving from POST /api/auth/login redirect or oauth-callback).
+      // Auth itself lives in the HttpOnly cookie set by the backend; the URL only carries
+      // the artist info needed to render the dashboard immediately without a /me round-trip.
       var artistParam = params.get('artist');
-      if (token && artistParam) {
+      // [LOGIN-PERF]
+      if (artistParam) {
+        try {
+          var _s = parseInt(sessionStorage.getItem('dv_perf_submit') || '0', 10);
+          if (_s) console.log('[LOGIN-PERF][frontend] index.onAuthSuccess(start) at', Date.now(), '(' + (Date.now() - _s) + 'ms since submit — END-TO-END login latency)');
+          sessionStorage.removeItem('dv_perf_submit');
+        } catch(_){}
+      }
+      if (artistParam) {
         try {
           var artist;
           try { artist = JSON.parse(artistParam); } catch(_) { artist = JSON.parse(decodeURIComponent(artistParam)); }
           localStorage.setItem('dv_artist', JSON.stringify(artist));
+          if (params.get('signup') === '1') {
+            try { localStorage.setItem('dv_just_signed_up', '1'); } catch(_){}
+          }
+
+          // Strip the artist payload from the URL bar so a refresh hits a clean /
+          try {
+            var clean = window.location.pathname;
+            window.history.replaceState({}, '', clean);
+          } catch(_){}
 
           // Google OAuth signup — redirect to completion page
           if (params.get('google_signup') === '1') {
@@ -2819,17 +2888,36 @@
         return;
       }
 
-      // Step 3: Token in localStorage (returning user or page refresh)
+      // Step 3: Returning user / page refresh — cached artist in localStorage.
+      // Cookie auth handles the actual authentication; we only need cached artist
+      // to render either the landing page (logged-in nav) or the dashboard.
       var savedArtist = localStorage.getItem('dv_artist');
-      if (savedToken && savedArtist) {
-        // Immediately activate dashboard from cached data (no flash)
-        try {
-          var cachedArtist = JSON.parse(savedArtist);
+      if (savedArtist) {
+        var cachedArtist = null;
+        try { cachedArtist = JSON.parse(savedArtist); } catch(e) { console.error('[Auth] cached artist parse error:', e); }
+        // If the URL points to a dashboard route, render the dashboard.
+        // Otherwise show the landing page in its logged-in state (Dashboard btn + bell + avatar).
+        var wantsDashboard = /^\/dashboard(\/|$)/.test(window.location.pathname);
+        if (wantsDashboard && cachedArtist) {
           onAuthSuccess(cachedArtist, false);
-        } catch(e) { console.error('[Auth] cached artist parse error:', e); }
+        } else {
+          removeBootCSS();
+          if (cachedArtist) updateArtistUI(cachedArtist);
+          markLandingAsAuthed();
+          // Make sure the landing screen is the visible one
+          document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+          document.getElementById('screen-landing').classList.add('active');
+          // Route to a sub-screen if the URL says so (login/signup/legal)
+          var pubScreen = getScreenFromURL();
+          if (pubScreen && pubScreen !== 'landing') go(pubScreen, true);
+        }
         // Validate session in background via shared Dv.api.
         // Only log out if server confirms 401/403; tolerate 5xx/network.
+        // [LOGIN-PERF]
+        var _tMe = Date.now();
+        console.log('[LOGIN-PERF][frontend] /auth/me background fetch start at', _tMe);
         Dv.api.fetch('/auth/me', { skipAuthRedirect: true, raw: true })
+          .then(function(r){ console.log('[LOGIN-PERF][frontend] /auth/me response in ' + (Date.now() - _tMe) + 'ms'); return r; })
           .then(function(r) {
             if (r.ok) return r.json().then(function(data){ return (data && data.artist) || data; });
             if (r.status === 401 || r.status === 403) throw new Error('unauthorized');
@@ -2844,6 +2932,7 @@
           .catch(function(err) {
             if (err && err.message === 'unauthorized') {
               Dv.auth.clearStoredArtist();
+              markLandingAsGuest();
               removeBootCSS();
               document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
               document.getElementById('screen-landing').classList.add('active');
@@ -2866,7 +2955,31 @@
     if (bootStyle) bootStyle.remove();
   }
 
+  // Toggle the landing page's top-right nav into the logged-in state
+  // (Dashboard btn + bell + avatar instead of Login / Get started).
+  function markLandingAsAuthed() {
+    var nr = document.getElementById('landing-nav-right');
+    if (nr) nr.classList.add('authed');
+  }
+  function markLandingAsGuest() {
+    var nr = document.getElementById('landing-nav-right');
+    if (nr) nr.classList.remove('authed');
+  }
+
+  // From the landing page (logged in), open the dashboard at a specific sub-page.
+  function enterDashboardFromLanding(page) {
+    var savedArtist = localStorage.getItem('dv_artist');
+    if (!savedArtist) { go('login'); return; }
+    try {
+      var artist = JSON.parse(savedArtist);
+      onAuthSuccess(artist, false);
+      if (page) showDashPage(page);
+    } catch(_) { go('login'); }
+  }
+  window.enterDashboardFromLanding = enterDashboardFromLanding;
+
   function onAuthSuccess(artist, isSignup) {
+    markLandingAsAuthed();
     updateArtistUI(artist);
     // Activate dashboard screen
     document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
@@ -2892,6 +3005,11 @@
     window.history.replaceState({ screen: 'dashboard', page: initialPage }, '', url);
     showDashPage(initialPage, true);
     window.scrollTo(0, 0);
+    // [LOGIN-PERF]
+    try {
+      var _now = Date.now();
+      console.log('[LOGIN-PERF][frontend] dashboard.rendered at', _now, (window.__dvPerf && window.__dvPerf.tDcl) ? '(' + (_now - window.__dvPerf.tDcl) + 'ms after DCL)' : '');
+    } catch(_){}
   }
 
   function logoClick() {
