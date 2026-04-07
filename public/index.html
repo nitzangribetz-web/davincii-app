@@ -4277,7 +4277,13 @@
   }
   function applySetupCompletion() {
     try {
-      if (localStorage.getItem('dv_setup_profile') === '1') markSetupComplete('profile');
+      // Source of truth: cached artist record. If stage_name + pro are populated,
+      // the profile is considered complete regardless of which device set it.
+      var artist = {};
+      try { artist = JSON.parse(localStorage.getItem('dv_artist') || '{}'); } catch(_){}
+      if ((artist && artist.stage_name && artist.pro) || localStorage.getItem('dv_setup_profile') === '1') {
+        markSetupComplete('profile');
+      }
       if (localStorage.getItem('dv_setup_w9') === '1') markSetupComplete('w9');
       // Stamp completion time the first time profile is done
       if (localStorage.getItem('dv_setup_profile') === '1' && !localStorage.getItem('dv_setup_done_at')) {
@@ -4288,6 +4294,16 @@
       if (doneAt && (Date.now() - doneAt) > 24 * 60 * 60 * 1000) {
         var box = document.getElementById('get-started-box');
         if (box) box.style.display = 'none';
+      }
+      // Live-check W-9 + songs from the API so the desktop reflects mobile actions
+      if (window.Dv && Dv.api) {
+        Dv.api.fetch('/payouts/w9', { skipAuthRedirect: true })
+          .then(function(d) {
+            if (d && (d.submitted || d.status === 'submitted' || d.status === 'pending' || d.status === 'approved' || d.legal_name)) {
+              try { localStorage.setItem('dv_setup_w9', '1'); } catch(_){}
+              markSetupComplete('w9');
+            }
+          }).catch(function(){});
       }
     } catch(e) {}
   }

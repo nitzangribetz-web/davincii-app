@@ -2683,8 +2683,14 @@ function showDP(page, skipPush){
     window.history.pushState({ screen:'dashboard', page: page }, '', url);
   }
   if(page === 'signups') mobLoadSignups();
-  if(page === 'payouts') { try { mobLoadStripeStatus(); } catch(e) {} }
+  if(page === 'payouts') { try { mobLoadStripeStatus(); } catch(e) {} try { mobLoadW9Status(); } catch(e) {} }
   if(page === 'add-song') mobResetAddSong();
+  if(page === 'overview') {
+    try { mobApplySetupCompletion(); } catch(e) {}
+    try { mobLoadSongs(); } catch(e) {}
+    try { mobLoadW9Status(); } catch(e) {}
+  }
+  if(page === 'catalog') { try { mobLoadSongs(); } catch(e) {} }
 }
 
 function getDashPageFromURL(){
