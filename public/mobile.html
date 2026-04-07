@@ -691,6 +691,17 @@ footer.m-footer{
 .m-sbar-line{flex:1;height:1px;background:var(--border-lt);margin:0 6px}
 .m-sbar-line.done{background:var(--blue)}
 .m-signup-panel{animation:fadeUp 0.22s ease}
+.pw-strength{margin-top:-2px;margin-bottom:14px}
+.pw-strength-bar{height:4px;border-radius:2px;background:rgba(255,255,255,0.08);overflow:hidden;margin-bottom:8px}
+.pw-strength-fill{height:100%;width:0;border-radius:2px;transition:width 0.3s, background 0.3s}
+.pw-strength-fill.weak{width:25%;background:#EF4444}
+.pw-strength-fill.fair{width:50%;background:#F59E0B}
+.pw-strength-fill.good{width:75%;background:#10B981}
+.pw-strength-fill.strong{width:100%;background:#059669}
+.pw-reqs{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:3px 12px}
+.pw-reqs li{font-family:'DM Sans',sans-serif;font-size:11px;font-weight:400;color:#94A3B8;display:flex;align-items:center;gap:5px;transition:color 0.2s}
+.pw-reqs li.met{color:#10B981}
+.pw-reqs li .pw-icon{font-size:10px}
 
 /* Agreement box */
 .m-agr{
@@ -1770,8 +1781,18 @@ footer.m-footer{
         <div style="height:12px"></div>
         <input class="field" type="text" name="artist_name" id="mob-sf-artist" placeholder="Artist / stage name" required>
         <input class="field" type="email" name="email" id="mob-sf-email" placeholder="Email address" required>
-        <input class="field" type="password" name="password" id="mob-sf-pass" placeholder="Create a password" required>
-        <input class="field" type="password" name="confirm_password" id="mob-sf-confirm" placeholder="Confirm password" required>
+        <input class="field" type="password" name="password" id="mob-sf-pass" placeholder="Create a password" required minlength="8" oninput="mobPwStrength(this.value)">
+        <div class="pw-strength" id="mob-pw-strength" style="display:none">
+          <div class="pw-strength-bar"><div class="pw-strength-fill" id="mob-pw-fill"></div></div>
+          <ul class="pw-reqs">
+            <li id="mob-req-len"><span class="pw-icon">&#9675;</span> 8+ characters</li>
+            <li id="mob-req-upper"><span class="pw-icon">&#9675;</span> Uppercase</li>
+            <li id="mob-req-lower"><span class="pw-icon">&#9675;</span> Lowercase</li>
+            <li id="mob-req-num"><span class="pw-icon">&#9675;</span> Number</li>
+            <li id="mob-req-special"><span class="pw-icon">&#9675;</span> Special char</li>
+          </ul>
+        </div>
+        <input class="field" type="password" name="confirm_password" id="mob-sf-confirm" placeholder="Confirm password" required minlength="8">
         <div class="m-agree-row">
           <input type="checkbox" id="mob-agree" required>
           <label for="mob-agree">I agree to Davincii's <a onclick="go('terms')">Terms</a> and <a onclick="go('privacy')">Privacy Policy</a></label>
@@ -2863,6 +2884,21 @@ function signupStep(s){
 }
 function signupBack(){
   go('landing');
+}
+function mobPwStrength(v){
+  var wrap=document.getElementById('mob-pw-strength');
+  var fill=document.getElementById('mob-pw-fill');
+  if(!wrap||!fill) return;
+  wrap.style.display = v && v.length>0 ? 'block' : 'none';
+  var hasLen=v.length>=8, hasUpper=/[A-Z]/.test(v), hasLower=/[a-z]/.test(v), hasNum=/[0-9]/.test(v), hasSpecial=/[^A-Za-z0-9]/.test(v);
+  function setReq(id,met){var el=document.getElementById(id);if(!el) return;el.classList.toggle('met',met);var ic=el.querySelector('.pw-icon');if(ic) ic.textContent = met ? '\u2713' : '\u25CB';}
+  setReq('mob-req-len',hasLen);setReq('mob-req-upper',hasUpper);setReq('mob-req-lower',hasLower);setReq('mob-req-num',hasNum);setReq('mob-req-special',hasSpecial);
+  var score=[hasLen,hasUpper,hasLower,hasNum,hasSpecial].filter(Boolean).length;
+  fill.className='pw-strength-fill';
+  if(score<=1) fill.classList.add('weak');
+  else if(score===2) fill.classList.add('fair');
+  else if(score===3||score===4) fill.classList.add('good');
+  else if(score===5) fill.classList.add('strong');
 }
 function mobValidateSignup(){
   var errEl=document.getElementById('mob-signup-error');
