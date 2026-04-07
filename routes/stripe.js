@@ -1,10 +1,38 @@
 const express = require('express');
+const jwt = require('jsonwebtoken');
 const router = express.Router();
 const pool = require('../db/pool');
 const auth = require('../middleware/auth');
 
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const APP_URL = process.env.APP_URL || 'https://davincii-app-production-89cc.up.railway.app';
+
+// ── Stripe refresh token helpers ──────────────────────────────────────────────
+// The Stripe onboarding refresh_url is opened by Stripe as a top-level browser
+// navigation that may not carry our auth cookie (different browser, expired
+// session, SameSite restrictions on some flows). To avoid relying on the
+// user's session at that moment, we embed a short signed token in the
+// refresh URL that binds it to a specific Stripe account id.
+function signStripeRefreshToken(stripeAccountId) {
+  return jwt.sign(
+    { purpose: 'stripe_refresh', sa: stripeAccountId },
+    process.env.JWT_SECRET,
+    { expiresIn: '30d' }
+  );
+}
+function verifyStripeRefreshToken(token) {
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (decoded.purpose !== 'stripe_refresh' || !decoded.sa) return null;
+    return decoded.sa;
+  } catch (e) {
+    return null;
+  }
+}
+function buildRefreshUrl(stripeAccountId) {
+  const sid = signStripeRefreshToken(stripeAccountId);
+  return `${APP_URL}/api/stripe/connect/refresh?sid=${encodeURIComponent(sid)}`;
+}
 
 // ── POST /api/stripe/connect ──────────────────────────────────────────────────
 // Creates (or re-fetches) a Stripe Connect Express account and returns the
@@ -34,7 +62,7 @@ router.post('/connect', auth, async (req, res) => {
 
     const accountLink = await stripe.accountLinks.create({
       account: accountId,
-      refresh_url: `${APP_URL}/api/stripe/connect/refresh`,
+      refresh_url: buildRefreshUrl(accountId),
       return_url: `${APP_URL}/?stripe_connected=true`,
       type: 'account_onboarding',
     });
@@ -47,26 +75,67 @@ router.post('/connect', auth, async (req, res) => {
 });
 
 // ── GET /api/stripe/connect/refresh ──────────────────────────────────────────
-// Stripe calls this if the onboarding link expires. Re-generate and redirect.
-router.get('/connect/refresh', auth, async (req, res) => {
+// Stripe opens this URL as a top-level browser navigation if the onboarding
+// link expires. It does NOT go through the auth middleware, because the user
+// may not have a valid session cookie at that moment (different browser,
+// cookie cleared, SameSite redirect, etc.). Instead the URL carries a signed
+// `sid` token that binds it to a specific Stripe account id; we verify the
+// signature and then re-issue an account link.
+router.get('/connect/refresh', async (req, res) => {
   try {
+    // Primary path: verify the signed sid token embedded in the URL.
+    let accountId = null;
+    if (req.query.sid) {
+      accountId = verifyStripeRefreshToken(String(req.query.sid));
+    }
+
+    // Fallback path: if no (or invalid) sid, try to resolve the artist from
+    // their current session cookie / Bearer header. This keeps older links
+    // working for logged-in users.
+    if (!accountId) {
+      const fallbackToken =
+        (req.cookies && req.cookies.dv_token) ||
+        (req.headers['authorization'] || '').split(' ')[1];
+      if (fallbackToken && fallbackToken !== 'null' && fallbackToken !== 'undefined') {
+        try {
+          const decoded = jwt.verify(fallbackToken, process.env.JWT_SECRET);
+          if (decoded && decoded.id) {
+            const { rows } = await pool.query(
+              'SELECT stripe_account_id FROM artists WHERE id = $1',
+              [decoded.id]
+            );
+            accountId = rows[0]?.stripe_account_id || null;
+          }
+        } catch (_) { /* invalid token — fall through */ }
+      }
+    }
+
+    if (!accountId) {
+      // No way to identify the artist — send them to the payouts page so
+      // they can re-initiate the Connect flow from a logged-in context.
+      return res.redirect(`${APP_URL}/dashboard/payouts?stripe_error=refresh_unauthorized`);
+    }
+
+    // Confirm the account still exists in our DB (defense in depth:
+    // a signed sid whose account was since disconnected should not work).
     const { rows } = await pool.query(
-      'SELECT stripe_account_id FROM artists WHERE id = $1',
-      [req.artist.id]
+      'SELECT id FROM artists WHERE stripe_account_id = $1',
+      [accountId]
     );
-    const accountId = rows[0]?.stripe_account_id;
-    if (!accountId) return res.redirect(`${APP_URL}/?stripe_error=no_account`);
+    if (rows.length === 0) {
+      return res.redirect(`${APP_URL}/dashboard/payouts?stripe_error=no_account`);
+    }
 
     const accountLink = await stripe.accountLinks.create({
       account: accountId,
-      refresh_url: `${APP_URL}/api/stripe/connect/refresh`,
+      refresh_url: buildRefreshUrl(accountId),
       return_url: `${APP_URL}/?stripe_connected=true`,
       type: 'account_onboarding',
     });
     res.redirect(accountLink.url);
   } catch (err) {
     console.error('[stripe/refresh]', err.message);
-    res.redirect(`${APP_URL}/?stripe_error=refresh_failed`);
+    res.redirect(`${APP_URL}/dashboard/payouts?stripe_error=refresh_failed`);
   }
 });
 
