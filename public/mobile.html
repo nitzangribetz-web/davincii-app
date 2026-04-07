@@ -2566,8 +2566,12 @@ function mobEnterDashboard(page) {
   var saved = null;
   try { saved = JSON.parse(localStorage.getItem('dv_artist') || 'null'); } catch(_) {}
   if (!saved) { go('login'); return; }
+  // Push a new history entry so the browser Back button returns to the
+  // landing-while-authed view instead of skipping past it.
+  var target = (page && page !== 'overview') ? '/' + page : '/dashboard';
+  try { window.history.pushState({ screen: 'dashboard', page: page || 'overview', fromLanding: true }, '', target); } catch(_){}
   mobActivateDashboard(saved);
-  if (page && page !== 'overview') { try { showDP(page); } catch(_){} }
+  if (page && page !== 'overview') { try { showDP(page, true); } catch(_){} }
 }
 window.mobEnterDashboard = mobEnterDashboard;
 
@@ -2705,6 +2709,20 @@ window.addEventListener('popstate', function(e) {
   }
   var loggedIn = false;
   try { loggedIn = !!localStorage.getItem('dv_artist'); } catch(_) {}
+  // If the user is going back to the landing page (/) while authed,
+  // restore the landing-while-authed view rather than re-opening the dashboard.
+  if (loggedIn && (location.pathname === '/' || location.pathname === '/index.html' || location.pathname === '/mobile.html')) {
+    document.body.classList.remove('dashboard-active');
+    document.body.style.background = '';
+    document.body.style.color = '';
+    document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+    document.getElementById('screen-landing').classList.add('active');
+    try { mobMarkLandingAuthed(); } catch(_){}
+    try { mobUpdateArtistUI(JSON.parse(localStorage.getItem('dv_artist') || '{}')); } catch(_){}
+    try { mobSyncNotifDot(); } catch(_){}
+    window.scrollTo(0, 0);
+    return;
+  }
   if (loggedIn) {
     var dashScreen = document.getElementById('screen-dashboard');
     if (!dashScreen || !dashScreen.classList.contains('active')) {
