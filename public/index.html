@@ -1099,13 +1099,15 @@
     .avatar-wrap { position: relative; }
     .avatar {
       width: 34px; height: 34px; border-radius: 50%;
-      background: linear-gradient(135deg, #2563EB, #1D4ED8);
+      background: rgba(255,255,255,0.06);
       display: flex; align-items: center; justify-content: center;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 12px; font-weight: 700; color: #fff;
+      color: rgba(255,255,255,0.75);
       cursor: pointer; user-select: none;
       border: 1.5px solid rgba(255,255,255,0.12);
+      transition: background 0.18s, border-color 0.18s;
     }
+    .avatar:hover { background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.20); }
+    .avatar svg { width: 18px; height: 18px; display: block; }
     .avatar-dropdown {
       display: none; position: absolute; right: 0; top: calc(100% + 10px);
       width: 220px; background: #fff;
@@ -2925,10 +2927,7 @@
   function updateArtistUI(artist) {
     var displayName = artist.stage_name || artist.name || artist.email || '';
     var name = artist.name || artist.email || '';
-    var initials = displayName.split(' ').map(function(w) { return w[0]; }).join('').toUpperCase().slice(0,2);
     document.querySelectorAll('.artist-display-name').forEach(function(el) { el.textContent = displayName; });
-    var avatar = document.getElementById('avatar-initials');
-    if (avatar) avatar.textContent = initials || '—';
     var ddName = document.getElementById('dropdown-artist-name');
     if (ddName) ddName.textContent = displayName;
     var ddEmail = document.getElementById('dropdown-artist-email');
@@ -4076,7 +4075,9 @@
         </div>
       </div>
       <div class="avatar-wrap" id="avatar-wrap">
-        <div class="avatar" onclick="toggleAvatarMenu()">SW</div>
+        <div class="avatar" onclick="toggleAvatarMenu()" aria-label="Account">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+        </div>
         <div class="avatar-dropdown">
           <div class="avatar-dropdown-header">
             <div class="avatar-dropdown-name">SwuM</div>
