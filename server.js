@@ -3,6 +3,7 @@ const cors = require('cors');
 const path = require('path');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const cookieParser = require('cookie-parser');
 require('dotenv').config();
 
 const migrate = require('./db/migrate');
@@ -51,6 +52,7 @@ app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
 const publicDir = path.resolve(__dirname, 'public');
 
 // Mobile detection — must run BEFORE express.static so it intercepts '/' requests

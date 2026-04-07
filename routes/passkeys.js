@@ -177,7 +177,14 @@ router.post('/login/verify', async (req, res) => {
       { expiresIn: '7d' }
     );
 
-    res.json({ verified: true, token, artist });
+    res.cookie('dv_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: '/',
+    });
+    res.json({ verified: true, artist });
   } catch (err) {
     console.error('Passkey login verify error:', err.message);
     res.status(500).json({ error: 'Failed to verify passkey authentication' });

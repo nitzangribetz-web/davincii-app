@@ -7,6 +7,22 @@ const pool = require('../db/pool');
 const supabase = require('../db/supabase');
 const { Resend } = require('resend');
 
+// HttpOnly cookie helpers — primary auth transport
+const COOKIE_NAME = 'dv_token';
+const COOKIE_OPTS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'lax',
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+  path: '/',
+};
+function setAuthCookie(res, token) {
+  res.cookie(COOKIE_NAME, token, COOKIE_OPTS);
+}
+function clearAuthCookie(res) {
+  res.clearCookie(COOKIE_NAME, { ...COOKIE_OPTS, maxAge: undefined });
+}
+
 // Send signup notification email to admin
 async function sendSignupNotification({ name, email, method }) {
   try {
@@ -230,6 +246,7 @@ router.get('/google/callback', async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
+    setAuthCookie(res, token);
     const artistPayload = encodeURIComponent(JSON.stringify({
       id: artist.id, name: artist.name, email: artist.email, stage_name: artist.stage_name || null, is_admin: !!artist.is_admin
     }));
@@ -237,10 +254,10 @@ router.get('/google/callback', async (req, res) => {
     // Redirect based on profile completeness
     if (!artist.stage_name) {
       console.log('[Google callback] Profile incomplete, redirecting to complete-profile');
-      res.redirect(`/?token=${token}&artist=${artistPayload}&google_signup=1`);
+      res.redirect(`/?artist=${artistPayload}&google_signup=1`);
     } else {
       console.log('[Google callback] Profile complete, redirecting to dashboard');
-      res.redirect(`/?token=${token}&artist=${artistPayload}`);
+      res.redirect(`/?artist=${artistPayload}`);
     }
   } catch (err) {
     console.error('[Google callback] FAILED:', err.message, err.stack);
@@ -302,11 +319,12 @@ router.get('/callback', async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
+    setAuthCookie(res, token);
     const artistPayload = encodeURIComponent(JSON.stringify({ id: artist.id, name: artist.name, email: artist.email, stage_name: artist.stage_name || null }));
     if (!artist.stage_name) {
-      res.redirect(`/auth-complete.html?token=${token}&artist=${artistPayload}&google_signup=1`);
+      res.redirect(`/auth-complete.html?artist=${artistPayload}&google_signup=1`);
     } else {
-      res.redirect(`/auth-complete.html?token=${token}&artist=${artistPayload}`);
+      res.redirect(`/auth-complete.html?artist=${artistPayload}`);
     }
   } catch (err) {
     console.error('[OAuth callback] FAILED:', err.message);
@@ -318,19 +336,20 @@ router.get('/callback', async (req, res) => {
 // Redirects directly to / (not auth-complete.html) so Safari can anchor
 // the "Save Password?" prompt on the destination page without an intermediate
 // JavaScript redirect killing it.
-function authSuccessRedirect(artist, isSignup) {
+function authSuccessRedirect(res, artist, isSignup) {
   const token = jwt.sign(
-    { id: artist.id, email: artist.email, name: artist.name },
+    { id: artist.id, email: artist.email, name: artist.name, is_admin: !!artist.is_admin },
     process.env.JWT_SECRET,
     { expiresIn: '7d' }
   );
+  setAuthCookie(res, token);
   const artistPayload = encodeURIComponent(JSON.stringify({
     id: artist.id, name: artist.name, email: artist.email, stage_name: artist.stage_name || null, is_admin: !!artist.is_admin
   }));
   const signupFlag = isSignup ? '&signup=1' : '';
   // Redirect through auth-complete.html so Safari detects the
   // POST → 302 → new-page cycle and offers to save credentials
-  return `/auth-complete.html?token=${token}&artist=${artistPayload}${signupFlag}`;
+  return `/auth-complete.html?artist=${artistPayload}${signupFlag}`;
 }
 
 // POST /api/auth/signup
@@ -439,14 +458,15 @@ router.post('/login', async (req, res) => {
     }
 
     if (isFormSubmit) {
-      return res.redirect(authSuccessRedirect(artist, false));
+      return res.redirect(authSuccessRedirect(res, artist, false));
     }
     const token = jwt.sign(
       { id: artist.id, email: artist.email, name: artist.name, is_admin: !!artist.is_admin },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
-    res.json({ token, artist: { id: artist.id, name: artist.name, email: artist.email, stage_name: artist.stage_name || null, is_admin: !!artist.is_admin, created_at: artist.created_at } });
+    setAuthCookie(res, token);
+    res.json({ artist: { id: artist.id, name: artist.name, email: artist.email, stage_name: artist.stage_name || null, is_admin: !!artist.is_admin, created_at: artist.created_at } });
   } catch (err) {
     console.error('Login error:', err.message);
     if (isFormSubmit) return res.redirect('/login?error=' + encodeURIComponent('Login failed'));
@@ -636,14 +656,20 @@ router.post('/complete-google-signup', require('../middleware/auth'), async (req
       console.error('[Google signup notification] Failed:', emailErr.message);
     }
 
+    setAuthCookie(res, token);
     res.json({
-      token,
       artist: { id: artist.id, name: artist.name, email: artist.email, stage_name: artist.stage_name, is_admin: !!artist.is_admin }
     });
   } catch (err) {
     console.error('Complete Google signup error:', err.message);
     res.status(500).json({ error: 'Failed to complete signup' });
   }
+});
+
+// POST /api/auth/logout — clear HttpOnly auth cookie
+router.post('/logout', (req, res) => {
+  clearAuthCookie(res);
+  res.json({ ok: true });
 });
 
 // POST /api/auth/verify-email — validate 6-digit code and activate account
@@ -664,13 +690,14 @@ router.post('/verify-email', async (req, res) => {
     }
     // Already verified — log them in instead of bouncing to /login
     if (artist.email_verified) {
-      if (isFormSubmit) return res.redirect(authSuccessRedirect(artist, true));
+      if (isFormSubmit) return res.redirect(authSuccessRedirect(res, artist, true));
       const token = jwt.sign(
         { id: artist.id, email: artist.email, name: artist.name, is_admin: !!artist.is_admin },
         process.env.JWT_SECRET,
         { expiresIn: '7d' }
       );
-      return res.json({ token, artist: { id: artist.id, name: artist.name, email: artist.email, stage_name: artist.stage_name || null, is_admin: !!artist.is_admin } });
+      setAuthCookie(res, token);
+      return res.json({ artist: { id: artist.id, name: artist.name, email: artist.email, stage_name: artist.stage_name || null, is_admin: !!artist.is_admin } });
     }
 
     // Check max attempts
@@ -700,14 +727,15 @@ router.post('/verify-email', async (req, res) => {
 
     // Issue JWT and redirect to dashboard
     if (isFormSubmit) {
-      return res.redirect(authSuccessRedirect(artist, true));
+      return res.redirect(authSuccessRedirect(res, artist, true));
     }
     const token = jwt.sign(
       { id: artist.id, email: artist.email, name: artist.name, is_admin: !!artist.is_admin },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
-    res.json({ token, artist: { id: artist.id, name: artist.name, email: artist.email, stage_name: artist.stage_name || null, is_admin: !!artist.is_admin } });
+    setAuthCookie(res, token);
+    res.json({ artist: { id: artist.id, name: artist.name, email: artist.email, stage_name: artist.stage_name || null, is_admin: !!artist.is_admin } });
   } catch (err) {
     console.error('Verify email error:', err.message);
     if (isFormSubmit) return res.redirect('/verify-email.html?email=' + encodeURIComponent(email) + '&error=' + encodeURIComponent('Verification failed'));

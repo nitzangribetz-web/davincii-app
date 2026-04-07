@@ -1,10 +1,14 @@
 const jwt = require('jsonwebtoken');
 
 const authMiddleware = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // Expects: Bearer <token>
-
+  // Prefer HttpOnly cookie; fall back to Authorization header for backward compat
+  let token = req.cookies && req.cookies.dv_token;
   if (!token) {
+    const authHeader = req.headers['authorization'];
+    token = authHeader && authHeader.split(' ')[1]; // Bearer <token>
+  }
+
+  if (!token || token === 'null' || token === 'undefined') {
     return res.status(401).json({ error: 'Access token required' });
   }
 

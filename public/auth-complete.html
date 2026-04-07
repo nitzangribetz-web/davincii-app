@@ -18,14 +18,13 @@ html,body{margin:0;background:#F0F4FA;min-height:100vh;display:flex;align-items:
 <script>
 (function() {
   var params = new URLSearchParams(window.location.search);
-  var token = params.get('token');
   var artistParam = params.get('artist');
   var isSignup = params.get('signup') === '1';
 
-  if (token && artistParam) {
+  if (artistParam) {
     try {
       var artist = JSON.parse(decodeURIComponent(artistParam));
-      localStorage.setItem('dv_token', token);
+      // Auth token now lives in HttpOnly cookie; only cache artist for UI display
       localStorage.setItem('dv_artist', JSON.stringify(artist));
       if (isSignup) {
         localStorage.setItem('dv_just_signed_up', '1');
@@ -34,7 +33,7 @@ html,body{margin:0;background:#F0F4FA;min-height:100vh;display:flex;align-items:
       window.location.replace('/login');
       return;
     }
-    var qs = '?token=' + encodeURIComponent(token) + '&artist=' + encodeURIComponent(artistParam);
+    var qs = '?artist=' + encodeURIComponent(artistParam);
     if (isSignup) { qs += '&signup=1'; }
     if (params.get('google_signup') === '1') { qs += '&google_signup=1'; }
     // Short delay so Safari's password manager detects the successful

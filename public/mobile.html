@@ -2433,9 +2433,13 @@ window.addEventListener('scroll',()=>{
 
 // ── Screen navigation ──
 function mobLogout(){
-  localStorage.removeItem('dv_token');
-  localStorage.removeItem('dv_artist');
-  window.location.href = '/';
+  fetch('/api/auth/logout', { method: 'POST', credentials: 'include' })
+    .catch(function(){})
+    .finally(function(){
+      localStorage.removeItem('dv_token');
+      localStorage.removeItem('dv_artist');
+      window.location.href = '/';
+    });
 }
 
 function go(key, skipPush){
