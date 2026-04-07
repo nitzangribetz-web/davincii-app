@@ -65,6 +65,10 @@ router.post('/connect', auth, async (req, res) => {
       refresh_url: buildRefreshUrl(accountId, req.artist.id),
       return_url: `${APP_URL}/?stripe_connected=true`,
       type: 'account_onboarding',
+      // Ask Stripe to collect ALL eventually-required fields during the first
+      // onboarding pass — this includes US tax identity (SSN/EIN/legal name)
+      // so Davincii never has to handle W-9 data itself.
+      collection_options: { fields: 'eventually_due' },
     });
 
     res.json({ url: accountLink.url, account_id: accountId });
@@ -141,6 +145,10 @@ router.get('/connect/refresh', async (req, res) => {
       refresh_url: buildRefreshUrl(stripeAccountId, artistId),
       return_url: `${APP_URL}/?stripe_connected=true`,
       type: 'account_onboarding',
+      // Ask Stripe to collect ALL eventually-required fields during the first
+      // onboarding pass — this includes US tax identity (SSN/EIN/legal name)
+      // so Davincii never has to handle W-9 data itself.
+      collection_options: { fields: 'eventually_due' },
     });
     res.redirect(accountLink.url);
   } catch (err) {
@@ -181,6 +189,9 @@ router.get('/connect/status', auth, async (req, res) => {
       email: account.email,
       country: account.country,
       payouts_enabled: account.payouts_enabled,
+      details_submitted: account.details_submitted,
+      charges_enabled: account.charges_enabled,
+      requirements_due: (account.requirements && account.requirements.currently_due) || [],
     });
   } catch (err) {
     console.error('[stripe/status]', err);
