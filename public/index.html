@@ -3153,6 +3153,7 @@
     }
     if(page === 'signups') loadSignups();
     if(page === 'add-song') deskResetAddSong();
+    if(page === 'overview') { try { applySetupCompletion(); } catch(e) {} }
   }
 
   // ── Notification bell ──
