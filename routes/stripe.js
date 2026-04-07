@@ -13,24 +13,24 @@ const APP_URL = process.env.APP_URL || 'https://davincii-app-production-89cc.up.
 // session, SameSite restrictions on some flows). To avoid relying on the
 // user's session at that moment, we embed a short signed token in the
 // refresh URL that binds it to a specific Stripe account id.
-function signStripeRefreshToken(stripeAccountId) {
+function signStripeRefreshToken(stripeAccountId, artistId) {
   return jwt.sign(
-    { purpose: 'stripe_refresh', sa: stripeAccountId },
+    { purpose: 'stripe_refresh', sa: stripeAccountId, aid: artistId },
     process.env.JWT_SECRET,
-    { expiresIn: '30d' }
+    { expiresIn: '1d' }
   );
 }
 function verifyStripeRefreshToken(token) {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    if (decoded.purpose !== 'stripe_refresh' || !decoded.sa) return null;
-    return decoded.sa;
+    if (decoded.purpose !== 'stripe_refresh' || !decoded.sa || !decoded.aid) return null;
+    return { stripeAccountId: decoded.sa, artistId: decoded.aid };
   } catch (e) {
     return null;
   }
 }
-function buildRefreshUrl(stripeAccountId) {
-  const sid = signStripeRefreshToken(stripeAccountId);
+function buildRefreshUrl(stripeAccountId, artistId) {
+  const sid = signStripeRefreshToken(stripeAccountId, artistId);
   return `${APP_URL}/api/stripe/connect/refresh?sid=${encodeURIComponent(sid)}`;
 }
 
@@ -62,15 +62,15 @@ router.post('/connect', auth, async (req, res) => {
 
     const accountLink = await stripe.accountLinks.create({
       account: accountId,
-      refresh_url: buildRefreshUrl(accountId),
+      refresh_url: buildRefreshUrl(accountId, req.artist.id),
       return_url: `${APP_URL}/?stripe_connected=true`,
       type: 'account_onboarding',
     });
 
     res.json({ url: accountLink.url, account_id: accountId });
   } catch (err) {
-    console.error('[stripe/connect]', err.message);
-    res.status(500).json({ error: err.message });
+    console.error('[stripe/connect]', err);
+    res.status(500).json({ error: 'Unable to start Stripe onboarding. Please try again.' });
   }
 });
 
@@ -84,15 +84,20 @@ router.post('/connect', auth, async (req, res) => {
 router.get('/connect/refresh', async (req, res) => {
   try {
     // Primary path: verify the signed sid token embedded in the URL.
-    let accountId = null;
+    let stripeAccountId = null;
+    let artistId = null;
     if (req.query.sid) {
-      accountId = verifyStripeRefreshToken(String(req.query.sid));
+      const decoded = verifyStripeRefreshToken(String(req.query.sid));
+      if (decoded) {
+        stripeAccountId = decoded.stripeAccountId;
+        artistId = decoded.artistId;
+      }
     }
 
     // Fallback path: if no (or invalid) sid, try to resolve the artist from
     // their current session cookie / Bearer header. This keeps older links
     // working for logged-in users.
-    if (!accountId) {
+    if (!stripeAccountId) {
       const fallbackToken =
         (req.cookies && req.cookies.dv_token) ||
         (req.headers['authorization'] || '').split(' ')[1];
@@ -104,37 +109,42 @@ router.get('/connect/refresh', async (req, res) => {
               'SELECT stripe_account_id FROM artists WHERE id = $1',
               [decoded.id]
             );
-            accountId = rows[0]?.stripe_account_id || null;
+            if (rows[0]?.stripe_account_id) {
+              stripeAccountId = rows[0].stripe_account_id;
+              artistId = decoded.id;
+            }
           }
         } catch (_) { /* invalid token — fall through */ }
       }
     }
 
-    if (!accountId) {
+    if (!stripeAccountId || !artistId) {
       // No way to identify the artist — send them to the payouts page so
       // they can re-initiate the Connect flow from a logged-in context.
       return res.redirect(`${APP_URL}/dashboard/payouts?stripe_error=refresh_unauthorized`);
     }
 
-    // Confirm the account still exists in our DB (defense in depth:
-    // a signed sid whose account was since disconnected should not work).
+    // Defense in depth: confirm the DB row matches BOTH the stripe account id
+    // AND the artist id claimed in the token. This prevents a stolen/leaked
+    // sid from being reused if the Stripe account was since disconnected or
+    // re-assigned.
     const { rows } = await pool.query(
-      'SELECT id FROM artists WHERE stripe_account_id = $1',
-      [accountId]
+      'SELECT id FROM artists WHERE id = $1 AND stripe_account_id = $2',
+      [artistId, stripeAccountId]
     );
     if (rows.length === 0) {
       return res.redirect(`${APP_URL}/dashboard/payouts?stripe_error=no_account`);
     }
 
     const accountLink = await stripe.accountLinks.create({
-      account: accountId,
-      refresh_url: buildRefreshUrl(accountId),
+      account: stripeAccountId,
+      refresh_url: buildRefreshUrl(stripeAccountId, artistId),
       return_url: `${APP_URL}/?stripe_connected=true`,
       type: 'account_onboarding',
     });
     res.redirect(accountLink.url);
   } catch (err) {
-    console.error('[stripe/refresh]', err.message);
+    console.error('[stripe/refresh]', err);
     res.redirect(`${APP_URL}/dashboard/payouts?stripe_error=refresh_failed`);
   }
 });
@@ -173,8 +183,8 @@ router.get('/connect/status', auth, async (req, res) => {
       payouts_enabled: account.payouts_enabled,
     });
   } catch (err) {
-    console.error('[stripe/status]', err.message);
-    res.status(500).json({ error: err.message });
+    console.error('[stripe/status]', err);
+    res.status(500).json({ error: 'Unable to load Stripe status. Please try again.' });
   }
 });
 
@@ -201,8 +211,8 @@ router.get('/balance', auth, async (req, res) => {
       available: available.toFixed(2),
     });
   } catch (err) {
-    console.error('[stripe/balance]', err.message);
-    res.status(500).json({ error: err.message });
+    console.error('[stripe/balance]', err);
+    res.status(500).json({ error: 'Unable to load balance. Please try again.' });
   }
 });
 
@@ -272,8 +282,8 @@ router.post('/payout', auth, async (req, res) => {
 
     res.json({ payout: payoutRows[0], transfer_id: transfer.id });
   } catch (err) {
-    console.error('[stripe/payout]', err.message);
-    res.status(500).json({ error: err.message });
+    console.error('[stripe/payout]', err);
+    res.status(500).json({ error: 'Unable to process payout. Please try again.' });
   }
 });
 
@@ -370,8 +380,8 @@ router.delete('/connect', auth, async (req, res) => {
     );
     res.json({ disconnected: true });
   } catch (err) {
-    console.error('[stripe/disconnect]', err.message);
-    res.status(500).json({ error: err.message });
+    console.error('[stripe/disconnect]', err);
+    res.status(500).json({ error: 'Unable to disconnect Stripe account. Please try again.' });
   }
 });
 
