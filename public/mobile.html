@@ -26,7 +26,7 @@
   --black:#0A0A0A;
   --slate:#374151;
   --muted:#64748B;
-  --muted-lt:#94A3B8;
+  --muted-lt:#475569;
   --border:#D8E2F0;
   --border-lt:#E8EDF5;
   --red:#DC2626;
@@ -535,8 +535,8 @@ body{
 .m-cta-h em{font-style:italic;color:rgba(147,197,253,0.38)}
 .m-cta-sub{
   position:relative;z-index:1;
-  font-family:var(--sans);font-size:14px;font-weight:300;
-  color:rgba(255,255,255,0.38);line-height:1.72;
+  font-family:var(--sans);font-size:14px;font-weight:400;
+  color:rgba(255,255,255,0.72);line-height:1.72;
   margin-bottom:32px;
 }
 .m-cta-btns{
@@ -560,8 +560,8 @@ footer.m-footer{
   margin-bottom:16px;
 }
 .m-footer-desc{
-  font-family:var(--sans);font-size:13px;font-weight:300;
-  color:rgba(255,255,255,0.28);line-height:1.78;
+  font-family:var(--sans);font-size:13px;font-weight:400;
+  color:rgba(255,255,255,0.62);line-height:1.78;
   margin-bottom:36px;
 }
 .m-footer-cols{
@@ -575,8 +575,8 @@ footer.m-footer{
 }
 .m-footer-links{display:flex;flex-direction:column;gap:10px}
 .m-footer-lnk{
-  font-family:var(--sans);font-size:13px;font-weight:300;
-  color:rgba(255,255,255,0.42);background:none;border:none;
+  font-family:var(--sans);font-size:13px;font-weight:400;
+  color:rgba(255,255,255,0.74);background:none;border:none;
   text-align:left;padding:0;cursor:pointer;
 }
 .m-footer-divider{
@@ -587,8 +587,8 @@ footer.m-footer{
   display:flex;flex-direction:column;gap:4px;
 }
 .m-footer-copy{
-  font-family:var(--sans);font-size:11px;font-weight:300;
-  color:rgba(255,255,255,0.18);
+  font-family:var(--sans);font-size:11px;font-weight:400;
+  color:rgba(255,255,255,0.55);
 }
 
 /* ══════════════════════════════════════
@@ -969,7 +969,7 @@ footer.m-footer{
   padding:13px 16px;border-bottom:1px solid var(--border-lt);
 }
 .d-sbox-title{font-family:var(--sans);font-size:13.5px;font-weight:700;color:var(--black);letter-spacing:-0.01em}
-.d-sbox-sub{font-family:var(--sans);font-size:11.5px;font-weight:300;color:var(--muted-lt);margin-top:1px}
+.d-sbox-sub{font-family:var(--sans);font-size:11.5px;font-weight:400;color:var(--muted-lt);margin-top:1px}
 .d-sbox-lnk{
   font-family:var(--sans);font-size:10.5px;font-weight:700;
   letter-spacing:0.08em;text-transform:uppercase;
@@ -2406,14 +2406,18 @@ footer.m-footer{
   document.addEventListener('DOMContentLoaded', function() {
     if (params.get('error')) { mobRemoveBootCSS(); return; }
 
-    // Token in URL (from auth-complete.html or oauth-callback)
-    var token = params.get('token');
+    // Artist payload in URL (from POST /api/auth/login redirect or oauth-callback).
+    // Cookie auth carries the actual session; the URL only provides the artist info.
     var artistParam = params.get('artist');
-    if (token && artistParam) {
+    if (artistParam) {
       try {
         var artist;
         try { artist = JSON.parse(artistParam); } catch(_) { artist = JSON.parse(decodeURIComponent(artistParam)); }
         localStorage.setItem('dv_artist', JSON.stringify(artist));
+        if (params.get('signup') === '1') {
+          try { localStorage.setItem('dv_just_signed_up', '1'); } catch(_){}
+        }
+        try { window.history.replaceState({}, '', window.location.pathname); } catch(_){}
 
         // Google OAuth signup — redirect to completion page
         if (params.get('google_signup') === '1') {
@@ -2426,9 +2430,9 @@ footer.m-footer{
       return;
     }
 
-    // Token in localStorage (returning user)
+    // Returning user / page refresh — cached artist in localStorage; cookie auth handles the session.
     var savedArtist = localStorage.getItem('dv_artist');
-    if (savedToken && savedArtist) {
+    if (savedArtist) {
       try { mobActivateDashboard(JSON.parse(savedArtist)); } catch(e) { console.error('[Auth] cached artist parse error:', e); }
       // Validate in background — only log out on explicit auth rejection
       Dv.api.fetch('/auth/me', { skipAuthRedirect: true, raw: true })
