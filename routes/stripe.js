@@ -37,7 +37,27 @@ function buildRefreshUrl(stripeAccountId, artistId) {
 // ── POST /api/stripe/connect ──────────────────────────────────────────────────
 // Creates (or re-fetches) a Stripe Connect Express account and returns the
 // hosted onboarding URL. The artist is redirected to Stripe to add their bank.
+async function createStripeAccountForArtist(artist) {
+  return stripe.accounts.create({
+    type: 'express',
+    email: artist.email,
+    capabilities: { transfers: { requested: true } },
+    business_type: 'individual',
+    metadata: { artist_id: String(artist.id) },
+  });
+}
+
 router.post('/connect', auth, async (req, res) => {
+  // Fast-fail if the platform isn't configured. Without this, Stripe SDK
+  // throws a generic "Invalid API Key" 401 that the catch block masks.
+  if (!process.env.STRIPE_SECRET_KEY) {
+    console.error('[stripe/connect] STRIPE_SECRET_KEY is not set on the server');
+    return res.status(500).json({
+      error: 'Stripe is not configured on the server. Please contact support.',
+      code: 'stripe_not_configured',
+    });
+  }
+
   try {
     const { rows } = await pool.query('SELECT * FROM artists WHERE id = $1', [req.artist.id]);
     const artist = rows[0];
@@ -45,14 +65,9 @@ router.post('/connect', auth, async (req, res) => {
 
     let accountId = artist.stripe_account_id;
 
+    // If we don't have an account on file, create one.
     if (!accountId) {
-      const account = await stripe.accounts.create({
-        type: 'express',
-        email: artist.email,
-        capabilities: { transfers: { requested: true } },
-        business_type: 'individual',
-        metadata: { artist_id: String(req.artist.id) },
-      });
+      const account = await createStripeAccountForArtist(artist);
       accountId = account.id;
       await pool.query(
         'UPDATE artists SET stripe_account_id = $1 WHERE id = $2',
@@ -60,21 +75,59 @@ router.post('/connect', auth, async (req, res) => {
       );
     }
 
-    const accountLink = await stripe.accountLinks.create({
-      account: accountId,
-      refresh_url: buildRefreshUrl(accountId, req.artist.id),
-      return_url: `${APP_URL}/?stripe_connected=true`,
-      type: 'account_onboarding',
-      // Ask Stripe to collect ALL eventually-required fields during the first
-      // onboarding pass — this includes US tax identity (SSN/EIN/legal name)
-      // so Davincii never has to handle W-9 data itself.
-      collection_options: { fields: 'eventually_due' },
-    });
+    // Try to create the onboarding link. If the stored stripe_account_id is
+    // stale (deleted account, mode mismatch between test/live keys, etc.),
+    // Stripe returns `resource_missing`. Recover by clearing the stale id,
+    // creating a fresh account, and retrying once.
+    let accountLink;
+    try {
+      accountLink = await stripe.accountLinks.create({
+        account: accountId,
+        refresh_url: buildRefreshUrl(accountId, req.artist.id),
+        return_url: `${APP_URL}/?stripe_connected=true`,
+        type: 'account_onboarding',
+        // Ask Stripe to collect ALL eventually-required fields during the first
+        // onboarding pass — this includes US tax identity (SSN/EIN/legal name)
+        // so Davincii never has to handle W-9 data itself.
+        collection_options: { fields: 'eventually_due' },
+      });
+    } catch (linkErr) {
+      const isStale = linkErr && (linkErr.code === 'resource_missing' || linkErr.type === 'StripeInvalidRequestError');
+      if (!isStale) throw linkErr;
+      console.warn('[stripe/connect] stale stripe_account_id, recreating:', accountId, linkErr.message);
+      const fresh = await createStripeAccountForArtist(artist);
+      accountId = fresh.id;
+      await pool.query(
+        'UPDATE artists SET stripe_account_id = $1 WHERE id = $2',
+        [accountId, req.artist.id]
+      );
+      accountLink = await stripe.accountLinks.create({
+        account: accountId,
+        refresh_url: buildRefreshUrl(accountId, req.artist.id),
+        return_url: `${APP_URL}/?stripe_connected=true`,
+        type: 'account_onboarding',
+        collection_options: { fields: 'eventually_due' },
+      });
+    }
 
     res.json({ url: accountLink.url, account_id: accountId });
   } catch (err) {
-    console.error('[stripe/connect]', err);
-    res.status(500).json({ error: 'Unable to start Stripe onboarding. Please try again.' });
+    // Log the full Stripe error server-side and surface a sanitized version
+    // (type/code/message — never the secret) so the client can show something
+    // actionable instead of a generic "try again".
+    console.error('[stripe/connect] FAILED', {
+      type: err && err.type,
+      code: err && err.code,
+      message: err && err.message,
+      requestId: err && err.requestId,
+      statusCode: err && err.statusCode,
+    });
+    res.status(500).json({
+      error: (err && err.message) || 'Unable to start Stripe onboarding. Please try again.',
+      code: (err && err.code) || 'stripe_unknown',
+      type: (err && err.type) || null,
+      requestId: (err && err.requestId) || null,
+    });
   }
 });
 
