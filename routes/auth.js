@@ -355,9 +355,9 @@ router.get('/callback', async (req, res) => {
     setAuthCookie(res, token);
     const artistPayload = encodeURIComponent(JSON.stringify({ id: artist.id, name: artist.name, email: artist.email, stage_name: artist.stage_name || null }));
     if (!artist.stage_name) {
-      res.redirect(`/auth-complete.html?artist=${artistPayload}&google_signup=1`);
+      res.redirect(`/?artist=${artistPayload}&google_signup=1`);
     } else {
-      res.redirect(`/auth-complete.html?artist=${artistPayload}`);
+      res.redirect(`/?artist=${artistPayload}`);
     }
   } catch (err) {
     console.error('[OAuth callback] FAILED:', err.message);
@@ -366,9 +366,9 @@ router.get('/callback', async (req, res) => {
 });
 
 // Helper: generate JWT and build redirect URL for successful auth
-// Redirects directly to / (not auth-complete.html) so Safari can anchor
-// the "Save Password?" prompt on the destination page without an intermediate
-// JavaScript redirect killing it.
+// Redirects directly to / so the browser sees a single POST → 302 → page-load
+// cycle. Safari's password manager anchors the "Save Password?" prompt on
+// that destination page.
 function authSuccessRedirect(res, artist, isSignup) {
   const token = jwt.sign(
     { id: artist.id, email: artist.email, name: artist.name, is_admin: !!artist.is_admin },
@@ -377,12 +377,10 @@ function authSuccessRedirect(res, artist, isSignup) {
   );
   setAuthCookie(res, token);
   const artistPayload = encodeURIComponent(JSON.stringify({
-    id: artist.id, name: artist.name, email: artist.email, stage_name: artist.stage_name || null, is_admin: !!artist.is_admin
+    id: artist.id, name: artist.name, email: artist.email, stage_name: artist.stage_name || null, pro: artist.pro || null, is_admin: !!artist.is_admin
   }));
   const signupFlag = isSignup ? '&signup=1' : '';
-  // Redirect through auth-complete.html so Safari detects the
-  // POST → 302 → new-page cycle and offers to save credentials
-  return `/auth-complete.html?artist=${artistPayload}${signupFlag}`;
+  return `/?artist=${artistPayload}${signupFlag}`;
 }
 
 // POST /api/auth/signup
@@ -458,6 +456,10 @@ router.post('/signup', async (req, res) => {
 // Form POST → 302 redirect (Safari saves credentials on real navigation)
 // JSON POST → JSON response (for passkey/API use)
 router.post('/login', async (req, res) => {
+  // [LOGIN-PERF] temporary timing — remove with rest of LOGIN-PERF blocks
+  const _t0 = Date.now();
+  const _mark = (label) => console.log(`[LOGIN-PERF][backend] ${label} +${Date.now() - _t0}ms`);
+  _mark('handler:start');
   const isFormSubmit = req.is('application/x-www-form-urlencoded');
   const { email, password } = req.body;
 
@@ -466,13 +468,19 @@ router.post('/login', async (req, res) => {
     return res.status(400).json({ error: 'Email and password are required' });
   }
   try {
+    // [LOGIN-PERF]
+    const _tDb = Date.now();
     const result = await pool.query('SELECT * FROM artists WHERE email = $1', [email]);
+    console.log(`[LOGIN-PERF][backend] db.select took ${Date.now() - _tDb}ms`);
     const artist = result.rows[0];
     if (!artist) {
       if (isFormSubmit) return res.redirect('/login?error=' + encodeURIComponent('Invalid email or password'));
       return res.status(401).json({ error: 'Invalid email or password' });
     }
+    // [LOGIN-PERF]
+    const _tBcrypt = Date.now();
     const validPassword = await bcrypt.compare(password, artist.password_hash);
+    console.log(`[LOGIN-PERF][backend] bcrypt.compare took ${Date.now() - _tBcrypt}ms`);
     if (!validPassword) {
       if (isFormSubmit) return res.redirect('/login?error=' + encodeURIComponent('Invalid email or password'));
       return res.status(401).json({ error: 'Invalid email or password' });
@@ -491,15 +499,24 @@ router.post('/login', async (req, res) => {
     }
 
     if (isFormSubmit) {
-      return res.redirect(authSuccessRedirect(res, artist, false));
+      // [LOGIN-PERF]
+      const _tJwt = Date.now();
+      const redirectUrl = authSuccessRedirect(res, artist, false);
+      console.log(`[LOGIN-PERF][backend] jwt+cookie took ${Date.now() - _tJwt}ms`);
+      _mark('handler:end (form-redirect)');
+      return res.redirect(redirectUrl);
     }
+    // [LOGIN-PERF]
+    const _tJwt = Date.now();
     const token = jwt.sign(
       { id: artist.id, email: artist.email, name: artist.name, is_admin: !!artist.is_admin },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
     setAuthCookie(res, token);
-    res.json({ artist: { id: artist.id, name: artist.name, email: artist.email, stage_name: artist.stage_name || null, is_admin: !!artist.is_admin, created_at: artist.created_at } });
+    console.log(`[LOGIN-PERF][backend] jwt+cookie took ${Date.now() - _tJwt}ms`);
+    _mark('handler:end (json)');
+    res.json({ artist: { id: artist.id, name: artist.name, email: artist.email, stage_name: artist.stage_name || null, pro: artist.pro || null, is_admin: !!artist.is_admin, created_at: artist.created_at } });
   } catch (err) {
     console.error('Login error:', err.message);
     if (isFormSubmit) return res.redirect('/login?error=' + encodeURIComponent('Login failed'));
@@ -509,8 +526,12 @@ router.post('/login', async (req, res) => {
 
 // GET /api/auth/me
 router.get('/me', require('../middleware/auth'), async (req, res) => {
+  // [LOGIN-PERF] temporary timing
+  const _t0 = Date.now();
   try {
+    const _tDb = Date.now();
     const result = await pool.query('SELECT id, name, email, stage_name, pro, email_verified, is_admin, created_at FROM artists WHERE id = $1', [req.artist.id]);
+    console.log(`[LOGIN-PERF][backend] /me db.select took ${Date.now() - _tDb}ms (total ${Date.now() - _t0}ms)`);
     const artist = result.rows[0];
     if (!artist) return res.status(404).json({ error: 'Artist not found' });
     res.json(artist);
