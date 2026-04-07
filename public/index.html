@@ -105,7 +105,7 @@
     .nav-right { display:flex; align-items:center; gap:10px; }
     /* Authed nav variant — shown when user has a session, hides Login/Get-started */
     .nav-right.authed .nav-guest { display:none !important; }
-    .nav-right .nav-authed { display:none; align-items:center; gap:12px; margin-right:36px; }
+    .nav-right .nav-authed { display:none; align-items:center; gap:12px; margin-right:120px; }
     .nav-right.authed .nav-authed { display:flex; }
     /* Hero CTA — swap guest buttons for a single Dashboard button when authed */
     .hero-authed { display:none !important; }
@@ -127,14 +127,14 @@
     .nav-dash-btn:active { transform:scale(0.97); }
     .nav-bell, .nav-avatar {
       width:40px; height:40px; border-radius:50%;
-      background:#fff; border:1px solid rgba(255,255,255,0.85);
+      background:#CBD5E1; border:1px solid rgba(255,255,255,0.55);
       display:flex; align-items:center; justify-content:center;
       color:#0A0F1F; cursor:pointer; position:relative;
       box-shadow:0 4px 14px rgba(0,0,0,0.35);
       transition:transform 0.15s, box-shadow 0.22s, background 0.18s;
     }
     .nav-bell:hover, .nav-avatar:hover {
-      background:#F1F5F9;
+      background:#E2E8F0;
       box-shadow:0 6px 20px rgba(0,0,0,0.45);
     }
     .nav-bell:active, .nav-avatar:active { transform:scale(0.94); }
@@ -142,11 +142,11 @@
     .nav-bell-dot {
       position:absolute; top:-3px; right:-3px;
       min-width:14px; height:14px; padding:0 4px;
-      border-radius:7px; background:rgba(148,163,184,0.85);
+      border-radius:7px; background:#EF4444;
       border:2px solid #050C1A;
       box-shadow:none;
-      font-family:'Inter',sans-serif; font-size:9px; font-weight:600;
-      color:#0A0A0A; line-height:10px; text-align:center;
+      font-family:'Inter',sans-serif; font-size:9px; font-weight:700;
+      color:#fff; line-height:10px; text-align:center;
       display:flex; align-items:center; justify-content:center;
     }
     .nav-bell-wrap, .nav-avatar-wrap { position:relative; }
@@ -2413,7 +2413,7 @@
     }
     .notif-bell {
       width: 46px; height: 46px; border-radius: 50%;
-      background: #fff;
+      background: #CBD5E1;
       border: 2px solid #fff;
       cursor: pointer;
       display: flex; align-items: center; justify-content: center;
@@ -2423,7 +2423,7 @@
       position: relative;
     }
     .notif-bell:hover {
-      background: #F1F5F9;
+      background: #E2E8F0;
       box-shadow: 0 6px 20px rgba(0,0,0,0.45);
     }
     .notif-bell:active { transform: scale(0.94); }
@@ -2434,13 +2434,13 @@
     }
     /* Unread badge — red, with count */
     .notif-bell-badge {
-      position: absolute; top: -5px; right: -5px;
-      min-width: 18px; height: 18px; padding: 0 5px;
-      border-radius: 9px; background: #EF4444;
+      position: absolute; top: -3px; right: -3px;
+      min-width: 14px; height: 14px; padding: 0 4px;
+      border-radius: 7px; background: #EF4444;
       border: 2px solid #030912;
-      box-shadow: 0 0 0 1px rgba(239,68,68,0.55), 0 0 14px rgba(239,68,68,0.65);
-      font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700;
-      color: #fff; line-height: 14px; text-align: center;
+      box-shadow: none;
+      font-family: 'Inter', sans-serif; font-size: 9px; font-weight: 700;
+      color: #fff; line-height: 10px; text-align: center;
       display: flex; align-items: center; justify-content: center;
       pointer-events: none;
     }
