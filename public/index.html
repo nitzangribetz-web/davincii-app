@@ -2925,6 +2925,7 @@
   }
 
   function updateArtistUI(artist) {
+    try { applySetupCompletion(); } catch(e) {}
     var displayName = artist.stage_name || artist.name || artist.email || '';
     var name = artist.name || artist.email || '';
     document.querySelectorAll('.artist-display-name').forEach(function(el) { el.textContent = displayName; });
@@ -3496,6 +3497,8 @@
       if(b)b.className='status-badge pending';if(t)t.textContent='Submitted';
       closeW9Modal();
       showToast('W-9 submitted successfully');
+      markSetupComplete('w9');
+      showDashPage('overview');
     })
     .catch(function() {
       if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Submit W-9'; }
@@ -3656,6 +3659,36 @@
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // PROFILE SAVE
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  function markSetupComplete(kind) {
+    var label = kind === 'w9' ? 'W-9 submitted' : 'Artist profile completed';
+    var alertEl = document.getElementById('setup-alert-' + kind);
+    if (alertEl) {
+      alertEl.classList.add('done');
+      var btn = alertEl.querySelector('.setup-alert-btn');
+      if (btn) { btn.textContent = 'Completed ✓'; btn.disabled = true; btn.onclick = null; }
+      var title = alertEl.querySelector('.setup-alert-title');
+      if (title) title.textContent = label;
+      var body = alertEl.querySelector('.setup-alert-body');
+      if (body) body.textContent = 'Done — no further action needed.';
+    }
+    if (kind === 'profile') {
+      var row = document.getElementById('setup-row-profile');
+      if (row) {
+        var rb = row.querySelector('.setup-action');
+        if (rb) { rb.textContent = 'Completed ✓'; rb.disabled = true; rb.onclick = null; }
+        var lbl = row.querySelector('.setup-row-label');
+        if (lbl) lbl.style.textDecoration = 'line-through';
+      }
+    }
+    try { localStorage.setItem('dv_setup_' + kind, '1'); } catch(e) {}
+  }
+  function applySetupCompletion() {
+    try {
+      if (localStorage.getItem('dv_setup_profile') === '1') markSetupComplete('profile');
+      if (localStorage.getItem('dv_setup_w9') === '1') markSetupComplete('w9');
+    } catch(e) {}
+  }
+
   function saveProfile() {
     var form = document.getElementById('profile-form');
     if (!validateFields(form)) return;
@@ -3691,6 +3724,8 @@
         localStorage.setItem('dv_artist', JSON.stringify(stored));
         updateArtistUI(stored);
         showToast('Profile saved successfully', 'success');
+        markSetupComplete('profile');
+        showDashPage('overview');
       } else {
         showToast(res.data.error || 'Failed to save profile', 'error');
       }
@@ -4147,7 +4182,7 @@
         <div class="page-rule"></div>
 
         <!-- Setup alerts -->
-        <div class="setup-alert">
+        <div class="setup-alert" id="setup-alert-profile">
           <div class="setup-alert-icon">!</div>
           <div class="setup-alert-content">
             <div class="setup-alert-title">Complete your artist profile</div>
@@ -4155,7 +4190,7 @@
           </div>
           <button class="setup-alert-btn" onclick="showDashPage('profile')">Complete Profile →</button>
         </div>
-        <div class="setup-alert">
+        <div class="setup-alert" id="setup-alert-w9">
           <div class="setup-alert-icon" style="font-size:10px;font-weight:700;letter-spacing:0.04em">W-9</div>
           <div class="setup-alert-content">
             <div class="setup-alert-title">Submit your W-9 tax form</div>
@@ -4204,7 +4239,7 @@
             </div>
           </div>
           <div class="sbox-body" style="padding:4px 24px 8px">
-            <div class="setup-row">
+            <div class="setup-row" id="setup-row-profile">
               <span class="setup-row-label">Complete your artist profile</span>
               <button class="setup-action" onclick="showDashPage('profile')">Complete →</button>
             </div>
