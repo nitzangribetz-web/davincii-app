@@ -1768,7 +1768,7 @@ footer.m-footer{
             <button class="d-dd-btn" onclick="showDP('signups');closeDMenu()"><span class="d-dd-icon">☰</span>Signups</button>
           </div>
           <div class="d-dd-sec">
-            <button class="d-dd-btn danger" onclick="go('landing');closeDMenu()"><span class="d-dd-icon">←</span>Sign out</button>
+            <button class="d-dd-btn danger" onclick="mobLogout();closeDMenu()"><span class="d-dd-icon">←</span>Sign out</button>
           </div>
         </div>
       </div>
@@ -2434,6 +2434,12 @@ window.addEventListener('scroll',()=>{
 },{passive:true});
 
 // ── Screen navigation ──
+function mobLogout(){
+  localStorage.removeItem('dv_token');
+  localStorage.removeItem('dv_artist');
+  window.location.href = '/';
+}
+
 function go(key, skipPush){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   if(key !== 'dashboard') document.body.classList.remove('dashboard-active');
