@@ -2940,6 +2940,12 @@
 
   function updateArtistUI(artist) {
     try { applySetupCompletion(); } catch(e) {}
+    var proVal = document.getElementById('dash-pro-val');
+    if (proVal) {
+      var pro = artist.pro && artist.pro !== 'Other' ? artist.pro : (artist.pro_other || artist.pro || '');
+      if (pro) { proVal.textContent = pro; proVal.style.color = '#0A0A0A'; }
+      else { proVal.textContent = '—'; proVal.style.color = '#94A3B8'; }
+    }
     var displayName = artist.stage_name || artist.name || artist.email || '';
     var name = artist.name || artist.email || '';
     document.querySelectorAll('.artist-display-name').forEach(function(el) { el.textContent = displayName; });
@@ -3724,6 +3730,16 @@
     try {
       if (localStorage.getItem('dv_setup_profile') === '1') markSetupComplete('profile');
       if (localStorage.getItem('dv_setup_w9') === '1') markSetupComplete('w9');
+      // Stamp completion time the first time profile is done
+      if (localStorage.getItem('dv_setup_profile') === '1' && !localStorage.getItem('dv_setup_done_at')) {
+        localStorage.setItem('dv_setup_done_at', String(Date.now()));
+      }
+      // Hide entire Get Started box 24h after profile completion
+      var doneAt = parseInt(localStorage.getItem('dv_setup_done_at') || '0', 10);
+      if (doneAt && (Date.now() - doneAt) > 24 * 60 * 60 * 1000) {
+        var box = document.getElementById('get-started-box');
+        if (box) box.style.display = 'none';
+      }
     } catch(e) {}
   }
 
@@ -3759,6 +3775,8 @@
         // Update stored artist with new stage_name
         var stored = JSON.parse(localStorage.getItem('dv_artist') || '{}');
         stored.stage_name = data.stage_name;
+        stored.pro = data.pro;
+        if (data.pro_other) stored.pro_other = data.pro_other;
         localStorage.setItem('dv_artist', JSON.stringify(stored));
         updateArtistUI(stored);
         showToast('Profile saved successfully', 'success');
@@ -4126,7 +4144,7 @@
   <nav class="top-nav">
     <span class="top-nav-logo" onclick="logoClick()"><img src="/logo-white-sm.png" alt="Davincii" style="height:26px"></span>
     <div class="top-nav-right">
-      <span class="top-nav-name">SwuM</span>
+      <span class="top-nav-name artist-display-name"></span>
       <!-- Notification bell -->
       <div class="notif-bell-wrap" id="notif-bell-wrap">
         <button class="notif-bell" onclick="toggleNotifPanel()" aria-label="Notifications">
@@ -4265,11 +4283,11 @@
           </div>
           <div class="stat-card">
             <div class="stat-label">PRO Affiliation</div>
-            <div class="stat-val" style="font-size:28px;color:#94A3B8">—</div>
+            <div class="stat-val" id="dash-pro-val" style="font-size:28px;color:#94A3B8">—</div>
             <div class="stat-note">Set in profile</div>
           </div>
         </div>
-        <div class="sbox">
+        <div class="sbox" id="get-started-box">
           <div class="sbox-head">
             <div>
               <div class="sbox-title">Get started</div>

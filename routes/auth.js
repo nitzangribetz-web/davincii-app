@@ -457,7 +457,7 @@ router.post('/login', async (req, res) => {
 // GET /api/auth/me
 router.get('/me', require('../middleware/auth'), async (req, res) => {
   try {
-    const result = await pool.query('SELECT id, name, email, stage_name, email_verified, is_admin, created_at FROM artists WHERE id = $1', [req.artist.id]);
+    const result = await pool.query('SELECT id, name, email, stage_name, pro, email_verified, is_admin, created_at FROM artists WHERE id = $1', [req.artist.id]);
     const artist = result.rows[0];
     if (!artist) return res.status(404).json({ error: 'Artist not found' });
     res.json(artist);
