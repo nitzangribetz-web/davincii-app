@@ -41,7 +41,7 @@ async function createStripeAccountForArtist(artist) {
   return stripe.accounts.create({
     type: 'express',
     email: artist.email,
-    capabilities: { transfers: { requested: true } },
+    capabilities: { transfers: { requested: true }, card_payments: { requested: true } },
     business_type: 'individual',
     metadata: { artist_id: String(artist.id) },
   });
