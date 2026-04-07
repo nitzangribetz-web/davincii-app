@@ -3385,6 +3385,12 @@ function submitMobW9() {
 // LOGO CLICK
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function logoClick() {
+  // If already on the landing screen, just scroll to top — never bounce to dashboard.
+  var landing = document.getElementById('screen-landing');
+  if (landing && landing.classList.contains('active')) {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    return;
+  }
   var loggedIn = false;
   try { loggedIn = !!localStorage.getItem('dv_artist'); } catch(_) {}
   if (loggedIn) {
@@ -3399,7 +3405,7 @@ function logoClick() {
     showDP('overview');
   } else {
     go('landing');
-    scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 }
 
