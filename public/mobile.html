@@ -3357,7 +3357,9 @@ function mobResetAddSong(){
   if(container)container.querySelectorAll('.field-error-msg').forEach(function(m){m.remove();});
 }
 
+var _mobSubmittingSong = false;
 function mobSubmitSong() {
+  if (_mobSubmittingSong) return;
   var titleField = document.getElementById('mob-song-title');
   var writerField = document.getElementById('mob-writer-name');
   var pctField = document.getElementById('mob-writer-pct');
@@ -3455,6 +3457,16 @@ function mobSubmitSong() {
     });
   }
 
+  // Lock submission + disable the button so rapid taps can't duplicate rows.
+  _mobSubmittingSong = true;
+  var submitBtn = document.querySelector('button[onclick="mobSubmitSong()"]');
+  var prevBtnText = submitBtn ? submitBtn.textContent : '';
+  if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Submitting\u2026'; }
+  var releaseLock = function(){
+    _mobSubmittingSong = false;
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = prevBtnText; }
+  };
+
   fetch('/api/songs', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -3465,12 +3477,13 @@ function mobSubmitSong() {
     if (res.ok) {
       showToast('Song submitted for registration', 'success');
       mobResetAddSong();
-      setTimeout(function() { showDP('catalog'); }, 400);
+      setTimeout(function() { releaseLock(); showDP('catalog'); }, 400);
     } else {
+      releaseLock();
       showToast(res.data.error || 'Failed to submit song', 'error');
     }
   })
-  .catch(function() { showToast('Network error — please try again', 'error'); });
+  .catch(function() { releaseLock(); showToast('Network error — please try again', 'error'); });
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

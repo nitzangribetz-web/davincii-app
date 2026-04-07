@@ -1639,6 +1639,17 @@
       color: #CBD5E1; margin-bottom: 24px; line-height: 1.65;
     }
     .catalog-list { display: flex; flex-direction: column; }
+    .catalog-row-del {
+      background: transparent; border: 1px solid #E2E8F0;
+      color: #94A3B8; width: 28px; height: 28px; border-radius: 6px;
+      font-size: 18px; line-height: 1; cursor: pointer; margin-left: 12px;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+      flex-shrink: 0;
+    }
+    .catalog-row-del:hover {
+      background: #FEF2F2; color: #EF4444; border-color: #FCA5A5;
+    }
     .catalog-row {
       display: flex; align-items: center; justify-content: space-between;
       padding: 18px 24px; border-bottom: 1px solid #F1F5F9;
@@ -3514,6 +3525,15 @@
     if(page === 'catalog') { try { loadCatalog(); } catch(e) {} }
   }
 
+  function deleteSong(id, title) {
+    if (!id) return;
+    if (!window.confirm('Delete "' + title + '"? This cannot be undone.')) return;
+    Dv.api.fetch('/songs/' + encodeURIComponent(id), { method: 'DELETE' })
+      .then(function(){ showToast('Song deleted', 'success'); loadCatalog(); })
+      .catch(function(err){ showToast((err && err.message) || 'Failed to delete song', 'error'); });
+  }
+  window.deleteSong = deleteSong;
+
   function loadCatalog() {
     var body = document.getElementById('catalog-body');
     var count = document.getElementById('catalog-count');
@@ -3528,9 +3548,10 @@
         }
         if (count) count.textContent = songs.length + ' composition' + (songs.length === 1 ? '' : 's') + ' registered';
         var rows = songs.map(function(s) {
-          var title = (s.title || 'Untitled').replace(/</g,'&lt;');
-          var writer = (s.primary_writer || '').replace(/</g,'&lt;');
-          var iswc = s.iswc ? ('ISWC ' + String(s.iswc).replace(/</g,'&lt;')) : 'No ISWC';
+          var esc = Dv.format.escapeHtml;
+          var title = esc(s.title || 'Untitled');
+          var writer = esc(s.primary_writer || '');
+          var iswc = s.iswc ? ('ISWC ' + esc(s.iswc)) : 'No ISWC';
           var status = (s.status || 'processing').toLowerCase();
           var statusLabel = status === 'registered' ? 'Registered' : (status === 'rejected' ? 'Rejected' : 'Processing');
           var statusClass = status === 'registered' ? 'success' : (status === 'rejected' ? 'error' : 'pending');
@@ -3540,6 +3561,7 @@
               '<div class="catalog-row-meta">' + writer + (writer ? ' · ' : '') + iswc + '</div>' +
             '</div>' +
             '<span class="status-badge ' + statusClass + '">' + statusLabel + '</span>' +
+            '<button class="catalog-row-del" title="Delete" aria-label="Delete song" onclick="deleteSong(\'' + esc(s.id) + '\', \'' + esc(s.title || 'Untitled').replace(/\'/g,"\\'") + '\')">&times;</button>' +
           '</div>';
         }).join('');
         body.innerHTML = '<div class="catalog-list">' + rows + '</div>';
@@ -4308,7 +4330,10 @@
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // SONG SUBMISSION
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  var _submittingSong = false;
   function submitSong() {
+    // Guard: ignore re-entry while a submission is already in flight.
+    if (_submittingSong) return;
     var container = document.getElementById('dp-add-song');
     // Validate song title
     var titleField = document.getElementById('desk-song-title');
@@ -4413,6 +4438,17 @@
       });
     }
 
+    // Lock submission + disable the submit button so rapid re-clicks can't
+    // create duplicate rows (root cause of the ghost catalog entries).
+    _submittingSong = true;
+    var submitBtn = container ? container.querySelector('button[onclick="submitSong()"]') : null;
+    var prevBtnText = submitBtn ? submitBtn.textContent : '';
+    if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Submitting\u2026'; }
+    var releaseLock = function(){
+      _submittingSong = false;
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = prevBtnText; }
+    };
+
     fetch('/api/songs', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -4424,12 +4460,14 @@
         showToast('Song submitted for registration', 'success');
         addNotification('Song submitted: ' + songData.title, 'Your composition is now in processing.', 'blue');
         deskResetAddSong();
-        setTimeout(function() { showDashPage('catalog'); }, 400);
+        // Stay locked until navigation happens — prevents a flicker-click re-submit.
+        setTimeout(function() { releaseLock(); showDashPage('catalog'); }, 400);
       } else {
+        releaseLock();
         showToast(res.data.error || 'Failed to submit song', 'error');
       }
     })
-    .catch(function() { showToast('Network error — please try again', 'error'); });
+    .catch(function() { releaseLock(); showToast('Network error — please try again', 'error'); });
   }
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
