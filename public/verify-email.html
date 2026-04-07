@@ -221,11 +221,21 @@ body { font-family:'DM Sans', system-ui, sans-serif; background:#fff; }
   var codeInput = document.getElementById('verify-code');
   codeInput.focus();
 
+  // Prevent double-submission (auto-submit + button click race)
+  var form = codeInput.closest('form');
+  var submitted = false;
+  form.addEventListener('submit', function(e) {
+    if (submitted) { e.preventDefault(); return; }
+    submitted = true;
+    var btn = form.querySelector('button[type="submit"]');
+    if (btn) { btn.disabled = true; btn.textContent = 'Verifying...'; }
+  });
+
   // Auto-submit when 6 digits entered
   codeInput.addEventListener('input', function() {
     this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);
-    if (this.value.length === 6) {
-      this.closest('form').submit();
+    if (this.value.length === 6 && !submitted) {
+      form.submit();
     }
   });
 })();
