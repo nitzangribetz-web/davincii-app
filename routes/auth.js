@@ -403,9 +403,9 @@ router.post('/signup', async (req, res) => {
     }
     res.status(201).json({ requiresVerification: true, email });
   } catch (err) {
-    console.error('Signup error:', err.message, err.stack);
-    if (isFormSubmit) return res.redirect('/signup?error=' + encodeURIComponent(err.message || 'Failed to create account'));
-    res.status(500).json({ error: err.message || 'Failed to create account' });
+    console.error('Signup error:', err.message);
+    if (isFormSubmit) return res.redirect('/signup?error=' + encodeURIComponent('Failed to create account'));
+    res.status(500).json({ error: 'Failed to create account' });
   }
 });
 

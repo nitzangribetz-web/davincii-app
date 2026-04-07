@@ -87,18 +87,22 @@ const columnMigrations = [
 async function migrate() {
   try {
     await pool.query(baseTables);
-    await pool.query(passkeyTable);
-    for (const stmt of columnMigrations) {
-      try {
-        await pool.query(stmt);
-      } catch (err) {
-        console.error('[migrate] Statement failed (continuing):', err.message);
-      }
-    }
-    console.log('[migrate] Schema ready');
   } catch (err) {
-    console.error('[migrate] Error:', err.message);
+    console.error('[migrate] baseTables failed (continuing):', err.message);
   }
+  try {
+    await pool.query(passkeyTable);
+  } catch (err) {
+    console.error('[migrate] passkeyTable failed (continuing):', err.message);
+  }
+  for (const stmt of columnMigrations) {
+    try {
+      await pool.query(stmt);
+    } catch (err) {
+      console.error('[migrate] Statement failed (continuing):', err.message);
+    }
+  }
+  console.log('[migrate] Schema ready');
 }
 
 module.exports = migrate;
