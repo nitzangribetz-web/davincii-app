@@ -154,6 +154,28 @@ body{
   padding:9px 18px;border-radius:100px;cursor:pointer;
   letter-spacing:0.02em;
 }
+/* Logged-in landing nav (bell + avatar) */
+.nav-authed-m{display:none;align-items:center;gap:8px}
+body.user-authed-landing .nav-authed-m{display:flex}
+body.user-authed-landing .nav-right-m .guest-only{display:none}
+body.user-authed-landing .m-hero-cta .guest-only{display:none}
+.m-hero-cta .authed-only{display:none}
+body.user-authed-landing .m-hero-cta .authed-only{display:flex;align-items:center;justify-content:center;gap:8px}
+.m-ln-bell,.m-ln-av{
+  width:33px;height:33px;border-radius:50%;
+  background:rgba(255,255,255,0.06);
+  border:1.5px solid rgba(255,255,255,0.15);
+  display:flex;align-items:center;justify-content:center;
+  color:rgba(255,255,255,0.85);cursor:pointer;
+  position:relative;padding:0;
+}
+.m-ln-bell svg,.m-ln-av svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.m-ln-bell-dot{
+  position:absolute;top:5px;right:5px;
+  width:7px;height:7px;border-radius:50%;
+  background:#5B9BFF;
+  border:2px solid #060E28;display:none;
+}
 
 /* ══════════════════════════════════════
    HERO
@@ -1434,8 +1456,17 @@ footer.m-footer{
   <nav class="mob-nav" id="mob-nav">
     <a class="nav-logo-m" onclick="logoClick()"><img src="/logo-white-sm.png" alt="Davincii" style="height:24px"></a>
     <div class="nav-right-m">
-      <button class="btn-nav-ghost-m" onclick="go('login')">Login</button>
-      <button class="btn-nav-solid-m" onclick="go('signup')">Get started</button>
+      <button class="btn-nav-ghost-m guest-only" onclick="go('login')">Login</button>
+      <button class="btn-nav-solid-m guest-only" onclick="go('signup')">Get started</button>
+      <div class="nav-authed-m">
+        <button class="m-ln-bell" aria-label="Notifications" onclick="mobEnterDashboard('notifications')">
+          <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="m-ln-bell-dot"></span>
+        </button>
+        <button class="m-ln-av" aria-label="Account" onclick="mobEnterDashboard('overview')">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+        </button>
+      </div>
     </div>
   </nav>
 
@@ -2481,7 +2512,6 @@ footer.m-footer{
     if (screen && screen !== 'landing') go(screen, true);
 
     // Show login/signup errors from URL params
-    var params = new URLSearchParams(window.location.search);
     var error = params.get('error');
     if (error) {
       var errEl = document.getElementById('mob-login-error');
@@ -2511,7 +2541,7 @@ function mobActivateDashboard(artist) {
     if (adminDrawer) adminDrawer.style.display = '';
   }
   var initialPage = getDashPageFromURL() || 'overview';
-  var url = initialPage === 'overview' ? '/dashboard' : '/dashboard/' + initialPage;
+  var url = initialPage === 'overview' ? '/dashboard' : '/' + initialPage;
   window.history.replaceState({ screen: 'dashboard', page: initialPage }, '', url);
   showDP(initialPage, true);
   window.scrollTo(0, 0);
@@ -2679,7 +2709,7 @@ function showDP(page, skipPush){
   });
   document.getElementById('d-tab-'+page)?.classList.add('active');
   if(!skipPush){
-    var url = page === 'overview' ? '/dashboard' : '/dashboard/' + page;
+    var url = page === 'overview' ? '/dashboard' : '/' + page;
     window.history.pushState({ screen:'dashboard', page: page }, '', url);
   }
   if(page === 'signups') mobLoadSignups();
@@ -2693,11 +2723,16 @@ function showDP(page, skipPush){
   if(page === 'catalog') { try { mobLoadSongs(); } catch(e) {} }
 }
 
+var DP_PAGES = ['overview','catalog','add-song','royalties','registration','statements','payouts','notifications','sync','profile','settings','signups'];
 function getDashPageFromURL(){
   var path = window.location.pathname;
+  // Legacy: /dashboard/<page>
   var match = path.match(/^\/dashboard\/(.+)$/);
   if(match) return match[1];
   if(path === '/dashboard' || path === '/dashboard/') return 'overview';
+  // New: /<page> at top level
+  var slug = path.replace(/^\/|\/$/g, '');
+  if(DP_PAGES.indexOf(slug) !== -1) return slug;
   return null;
 }
 
