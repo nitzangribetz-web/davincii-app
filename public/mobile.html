@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="dark">
 <title>Davincii — Artist Portal</title>
-<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="icon" type="image/png" href="/favicon_clean.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:opsz,wght@9..40,200;9..40,300;9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&family=Pinyon+Script&display=swap" rel="stylesheet">
@@ -735,6 +735,63 @@ footer.m-footer{
   font-family:var(--script);font-size:25px;color:#fff;
   cursor:pointer;line-height:1;
 }
+.d-nav-l{display:flex;align-items:center;gap:10px}
+.d-burger{
+  width:36px;height:36px;border-radius:8px;
+  background:none;border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  color:rgba(255,255,255,0.85);padding:0;
+  transition:background 0.15s;
+}
+.d-burger:hover{background:rgba(255,255,255,0.06)}
+.d-burger svg{width:22px;height:22px;display:block;stroke:currentColor;stroke-width:2;stroke-linecap:round;fill:none}
+.d-drawer-back{
+  position:fixed;inset:0;background:rgba(3,9,18,0.55);
+  z-index:300;opacity:0;pointer-events:none;
+  transition:opacity 0.22s ease;
+}
+.d-drawer-back.open{opacity:1;pointer-events:auto}
+.d-drawer{
+  position:fixed;top:0;left:0;bottom:0;
+  width:284px;max-width:84vw;background:#fff;
+  z-index:301;transform:translateX(-100%);
+  transition:transform 0.26s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column;
+  box-shadow:2px 0 24px rgba(0,0,0,0.18);
+  overflow-y:auto;
+}
+.d-drawer.open{transform:translateX(0)}
+.d-drawer-hd{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 16px;border-bottom:1px solid #F1F5F9;
+  background:var(--navy);
+}
+.d-drawer-hd img{height:22px}
+.d-drawer-x{
+  width:32px;height:32px;border-radius:7px;
+  background:none;border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  color:rgba(255,255,255,0.7);
+}
+.d-drawer-x svg{width:18px;height:18px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round}
+.d-drawer-body{padding:10px 12px;flex:1}
+.d-drawer-sec{padding:6px 0;border-bottom:1px solid #F1F5F9}
+.d-drawer-sec:last-child{border-bottom:none}
+.d-drawer-btn{
+  display:flex;align-items:center;gap:14px;width:100%;
+  padding:12px 12px;font-family:var(--sans);font-size:14px;
+  font-weight:500;color:var(--slate);background:none;border:none;
+  cursor:pointer;text-align:left;border-radius:8px;
+  transition:background 0.14s,color 0.14s;
+}
+.d-drawer-btn:hover,.d-drawer-btn.active{background:#F1F5F9;color:var(--black)}
+.d-drawer-btn.danger{color:var(--red)}
+.d-drawer-ico{
+  width:22px;height:22px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--muted);
+}
+.d-drawer-ico svg{width:20px;height:20px;stroke:currentColor;stroke-width:1.6;fill:none;stroke-linecap:round;stroke-linejoin:round}
 .d-nav-r{display:flex;align-items:center;gap:10px}
 .d-nav-name{
   font-family:var(--sans);font-size:12px;
@@ -1725,7 +1782,10 @@ footer.m-footer{
 <div class="screen" id="screen-dashboard">
   <!-- Top nav -->
   <div class="d-nav">
-    <span class="d-nav-logo" onclick="logoClick()"><img src="/logo-white-sm.png" alt="Davincii" style="height:24px"></span>
+    <div class="d-nav-l">
+      <button class="d-burger" aria-label="Menu" onclick="openDrawer()"><svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+      <span class="d-nav-logo" onclick="logoClick()"><img src="/logo-white-sm.png" alt="Davincii" style="height:24px"></span>
+    </div>
     <div class="d-nav-r">
       <span class="d-nav-name artist-display-name"></span>
       <div class="notif-dropdown-wrap" id="notif-drop-wrap">
@@ -1778,6 +1838,37 @@ footer.m-footer{
     </div>
   </div>
 
+  <!-- ── LEFT DRAWER ── -->
+  <div class="d-drawer-back" id="d-drawer-back" onclick="closeDrawer()"></div>
+  <aside class="d-drawer" id="d-drawer" aria-hidden="true">
+    <div class="d-drawer-hd">
+      <img src="/logo-white-sm.png" alt="Davincii">
+      <button class="d-drawer-x" aria-label="Close" onclick="closeDrawer()"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6l-12 12"/></svg></button>
+    </div>
+    <div class="d-drawer-body">
+      <div class="d-drawer-sec">
+        <button class="d-drawer-btn" onclick="drawerNav('overview')"><span class="d-drawer-ico"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg></span>Dashboard</button>
+        <button class="d-drawer-btn" onclick="drawerNav('catalog')"><span class="d-drawer-ico"><svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>My Songs</button>
+        <button class="d-drawer-btn" onclick="drawerNav('add-song')"><span class="d-drawer-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg></span>Add Song</button>
+      </div>
+      <div class="d-drawer-sec">
+        <button class="d-drawer-btn" onclick="drawerNav('profile')"><span class="d-drawer-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg></span>Artist Profile</button>
+        <button class="d-drawer-btn" onclick="drawerNav('statements')"><span class="d-drawer-ico"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h6"/></svg></span>Statements</button>
+        <button class="d-drawer-btn" onclick="drawerNav('payouts')"><span class="d-drawer-ico"><svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg></span>Payouts</button>
+      </div>
+      <div class="d-drawer-sec">
+        <button class="d-drawer-btn" onclick="drawerNav('settings')"><span class="d-drawer-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5h0a1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></span>Settings</button>
+        <button class="d-drawer-btn" onclick="drawerNav('notifications')"><span class="d-drawer-ico"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></span>Notifications</button>
+      </div>
+      <div class="d-drawer-sec admin-nav-mob" id="mob-admin-drawer" style="display:none">
+        <button class="d-drawer-btn" onclick="drawerNav('signups')"><span class="d-drawer-ico"><svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg></span>Signups</button>
+      </div>
+      <div class="d-drawer-sec">
+        <button class="d-drawer-btn danger" onclick="closeDrawer();mobLogout()"><span class="d-drawer-ico"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></span>Sign out</button>
+      </div>
+    </div>
+  </aside>
+
   <!-- ── OVERVIEW ── -->
   <div class="dash-page d-content" id="dp-overview">
     <div class="d-pg-title" id="mob-dash-greeting">Good morning, <em id="mob-greeting-name">—</em></div>
@@ -1810,7 +1901,7 @@ footer.m-footer{
     </div>
     <div class="d-stats">
       <div class="d-stat"><div class="d-stat-num">0</div><div class="d-stat-lbl">Songs</div></div>
-      <div class="d-stat"><div class="d-stat-num">$0</div><div class="d-stat-lbl">Collected</div></div>
+      <div class="d-stat"><div class="d-stat-num"><span class="d-cs">$</span>0</div><div class="d-stat-lbl">Collected</div></div>
       <div class="d-stat"><div class="d-stat-num">—</div><div class="d-stat-lbl">PRO</div></div>
     </div>
     <div class="d-sbox">
@@ -2407,6 +2498,8 @@ function mobActivateDashboard(artist) {
   if (artist && artist.is_admin) {
     var adminNav = document.getElementById('mob-admin-nav');
     if (adminNav) adminNav.style.display = '';
+    var adminDrawer = document.getElementById('mob-admin-drawer');
+    if (adminDrawer) adminDrawer.style.display = '';
   }
   var initialPage = getDashPageFromURL() || 'overview';
   var url = initialPage === 'overview' ? '/dashboard' : '/dashboard/' + initialPage;
@@ -2442,13 +2535,15 @@ window.addEventListener('popstate', function(e) {
     document.body.style.color = '';
     return;
   }
-  if (token) {
+  var loggedIn = false;
+  try { loggedIn = !!localStorage.getItem('dv_artist'); } catch(_) {}
+  if (loggedIn) {
     var dashScreen = document.getElementById('screen-dashboard');
     if (!dashScreen || !dashScreen.classList.contains('active')) {
       try { mobActivateDashboard(JSON.parse(localStorage.getItem('dv_artist') || '{}')); } catch(_) {}
     }
-    var page = (e.state && e.state.page) || getDashPageFromURL();
-    if (page) showDP(page, true);
+    var page = (e.state && e.state.page) || getDashPageFromURL() || 'overview';
+    showDP(page, true);
   } else {
     var screen = getScreenFromURL();
     if (screen) go(screen, true);
@@ -2771,7 +2866,7 @@ function openMobWithdraw(){
       .then(function(r) { return r.json(); })
       .then(function(data) {
         var balEl = document.getElementById('mob-wd-balance');
-        if (balEl) balEl.textContent = '$' + (parseFloat(data.available) || 0).toFixed(2);
+        if (balEl) balEl.innerHTML = '<span class="d-cs">$</span>' + (parseFloat(data.available) || 0).toFixed(2);
       }).catch(function(){});
   }
 }
@@ -3092,13 +3187,38 @@ function submitMobW9() {
 // LOGO CLICK
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function logoClick() {
-  if (token) {
-    go('dashboard');
+  var loggedIn = false;
+  try { loggedIn = !!localStorage.getItem('dv_artist'); } catch(_) {}
+  if (loggedIn) {
+    var dash = document.getElementById('screen-dashboard');
+    if (dash && !dash.classList.contains('active')) {
+      document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});
+      dash.classList.add('active');
+    }
+    document.body.classList.add('dashboard-active');
+    document.body.style.background = '#F0F4FA';
+    document.body.style.color = '#0A0A0A';
     showDP('overview');
   } else {
     go('landing');
     scrollTo({ top: 0, behavior: 'smooth' });
   }
+}
+
+// ── Left drawer ──
+function openDrawer(){
+  document.getElementById('d-drawer').classList.add('open');
+  document.getElementById('d-drawer-back').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeDrawer(){
+  document.getElementById('d-drawer').classList.remove('open');
+  document.getElementById('d-drawer-back').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function drawerNav(page){
+  closeDrawer();
+  showDP(page);
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -3421,7 +3541,7 @@ function mobToggle2FA() {
     <div style="padding:20px">
       <div style="background:#F0F4FA;border-radius:10px;padding:18px;margin-bottom:18px;text-align:center">
         <div style="font-size:10px;font-weight:600;letter-spacing:0.10em;text-transform:uppercase;color:#64748B;margin-bottom:4px">Available Balance</div>
-        <div id="mob-wd-balance" style="font-family:var(--serif);font-size:36px;font-weight:300;color:var(--black)">$0.00</div>
+        <div id="mob-wd-balance" style="font-family:var(--serif);font-size:36px;font-weight:300;color:var(--black)"><span class="d-cs">$</span>0.00</div>
       </div>
       <label class="field-label">Amount to withdraw</label>
       <input class="field" type="number" id="mob-wd-amount" placeholder="0.00" min="10" step="0.01" style="margin-bottom:6px">
