@@ -136,6 +136,19 @@ async function sendVerificationEmail({ email, name, code }) {
   }
 }
 
+// OAuth state helpers — CSRF protection for Google flow.
+// State is a random token stored in a short-lived HttpOnly cookie and echoed
+// back via the OAuth `state` query param. Callback compares with timing-safe
+// equality; anything missing or mismatched is rejected.
+const OAUTH_STATE_COOKIE = 'dv_oauth_state';
+const OAUTH_STATE_COOKIE_OPTS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'lax', // must survive top-level redirect back from Google
+  maxAge: 10 * 60 * 1000, // 10 minutes
+  path: '/',
+};
+
 // GET /api/auth/google - Initiate Google OAuth (authorization code flow)
 router.get('/google', async (req, res) => {
   try {
@@ -147,6 +160,10 @@ router.get('/google', async (req, res) => {
       return res.redirect('/login?error=' + encodeURIComponent('Google sign-in is not configured. Please contact support.'));
     }
 
+    // Generate a random state token and bind it to this browser via cookie
+    const state = crypto.randomBytes(32).toString('hex');
+    res.cookie(OAUTH_STATE_COOKIE, state, OAUTH_STATE_COOKIE_OPTS);
+
     const params = new URLSearchParams({
       client_id: googleClientId,
       redirect_uri: `${appUrl}/api/auth/google/callback`,
@@ -154,6 +171,7 @@ router.get('/google', async (req, res) => {
       scope: 'openid email profile',
       prompt: 'select_account',
       access_type: 'offline',
+      state,
     });
     res.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`);
   } catch (err) {
@@ -164,7 +182,7 @@ router.get('/google', async (req, res) => {
 
 // GET /api/auth/google/callback - Handle Google authorization code
 router.get('/google/callback', async (req, res) => {
-  const { code, error: googleError } = req.query;
+  const { code, error: googleError, state: returnedState } = req.query;
 
   if (googleError) {
     console.error('[Google callback] Google returned error:', googleError);
@@ -173,6 +191,21 @@ router.get('/google/callback', async (req, res) => {
   if (!code) {
     console.error('[Google callback] No authorization code received');
     return res.redirect('/login?error=' + encodeURIComponent('Google sign-in failed — no authorization code received.'));
+  }
+
+  // CSRF protection: verify state matches the cookie set at OAuth initiation.
+  // Always clear the cookie so a single state value can't be reused.
+  const expectedState = req.cookies && req.cookies[OAUTH_STATE_COOKIE];
+  res.clearCookie(OAUTH_STATE_COOKIE, { ...OAUTH_STATE_COOKIE_OPTS, maxAge: undefined });
+  if (!expectedState || !returnedState || typeof returnedState !== 'string') {
+    console.error('[Google callback] Missing OAuth state');
+    return res.redirect('/login?error=' + encodeURIComponent('Google sign-in failed — session expired. Please try again.'));
+  }
+  const a = Buffer.from(expectedState);
+  const b = Buffer.from(returnedState);
+  if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) {
+    console.error('[Google callback] OAuth state mismatch');
+    return res.redirect('/login?error=' + encodeURIComponent('Google sign-in failed — invalid session. Please try again.'));
   }
 
   try {
