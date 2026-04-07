@@ -1234,33 +1234,23 @@
       font-family: 'Pinyon Script', cursive;
       font-size: 28px; color: #fff; cursor: pointer; line-height: 1;
     }
-    .top-nav-right { display: flex; align-items: center; gap: 20px; margin-right: 12px; }
+    .top-nav-right { display: flex; align-items: center; gap: 16px; }
     .top-nav-name {
       font-family: 'DM Sans', sans-serif;
-      font-size: 14.5px; font-weight: 600; color: #fff;
-      letter-spacing: 0.01em;
+      font-size: 13px; font-weight: 400; color: rgba(255,255,255,0.55);
     }
     .avatar-wrap { position: relative; }
     .avatar {
-      width: 36px; height: 36px; border-radius: 50%;
-      background: #fff;
+      width: 34px; height: 34px; border-radius: 50%;
+      background: rgba(255,255,255,0.06);
       display: flex; align-items: center; justify-content: center;
-      color: #0A0F1F;
+      color: rgba(255,255,255,0.75);
       cursor: pointer; user-select: none;
-      border: 1px solid rgba(255,255,255,0.85);
-      box-shadow: 0 4px 14px rgba(0,0,0,0.35);
-      transition: transform 0.15s, box-shadow 0.22s, background 0.18s;
+      border: 1.5px solid rgba(255,255,255,0.12);
+      transition: background 0.18s, border-color 0.18s;
     }
-    .avatar:hover {
-      background: #F1F5F9;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.45);
-    }
-    .avatar:active { transform: scale(0.94); }
-    .avatar svg {
-      width: 17px; height: 17px; display: block;
-      fill: none; stroke: currentColor; stroke-width: 2;
-      stroke-linecap: round; stroke-linejoin: round;
-    }
+    .avatar:hover { background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.20); }
+    .avatar svg { width: 18px; height: 18px; display: block; }
     .avatar-dropdown {
       display: none; position: absolute; right: 0; top: calc(100% + 10px);
       width: 220px; background: #fff;
@@ -2428,36 +2418,28 @@
       position: relative;
     }
     .notif-bell {
-      width: 36px; height: 36px; border-radius: 50%;
-      background: #fff;
-      border: 1px solid rgba(255,255,255,0.85);
-      cursor: pointer;
+      width: 36px; height: 36px; border-radius: 8px;
+      background: none; border: none; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
-      color: #0A0F1F;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.35);
-      transition: transform 0.15s, box-shadow 0.22s, background 0.18s;
+      color: rgba(255,255,255,0.55);
+      transition: background 0.15s, color 0.15s;
       position: relative;
     }
     .notif-bell:hover {
-      background: #F1F5F9;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.45);
+      background: rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.90);
     }
-    .notif-bell:active { transform: scale(0.94); }
     .notif-bell svg {
-      width: 17px; height: 17px;
+      width: 18px; height: 18px;
       fill: none; stroke: currentColor;
-      stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+      stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
     }
-    /* Unread badge — red, with count */
+    /* Unread badge dot */
     .notif-bell-badge {
-      position: absolute; top: -3px; right: -3px;
-      min-width: 14px; height: 14px; padding: 0 4px;
-      border-radius: 7px; background: #EF4444;
+      position: absolute; top: 6px; right: 6px;
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #3B82F6;
       border: 2px solid #030912;
-      box-shadow: none;
-      font-family: 'Inter', sans-serif; font-size: 9px; font-weight: 700;
-      color: #fff; line-height: 10px; text-align: center;
-      display: flex; align-items: center; justify-content: center;
       pointer-events: none;
     }
     /* Notification dropdown panel */
@@ -3471,6 +3453,13 @@
       });
   }
 
+  function legalBack() {
+    if (localStorage.getItem('dv_artist')) {
+      go('dashboard');
+    } else {
+      go('landing');
+    }
+  }
   function go(key, skipPush) {
     // Standalone pages for Safari credential autofill (real form POST + navigation)
     if(key==='login'){window.location.href='/login';return;}
@@ -5729,8 +5718,8 @@
 <!-- ════════════ PRIVACY ════════════ -->
 <div class="screen legal-screen" id="screen-privacy">
   <div class="legal-topbar">
-    <span class="legal-topbar-logo" onclick="go('landing')"><img src="/logo-white-sm.png" alt="Davincii" style="height:26px"></span>
-    <button class="legal-topbar-back" onclick="history.back ? go('landing') : go('landing')">← Back</button>
+    <span class="legal-topbar-logo" onclick="legalBack()"><img src="/logo-white-sm.png" alt="Davincii" style="height:26px"></span>
+    <button class="legal-topbar-back" onclick="legalBack()">← Back</button>
   </div>
   <div class="legal-body">
     <div class="legal-eyebrow">Legal</div>
@@ -5800,8 +5789,8 @@
 <!-- ════════════ TERMS ════════════ -->
 <div class="screen legal-screen" id="screen-terms">
   <div class="legal-topbar">
-    <span class="legal-topbar-logo" onclick="go('landing')"><img src="/logo-white-sm.png" alt="Davincii" style="height:26px"></span>
-    <button class="legal-topbar-back" onclick="go('landing')">← Back</button>
+    <span class="legal-topbar-logo" onclick="legalBack()"><img src="/logo-white-sm.png" alt="Davincii" style="height:26px"></span>
+    <button class="legal-topbar-back" onclick="legalBack()">← Back</button>
   </div>
   <div class="legal-body">
     <div class="legal-eyebrow">Legal</div>
