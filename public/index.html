@@ -1304,20 +1304,20 @@
     .sb-label {
       font-family: 'DM Sans', sans-serif;
       font-size: 10px; font-weight: 600; letter-spacing: 0.22em;
-      text-transform: uppercase; color: rgba(255,255,255,0.22);
+      text-transform: uppercase; color: rgba(255,255,255,0.42);
       padding: 6px 12px 8px; display: block;
     }
     .sidebar .nav-lnk {
       display: flex; align-items: center; gap: 10px; width: 100%;
       padding: 9px 12px; border-radius: 7px;
       font-family: 'DM Sans', sans-serif;
-      font-size: 13.5px; font-weight: 400; color: rgba(255,255,255,0.50);
+      font-size: 13.5px; font-weight: 400; color: rgba(255,255,255,0.78);
       background: none; border: none; cursor: pointer; text-align: left;
       transition: background 0.15s, color 0.15s;
       margin-bottom: 2px;
       white-space: nowrap;
     }
-    .sidebar .nav-lnk:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.80); }
+    .sidebar .nav-lnk:hover { background: rgba(255,255,255,0.06); color: #fff; }
     .sidebar .nav-lnk.active {
       background: rgba(59,130,246,0.18);
       color: #93C5FD;
@@ -3598,7 +3598,6 @@
               '<div class="catalog-row-title">' + title + '</div>' +
             '</div>' +
             '<span class="status-badge ' + statusClass + '">' + statusLabel + '</span>' +
-            '<button class="catalog-row-del" title="Delete" aria-label="Delete song" onclick="deleteSong(\'' + esc(s.id) + '\', \'' + esc(s.title || 'Untitled').replace(/\'/g,"\\'") + '\')">&times;</button>' +
           '</div>';
         }).join('');
         body.innerHTML = '<div class="catalog-list">' + rows + '</div>';
