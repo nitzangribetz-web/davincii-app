@@ -105,37 +105,44 @@
     .nav-right { display:flex; align-items:center; gap:10px; }
     /* Authed nav variant — shown when user has a session, hides Login/Get-started */
     .nav-right.authed .nav-guest { display:none !important; }
-    .nav-right .nav-authed { display:none; align-items:center; gap:14px; margin-right:14px; }
+    .nav-right .nav-authed { display:none; align-items:center; gap:12px; margin-right:36px; }
     .nav-right.authed .nav-authed { display:flex; }
     .nav-dash-btn {
-      padding:10px 20px; font-family:'Inter',sans-serif;
-      font-size:13px; font-weight:600; color:#fff;
-      background:rgba(255,255,255,0.14);
-      border:1px solid rgba(255,255,255,0.32);
-      border-radius:8px; cursor:pointer; letter-spacing:0.01em;
-      transition:background 0.18s, border-color 0.18s, transform 0.15s;
+      padding:11px 22px; font-family:'Inter',sans-serif;
+      font-size:13.5px; font-weight:600; color:#fff;
+      background:#0A0F1F;
+      border:1px solid rgba(255,255,255,0.28);
+      border-radius:9px; cursor:pointer; letter-spacing:0.01em;
+      box-shadow:0 4px 14px rgba(0,0,0,0.35);
+      transition:background 0.18s, border-color 0.18s, transform 0.15s, box-shadow 0.22s;
     }
-    .nav-dash-btn:hover { background:rgba(255,255,255,0.22); border-color:rgba(255,255,255,0.48); }
+    .nav-dash-btn:hover {
+      background:#121A33; border-color:rgba(255,255,255,0.50);
+      box-shadow:0 6px 20px rgba(0,0,0,0.45);
+    }
     .nav-dash-btn:active { transform:scale(0.97); }
     .nav-bell, .nav-avatar {
-      width:38px; height:38px; border-radius:50%;
-      background:rgba(255,255,255,0.14);
-      border:1px solid rgba(255,255,255,0.32);
+      width:40px; height:40px; border-radius:50%;
+      background:#fff; border:1px solid rgba(255,255,255,0.85);
       display:flex; align-items:center; justify-content:center;
-      color:#fff; cursor:pointer; position:relative;
-      transition:background 0.18s, border-color 0.18s, transform 0.15s;
+      color:#0A0F1F; cursor:pointer; position:relative;
+      box-shadow:0 4px 14px rgba(0,0,0,0.35);
+      transition:transform 0.15s, box-shadow 0.22s, background 0.18s;
     }
-    .nav-bell:hover, .nav-avatar:hover { background:rgba(255,255,255,0.22); border-color:rgba(255,255,255,0.48); }
+    .nav-bell:hover, .nav-avatar:hover {
+      background:#F1F5F9;
+      box-shadow:0 6px 20px rgba(0,0,0,0.45);
+    }
     .nav-bell:active, .nav-avatar:active { transform:scale(0.94); }
-    .nav-bell svg, .nav-avatar svg { width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+    .nav-bell svg, .nav-avatar svg { width:19px; height:19px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
     .nav-bell-dot {
-      position:absolute; top:-3px; right:-3px;
-      min-width:16px; height:16px; padding:0 5px;
-      border-radius:8px; background:#EF4444;
+      position:absolute; top:-5px; right:-5px;
+      min-width:18px; height:18px; padding:0 5px;
+      border-radius:9px; background:#EF4444;
       border:2px solid #050C1A;
-      box-shadow:0 0 0 1px rgba(239,68,68,0.45), 0 0 12px rgba(239,68,68,0.55);
-      font-family:'Inter',sans-serif; font-size:10px; font-weight:700;
-      color:#fff; line-height:12px; text-align:center;
+      box-shadow:0 0 0 1px rgba(239,68,68,0.55), 0 0 14px rgba(239,68,68,0.65);
+      font-family:'Inter',sans-serif; font-size:11px; font-weight:700;
+      color:#fff; line-height:14px; text-align:center;
       display:flex; align-items:center; justify-content:center;
     }
     .nav-bell-wrap, .nav-avatar-wrap { position:relative; }
