@@ -1340,6 +1340,7 @@ footer.m-footer{
 <script src="/js/api.js"></script>
 <script src="/js/auth.js"></script>
 <script src="/js/notifications.js"></script>
+<script src="/js/stripe-state.js"></script>
 </head>
 <body>
 <script>
@@ -1738,9 +1739,8 @@ footer.m-footer{
             <button class="notif-panel-mark">Mark all read</button>
           </div>
           <div class="notif-panel-body">
-            <div class="notif-panel-empty-icon">🔔</div>
-            <div class="notif-panel-empty-t">No notifications yet.</div>
-            <div class="notif-panel-empty-s">You'll be notified when compositions are registered, royalties are collected, and payouts are processed.</div>
+            <div class="notif-panel-empty-t">You're all caught up.</div>
+            <div class="notif-panel-empty-s">We'll let you know the moment royalties, registrations, or payouts move.</div>
           </div>
           <div class="notif-panel-footer">
             <button class="notif-panel-footer-btn" onclick="showDP('notifications');closeNotifPanel()">View all notifications →</button>
@@ -2007,7 +2007,7 @@ footer.m-footer{
       <div class="d-sbox-hd"><div><div class="d-sbox-title">Tax Forms</div><div class="d-sbox-sub">Required before first payout</div></div><span class="d-pill pending"><span class="d-pill-dot"></span>Pending</span></div>
       <div style="padding:14px 16px"><div style="font-family:var(--sans);font-size:13.5px;font-weight:500;color:var(--black);margin-bottom:4px">W-9 — Taxpayer Identification</div><div style="font-family:var(--sans);font-size:12.5px;font-weight:300;color:var(--muted);margin-bottom:14px">Required for U.S. persons. Non-U.S. persons complete a W-8BEN.</div><button class="btn-s" style="max-width:190px" onclick="openMobW9Modal()">Complete Tax Form</button></div>
     </div>
-    <div class="d-sbox"><div class="d-sbox-hd"><div><div class="d-sbox-title">Payout History</div></div></div><div class="d-empty"><div class="d-empty-title">No payouts yet.</div><div class="d-empty-sub">Your payout history will appear here.</div></div></div>
+    <div class="d-sbox"><div class="d-sbox-hd"><div><div class="d-sbox-title">Payout History</div></div></div><div class="d-empty"><div class="d-empty-title">No payouts yet.</div><div class="d-empty-sub">Payouts are issued each quarter after royalties are collected and distributed. Your history will appear here after your first payment.</div></div></div>
   </div>
 
   <!-- ── NOTIFICATIONS ── -->
@@ -2578,13 +2578,14 @@ function mobGoogleComplete() {
   })
   .then(function(r){ return r.json().then(function(d){ return {ok:r.ok,data:d}; }); })
   .then(function(result){
-    if (!result.ok) throw new Error(result.data.error || 'Failed to complete signup');
+    if (!result.ok) throw new Error(result.data.error || 'We couldn\u2019t complete your signup right now. Please try again.');
     localStorage.setItem('dv_artist', JSON.stringify(result.data.artist));
     mobActivateDashboard(result.data.artist);
   })
   .catch(function(err){
     btn.disabled=false; btn.textContent='Create account →';
-    errEl.textContent=err.message; errEl.removeAttribute('hidden');
+    errEl.textContent = (err && err.message) ? err.message : 'We couldn\u2019t complete your signup right now. Please try again.';
+    errEl.removeAttribute('hidden');
   });
 }
 function mobGoogleBack() {
@@ -2782,7 +2783,7 @@ function confirmMobWithdraw(){
   .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
   .then(function(res) {
     if (!res.ok) {
-      errEl.textContent = res.data.error || 'Withdrawal failed';
+      errEl.textContent = res.data.error || 'We couldn\u2019t process your withdrawal right now. Please try again.';
       errEl.style.display = 'block';
       btn.disabled = false;
       btn.textContent = 'WITHDRAW';

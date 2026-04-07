@@ -253,7 +253,7 @@ function submitGoogleSignup() {
   })
   .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
   .then(function(result) {
-    if (!result.ok) throw new Error(result.data.error || 'Failed to complete signup');
+    if (!result.ok) throw new Error(result.data.error || 'We couldn\u2019t complete your signup right now. Please try again.');
 
     // Update localStorage with new artist data and new token
     localStorage.setItem('dv_artist', JSON.stringify(result.data.artist));
@@ -267,7 +267,7 @@ function submitGoogleSignup() {
   .catch(function(err) {
     btn.disabled = false;
     btn.textContent = 'Complete signup';
-    errEl.textContent = err.message;
+    errEl.textContent = (err && err.message) ? err.message : 'We couldn\u2019t complete your signup right now. Please try again.';
     errEl.classList.add('visible');
   });
 }

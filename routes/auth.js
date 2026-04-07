@@ -588,8 +588,8 @@ router.post('/profile', require('../middleware/auth'), async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     console.error('Profile update error:', err.message, err.stack);
-    if (isFormSubmit) return res.redirect('/details.html?error=' + encodeURIComponent('Failed to save details'));
-    res.status(500).json({ error: 'Failed to save details: ' + err.message });
+    if (isFormSubmit) return res.redirect('/details.html?error=' + encodeURIComponent('We couldn\u2019t save your details right now. Please try again.'));
+    res.status(500).json({ error: 'We couldn\u2019t save your details right now. Please try again.' });
   }
 });
 

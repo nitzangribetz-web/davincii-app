@@ -2407,6 +2407,7 @@
   <script src="/js/api.js"></script>
   <script src="/js/auth.js"></script>
   <script src="/js/notifications.js"></script>
+  <script src="/js/stripe-state.js"></script>
 </head>
 <body>
 <script>
@@ -3219,7 +3220,7 @@
         body.innerHTML = '<div class="catalog-list">' + rows + '</div>';
       })
       .catch(function() {
-        body.innerHTML = '<div class="empty-state"><div class="empty-state-title">Couldn\'t load catalog.</div><div class="empty-state-sub">Please try again in a moment.</div></div>';
+        body.innerHTML = '<div class="empty-state"><div class="empty-state-title">Couldn\u2019t load your catalog.</div><div class="empty-state-sub">Something went wrong on our end. Check your connection and try again.</div><button onclick="loadCatalog()" class="btn-blue">Retry</button></div>';
       });
   }
 
@@ -3411,13 +3412,14 @@
     })
     .then(function(r){ return r.json().then(function(d){ return {ok:r.ok,data:d}; }); })
     .then(function(result){
-      if (!result.ok) throw new Error(result.data.error || 'Failed to complete signup');
+      if (!result.ok) throw new Error(result.data.error || 'We couldn\u2019t complete your signup right now. Please try again.');
       localStorage.setItem('dv_artist', JSON.stringify(result.data.artist));
       onAuthSuccess(result.data.artist, true);
     })
     .catch(function(err){
       btn.disabled=false; btn.textContent='Create account →';
-      errEl.textContent=err.message; errEl.classList.add('visible');
+      errEl.textContent = (err && err.message) ? err.message : 'We couldn\u2019t complete your signup right now. Please try again.';
+      errEl.classList.add('visible');
     });
   }
 
@@ -3694,14 +3696,14 @@
       .then(function(r){ return r.json().then(function(d){ return { ok:r.ok, d:d }; }); })
       .then(function(res){
         if(!res.ok || !res.d.url){
-          showToast(res.d.error || 'Unable to start Stripe onboarding', 'error');
+          showToast('We couldn\u2019t connect your payout account right now. Please try again.', 'error');
           if(btn){ btn.disabled = false; btn.textContent = 'Try again'; }
           return;
         }
         window.location.href = res.d.url;
       })
       .catch(function(){
-        showToast('Network error starting Stripe', 'error');
+        showToast('We couldn\u2019t connect your payout account right now. Please try again.', 'error');
         if(btn){ btn.disabled = false; btn.textContent = 'Try again'; }
       });
   }
@@ -3760,7 +3762,7 @@
     .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
     .then(function(res) {
       if (!res.ok) {
-        errEl.textContent = res.data.error || 'Withdrawal failed';
+        errEl.textContent = res.data.error || 'We couldn\u2019t process your withdrawal right now. Please try again.';
         errEl.style.display = 'block';
         btn.disabled = false;
         btn.textContent = 'Withdraw';
@@ -5174,6 +5176,18 @@
               <div class="sbox-sub" id="signups-count"></div>
             </div>
           </div>
+          <div style="padding:14px 18px;border-bottom:1px solid #E8EDF5;display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+            <input id="signups-search" type="search" placeholder="Search name or email"
+              style="flex:1 1 220px;min-width:180px;padding:8px 12px;border:1px solid #CBD5E1;border-radius:6px;font-family:var(--sans);font-size:13px;background:#fff">
+            <div id="signups-filters" style="display:flex;flex-wrap:wrap;gap:6px">
+              <button type="button" class="sg-chip" data-filter="all">All</button>
+              <button type="button" class="sg-chip" data-filter="newest">Newest 7d</button>
+              <button type="button" class="sg-chip" data-filter="unverified">Unverified</button>
+              <button type="button" class="sg-chip" data-filter="incomplete">Profile incomplete</button>
+              <button type="button" class="sg-chip" data-filter="no_stripe">No Stripe</button>
+              <button type="button" class="sg-chip" data-filter="stripe_incomplete">Stripe incomplete</button>
+            </div>
+          </div>
           <div class="sbox-body" style="padding:0;overflow-x:auto">
             <table style="width:100%;border-collapse:collapse;font-family:var(--sans);font-size:13px">
               <thead>
@@ -5183,15 +5197,21 @@
                   <th style="padding:10px 14px;font-weight:600;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:#374151">Stage Name</th>
                   <th style="padding:10px 14px;font-weight:600;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:#374151">Verified</th>
                   <th style="padding:10px 14px;font-weight:600;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:#374151">Onboarded</th>
+                  <th style="padding:10px 14px;font-weight:600;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:#374151">Stripe</th>
                   <th style="padding:10px 14px;font-weight:600;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:#374151">Signed Up</th>
                 </tr>
               </thead>
               <tbody id="signups-tbody">
-                <tr><td colspan="6" style="padding:32px;text-align:center;color:#94A3B8">Loading...</td></tr>
+                <tr><td colspan="7" style="padding:32px;text-align:center;color:#94A3B8">Loading...</td></tr>
               </tbody>
             </table>
           </div>
         </div>
+        <style>
+          .sg-chip{padding:6px 12px;border:1px solid #CBD5E1;background:#fff;border-radius:999px;font-family:var(--sans);font-size:12px;font-weight:500;color:#475569;cursor:pointer;transition:all .15s}
+          .sg-chip:hover{border-color:#2260CC;color:#2260CC}
+          .sg-chip.active{background:#0E2A78;border-color:#0E2A78;color:#fff}
+        </style>
       </div>
 
     </div><!-- /main content scroll -->
