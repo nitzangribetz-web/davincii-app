@@ -2619,6 +2619,7 @@
   <script src="/js/auth.js"></script>
   <script src="/js/notifications.js"></script>
   <script src="/js/stripe-state.js"></script>
+  <script src="/js/tax.js"></script>
 </head>
 <body>
 <script>
@@ -3586,7 +3587,7 @@
       window.history.pushState({ screen:'dashboard', page: page }, '', url);
     }
     if(page === 'signups') loadSignups();
-    if(page === 'payouts') { try { loadStripeStatus(); } catch(e) {} try { loadPayPalStatus(); } catch(e) {} }
+    if(page === 'payouts') { try { loadStripeStatus(); } catch(e) {} try { loadPayPalStatus(); } catch(e) {} try { loadTaxStatus(); } catch(e) {} try { loadPayoutMethods(); } catch(e) {} }
     if(page === 'add-song') deskResetAddSong();
     if(page === 'overview') { try { applySetupCompletion(); } catch(e) {} }
     if(page === 'catalog') { try { loadCatalog(); } catch(e) {} }
@@ -4213,6 +4214,101 @@
       });
   }
   window.loadStripeStatus = loadStripeStatus;
+
+  // ── Tax form (W-9 / W-8BEN) ───────────────────────────────────────────
+  function renderTaxStatus(d){
+    if (!window.Dv || !Dv.tax) return;
+    var vm = Dv.tax.describeState(d);
+    var badge = document.getElementById('tax-status-badge');
+    var text  = document.getElementById('tax-status-text');
+    var title = document.getElementById('tax-card-title');
+    var desc  = document.getElementById('tax-card-desc');
+    var btn   = document.getElementById('tax-card-action');
+    if (badge) badge.className = 'status-badge ' + (vm.badgeTone === 'success' ? 'success' : (vm.badgeTone === 'pending' ? 'pending' : 'error'));
+    if (text)  text.textContent = vm.label;
+    if (title) title.textContent = vm.isComplete ? (vm.formLabel + ' on file') : 'Complete your tax form (1 min)';
+    if (desc)  desc.textContent  = vm.desc;
+    if (btn)   btn.textContent   = vm.actionText;
+  }
+  function loadTaxStatus(){
+    if (!window.Dv || !Dv.tax) return;
+    Dv.tax.fetchStatus().then(renderTaxStatus);
+  }
+  function startTaxForm(){
+    if (!window.Dv || !Dv.tax) return;
+    var btn = document.getElementById('tax-card-action');
+    if (btn) { btn.disabled = true; btn.textContent = 'Opening\u2026'; }
+    Dv.tax.start({}).then(function(res){
+      if (res && res.url) {
+        window.location.href = res.url;
+      } else {
+        // No real provider wired up yet — show an explanation toast and
+        // leave the row in 'pending' state. When Anvil is integrated, the
+        // backend will return { url } and we'll redirect.
+        showToast('Tax-form provider isn\u2019t connected yet. The form is saved as pending.', 'success');
+        if (btn) { btn.disabled = false; btn.textContent = 'Resume'; }
+        loadTaxStatus();
+      }
+    }).catch(function(){
+      showToast('Could not start the tax form. Please try again.', 'error');
+      if (btn) { btn.disabled = false; btn.textContent = 'Complete Tax Form'; }
+    });
+  }
+  window.startTaxForm = startTaxForm;
+  window.loadTaxStatus = loadTaxStatus;
+
+  // ── Payout method picker ──────────────────────────────────────────────
+  function renderPayoutMethods(data){
+    var list = document.getElementById('payout-method-list');
+    if (!list) return;
+    var methods = (data && data.methods) || [];
+    var byType = {};
+    methods.forEach(function(m){ byType[m.method_type] = m; });
+    var rails = [
+      { type: 'stripe', label: 'Stripe',  blurb: 'Direct deposit to your bank — works in 40+ countries.', action: 'stripeConnectStart()' },
+      { type: 'paypal', label: 'PayPal',  blurb: 'Send to any PayPal email. Best for non-U.S. artists.',  action: 'showDashPage(\'profile\')' }
+    ];
+    list.innerHTML = rails.map(function(r){
+      var m = byType[r.type];
+      var connected = !!m && m.status === 'connected';
+      var primary = !!m && m.is_primary;
+      var statusLabel = connected ? (primary ? 'Primary' : 'Connected') : 'Not connected';
+      var statusClass = connected ? (primary ? 'success' : 'pending') : 'error';
+      var actionLabel = connected ? (primary ? 'Primary' : 'Make primary') : 'Set up';
+      var actionFn = connected
+        ? (primary ? '' : ('setPrimaryPayoutMethod(\'' + r.type + '\')'))
+        : r.action;
+      var btn = primary
+        ? '<span class="status-badge success" style="pointer-events:none"><span class="status-dot"></span>Primary</span>'
+        : '<button class="btn-ghost-dark" onclick="' + actionFn + '">' + actionLabel + '</button>';
+      return '<div style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 16px;border:1px solid #E2E8F0;border-radius:8px">' +
+        '<div style="min-width:0">' +
+          '<div style="font-family:\'DM Sans\',sans-serif;font-size:14px;font-weight:600;color:#0A0A0A;margin-bottom:3px">' + r.label + '</div>' +
+          '<div style="font-family:\'DM Sans\',sans-serif;font-size:12.5px;font-weight:300;color:#64748B">' + r.blurb + '</div>' +
+        '</div>' +
+        '<div style="display:flex;align-items:center;gap:10px;flex-shrink:0">' +
+          '<span class="status-badge ' + statusClass + '" style="pointer-events:none"><span class="status-dot"></span>' + statusLabel + '</span>' +
+          (primary ? '' : btn) +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+  function loadPayoutMethods(){
+    if (!Dv || !Dv.api) return;
+    Dv.api.fetch('/payout-methods', { skipAuthRedirect: true })
+      .then(renderPayoutMethods)
+      .catch(function(){});
+  }
+  function setPrimaryPayoutMethod(type){
+    Dv.api.fetch('/payout-methods/primary', {
+      method: 'POST',
+      body: JSON.stringify({ method_type: type }),
+      headers: { 'Content-Type': 'application/json' }
+    }).then(function(){ loadPayoutMethods(); })
+      .catch(function(){ showToast('Could not update primary payout method.', 'error'); });
+  }
+  window.loadPayoutMethods = loadPayoutMethods;
+  window.setPrimaryPayoutMethod = setPrimaryPayoutMethod;
   window.stripeConnectStart = stripeConnectStart;
 
   window.selectedPayoutMethod = 'stripe';
@@ -4532,22 +4628,17 @@
         var box = document.getElementById('get-started-box');
         if (box) box.style.display = 'none';
       }
-      // W-9 / payouts completion is derived ONLY from Stripe Connect status.
-      // It is considered done when Stripe has both collected the full tax
-      // identity (details_submitted=true) AND has no outstanding requirements
-      // (no currently_due items). Anything less leaves the alert visible.
-      if (window.Dv && Dv.stripe) {
-        Dv.stripe.fetchStatus().then(function(d) {
-          var hasDetails = !!(d && d.details_submitted);
-          var reqs = (d && Array.isArray(d.requirements_due)) ? d.requirements_due : [];
-          var noOutstanding = reqs.length === 0;
-          var done = hasDetails && noOutstanding;
-          if (done) {
+      // Tax-form completion is derived ONLY from /api/tax/status (the
+      // platform's own record), not from any payout provider. This decouples
+      // W-9 / W-8BEN collection from Stripe / PayPal so artists can pick any
+      // payout rail without re-doing tax info.
+      if (window.Dv && Dv.tax) {
+        Dv.tax.fetchStatus().then(function(d) {
+          var vm = Dv.tax.describeState(d);
+          if (vm.isComplete) {
             try { localStorage.setItem('dv_setup_w9', '1'); } catch(_){}
             markSetupComplete('w9');
           } else {
-            // Stripe says not done — clear any stale local flag and re-show
-            // the alert in case it was previously marked complete.
             try { localStorage.removeItem('dv_setup_w9'); } catch(_){}
             try { localStorage.removeItem('dv_setup_w9_at'); } catch(_){}
             var alertEl = document.getElementById('setup-alert-w9');
@@ -5725,22 +5816,37 @@
             <div class="empty-state"><div class="empty-state-title">No payouts yet.</div><div class="empty-state-sub">Payouts are issued each quarter after royalties are collected and distributed. Your history will appear here once your first payment is processed.</div></div>
           </div>
         </div>
+        <!-- Tax Information (decoupled from payout method) -->
         <div class="sbox">
           <div class="sbox-head">
-            <div><div class="sbox-title">Payouts &amp; Tax Info</div><div class="sbox-sub">Powered by Stripe — required before your first withdrawal</div></div>
+            <div><div class="sbox-title">Tax Information</div><div class="sbox-sub">Required so we can pay you and issue a 1099 at year-end</div></div>
+            <div class="status-badge error" id="tax-status-badge">
+              <span class="status-dot"></span>
+              <span id="tax-status-text">Not Started</span>
+            </div>
+          </div>
+          <div class="sbox-body" style="padding:24px">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
+              <div style="max-width:560px">
+                <div id="tax-card-title" style="font-family:'DM Sans',sans-serif;font-size:15.5px;font-weight:600;color:#0A0A0A;margin-bottom:5px;letter-spacing:-0.01em">Complete your tax form (1 min)</div>
+                <div id="tax-card-desc" style="font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:300;color:#64748B;line-height:1.55">U.S. persons complete a W-9. Non-U.S. persons complete a W-8BEN. Davincii uses your tax form to issue a 1099 at year-end — separate from how you choose to receive payouts.</div>
+              </div>
+              <button id="tax-card-action" onclick="startTaxForm()" class="btn-ghost-dark">Complete Tax Form</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payout Method (Stripe / PayPal picker) -->
+        <div class="sbox">
+          <div class="sbox-head">
+            <div><div class="sbox-title">Payout Method</div><div class="sbox-sub">Choose how you'd like to receive your royalties</div></div>
             <div class="status-badge error" id="w9-status-badge">
               <span class="status-dot"></span>
               <span id="w9-status-text">Not Set Up</span>
             </div>
           </div>
           <div class="sbox-body" style="padding:24px">
-            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
-              <div style="max-width:560px">
-                <div style="font-family:'DM Sans',sans-serif;font-size:15.5px;font-weight:600;color:#0A0A0A;margin-bottom:5px;letter-spacing:-0.01em">Set up payouts in 2 minutes</div>
-                <div style="font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:300;color:#64748B;line-height:1.55">Davincii pays artists worldwide through Stripe. You'll create a free Stripe account and complete your tax info (W-9 for U.S. persons, W-8BEN for non-U.S.) in a single guided flow — no separate form to fill out here.</div>
-              </div>
-              <button onclick="openW9Modal()" class="btn-ghost-dark">Set Up Payouts</button>
-            </div>
+            <div id="payout-method-list" style="display:grid;gap:12px"></div>
           </div>
         </div>
       </div>

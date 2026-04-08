@@ -1469,6 +1469,7 @@ footer.m-footer{
 <script src="/js/auth.js"></script>
 <script src="/js/notifications.js"></script>
 <script src="/js/stripe-state.js"></script>
+<script src="/js/tax.js"></script>
 </head>
 <body>
 <script>
@@ -2188,8 +2189,12 @@ footer.m-footer{
       </div>
     </div>
     <div class="d-sbox" style="margin-bottom:12px">
-      <div class="d-sbox-hd"><div><div class="d-sbox-title">Payouts &amp; Tax Info</div><div class="d-sbox-sub">Powered by Stripe</div></div><span class="d-pill pending"><span class="d-pill-dot"></span>Not Set Up</span></div>
-      <div style="padding:14px 16px"><div style="font-family:var(--sans);font-size:13.5px;font-weight:500;color:var(--black);margin-bottom:4px">Set up payouts in 2 minutes</div><div style="font-family:var(--sans);font-size:12.5px;font-weight:300;color:var(--muted);line-height:1.6;margin-bottom:14px">Davincii pays artists worldwide through Stripe. You'll create a free Stripe account and complete your tax info (W-9 for U.S. persons, W-8BEN for non-U.S.) in a single guided flow — no separate form to fill out here.</div><button class="btn-s" style="max-width:190px" onclick="openMobW9Modal()">Set Up Payouts</button></div>
+      <div class="d-sbox-hd"><div><div class="d-sbox-title">Tax Information</div><div class="d-sbox-sub">Required for 1099 issuance</div></div><span class="d-pill error" id="mob-tax-status-badge"><span class="d-pill-dot"></span><span id="mob-tax-status-text">Not Started</span></span></div>
+      <div style="padding:14px 16px"><div id="mob-tax-card-title" style="font-family:var(--sans);font-size:13.5px;font-weight:500;color:var(--black);margin-bottom:4px">Complete your tax form (1 min)</div><div id="mob-tax-card-desc" style="font-family:var(--sans);font-size:12.5px;font-weight:300;color:var(--muted);line-height:1.6;margin-bottom:14px">U.S. persons complete a W-9. Non-U.S. persons complete a W-8BEN. Separate from how you choose to receive payouts.</div><button class="btn-s" style="max-width:190px" id="mob-tax-card-action" onclick="mobStartTaxForm()">Complete Tax Form</button></div>
+    </div>
+    <div class="d-sbox" style="margin-bottom:12px">
+      <div class="d-sbox-hd"><div><div class="d-sbox-title">Payout Method</div><div class="d-sbox-sub">Choose how you receive royalties</div></div></div>
+      <div id="mob-payout-method-list" style="padding:14px 16px;display:grid;gap:10px"></div>
     </div>
     <div class="d-sbox"><div class="d-sbox-hd"><div><div class="d-sbox-title">Payout History</div></div></div><div class="d-empty"><div class="d-empty-title">No payouts yet.</div><div class="d-empty-sub">Payouts are issued each quarter after royalties are collected and distributed. Your history will appear here after your first payment.</div></div></div>
   </div>
@@ -2734,17 +2739,16 @@ function mobLoadSongs() {
 // W-9 completion is derived from Stripe Connect status (details_submitted).
 // The legacy /api/payouts/w9 endpoint is intentionally a 410.
 function mobLoadW9Status() {
-  if (!window.Dv || !Dv.stripe) return;
-  Dv.stripe.fetchStatus()
+  if (!window.Dv || !Dv.tax) return;
+  Dv.tax.fetchStatus()
     .then(function(d) {
-      var hasDetails = !!(d && d.details_submitted);
-      var reqs = (d && Array.isArray(d.requirements_due)) ? d.requirements_due : [];
-      var done = hasDetails && reqs.length === 0;
-      if (done) {
+      var vm = Dv.tax.describeState(d);
+      // Also paint the payouts-page card if it's mounted.
+      try { mobRenderTaxStatus(d); } catch(_){}
+      if (vm.isComplete) {
         try { localStorage.setItem('dv_setup_w9', '1'); } catch(_){}
         mobMarkSetupComplete('w9');
       } else {
-        // Stripe says not done — clear stale flag and re-show the alert/row.
         try { localStorage.removeItem('dv_setup_w9'); } catch(_){}
         try { localStorage.removeItem('dv_setup_w9_at'); } catch(_){}
         var alertEl = document.getElementById('mob-alert-w9');
@@ -2863,7 +2867,7 @@ function showDP(page, skipPush){
     window.history.pushState({ screen:'dashboard', page: page }, '', url);
   }
   if(page === 'signups') mobLoadSignups();
-  if(page === 'payouts') { try { mobLoadStripeStatus(); } catch(e) {} try { mobLoadW9Status(); } catch(e) {} try { mobLoadPayPalStatus(); } catch(e) {} }
+  if(page === 'payouts') { try { mobLoadStripeStatus(); } catch(e) {} try { mobLoadW9Status(); } catch(e) {} try { mobLoadTaxStatus(); } catch(e) {} try { mobLoadPayoutMethods(); } catch(e) {} try { mobLoadPayPalStatus(); } catch(e) {} }
   if(page === 'add-song') mobResetAddSong();
   if(page === 'overview') {
     try { mobApplySetupCompletion(); } catch(e) {}
@@ -3052,6 +3056,95 @@ function mobStripeConnectStart(){
 }
 window.mobLoadStripeStatus = mobLoadStripeStatus;
 window.mobStripeConnectStart = mobStripeConnectStart;
+
+// ── Tax form (W-9 / W-8BEN) ─────────────────────────────────────────────────
+function mobRenderTaxStatus(d){
+  if (!window.Dv || !Dv.tax) return;
+  var vm = Dv.tax.describeState(d);
+  var badge = document.getElementById('mob-tax-status-badge');
+  var text  = document.getElementById('mob-tax-status-text');
+  var title = document.getElementById('mob-tax-card-title');
+  var desc  = document.getElementById('mob-tax-card-desc');
+  var btn   = document.getElementById('mob-tax-card-action');
+  if (badge) badge.className = 'd-pill ' + (vm.badgeTone === 'success' ? 'success' : (vm.badgeTone === 'pending' ? 'pending' : 'error'));
+  if (text)  text.textContent = vm.label;
+  if (title) title.textContent = vm.isComplete ? (vm.formLabel + ' on file') : 'Complete your tax form (1 min)';
+  if (desc)  desc.textContent  = vm.desc;
+  if (btn)   btn.textContent   = vm.actionText;
+}
+function mobLoadTaxStatus(){
+  if (!window.Dv || !Dv.tax) return;
+  Dv.tax.fetchStatus().then(mobRenderTaxStatus);
+}
+function mobStartTaxForm(){
+  if (!window.Dv || !Dv.tax) return;
+  var btn = document.getElementById('mob-tax-card-action');
+  if (btn) { btn.disabled = true; btn.textContent = 'Opening\u2026'; }
+  Dv.tax.start({}).then(function(res){
+    if (res && res.url) {
+      window.location.href = res.url;
+    } else {
+      showToast('Tax-form provider isn\u2019t connected yet. Saved as pending.', 'success');
+      if (btn) { btn.disabled = false; btn.textContent = 'Resume'; }
+      mobLoadTaxStatus();
+    }
+  }).catch(function(){
+    showToast('Could not start the tax form. Please try again.', 'error');
+    if (btn) { btn.disabled = false; btn.textContent = 'Complete Tax Form'; }
+  });
+}
+window.mobLoadTaxStatus = mobLoadTaxStatus;
+window.mobStartTaxForm  = mobStartTaxForm;
+
+// ── Payout method picker ────────────────────────────────────────────────────
+function mobRenderPayoutMethods(data){
+  var list = document.getElementById('mob-payout-method-list');
+  if (!list) return;
+  var methods = (data && data.methods) || [];
+  var byType = {};
+  methods.forEach(function(m){ byType[m.method_type] = m; });
+  var rails = [
+    { type: 'stripe', label: 'Stripe', blurb: 'Direct deposit (40+ countries)', action: 'mobStripeConnectStart()' },
+    { type: 'paypal', label: 'PayPal', blurb: 'Send to any PayPal email',       action: 'showDP(\'profile\')' }
+  ];
+  list.innerHTML = rails.map(function(r){
+    var m = byType[r.type];
+    var connected = !!m && m.status === 'connected';
+    var primary = !!m && m.is_primary;
+    var statusLabel = connected ? (primary ? 'Primary' : 'Connected') : 'Not connected';
+    var statusClass = connected ? (primary ? 'success' : 'pending') : 'error';
+    var actionFn = connected ? (primary ? '' : ('mobSetPrimaryPayoutMethod(\'' + r.type + '\')')) : r.action;
+    var btnHtml = primary
+      ? ''
+      : '<button class="btn-s" style="height:34px;padding:0 14px;font-size:11px" onclick="' + actionFn + '">' + (connected ? 'Make primary' : 'Set up') + '</button>';
+    return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border:1px solid var(--border-lt);border-radius:8px">' +
+      '<div style="min-width:0">' +
+        '<div style="font-family:var(--sans);font-size:13px;font-weight:600;color:var(--black);margin-bottom:2px">' + r.label + '</div>' +
+        '<div style="font-family:var(--sans);font-size:11.5px;font-weight:300;color:var(--muted)">' + r.blurb + '</div>' +
+      '</div>' +
+      '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">' +
+        '<span class="d-pill ' + statusClass + '"><span class="d-pill-dot"></span>' + statusLabel + '</span>' +
+        btnHtml +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+function mobLoadPayoutMethods(){
+  if (!Dv || !Dv.api) return;
+  Dv.api.fetch('/payout-methods', { skipAuthRedirect: true })
+    .then(mobRenderPayoutMethods)
+    .catch(function(){});
+}
+function mobSetPrimaryPayoutMethod(type){
+  Dv.api.fetch('/payout-methods/primary', {
+    method: 'POST',
+    body: JSON.stringify({ method_type: type }),
+    headers: { 'Content-Type': 'application/json' }
+  }).then(function(){ mobLoadPayoutMethods(); })
+    .catch(function(){ showToast('Could not update primary payout method.', 'error'); });
+}
+window.mobLoadPayoutMethods = mobLoadPayoutMethods;
+window.mobSetPrimaryPayoutMethod = mobSetPrimaryPayoutMethod;
 
 // ── Payout selection ──
 window.mobSelectedPayout = 'stripe';

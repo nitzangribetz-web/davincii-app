@@ -100,6 +100,8 @@ app.use('/api/royalties', royaltyRoutes);
 app.use('/api/payouts', payoutRoutes);
 app.use('/api/stripe', stripeRoutes);
 app.use('/api/paypal', paypalRoutes);
+app.use('/api/tax', require('./routes/tax'));
+app.use('/api/payout-methods', require('./routes/payout-methods'));
 app.use('/api/passkeys', passkeyRoutes);
 app.use('/api/admin', require('./routes/admin'));
 

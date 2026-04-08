@@ -86,6 +86,50 @@ const columnMigrations = [
   `ALTER TABLE artists ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT FALSE`,
   // Widen pro column for "Other" PRO names
   `ALTER TABLE artists ALTER COLUMN pro TYPE VARCHAR(255)`,
+
+  // ── Tax forms (W-9 / W-8BEN) ────────────────────────────────────────────
+  // Decoupled from any single payout provider. The platform owns tax-form
+  // collection so artists can choose any payout rail (Stripe, PayPal, …)
+  // without re-doing tax info. One row per artist + form_type combination;
+  // the most recent row is the active one (older rows are kept for audit).
+  `CREATE TABLE IF NOT EXISTS tax_forms (
+    id                SERIAL PRIMARY KEY,
+    artist_id         INTEGER NOT NULL REFERENCES artists(id) ON DELETE CASCADE,
+    form_type         VARCHAR(16) NOT NULL,
+    status            VARCHAR(20) NOT NULL DEFAULT 'not_started',
+    provider          VARCHAR(32),
+    provider_form_id  VARCHAR(255),
+    signed_pdf_url    TEXT,
+    country           VARCHAR(8),
+    tin_last4         VARCHAR(8),
+    legal_name        VARCHAR(255),
+    submitted_at      TIMESTAMPTZ,
+    completed_at      TIMESTAMPTZ,
+    expires_at        TIMESTAMPTZ,
+    created_at        TIMESTAMPTZ DEFAULT NOW(),
+    updated_at        TIMESTAMPTZ DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_tax_forms_artist ON tax_forms(artist_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_tax_forms_status ON tax_forms(status)`,
+
+  // ── Payout methods ──────────────────────────────────────────────────────
+  // Multiple payout rails per artist. The legacy artists.stripe_account_id
+  // and artists.paypal_email columns remain populated for backwards compat,
+  // but new code should read/write through this table.
+  `CREATE TABLE IF NOT EXISTS payout_methods (
+    id            SERIAL PRIMARY KEY,
+    artist_id     INTEGER NOT NULL REFERENCES artists(id) ON DELETE CASCADE,
+    method_type   VARCHAR(32) NOT NULL,
+    is_primary    BOOLEAN DEFAULT FALSE,
+    status        VARCHAR(32) NOT NULL DEFAULT 'pending',
+    external_id   VARCHAR(255),
+    external_email VARCHAR(255),
+    metadata      JSONB DEFAULT '{}'::jsonb,
+    created_at    TIMESTAMPTZ DEFAULT NOW(),
+    updated_at    TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE (artist_id, method_type)
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_payout_methods_artist ON payout_methods(artist_id)`,
 ];
 
 async function migrate() {
