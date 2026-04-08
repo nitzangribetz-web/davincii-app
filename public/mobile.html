@@ -190,16 +190,15 @@ body.user-authed-landing .m-hero-cta .authed-only{display:flex;align-items:cente
 .m-ln-bell:active,.m-ln-av:active{transform:scale(0.94)}
 .m-ln-bell svg,.m-ln-av svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .m-ln-bell-dot{
-  position:absolute;top:-4px;right:-4px;
-  min-width:16px;height:16px;padding:0 4px;border-radius:8px;
+  position:absolute;top:-3px;right:-3px;
+  min-width:14px;height:14px;padding:0 3px;border-radius:999px;
   background:#EF4444;
-  border:2px solid #060E28;
-  box-shadow:0 0 0 1px rgba(239,68,68,0.35);
+  border:1.5px solid #060E28;
   color:#fff;
   font-family:var(--sans);
-  font-size:9.5px;font-weight:700;line-height:12px;
+  font-size:9px;font-weight:700;line-height:1;
   display:none;align-items:center;justify-content:center;
-  box-sizing:content-box;pointer-events:none;
+  box-sizing:border-box;pointer-events:none;
 }
 .m-ln-bell.has-notif .m-ln-bell-dot{display:inline-flex}
 
@@ -870,18 +869,38 @@ footer.m-footer{
 .d-bell:active{transform:scale(0.94)}
 .d-bell svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .d-bell-dot{
-  position:absolute;top:-4px;right:-4px;
-  min-width:16px;height:16px;padding:0 4px;
-  border-radius:8px;background:#EF4444;
-  border:2px solid var(--navy);
-  box-shadow:0 0 0 1px rgba(239,68,68,0.35);
+  position:absolute;top:-3px;right:-3px;
+  min-width:14px;height:14px;padding:0 3px;
+  border-radius:999px;background:#EF4444;
+  border:1.5px solid var(--navy);
   color:#fff;
   font-family:var(--sans);
-  font-size:9.5px;font-weight:700;line-height:12px;
+  font-size:9px;font-weight:700;line-height:1;
   display:none;align-items:center;justify-content:center;
-  box-sizing:content-box;pointer-events:none;
+  box-sizing:border-box;pointer-events:none;
 }
 .d-bell.has-notif .d-bell-dot{display:inline-flex}
+@keyframes dv-bell-shake {
+  0%,100%{transform:rotate(0)}
+  10%{transform:rotate(-14deg)}
+  20%{transform:rotate(12deg)}
+  30%{transform:rotate(-10deg)}
+  40%{transform:rotate(8deg)}
+  50%{transform:rotate(-6deg)}
+  60%{transform:rotate(4deg)}
+  70%{transform:rotate(-2deg)}
+  80%{transform:rotate(1deg)}
+}
+.d-bell.shake svg,.m-ln-bell.shake svg{
+  animation:dv-bell-shake 0.9s cubic-bezier(.36,.07,.19,.97) both;
+  transform-origin:50% 10%;
+}
+@keyframes dv-badge-pop{
+  0%{transform:scale(0.6);opacity:0}
+  60%{transform:scale(1.25);opacity:1}
+  100%{transform:scale(1);opacity:1}
+}
+.d-bell-dot.pop,.m-ln-bell-dot.pop{animation:dv-badge-pop 0.45s ease-out both}
 /* Avatar */
 .d-av-wrap{position:relative}
 .d-av{
@@ -2536,6 +2555,7 @@ try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; 
         window.history.replaceState({}, '', window.location.pathname + (_qs ? '?' + _qs : ''));
       } catch(_){}
       try { mobSyncNotifDot(); } catch(_){}
+      setTimeout(function(){ try { mobPlayBellShake(); } catch(_){} }, 300);
     }
 
     // Artist payload in URL (from POST /api/auth/login redirect or oauth-callback).
@@ -2646,6 +2666,24 @@ function mobSyncNotifDot() {
     });
   });
 }
+// Cosmetic cue: shake the bell + pop the badge briefly when a new
+// notification lands while the user is on the site.
+function mobPlayBellShake() {
+  document.querySelectorAll('.d-bell, .m-ln-bell').forEach(function(el){
+    el.classList.remove('shake');
+    void el.offsetWidth;
+    el.classList.add('shake');
+    setTimeout(function(){ el.classList.remove('shake'); }, 1000);
+    var dot = el.querySelector('.d-bell-dot, .m-ln-bell-dot');
+    if (dot && el.classList.contains('has-notif')) {
+      dot.classList.remove('pop');
+      void dot.offsetWidth;
+      dot.classList.add('pop');
+      setTimeout(function(){ dot.classList.remove('pop'); }, 500);
+    }
+  });
+}
+window.mobPlayBellShake = mobPlayBellShake;
 window.mobSyncNotifDot = mobSyncNotifDot;
 
 // Enter the mobile dashboard from the landing page (when already authed).
@@ -3750,6 +3788,7 @@ function submitMobW9() {
     try {
       Dv.notifications.addOnce('w9_submitted', 'Tax form submitted', 'Your W-9 is on file \u2014 you\u2019re all set for year-end 1099s.', 'blue');
       mobSyncNotifDot();
+      mobPlayBellShake();
     } catch(_){}
   })
   .catch(function() {
@@ -4078,6 +4117,7 @@ function mobSubmitSong() {
           'blue'
         );
         mobSyncNotifDot();
+        mobPlayBellShake();
       } catch(_){}
       mobResetAddSong();
       setTimeout(function() { releaseLock(); showDP('catalog'); }, 400);

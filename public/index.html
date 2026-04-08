@@ -2500,22 +2500,41 @@
       fill: none; stroke: currentColor;
       stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
     }
+    /* Bell shake animation — plays once when a new notification arrives */
+    @keyframes dv-bell-shake {
+      0%, 100% { transform: rotate(0deg); }
+      10% { transform: rotate(-14deg); }
+      20% { transform: rotate(12deg); }
+      30% { transform: rotate(-10deg); }
+      40% { transform: rotate(8deg); }
+      50% { transform: rotate(-6deg); }
+      60% { transform: rotate(4deg); }
+      70% { transform: rotate(-2deg); }
+      80% { transform: rotate(1deg); }
+    }
+    .notif-bell.shake svg { animation: dv-bell-shake 0.9s cubic-bezier(.36,.07,.19,.97) both; transform-origin: 50% 10%; }
+    @keyframes dv-badge-pop {
+      0% { transform: scale(0.6); opacity: 0; }
+      60% { transform: scale(1.25); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .notif-bell-badge.pop { animation: dv-badge-pop 0.45s ease-out both; }
     /* Unread badge — numeric count */
     .notif-bell-badge {
-      position: absolute; top: 2px; right: 2px;
-      min-width: 16px; height: 16px; padding: 0 4px;
-      border-radius: 8px;
-      background: #3B82F6;
-      border: 2px solid #030912;
+      position: absolute; top: -3px; right: -3px;
+      min-width: 14px; height: 14px; padding: 0 3px;
+      border-radius: 999px;
+      background: #EF4444;
+      border: 1.5px solid #030912;
       color: #fff;
       font-family: 'DM Sans', sans-serif;
-      font-size: 9.5px; font-weight: 700;
-      line-height: 12px;
+      font-size: 9px; font-weight: 700;
+      line-height: 1;
       display: none;
       align-items: center; justify-content: center;
       text-align: center;
       pointer-events: none;
-      box-sizing: content-box;
+      box-sizing: border-box;
     }
     /* Notification dropdown panel */
     .notif-panel {
@@ -3102,6 +3121,8 @@
           var _qs = _p.toString();
           window.history.replaceState({}, '', window.location.pathname + (_qs ? '?' + _qs : ''));
         } catch(_){}
+        // Shake the bell once the dashboard + notif renderer are mounted.
+        setTimeout(function(){ try { renderNotifications(); playBellShake(); } catch(_){} }, 600);
       }
 
       // Step 2: Artist payload in URL (arriving from POST /api/auth/login redirect or oauth-callback).
@@ -3762,8 +3783,30 @@
   function addNotification(title, body, icon) {
     Dv.notifications.add(title, body, icon || 'blue');
     renderNotifications();
+    playBellShake();
   }
   window.addNotification = addNotification;
+
+  // Cosmetic cue: shake the bell + pop the badge briefly when a new
+  // notification lands while the user is on the site.
+  function playBellShake() {
+    var bell = document.querySelector('.notif-bell');
+    var badge = document.getElementById('notif-badge');
+    if (bell) {
+      bell.classList.remove('shake');
+      // force reflow so the animation restarts if triggered again quickly
+      void bell.offsetWidth;
+      bell.classList.add('shake');
+      setTimeout(function(){ bell.classList.remove('shake'); }, 1000);
+    }
+    if (badge && badge.style.display !== 'none') {
+      badge.classList.remove('pop');
+      void badge.offsetWidth;
+      badge.classList.add('pop');
+      setTimeout(function(){ badge.classList.remove('pop'); }, 500);
+    }
+  }
+  window.playBellShake = playBellShake;
 
   // Expose closure functions to global scope for inline onclick handlers
   window.go = go;
@@ -4178,6 +4221,7 @@
       showToast('W-9 submitted successfully');
       Dv.notifications.addOnce('w9_submitted', 'Tax form submitted', 'Your W-9 is on file — you\u2019re all set for year-end 1099s.', 'blue');
       renderNotifications();
+      playBellShake();
       markSetupComplete('w9');
       showDashPage('overview');
     })
@@ -4905,6 +4949,7 @@
           'blue'
         );
         renderNotifications();
+        playBellShake();
         deskResetAddSong();
         // Stay locked until navigation happens — prevents a flicker-click re-submit.
         setTimeout(function() { releaseLock(); showDashPage('catalog'); }, 400);
