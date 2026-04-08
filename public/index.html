@@ -3587,7 +3587,7 @@
       window.history.pushState({ screen:'dashboard', page: page }, '', url);
     }
     if(page === 'signups') loadSignups();
-    if(page === 'payouts') { try { loadStripeStatus(); } catch(e) {} try { loadPayPalStatus(); } catch(e) {} try { loadTaxStatus(); } catch(e) {} try { loadPayoutMethods(); } catch(e) {} }
+    if(page === 'payouts') { try { loadPayPalStatus(); } catch(e) {} try { loadTaxStatus(); } catch(e) {} }
     if(page === 'add-song') deskResetAddSong();
     if(page === 'overview') { try { applySetupCompletion(); } catch(e) {} }
     if(page === 'catalog') { try { loadCatalog(); } catch(e) {} }
@@ -4154,7 +4154,10 @@
   function renderStripeStatus(d){
     var box = document.getElementById('stripe-status-box');
     if(!box) return;
-    box.style.display = 'block';
+    // Only reveal the Stripe onboarding card when the artist has actually
+    // picked Stripe as their payout method. selectPayout('stripe') is what
+    // flips this visible; we don't force-show from the renderer.
+    if (window.selectedPayoutMethod === 'stripe') box.style.display = 'block';
     var vm = Dv.stripe.describeState(d);
 
     var badge = document.getElementById('stripe-status-badge');
@@ -4192,7 +4195,7 @@
   function loadStripeStatus(){
     var box = document.getElementById('stripe-status-box');
     if(!box) return;
-    box.style.display = 'block';
+    // Callers (selectPayout('stripe')) are responsible for revealing the box.
     document.getElementById('stripe-status-label').textContent = 'Loading';
     Dv.stripe.fetchStatus().then(renderStripeStatus);
   }
@@ -4316,8 +4319,18 @@
     document.querySelectorAll('.payout-option').forEach(e=>e.classList.remove('selected'));
     const s=document.getElementById(m+'-option');if(s)s.classList.add('selected');
     window.selectedPayoutMethod = m;
-    if (m === 'paypal' && !window.paypalConnected) {
-      openPayPalModal();
+    var stripeBox = document.getElementById('stripe-status-box');
+    if (m === 'stripe') {
+      // Only now do we reveal the Stripe Connect onboarding card and load its
+      // state. Before the artist picks Stripe we deliberately hide it so the
+      // payouts page stays uncluttered.
+      if (stripeBox) stripeBox.style.display = 'block';
+      try { loadStripeStatus(); } catch(e) {}
+    } else {
+      if (stripeBox) stripeBox.style.display = 'none';
+      if (m === 'paypal' && !window.paypalConnected) {
+        openPayPalModal();
+      }
     }
   }
 
@@ -5795,14 +5808,8 @@
           </div>
 
         </div>
-        <div class="sbox" style="margin-bottom:20px">
-          <div class="sbox-head"><div class="sbox-title">Payout History</div></div>
-          <div class="sbox-body">
-            <div class="empty-state"><div class="empty-state-title">No payouts yet.</div><div class="empty-state-sub">Payouts are issued each quarter after royalties are collected and distributed. Your history will appear here once your first payment is processed.</div></div>
-          </div>
-        </div>
         <!-- Tax Information (decoupled from payout method) -->
-        <div class="sbox">
+        <div class="sbox" style="margin-bottom:22px">
           <div class="sbox-head">
             <div><div class="sbox-title">Tax Information</div><div class="sbox-sub">Required so we can pay you and issue a 1099 at year-end</div></div>
             <div class="status-badge error" id="tax-status-badge">
@@ -5821,17 +5828,10 @@
           </div>
         </div>
 
-        <!-- Payout Method (Stripe / PayPal picker) -->
-        <div class="sbox">
-          <div class="sbox-head">
-            <div><div class="sbox-title">Payout Method</div><div class="sbox-sub">Choose how you'd like to receive your royalties</div></div>
-            <div class="status-badge error" id="w9-status-badge">
-              <span class="status-dot"></span>
-              <span id="w9-status-text">Not Set Up</span>
-            </div>
-          </div>
-          <div class="sbox-body" style="padding:24px">
-            <div id="payout-method-list" style="display:grid;gap:12px"></div>
+        <div class="sbox" style="margin-bottom:20px">
+          <div class="sbox-head"><div class="sbox-title">Payout History</div></div>
+          <div class="sbox-body">
+            <div class="empty-state"><div class="empty-state-title">No payouts yet.</div><div class="empty-state-sub">Payouts are issued each quarter after royalties are collected and distributed. Your history will appear here once your first payment is processed.</div></div>
           </div>
         </div>
       </div>

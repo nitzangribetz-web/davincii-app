@@ -2176,8 +2176,8 @@ footer.m-footer{
     <div class="d-sbox" style="margin-bottom:12px">
       <div class="d-sbox-hd"><div><div class="d-sbox-title">Select Payout Method</div><div class="d-sbox-sub">Choose how to receive royalties</div></div></div>
       <div style="padding:14px 16px">
-        <label class="d-pay-card selected" id="d-stripe" onclick="dPayout('stripe')">
-          <input type="radio" name="d-pm" value="stripe" checked>
+        <label class="d-pay-card" id="d-stripe" onclick="dPayout('stripe')">
+          <input type="radio" name="d-pm" value="stripe">
           <svg width="34" height="34" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0"><rect width="32" height="32" rx="7" fill="#635BFF"/><path fill="#fff" fill-rule="evenodd" d="M14.68 12.19c0-.76.63-1.06 1.66-1.06 1.49 0 3.36.45 4.85 1.25V8.52C19.73 7.98 18.24 7.76 16.34 7.76c-3.34 0-5.57 1.75-5.57 4.67 0 4.54 6.25 3.82 6.25 5.78 0 .9-.78 1.19-1.88 1.19-1.62 0-3.7-.67-5.35-1.57v3.95c1.82.78 3.65 1.11 5.35 1.11 3.42 0 5.78-1.69 5.78-4.64-.01-4.91-6.24-4.04-6.24-5.07z"/></svg>
           <span style="font-family:-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;font-size:19px;font-weight:700;color:#635BFF;letter-spacing:-0.5px">stripe</span>
           <div style="margin-left:auto;text-align:right"><div style="font-family:var(--sans);font-size:12px;font-weight:600;color:var(--black)">Stripe</div><div style="font-family:var(--sans);font-size:11px;font-weight:300;color:var(--muted)">ACH · 2–5 days</div></div>
@@ -2192,10 +2192,6 @@ footer.m-footer{
     <div class="d-sbox" style="margin-bottom:12px">
       <div class="d-sbox-hd"><div><div class="d-sbox-title">Tax Information</div><div class="d-sbox-sub">Required for 1099 issuance</div></div><span class="d-pill error" id="mob-tax-status-badge"><span class="d-pill-dot"></span><span id="mob-tax-status-text">Not Started</span></span></div>
       <div style="padding:14px 16px"><div id="mob-tax-card-title" style="font-family:var(--sans);font-size:13.5px;font-weight:500;color:var(--black);margin-bottom:4px">Complete your tax form (1 min)</div><div id="mob-tax-card-desc" style="font-family:var(--sans);font-size:12.5px;font-weight:300;color:var(--muted);line-height:1.6;margin-bottom:14px">U.S. persons complete a W-9. Non-U.S. persons complete a W-8BEN. Separate from how you choose to receive payouts.</div><button class="btn-s" style="max-width:190px" id="mob-tax-card-action" onclick="mobStartTaxForm()">Complete Tax Form</button></div>
-    </div>
-    <div class="d-sbox" style="margin-bottom:12px">
-      <div class="d-sbox-hd"><div><div class="d-sbox-title">Payout Method</div><div class="d-sbox-sub">Choose how you receive royalties</div></div></div>
-      <div id="mob-payout-method-list" style="padding:14px 16px;display:grid;gap:10px"></div>
     </div>
     <div class="d-sbox"><div class="d-sbox-hd"><div><div class="d-sbox-title">Payout History</div></div></div><div class="d-empty"><div class="d-empty-title">No payouts yet.</div><div class="d-empty-sub">Payouts are issued each quarter after royalties are collected and distributed. Your history will appear here after your first payment.</div></div></div>
   </div>
@@ -2877,7 +2873,7 @@ function showDP(page, skipPush){
     window.history.pushState({ screen:'dashboard', page: page }, '', url);
   }
   if(page === 'signups') mobLoadSignups();
-  if(page === 'payouts') { try { mobLoadStripeStatus(); } catch(e) {} try { mobLoadW9Status(); } catch(e) {} try { mobLoadTaxStatus(); } catch(e) {} try { mobLoadPayoutMethods(); } catch(e) {} try { mobLoadPayPalStatus(); } catch(e) {} }
+  if(page === 'payouts') { try { mobLoadW9Status(); } catch(e) {} try { mobLoadTaxStatus(); } catch(e) {} try { mobLoadPayPalStatus(); } catch(e) {} }
   if(page === 'add-song') mobResetAddSong();
   if(page === 'overview') {
     try { mobApplySetupCompletion(); } catch(e) {}
@@ -3008,7 +3004,9 @@ function mobGoogleBack() {
 function mobRenderStripeStatus(d){
   var box = document.getElementById('m-stripe-status-box');
   if(!box) return;
-  box.style.display = 'block';
+  // Only reveal when the artist actually picked Stripe. dPayout('stripe')
+  // flips the selection flag before calling mobLoadStripeStatus().
+  if (window.mobSelectedPayout === 'stripe') box.style.display = 'block';
   var vm = Dv.stripe.describeState(d);
 
   var badge = document.getElementById('m-stripe-status-badge');
@@ -3044,7 +3042,7 @@ function mobRenderStripeStatus(d){
 function mobLoadStripeStatus(){
   var box = document.getElementById('m-stripe-status-box');
   if(!box) return;
-  box.style.display = 'block';
+  // Caller (dPayout('stripe')) is responsible for revealing the box.
   var lbl = document.getElementById('m-stripe-status-label');
   if(lbl) lbl.textContent = 'Loading';
   Dv.stripe.fetchStatus().then(mobRenderStripeStatus);
@@ -3164,7 +3162,14 @@ function dPayout(m){
   ['stripe','paypal'].forEach(p=>document.getElementById('d-'+p)?.classList.remove('selected'));
   document.getElementById('d-'+m)?.classList.add('selected');
   window.mobSelectedPayout = m;
-  if (m === 'paypal' && !window.mobPaypalConnected) openMobPayPalModal();
+  var stripeBox = document.getElementById('m-stripe-status-box');
+  if (m === 'stripe') {
+    if (stripeBox) stripeBox.style.display = 'block';
+    try { mobLoadStripeStatus(); } catch(e) {}
+  } else {
+    if (stripeBox) stripeBox.style.display = 'none';
+    if (m === 'paypal' && !window.mobPaypalConnected) openMobPayPalModal();
+  }
 }
 function mobLoadPayPalStatus(){
   fetch('/api/paypal/status').then(r=>r.json()).then(function(d){
