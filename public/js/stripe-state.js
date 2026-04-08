@@ -108,8 +108,8 @@
         vm.label = 'Ready for payouts';
         vm.sub = 'Your Stripe account is connected and ready.';
         vm.desc = 'Your payout account is verified and ready to receive royalties. Use the Withdraw button above to initiate a payout.';
-        vm.actionText = null;
-        vm.showAction = false;
+        vm.actionText = 'Manage payout account';
+        vm.showAction = true;
         break;
     }
     return vm;
