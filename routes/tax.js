@@ -58,7 +58,7 @@ async function ensureTaxTable() {
   if (_taxTableReady) return;
   await pool.query(`CREATE TABLE IF NOT EXISTS tax_forms (
     id                SERIAL PRIMARY KEY,
-    artist_id         INTEGER NOT NULL,
+    artist_id         TEXT NOT NULL,
     form_type         VARCHAR(16) NOT NULL,
     status            VARCHAR(20) NOT NULL DEFAULT 'not_started',
     provider          VARCHAR(32),
