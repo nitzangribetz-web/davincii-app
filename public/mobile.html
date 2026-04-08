@@ -2013,8 +2013,18 @@ footer.m-footer{
     <div class="d-pg-sub">Your registered compositions.</div>
     <div class="d-pg-rule"></div>
     <div class="d-sbox">
-      <div class="d-sbox-hd"><div><div class="d-sbox-title">Catalog</div><div class="d-sbox-sub" id="mob-catalog-count">0 compositions</div></div></div>
+      <div class="d-sbox-hd"><div><div class="d-sbox-title">My Songs</div><div class="d-sbox-sub" id="mob-catalog-count">0 songs submitted</div></div></div>
       <div id="mob-catalog-list"></div>
+      <style>
+        .mob-song-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border:1px solid rgba(0,0,0,0.06);border-radius:10px;background:#fff;margin-top:8px}
+        .mob-song-row:first-child{margin-top:0}
+        .mob-song-title{font-family:var(--sans);font-size:13px;font-weight:600;color:var(--black);letter-spacing:-0.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .mob-song-sub{font-family:var(--sans);font-size:11px;font-weight:400;color:var(--muted-lt);margin-top:2px}
+        .mob-song-pill{font-family:var(--sans);font-size:10px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;padding:5px 9px;border-radius:999px;white-space:nowrap;flex-shrink:0}
+        .mob-song-pill.processing{background:rgba(59,130,246,0.10);color:#3B82F6}
+        .mob-song-pill.registered{background:rgba(16,185,129,0.10);color:#10B981}
+        .mob-song-pill.rejected{background:rgba(239,68,68,0.10);color:#EF4444}
+      </style>
       <div class="d-empty" id="mob-catalog-empty"><div class="d-empty-title">No songs yet.</div><div class="d-empty-sub">Register your first composition to start collecting royalties worldwide.</div><button class="btn-p" style="max-width:250px;margin:0 auto" onclick="showDP('add-song')">Register a Composition →</button></div>
     </div>
   </div>
@@ -2726,9 +2736,30 @@ function mobLoadSongs() {
       var stat = document.getElementById('mob-stat-songs');
       if (stat) stat.textContent = String(songs.length);
       var count = document.getElementById('mob-catalog-count');
-      if (count) count.textContent = songs.length + ' composition' + (songs.length === 1 ? '' : 's');
+      if (count) count.textContent = songs.length + ' song' + (songs.length === 1 ? '' : 's') + ' submitted';
       var empty = document.getElementById('mob-catalog-empty');
       if (empty) empty.style.display = songs.length ? 'none' : '';
+      var list = document.getElementById('mob-catalog-list');
+      if (list) {
+        if (!songs.length) {
+          list.innerHTML = '';
+        } else {
+          var esc = (window.Dv && Dv.format && Dv.format.escapeHtml) ? Dv.format.escapeHtml : function(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); };
+          list.innerHTML = songs.map(function(s){
+            var title = esc(s.title || 'Untitled');
+            var writer = esc(s.primary_writer || '');
+            var status = (s.status || 'processing').toLowerCase();
+            var label = status === 'registered' ? 'Registered' : (status === 'rejected' ? 'Rejected' : 'Processing');
+            var cls = status === 'registered' ? 'registered' : (status === 'rejected' ? 'rejected' : 'processing');
+            return '<div class="mob-song-row">' +
+              '<div style="min-width:0;flex:1"><div class="mob-song-title">' + title + '</div>' +
+              (writer ? '<div class="mob-song-sub">' + writer + '</div>' : '') +
+              '</div>' +
+              '<span class="mob-song-pill ' + cls + '">' + label + '</span>' +
+            '</div>';
+          }).join('');
+        }
+      }
       if (songs.length > 0) {
         mobMarkSetupComplete('song');
       }
