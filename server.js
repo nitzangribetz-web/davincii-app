@@ -56,6 +56,8 @@ app.use('/api/passkeys/login', authLimiter);
 
 // Stripe webhook MUST receive raw body — register before express.json()
 app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
+// Anvil tax webhook — raw body for HMAC signature verification
+app.use('/api/tax/webhook', express.raw({ type: '*/*' }));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
