@@ -5038,12 +5038,12 @@
           <button class="setup-alert-btn" onclick="showDashPage('profile')">Complete Profile →</button>
         </div>
         <div class="setup-alert" id="setup-alert-w9">
-          <div class="setup-alert-icon" style="font-size:10px;font-weight:700;letter-spacing:0.04em">W-9</div>
+          <div class="setup-alert-icon" style="font-size:10px;font-weight:700;letter-spacing:0.04em">$</div>
           <div class="setup-alert-content">
-            <div class="setup-alert-title">Submit your W-9 tax form</div>
-            <div class="setup-alert-body">Required before your first payout can be processed. Complete your tax information to unlock payouts.</div>
+            <div class="setup-alert-title">Set up payouts (2 min)</div>
+            <div class="setup-alert-body">Davincii uses Stripe to pay artists worldwide. You'll create a free Stripe account and complete your tax info in one step — no separate W-9 form needed.</div>
           </div>
-          <button class="setup-alert-btn" onclick="openW9Modal()">Complete W-9 →</button>
+          <button class="setup-alert-btn" onclick="openW9Modal()">Set up payouts →</button>
         </div>
 
         <div class="bal-card" style="display:flex;align-items:flex-end;justify-content:space-between;">
@@ -5091,8 +5091,8 @@
               <button class="setup-action" onclick="showDashPage('profile')">Complete →</button>
             </div>
             <div class="setup-row" id="setup-row-w9">
-              <span class="setup-row-label">Submit your W-9 tax form</span>
-              <button class="setup-action" onclick="showDashPage('payouts')">Complete →</button>
+              <span class="setup-row-label">Set up payouts &amp; tax info</span>
+              <button class="setup-action" onclick="showDashPage('payouts')">Set up →</button>
             </div>
             <div class="setup-row" id="setup-row-song" style="border-bottom:none">
               <span class="setup-row-label">Register your first composition</span>
@@ -5683,19 +5683,19 @@
         </div>
         <div class="sbox">
           <div class="sbox-head">
-            <div><div class="sbox-title">Tax Forms</div><div class="sbox-sub">Required before your first payout can be processed</div></div>
+            <div><div class="sbox-title">Payouts &amp; Tax Info</div><div class="sbox-sub">Powered by Stripe — required before your first withdrawal</div></div>
             <div class="status-badge error" id="w9-status-badge">
               <span class="status-dot"></span>
-              <span id="w9-status-text">Not Submitted</span>
+              <span id="w9-status-text">Not Set Up</span>
             </div>
           </div>
           <div class="sbox-body" style="padding:24px">
             <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
-              <div>
-                <div style="font-family:'DM Sans',sans-serif;font-size:15.5px;font-weight:600;color:#0A0A0A;margin-bottom:5px;letter-spacing:-0.01em">W-9 — Request for Taxpayer Identification Number</div>
-                <div style="font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:300;color:#64748B">Required for U.S. persons. Non-U.S. persons complete a W-8BEN.</div>
+              <div style="max-width:560px">
+                <div style="font-family:'DM Sans',sans-serif;font-size:15.5px;font-weight:600;color:#0A0A0A;margin-bottom:5px;letter-spacing:-0.01em">Set up payouts in 2 minutes</div>
+                <div style="font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:300;color:#64748B;line-height:1.55">Davincii pays artists worldwide through Stripe. You'll create a free Stripe account and complete your tax info (W-9 for U.S. persons, W-8BEN for non-U.S.) in a single guided flow — no separate form to fill out here.</div>
               </div>
-              <button onclick="openW9Modal()" class="btn-ghost-dark">Complete Tax Form</button>
+              <button onclick="openW9Modal()" class="btn-ghost-dark">Set Up Payouts</button>
             </div>
           </div>
         </div>

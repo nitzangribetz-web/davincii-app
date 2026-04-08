@@ -1974,11 +1974,11 @@ footer.m-footer{
       </div>
     </div>
     <div class="d-alert" id="mob-alert-w9" style="margin-bottom:16px">
-      <div class="d-alert-icon" style="font-size:9px;font-weight:700">W-9</div>
+      <div class="d-alert-icon" style="font-size:11px;font-weight:700">$</div>
       <div style="flex:1;min-width:0">
-        <div class="d-alert-title">Submit your W-9 form</div>
-        <div class="d-alert-sub">Required before your first payout can be processed.</div>
-        <button class="d-alert-btn" onclick="showDP('payouts')">Complete →</button>
+        <div class="d-alert-title">Set up payouts (2 min)</div>
+        <div class="d-alert-sub">Davincii uses Stripe to pay artists worldwide. You'll create a free Stripe account and complete your tax info in one step — no separate W-9 form needed.</div>
+        <button class="d-alert-btn" onclick="showDP('payouts')">Set up payouts →</button>
       </div>
     </div>
     <div class="d-bal">
@@ -1998,7 +1998,7 @@ footer.m-footer{
     <div class="d-sbox" id="mob-get-started-box">
       <div class="d-sbox-hd"><div><div class="d-sbox-title">Get started</div><div class="d-sbox-sub">Complete your setup</div></div></div>
       <div class="d-setup-row" id="mob-setup-row-profile"><span class="d-setup-lbl">Complete artist profile</span><button class="d-setup-cta" onclick="showDP('profile')">Complete →</button></div>
-      <div class="d-setup-row" id="mob-setup-row-w9"><span class="d-setup-lbl">Submit W-9 tax form</span><button class="d-setup-cta" onclick="showDP('payouts')">Complete →</button></div>
+      <div class="d-setup-row" id="mob-setup-row-w9"><span class="d-setup-lbl">Set up payouts &amp; tax info</span><button class="d-setup-cta" onclick="showDP('payouts')">Set up →</button></div>
       <div class="d-setup-row" id="mob-setup-row-song"><span class="d-setup-lbl">Register first composition</span><button class="d-setup-cta" onclick="showDP('add-song')">Register →</button></div>
     </div>
   </div>
@@ -2188,8 +2188,8 @@ footer.m-footer{
       </div>
     </div>
     <div class="d-sbox" style="margin-bottom:12px">
-      <div class="d-sbox-hd"><div><div class="d-sbox-title">Tax Forms</div><div class="d-sbox-sub">Required before first payout</div></div><span class="d-pill pending"><span class="d-pill-dot"></span>Pending</span></div>
-      <div style="padding:14px 16px"><div style="font-family:var(--sans);font-size:13.5px;font-weight:500;color:var(--black);margin-bottom:4px">W-9 — Taxpayer Identification</div><div style="font-family:var(--sans);font-size:12.5px;font-weight:300;color:var(--muted);margin-bottom:14px">Required for U.S. persons. Non-U.S. persons complete a W-8BEN.</div><button class="btn-s" style="max-width:190px" onclick="openMobW9Modal()">Complete Tax Form</button></div>
+      <div class="d-sbox-hd"><div><div class="d-sbox-title">Payouts &amp; Tax Info</div><div class="d-sbox-sub">Powered by Stripe</div></div><span class="d-pill pending"><span class="d-pill-dot"></span>Not Set Up</span></div>
+      <div style="padding:14px 16px"><div style="font-family:var(--sans);font-size:13.5px;font-weight:500;color:var(--black);margin-bottom:4px">Set up payouts in 2 minutes</div><div style="font-family:var(--sans);font-size:12.5px;font-weight:300;color:var(--muted);line-height:1.6;margin-bottom:14px">Davincii pays artists worldwide through Stripe. You'll create a free Stripe account and complete your tax info (W-9 for U.S. persons, W-8BEN for non-U.S.) in a single guided flow — no separate form to fill out here.</div><button class="btn-s" style="max-width:190px" onclick="openMobW9Modal()">Set Up Payouts</button></div>
     </div>
     <div class="d-sbox"><div class="d-sbox-hd"><div><div class="d-sbox-title">Payout History</div></div></div><div class="d-empty"><div class="d-empty-title">No payouts yet.</div><div class="d-empty-sub">Payouts are issued each quarter after royalties are collected and distributed. Your history will appear here after your first payment.</div></div></div>
   </div>
