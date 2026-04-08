@@ -175,7 +175,7 @@ async function createAnvilPacket({ formType, artist, legalName }) {
         detailsURL
         documentGroup {
           eid
-          signers { eid aliasId routingOrder signActionURL }
+          signers { eid aliasId routingOrder status signActionType }
         }
       }
     }
@@ -200,9 +200,23 @@ async function createAnvilPacket({ formType, artist, legalName }) {
   const packet = data.createEtchPacket;
   const signers = (packet.documentGroup && packet.documentGroup.signers) || [];
   const signer = signers[0];
+  if (!signer || !signer.eid) {
+    throw new Error('Anvil packet created but no signer eid returned.');
+  }
+  // Second hop: generate the embedded sign URL for this signer.
+  const urlMutation = `
+    mutation GenerateEtchSignURL($signerEid: String!, $clientUserId: String!) {
+      generateEtchSignURL(signerEid: $signerEid, clientUserId: $clientUserId)
+    }
+  `;
+  const urlData = await anvilGraphQL(urlMutation, {
+    signerEid: signer.eid,
+    clientUserId: String(artist.id),
+  });
   return {
     eid: packet.eid,
-    signUrl: signer && signer.signActionURL,
+    signerEid: signer.eid,
+    signUrl: urlData.generateEtchSignURL,
     detailsUrl: packet.detailsURL,
   };
 }
