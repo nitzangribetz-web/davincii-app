@@ -4244,16 +4244,17 @@
     Dv.tax.start({}).then(function(res){
       if (res && res.url) {
         window.location.href = res.url;
+      } else if (res && res.error) {
+        showToast('Tax form: ' + res.error, 'error');
+        if (btn) { btn.disabled = false; btn.textContent = 'Complete Tax Form'; }
       } else {
-        // No real provider wired up yet — show an explanation toast and
-        // leave the row in 'pending' state. When Anvil is integrated, the
-        // backend will return { url } and we'll redirect.
         showToast('Tax-form provider isn\u2019t connected yet. The form is saved as pending.', 'success');
         if (btn) { btn.disabled = false; btn.textContent = 'Resume'; }
         loadTaxStatus();
       }
-    }).catch(function(){
-      showToast('Could not start the tax form. Please try again.', 'error');
+    }).catch(function(err){
+      var msg = (err && err.data && (err.data.detail || err.data.error)) || (err && err.message) || 'Please try again.';
+      showToast('Could not start tax form: ' + msg, 'error');
       if (btn) { btn.disabled = false; btn.textContent = 'Complete Tax Form'; }
     });
   }

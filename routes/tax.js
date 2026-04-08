@@ -154,8 +154,14 @@ router.get('/status', auth, async (req, res) => {
 
 // ── POST /api/tax/start ─────────────────────────────────────────────────────
 router.post('/start', auth, async (req, res) => {
+  let stage = 'init';
   try {
     const body = req.body || {};
+    if (!req.artist || !req.artist.id) {
+      console.error('[tax/start] no req.artist.id');
+      return res.status(401).json({ error: 'Not authenticated.' });
+    }
+    stage = 'fetch-artist';
     const { rows: artistRows } = await pool.query(
       'SELECT id, email, address_country, name, stage_name FROM artists WHERE id = $1',
       [req.artist.id]
@@ -170,19 +176,22 @@ router.post('/start', auth, async (req, res) => {
 
     // Try Anvil. If it fails (or isn't configured), fall back to manual stub
     // so the site keeps working while we debug.
+    stage = 'anvil';
     let anvil = null;
     let anvilError = null;
     try {
       anvil = await createAnvilPacket({ formType, artist, legalName });
     } catch (err) {
       anvilError = err.message;
-      console.error('[tax/start] Anvil error:', err.message);
+      console.error('[tax/start] Anvil error:', err && err.stack || err);
     }
 
     const provider = anvil ? 'anvil' : 'manual';
     const providerFormId = anvil ? anvil.eid : null;
 
+    stage = 'db-read';
     const existing = await getActiveTaxForm(req.artist.id);
+    stage = 'db-write';
     let row;
     if (existing && (existing.status === 'not_started' || existing.status === 'pending')) {
       const { rows } = await pool.query(
@@ -218,8 +227,8 @@ router.post('/start', auth, async (req, res) => {
       error: anvilError || undefined,
     });
   } catch (err) {
-    console.error('[tax/start]', err);
-    res.status(500).json({ error: 'Unable to start tax form.' });
+    console.error('[tax/start] stage=' + stage, err && err.stack || err);
+    res.status(500).json({ error: 'Unable to start tax form.', stage, detail: err && err.message });
   }
 });
 
