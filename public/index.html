@@ -4442,6 +4442,25 @@
       errEl.style.display = 'block';
       return;
     }
+    // Tax form must be on file before any money moves. Block here and send
+    // the artist to the Payouts page where the tax card lives.
+    if (window.Dv && Dv.tax) {
+      Dv.tax.fetchStatus().then(function(d){
+        var vm = Dv.tax.describeState(d);
+        if (!vm.isComplete) {
+          errEl.innerHTML = 'Please complete your ' + (vm.formLabel || 'tax form') + ' before withdrawing. <a href="#" onclick="closeWithdrawModal();showDashPage(\'payouts\');return false;" style="color:#3B82F6;text-decoration:underline">Go to Payouts →</a>';
+          errEl.style.display = 'block';
+          return;
+        }
+        _doConfirmWithdraw(amount, errEl, sucEl, btn);
+      }).catch(function(){
+        _doConfirmWithdraw(amount, errEl, sucEl, btn);
+      });
+      return;
+    }
+    _doConfirmWithdraw(amount, errEl, sucEl, btn);
+  }
+  function _doConfirmWithdraw(amount, errEl, sucEl, btn){
     btn.disabled = true;
     btn.textContent = 'Processing...';
     var method = window.selectedPayoutMethod || 'stripe';
@@ -4616,37 +4635,16 @@
           .catch(function(){});
       }
       // Hide entire Get Started box once all items have been completed
-      // for more than the 2-day grace period.
+      // for more than the 2-day grace period. W-9 is intentionally NOT part
+      // of Get Started — it's handled inside the Payouts section instead.
       var pAt = parseInt(localStorage.getItem('dv_setup_profile_at') || '0', 10);
-      var wAt = parseInt(localStorage.getItem('dv_setup_w9_at') || '0', 10);
       var sAt = parseInt(localStorage.getItem('dv_setup_song_at') || '0', 10);
-      var allExpired = pAt && wAt && sAt
+      var allExpired = pAt && sAt
         && (Date.now() - pAt) > SETUP_HIDE_MS
-        && (Date.now() - wAt) > SETUP_HIDE_MS
         && (Date.now() - sAt) > SETUP_HIDE_MS;
       if (allExpired) {
         var box = document.getElementById('get-started-box');
         if (box) box.style.display = 'none';
-      }
-      // Tax-form completion is derived ONLY from /api/tax/status (the
-      // platform's own record), not from any payout provider. This decouples
-      // W-9 / W-8BEN collection from Stripe / PayPal so artists can pick any
-      // payout rail without re-doing tax info.
-      if (window.Dv && Dv.tax) {
-        Dv.tax.fetchStatus().then(function(d) {
-          var vm = Dv.tax.describeState(d);
-          if (vm.isComplete) {
-            try { localStorage.setItem('dv_setup_w9', '1'); } catch(_){}
-            markSetupComplete('w9');
-          } else {
-            try { localStorage.removeItem('dv_setup_w9'); } catch(_){}
-            try { localStorage.removeItem('dv_setup_w9_at'); } catch(_){}
-            var alertEl = document.getElementById('setup-alert-w9');
-            if (alertEl) { alertEl.classList.remove('completed'); alertEl.style.display = ''; }
-            var rowEl = document.getElementById('setup-row-w9');
-            if (rowEl) { rowEl.classList.remove('completed'); rowEl.style.display = ''; }
-          }
-        }).catch(function(){});
       }
     } catch(e) {}
   }
@@ -5172,15 +5170,6 @@
           </div>
           <button class="setup-alert-btn" onclick="showDashPage('profile')">Complete Profile →</button>
         </div>
-        <div class="setup-alert" id="setup-alert-w9">
-          <div class="setup-alert-icon" style="font-size:10px;font-weight:700;letter-spacing:0.04em">$</div>
-          <div class="setup-alert-content">
-            <div class="setup-alert-title">Set up payouts (2 min)</div>
-            <div class="setup-alert-body">Davincii uses Stripe to pay artists worldwide. You'll create a free Stripe account and complete your tax info in one step — no separate W-9 form needed.</div>
-          </div>
-          <button class="setup-alert-btn" onclick="openW9Modal()">Set up payouts →</button>
-        </div>
-
         <div class="bal-card" style="display:flex;align-items:flex-end;justify-content:space-between;">
           <div style="position:relative;z-index:1">
             <div class="bal-label">Available Balance</div>
@@ -5224,10 +5213,6 @@
             <div class="setup-row" id="setup-row-profile">
               <span class="setup-row-label">Complete your artist profile</span>
               <button class="setup-action" onclick="showDashPage('profile')">Complete →</button>
-            </div>
-            <div class="setup-row" id="setup-row-w9">
-              <span class="setup-row-label">Set up payouts &amp; tax info</span>
-              <button class="setup-action" onclick="showDashPage('payouts')">Set up →</button>
             </div>
             <div class="setup-row" id="setup-row-song" style="border-bottom:none">
               <span class="setup-row-label">Register your first composition</span>

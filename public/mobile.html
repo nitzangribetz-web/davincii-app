@@ -1974,14 +1974,6 @@ footer.m-footer{
         <button class="d-alert-btn" onclick="showDP('profile')">Complete →</button>
       </div>
     </div>
-    <div class="d-alert" id="mob-alert-w9" style="margin-bottom:16px">
-      <div class="d-alert-icon" style="font-size:11px;font-weight:700">$</div>
-      <div style="flex:1;min-width:0">
-        <div class="d-alert-title">Set up payouts (2 min)</div>
-        <div class="d-alert-sub">Davincii uses Stripe to pay artists worldwide. You'll create a free Stripe account and complete your tax info in one step — no separate W-9 form needed.</div>
-        <button class="d-alert-btn" onclick="showDP('payouts')">Set up payouts →</button>
-      </div>
-    </div>
     <div class="d-bal">
       <div class="d-bal-lbl">Available Balance</div>
       <div class="d-bal-amt"><span class="d-cs">$</span>0.00</div>
@@ -1999,7 +1991,6 @@ footer.m-footer{
     <div class="d-sbox" id="mob-get-started-box">
       <div class="d-sbox-hd"><div><div class="d-sbox-title">Get started</div><div class="d-sbox-sub">Complete your setup</div></div></div>
       <div class="d-setup-row" id="mob-setup-row-profile"><span class="d-setup-lbl">Complete artist profile</span><button class="d-setup-cta" onclick="showDP('profile')">Complete →</button></div>
-      <div class="d-setup-row" id="mob-setup-row-w9"><span class="d-setup-lbl">Set up payouts &amp; tax info</span><button class="d-setup-cta" onclick="showDP('payouts')">Set up →</button></div>
       <div class="d-setup-row" id="mob-setup-row-song"><span class="d-setup-lbl">Register first composition</span><button class="d-setup-cta" onclick="showDP('add-song')">Register →</button></div>
     </div>
   </div>
@@ -2769,25 +2760,13 @@ function mobLoadSongs() {
 
 // W-9 completion is derived from Stripe Connect status (details_submitted).
 // The legacy /api/payouts/w9 endpoint is intentionally a 410.
+// Tax status is now displayed inside the Payouts page card only — it's no
+// longer part of the dashboard Get Started flow. This just paints the payouts
+// card if it's mounted.
 function mobLoadW9Status() {
   if (!window.Dv || !Dv.tax) return;
   Dv.tax.fetchStatus()
-    .then(function(d) {
-      var vm = Dv.tax.describeState(d);
-      // Also paint the payouts-page card if it's mounted.
-      try { mobRenderTaxStatus(d); } catch(_){}
-      if (vm.isComplete) {
-        try { localStorage.setItem('dv_setup_w9', '1'); } catch(_){}
-        mobMarkSetupComplete('w9');
-      } else {
-        try { localStorage.removeItem('dv_setup_w9'); } catch(_){}
-        try { localStorage.removeItem('dv_setup_w9_at'); } catch(_){}
-        var alertEl = document.getElementById('mob-alert-w9');
-        if (alertEl) { alertEl.classList.remove('completed'); alertEl.style.display = ''; }
-        var rowEl = document.getElementById('mob-setup-row-w9');
-        if (rowEl) { rowEl.classList.remove('completed'); rowEl.style.display = ''; }
-      }
-    })
+    .then(function(d) { try { mobRenderTaxStatus(d); } catch(_){} })
     .catch(function(){});
 }
 
@@ -3393,6 +3372,22 @@ function confirmMobWithdraw(){
     errEl.style.display = 'block';
     return;
   }
+  // Gate on tax-form completion — no money moves until the W-9/W-8BEN is on file.
+  if (window.Dv && Dv.tax) {
+    Dv.tax.fetchStatus().then(function(d){
+      var vm = Dv.tax.describeState(d);
+      if (!vm.isComplete) {
+        errEl.innerHTML = 'Please complete your ' + (vm.formLabel || 'tax form') + ' before withdrawing. <a href="#" onclick="closeMobWithdraw();showDP(\'payouts\');return false;" style="color:var(--blue);text-decoration:underline">Go to Payouts →</a>';
+        errEl.style.display = 'block';
+        return;
+      }
+      _mobDoConfirmWithdraw(amount, errEl, sucEl, btn);
+    }).catch(function(){ _mobDoConfirmWithdraw(amount, errEl, sucEl, btn); });
+    return;
+  }
+  _mobDoConfirmWithdraw(amount, errEl, sucEl, btn);
+}
+function _mobDoConfirmWithdraw(amount, errEl, sucEl, btn){
   btn.disabled = true;
   btn.textContent = 'PROCESSING...';
   var method = window.mobSelectedPayout || 'stripe';
