@@ -190,14 +190,14 @@ body.user-authed-landing .m-hero-cta .authed-only{display:flex;align-items:cente
 .m-ln-bell:active,.m-ln-av:active{transform:scale(0.94)}
 .m-ln-bell svg,.m-ln-av svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .m-ln-bell-dot{
-  position:absolute;top:-2px;right:-2px;
-  width:10px;height:10px;border-radius:50%;
-  background:#EF4444;
+  position:absolute;top:-3px;right:-3px;
+  min-width:14px;height:14px;padding:0 4px;
+  border-radius:7px;background:#3B82F6;
   border:2px solid #060E28;
-  box-shadow:0 0 0 1px rgba(239,68,68,0.35);
-  display:none;
+  font-family:'Inter',sans-serif;font-size:9px;font-weight:700;
+  color:#fff;line-height:10px;text-align:center;
+  display:flex;align-items:center;justify-content:center;
 }
-.m-ln-bell.has-notif .m-ln-bell-dot{display:block}
 
 /* ══════════════════════════════════════
    HERO
@@ -866,14 +866,14 @@ footer.m-footer{
 .d-bell:active{transform:scale(0.94)}
 .d-bell svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .d-bell-dot{
-  position:absolute;top:-2px;right:-2px;
-  min-width:10px;height:10px;
-  border-radius:50%;background:#EF4444;
+  position:absolute;top:-3px;right:-3px;
+  min-width:14px;height:14px;padding:0 4px;
+  border-radius:7px;background:#3B82F6;
   border:2px solid var(--navy);
-  box-shadow:0 0 0 1px rgba(239,68,68,0.35);
-  display:none;
+  font-family:'Inter',sans-serif;font-size:9px;font-weight:700;
+  color:#fff;line-height:10px;text-align:center;
+  display:flex;align-items:center;justify-content:center;
 }
-.d-bell.has-notif .d-bell-dot{display:block}
 /* Avatar */
 .d-av-wrap{position:relative}
 .d-av{
@@ -1499,7 +1499,7 @@ footer.m-footer{
       <div class="nav-authed-m">
         <button class="m-ln-bell" aria-label="Notifications" onclick="mobEnterDashboard('notifications')">
           <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-          <span class="m-ln-bell-dot"></span>
+          <span class="m-ln-bell-dot">0</span>
         </button>
         <button class="m-ln-av" aria-label="Account" onclick="mobEnterDashboard('overview')">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
@@ -1883,7 +1883,7 @@ footer.m-footer{
       <div class="notif-dropdown-wrap" id="notif-drop-wrap">
         <button class="d-bell" aria-label="Notifications" onclick="toggleNotifPanel(event)">
           <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-          <span class="d-bell-dot" id="d-bell-dot"></span>
+          <span class="d-bell-dot" id="d-bell-dot">0</span>
         </button>
         <div class="notif-panel" id="notif-panel">
           <div class="notif-panel-hd">
