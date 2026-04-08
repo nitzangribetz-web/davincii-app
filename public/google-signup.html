@@ -194,9 +194,9 @@ body{
     });
   }
 
-  // Must have token and artist from OAuth
+  // Must have artist from OAuth (auth token is in HttpOnly cookie)
   var artistStr = localStorage.getItem('dv_artist');
-  if (!token || !artistStr) {
+  if (!artistStr) {
     window.location.replace('/');
     return;
   }
@@ -260,8 +260,7 @@ function submitGoogleSignup() {
     else localStorage.setItem('dv_artist', JSON.stringify(result.data.artist));
 
     // Redirect to dashboard with token
-    var qs = '?token=' + encodeURIComponent(result.data.token || token) +
-             '&artist=' + encodeURIComponent(JSON.stringify(result.data.artist)) +
+    var qs = '?artist=' + encodeURIComponent(JSON.stringify(result.data.artist)) +
              '&signup=1';
     window.location.replace('/' + qs);
   })
