@@ -3358,6 +3358,12 @@
     // Pre-populate profile form stage name
     var pfStage = document.getElementById('pf-stage-name');
     if (pfStage) pfStage.value = artist.stage_name || '';
+    // Pre-select the PRO and render its real logo (Clearbit)
+    var pfPro = document.getElementById('pro-select');
+    if (pfPro && artist.pro) {
+      pfPro.value = artist.pro;
+      try { toggleOtherPro(artist.pro); } catch(_) {}
+    }
   }
 
   // ── FILM GRAIN (canvas, highest quality) ──
@@ -3944,6 +3950,31 @@
     list.appendChild(d);deskCloseRecording();
   }
 
+  // PRO → official domain, used to render the org's real logo via Clearbit
+  // Logo API. Kept as a lookup (not bundled assets) so the logos stay current
+  // if an org rebrands, and so we don't ship heavy image files.
+  var PRO_DOMAINS = {
+    'ASCAP':         'ascap.com',
+    'BMI':           'bmi.com',
+    'SESAC':         'sesac.com',
+    'SOCAN':         'socan.ca',
+    'PRS for Music': 'prsformusic.com',
+    'GEMA':          'gema.de',
+    'SIAE':          'siae.it'
+  };
+  function renderProLogo(val) {
+    var wrap = document.getElementById('pro-logo-wrap');
+    var img  = document.getElementById('pro-logo-img');
+    var name = document.getElementById('pro-logo-name');
+    if (!wrap || !img || !name) return;
+    var domain = PRO_DOMAINS[val];
+    if (!domain) { wrap.style.display = 'none'; img.src = ''; return; }
+    img.style.display = 'block';
+    img.src  = 'https://logo.clearbit.com/' + domain + '?size=128';
+    img.alt  = val;
+    name.textContent = val;
+    wrap.style.display = 'flex';
+  }
   // W-9 + payouts
   function toggleOtherPro(val) {
     const wrap = document.getElementById('pro-other-wrap');
@@ -3956,6 +3987,7 @@
         else input.focus();
       }
     }
+    renderProLogo(val);
   }
   // W-9 collection now happens entirely inside Stripe Connect onboarding.
   // Davincii never sees or stores the SSN/EIN/legal name. The legacy in-app
@@ -4579,6 +4611,7 @@
     form.querySelectorAll('input[type="text"], input[type="date"]').forEach(function(i) { i.value = ''; });
     form.querySelectorAll('select').forEach(function(s) { s.selectedIndex = 0; });
     document.getElementById('pro-other-wrap').style.display = 'none';
+    var plw = document.getElementById('pro-logo-wrap'); if (plw) plw.style.display = 'none';
   }
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -5751,6 +5784,10 @@
               <input class="field" type="text" id="pro-other-input"
                      placeholder="e.g. SABAM, ICMP, COMPASS…"
                      style="margin-bottom:0">
+            </div>
+            <div id="pro-logo-wrap" style="display:none;margin-top:12px;align-items:center;gap:10px;">
+              <img id="pro-logo-img" alt="" style="height:26px;max-width:120px;object-fit:contain;display:block;" onerror="this.style.display='none'">
+              <span id="pro-logo-name" style="font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:#64748B;"></span>
             </div>
           </div>
 

@@ -2225,6 +2225,10 @@ footer.m-footer{
         <option>SIAE</option><option>Other</option><option>Not yet registered</option>
       </select>
       <div id="d-pro-other" style="display:none"><label class="field-label">Specify your PRO *</label><input class="field" type="text" id="mob-pro-other" placeholder="e.g. SABAM, ICMP…"></div>
+      <div id="d-pro-logo" style="display:none;align-items:center;gap:10px;margin-top:10px;margin-bottom:6px;">
+        <img id="d-pro-logo-img" alt="" style="height:24px;max-width:110px;object-fit:contain;display:block;" onerror="this.style.display='none'">
+        <span id="d-pro-logo-name" style="font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:var(--muted);"></span>
+      </div>
       <label class="field-label">IPI / CAE Number *</label><input class="field" type="text" placeholder="e.g. 00123456789" id="mob-pf-ipi" data-required="true">
       <label class="field-label">Date of Birth *</label>
       <div style="position:relative">
@@ -3135,6 +3139,11 @@ window.confirmMobPayPalConnect = confirmMobPayPalConnect;
 window.mobDisconnectPayPal = mobDisconnectPayPal;
 
 // ── PRO Other ──
+var PRO_DOMAINS_M = {
+  'ASCAP':'ascap.com','BMI':'bmi.com','SESAC':'sesac.com',
+  'SOCAN':'socan.ca','PRS for Music':'prsformusic.com',
+  'GEMA':'gema.de','SIAE':'siae.it'
+};
 function dTogglePro(v){
   const w=document.getElementById('d-pro-other');
   const input=document.getElementById('mob-pro-other');
@@ -3143,6 +3152,18 @@ function dTogglePro(v){
     input.setAttribute('data-required', v==='Other'?'true':'false');
     if(v!=='Other'){input.value='';input.classList.remove('field-error');}
   }
+  // Render the PRO's real logo via Clearbit
+  var wrap=document.getElementById('d-pro-logo');
+  var img=document.getElementById('d-pro-logo-img');
+  var name=document.getElementById('d-pro-logo-name');
+  if(!wrap||!img||!name)return;
+  var domain=PRO_DOMAINS_M[v];
+  if(!domain){wrap.style.display='none';img.src='';return;}
+  img.style.display='block';
+  img.src='https://logo.clearbit.com/'+domain+'?size=128';
+  img.alt=v;
+  name.textContent=v;
+  wrap.style.display='flex';
 }
 
 // ── Admin: Load signups (with client-side search + filter) ──
@@ -3740,6 +3761,7 @@ function mobDiscardProfile() {
   form.querySelectorAll('input[type="text"], input[type="date"]').forEach(function(i) { i.value = ''; });
   form.querySelectorAll('select').forEach(function(s) { s.selectedIndex = 0; });
   document.getElementById('d-pro-other').style.display = 'none';
+  var dpl = document.getElementById('d-pro-logo'); if (dpl) dpl.style.display = 'none';
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
