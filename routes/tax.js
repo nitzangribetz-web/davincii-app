@@ -75,6 +75,12 @@ async function ensureTaxTable() {
   )`);
   await pool.query(`CREATE INDEX IF NOT EXISTS idx_tax_forms_artist ON tax_forms(artist_id)`);
   await pool.query(`CREATE INDEX IF NOT EXISTS idx_tax_forms_status ON tax_forms(status)`);
+  // Existing deploys may have created artist_id as INTEGER. Coerce to TEXT.
+  try {
+    await pool.query(`ALTER TABLE tax_forms ALTER COLUMN artist_id TYPE TEXT USING artist_id::text`);
+  } catch (e) {
+    console.warn('[tax] artist_id type coerce skipped:', e.message);
+  }
   _taxTableReady = true;
 }
 
