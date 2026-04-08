@@ -5,7 +5,43 @@ const pool = require('../db/pool');
 const auth = require('../middleware/auth');
 
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const { Resend } = require('resend');
 const APP_URL = process.env.APP_URL || 'https://davincii-app-production-89cc.up.railway.app';
+const ADMIN_NOTIFY_EMAIL = process.env.ADMIN_NOTIFY_EMAIL || 'info@davincii.co';
+
+// Fire-and-forget admin email when an artist completes Stripe Connect
+// onboarding (which includes the W-9 / tax identity collection). We
+// intentionally do NOT include any tax details — the email only links to the
+// Stripe dashboard where the connected account can be inspected.
+async function notifyAdminW9Completed({ artistId, accountId }) {
+  try {
+    if (!process.env.RESEND_API_KEY) return;
+    const { rows } = await pool.query(
+      'SELECT name, email, stage_name FROM artists WHERE id = $1',
+      [artistId]
+    );
+    const artist = rows[0] || {};
+    const displayName = artist.stage_name || artist.name || artist.email || ('Artist #' + artistId);
+    const isLive = String(process.env.STRIPE_SECRET_KEY || '').startsWith('sk_live_');
+    const dashUrl = 'https://dashboard.stripe.com/' + (isLive ? '' : 'test/') + 'connect/accounts/' + accountId;
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    await resend.emails.send({
+      from: 'Davincii <info@davincii.co>',
+      to: ADMIN_NOTIFY_EMAIL,
+      subject: 'W-9 completed — ' + displayName,
+      html:
+        '<div style="font-family:DM Sans,Arial,sans-serif;font-size:14px;color:#0A0A0A;line-height:1.55">' +
+          '<p><strong>' + displayName + '</strong> just completed their W-9 / tax identity through Stripe Connect.</p>' +
+          '<p>View the connected account in Stripe to extract the W-9 information:</p>' +
+          '<p><a href="' + dashUrl + '" style="color:#3B82F6">' + dashUrl + '</a></p>' +
+          '<p style="color:#6B7280;font-size:12px;margin-top:24px">Artist ID: ' + artistId + '<br>Stripe account: ' + accountId + '</p>' +
+        '</div>'
+    });
+    console.log('[stripe/webhook] admin W-9 notification sent for artist=' + artistId);
+  } catch (err) {
+    console.error('[stripe/webhook] admin W-9 notify failed:', err.message);
+  }
+}
 
 // ── Stripe refresh token helpers ──────────────────────────────────────────────
 // The Stripe onboarding refresh_url is opened by Stripe as a top-level browser
@@ -373,11 +409,22 @@ router.post('/webhook', async (req, res) => {
         const artistId = account.metadata?.artist_id;
         if (artistId) {
           const onboarded = !!(account.details_submitted && account.charges_enabled);
+          // Detect false→true transition so the admin email only fires once.
+          const prev = await pool.query(
+            'SELECT stripe_onboarded FROM artists WHERE id = $1',
+            [artistId]
+          );
+          const wasOnboarded = !!(prev.rows[0] && prev.rows[0].stripe_onboarded);
           await pool.query(
             'UPDATE artists SET stripe_onboarded = $1 WHERE id = $2',
             [onboarded, artistId]
           );
           console.log(`[stripe/webhook] account.updated artist=${artistId} onboarded=${onboarded}`);
+          // Tax identity is collected during details_submitted; notify admin
+          // the first time this flips on, regardless of charges_enabled.
+          if (account.details_submitted && !wasOnboarded) {
+            notifyAdminW9Completed({ artistId, accountId: account.id });
+          }
         }
         break;
       }
