@@ -51,7 +51,35 @@ function summarize(row) {
   };
 }
 
+// Safety net: ensure tax_forms table exists. Normally created by db/migrate.js
+// on startup, but if that failed silently we self-heal here.
+let _taxTableReady = false;
+async function ensureTaxTable() {
+  if (_taxTableReady) return;
+  await pool.query(`CREATE TABLE IF NOT EXISTS tax_forms (
+    id                SERIAL PRIMARY KEY,
+    artist_id         INTEGER NOT NULL REFERENCES artists(id) ON DELETE CASCADE,
+    form_type         VARCHAR(16) NOT NULL,
+    status            VARCHAR(20) NOT NULL DEFAULT 'not_started',
+    provider          VARCHAR(32),
+    provider_form_id  VARCHAR(255),
+    signed_pdf_url    TEXT,
+    country           VARCHAR(8),
+    tin_last4         VARCHAR(8),
+    legal_name        VARCHAR(255),
+    submitted_at      TIMESTAMPTZ,
+    completed_at      TIMESTAMPTZ,
+    expires_at        TIMESTAMPTZ,
+    created_at        TIMESTAMPTZ DEFAULT NOW(),
+    updated_at        TIMESTAMPTZ DEFAULT NOW()
+  )`);
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_tax_forms_artist ON tax_forms(artist_id)`);
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_tax_forms_status ON tax_forms(status)`);
+  _taxTableReady = true;
+}
+
 async function getActiveTaxForm(artistId) {
+  await ensureTaxTable();
   const { rows } = await pool.query(
     `SELECT * FROM tax_forms
        WHERE artist_id = $1
