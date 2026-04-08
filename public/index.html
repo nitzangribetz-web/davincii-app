@@ -4473,7 +4473,8 @@
       if ((artist && artist.stage_name && artist.pro) || localStorage.getItem('dv_setup_profile') === '1') {
         markSetupComplete('profile');
       }
-      if (localStorage.getItem('dv_setup_w9') === '1') markSetupComplete('w9');
+      // Note: we intentionally do NOT trust dv_setup_w9 from localStorage as a
+      // shortcut. Stripe is the only source of truth for the payouts/W-9 step.
       if (localStorage.getItem('dv_setup_song') === '1') markSetupComplete('song');
       // Detect first registered composition via /songs API, then mark song complete.
       if (window.Dv && Dv.api && localStorage.getItem('dv_setup_song') !== '1') {
@@ -4499,18 +4500,28 @@
         var box = document.getElementById('get-started-box');
         if (box) box.style.display = 'none';
       }
-      // W-9 completion is now derived from Stripe Connect: once Stripe has
-      // collected the tax identity (details_submitted=true and no outstanding
-      // requirements), the in-app W-9 alert is hidden.
+      // W-9 / payouts completion is derived ONLY from Stripe Connect status.
+      // It is considered done when Stripe has both collected the full tax
+      // identity (details_submitted=true) AND has no outstanding requirements
+      // (no currently_due items). Anything less leaves the alert visible.
       if (window.Dv && Dv.stripe) {
         Dv.stripe.fetchStatus().then(function(d) {
-          var vm = Dv.stripe.describeState(d);
-          var done = vm.state === 'connected_ready'
-                  || vm.state === 'connected_incomplete' && d && d.details_submitted
-                  || (d && d.details_submitted);
+          var hasDetails = !!(d && d.details_submitted);
+          var reqs = (d && Array.isArray(d.requirements_due)) ? d.requirements_due : [];
+          var noOutstanding = reqs.length === 0;
+          var done = hasDetails && noOutstanding;
           if (done) {
             try { localStorage.setItem('dv_setup_w9', '1'); } catch(_){}
             markSetupComplete('w9');
+          } else {
+            // Stripe says not done — clear any stale local flag and re-show
+            // the alert in case it was previously marked complete.
+            try { localStorage.removeItem('dv_setup_w9'); } catch(_){}
+            try { localStorage.removeItem('dv_setup_w9_at'); } catch(_){}
+            var alertEl = document.getElementById('setup-alert-w9');
+            if (alertEl) { alertEl.classList.remove('completed'); alertEl.style.display = ''; }
+            var rowEl = document.getElementById('setup-row-w9');
+            if (rowEl) { rowEl.classList.remove('completed'); rowEl.style.display = ''; }
           }
         }).catch(function(){});
       }

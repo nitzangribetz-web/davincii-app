@@ -2692,7 +2692,7 @@ function mobApplySetupCompletion() {
   var profileDone = (artist && artist.stage_name && artist.pro)
     || localStorage.getItem('dv_setup_profile') === '1';
   if (profileDone) mobMarkSetupComplete('profile');
-  if (localStorage.getItem('dv_setup_w9') === '1') mobMarkSetupComplete('w9');
+  // Stripe is the only source of truth for W-9 / payouts — see mobLoadW9Status.
   if (localStorage.getItem('dv_setup_song') === '1') mobMarkSetupComplete('song');
   // Hide entire Get Started box once everything is done
   var box = document.getElementById('mob-get-started-box');
@@ -2733,9 +2733,20 @@ function mobLoadW9Status() {
   if (!window.Dv || !Dv.stripe) return;
   Dv.stripe.fetchStatus()
     .then(function(d) {
-      if (d && d.details_submitted) {
+      var hasDetails = !!(d && d.details_submitted);
+      var reqs = (d && Array.isArray(d.requirements_due)) ? d.requirements_due : [];
+      var done = hasDetails && reqs.length === 0;
+      if (done) {
         try { localStorage.setItem('dv_setup_w9', '1'); } catch(_){}
         mobMarkSetupComplete('w9');
+      } else {
+        // Stripe says not done — clear stale flag and re-show the alert/row.
+        try { localStorage.removeItem('dv_setup_w9'); } catch(_){}
+        try { localStorage.removeItem('dv_setup_w9_at'); } catch(_){}
+        var alertEl = document.getElementById('mob-alert-w9');
+        if (alertEl) { alertEl.classList.remove('completed'); alertEl.style.display = ''; }
+        var rowEl = document.getElementById('mob-setup-row-w9');
+        if (rowEl) { rowEl.classList.remove('completed'); rowEl.style.display = ''; }
       }
     })
     .catch(function(){});
