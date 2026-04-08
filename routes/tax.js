@@ -100,6 +100,9 @@ async function ensureTaxTable() {
   )`);
   await pool.query(`CREATE INDEX IF NOT EXISTS idx_tax_forms_artist ON tax_forms(artist_id)`);
   await pool.query(`CREATE INDEX IF NOT EXISTS idx_tax_forms_status ON tax_forms(status)`);
+  try {
+    await pool.query(`ALTER TABLE tax_forms ALTER COLUMN country TYPE VARCHAR(64)`);
+  } catch (e) { console.warn('[tax] country widen skipped:', e.message); }
   _taxTableReady = true;
 }
 
