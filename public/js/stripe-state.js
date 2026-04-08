@@ -75,7 +75,7 @@
         vm.label = 'Not connected';
         vm.sub = 'Connect Stripe to receive royalty payouts.';
         vm.desc = 'You haven\u2019t connected a payout account yet. Connect Stripe to receive your royalties by direct deposit.';
-        vm.actionText = 'Manage payout account';
+        vm.actionText = 'Connect Stripe';
         break;
 
       case STATES.CONNECTED_INCOMPLETE:
