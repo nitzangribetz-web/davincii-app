@@ -92,9 +92,12 @@ const columnMigrations = [
   // collection so artists can choose any payout rail (Stripe, PayPal, …)
   // without re-doing tax info. One row per artist + form_type combination;
   // the most recent row is the active one (older rows are kept for audit).
+  // NOTE: artists.id is UUID in prod (despite the baseTables declaration
+  // above saying SERIAL — schema drift we haven't reconciled). Keep artist_id
+  // as UUID here to match prod. routes/tax.js also self-heals.
   `CREATE TABLE IF NOT EXISTS tax_forms (
     id                SERIAL PRIMARY KEY,
-    artist_id         INTEGER NOT NULL REFERENCES artists(id) ON DELETE CASCADE,
+    artist_id         UUID NOT NULL,
     form_type         VARCHAR(16) NOT NULL,
     status            VARCHAR(20) NOT NULL DEFAULT 'not_started',
     provider          VARCHAR(32),

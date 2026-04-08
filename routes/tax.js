@@ -56,9 +56,34 @@ function summarize(row) {
 let _taxTableReady = false;
 async function ensureTaxTable() {
   if (_taxTableReady) return;
+
+  // Detect the real type of artists.id in prod (UUID in our case, not SERIAL
+  // as db/migrate.js claims — schema drift). Mirror it on tax_forms.artist_id.
+  const { rows: typeRows } = await pool.query(
+    `SELECT data_type FROM information_schema.columns
+      WHERE table_name = 'artists' AND column_name = 'id'`
+  );
+  const artistIdType = (typeRows[0] && typeRows[0].data_type) || 'uuid';
+  const colType = artistIdType === 'uuid' ? 'UUID'
+                : artistIdType === 'integer' ? 'INTEGER'
+                : artistIdType === 'bigint' ? 'BIGINT'
+                : 'TEXT';
+
+  // If an existing tax_forms has a mismatched artist_id type, drop it (no
+  // real data yet — this feature just shipped). Safer than ALTER COLUMN with
+  // USING across type families.
+  const { rows: existingCol } = await pool.query(
+    `SELECT data_type FROM information_schema.columns
+      WHERE table_name = 'tax_forms' AND column_name = 'artist_id'`
+  );
+  if (existingCol[0] && existingCol[0].data_type !== artistIdType) {
+    console.warn('[tax] Dropping tax_forms: artist_id is', existingCol[0].data_type, 'but artists.id is', artistIdType);
+    await pool.query(`DROP TABLE IF EXISTS tax_forms CASCADE`);
+  }
+
   await pool.query(`CREATE TABLE IF NOT EXISTS tax_forms (
     id                SERIAL PRIMARY KEY,
-    artist_id         TEXT NOT NULL,
+    artist_id         ${colType} NOT NULL,
     form_type         VARCHAR(16) NOT NULL,
     status            VARCHAR(20) NOT NULL DEFAULT 'not_started',
     provider          VARCHAR(32),
@@ -75,12 +100,6 @@ async function ensureTaxTable() {
   )`);
   await pool.query(`CREATE INDEX IF NOT EXISTS idx_tax_forms_artist ON tax_forms(artist_id)`);
   await pool.query(`CREATE INDEX IF NOT EXISTS idx_tax_forms_status ON tax_forms(status)`);
-  // Existing deploys may have created artist_id as INTEGER. Coerce to TEXT.
-  try {
-    await pool.query(`ALTER TABLE tax_forms ALTER COLUMN artist_id TYPE TEXT USING artist_id::text`);
-  } catch (e) {
-    console.warn('[tax] artist_id type coerce skipped:', e.message);
-  }
   _taxTableReady = true;
 }
 

@@ -4,15 +4,32 @@
   var Dv = window.Dv = window.Dv || {};
   var KEY = 'dv_notifs';
   var MAX = 50;
+  // Industry-standard retention for in-app notifications (~30 days). Items
+  // older than this are pruned automatically on every load/save.
+  var TTL_MS = 30 * 24 * 60 * 60 * 1000;
+
+  function prune(list) {
+    var cutoff = Date.now() - TTL_MS;
+    return (list || []).filter(function (n) {
+      return n && typeof n.ts === 'number' && n.ts >= cutoff;
+    });
+  }
 
   function load() {
-    try { return JSON.parse(localStorage.getItem(KEY) || '[]') || []; }
-    catch (_) { return []; }
+    try {
+      var raw = JSON.parse(localStorage.getItem(KEY) || '[]') || [];
+      var pruned = prune(raw);
+      if (pruned.length !== raw.length) {
+        try { localStorage.setItem(KEY, JSON.stringify(pruned.slice(0, MAX))); } catch (_) {}
+      }
+      return pruned;
+    } catch (_) { return []; }
   }
 
   function save(arr) {
-    try { localStorage.setItem(KEY, JSON.stringify((arr || []).slice(0, MAX))); }
-    catch (_) {}
+    try {
+      localStorage.setItem(KEY, JSON.stringify(prune(arr || []).slice(0, MAX)));
+    } catch (_) {}
   }
 
   function add(title, body, icon) {
@@ -27,6 +44,21 @@
     });
     save(list);
     return list;
+  }
+
+  /* addOnce(key, title, body, icon)
+     Idempotently record an event-sourced notification. The same `key` will
+     only ever produce one entry (persisted in localStorage), so reloads or
+     duplicate triggers from multiple UI hooks don't spam the inbox. */
+  function addOnce(key, title, body, icon) {
+    if (!key) return add(title, body, icon);
+    var seenKey = 'dv_notifs_once';
+    var seen = {};
+    try { seen = JSON.parse(localStorage.getItem(seenKey) || '{}') || {}; } catch (_) {}
+    if (seen[key]) return load();
+    seen[key] = Date.now();
+    try { localStorage.setItem(seenKey, JSON.stringify(seen)); } catch (_) {}
+    return add(title, body, icon);
   }
 
   function markAllRead() {
@@ -62,8 +94,10 @@
     load: load,
     save: save,
     add: add,
+    addOnce: addOnce,
     markAllRead: markAllRead,
     unreadCount: unreadCount,
-    render: render
+    render: render,
+    TTL_MS: TTL_MS
   };
 })();
