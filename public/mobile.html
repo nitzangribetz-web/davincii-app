@@ -190,14 +190,18 @@ body.user-authed-landing .m-hero-cta .authed-only{display:flex;align-items:cente
 .m-ln-bell:active,.m-ln-av:active{transform:scale(0.94)}
 .m-ln-bell svg,.m-ln-av svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .m-ln-bell-dot{
-  position:absolute;top:-2px;right:-2px;
-  width:10px;height:10px;border-radius:50%;
+  position:absolute;top:-4px;right:-4px;
+  min-width:16px;height:16px;padding:0 4px;border-radius:8px;
   background:#EF4444;
   border:2px solid #060E28;
   box-shadow:0 0 0 1px rgba(239,68,68,0.35);
-  display:none;
+  color:#fff;
+  font-family:var(--sans);
+  font-size:9.5px;font-weight:700;line-height:12px;
+  display:none;align-items:center;justify-content:center;
+  box-sizing:content-box;pointer-events:none;
 }
-.m-ln-bell.has-notif .m-ln-bell-dot{display:block}
+.m-ln-bell.has-notif .m-ln-bell-dot{display:inline-flex}
 
 /* ══════════════════════════════════════
    HERO
@@ -866,14 +870,18 @@ footer.m-footer{
 .d-bell:active{transform:scale(0.94)}
 .d-bell svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .d-bell-dot{
-  position:absolute;top:-2px;right:-2px;
-  min-width:10px;height:10px;
-  border-radius:50%;background:#EF4444;
+  position:absolute;top:-4px;right:-4px;
+  min-width:16px;height:16px;padding:0 4px;
+  border-radius:8px;background:#EF4444;
   border:2px solid var(--navy);
   box-shadow:0 0 0 1px rgba(239,68,68,0.35);
-  display:none;
+  color:#fff;
+  font-family:var(--sans);
+  font-size:9.5px;font-weight:700;line-height:12px;
+  display:none;align-items:center;justify-content:center;
+  box-sizing:content-box;pointer-events:none;
 }
-.d-bell.has-notif .d-bell-dot{display:block}
+.d-bell.has-notif .d-bell-dot{display:inline-flex}
 /* Avatar */
 .d-av-wrap{position:relative}
 .d-av{
@@ -2523,6 +2531,26 @@ try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; 
   document.addEventListener('DOMContentLoaded', function() {
     if (params.get('error')) { mobRemoveBootCSS(); return; }
 
+    // Stripe Connect return — when Stripe redirects back with
+    // ?stripe_connected=true, fire a one-shot notification so the user
+    // sees it in the bell/inbox. Deduped per calendar day.
+    if (params.get('stripe_connected') === 'true' && window.Dv && Dv.notifications) {
+      var _day = new Date().toISOString().slice(0, 10);
+      Dv.notifications.addOnce(
+        'stripe_connected_' + _day,
+        'Payout account connected',
+        'Your Stripe account is connected and ready to receive royalties.',
+        'green'
+      );
+      try {
+        var _p = new URLSearchParams(window.location.search);
+        _p.delete('stripe_connected');
+        var _qs = _p.toString();
+        window.history.replaceState({}, '', window.location.pathname + (_qs ? '?' + _qs : ''));
+      } catch(_){}
+      try { mobSyncNotifDot(); } catch(_){}
+    }
+
     // Artist payload in URL (from POST /api/auth/login redirect or oauth-callback).
     // Cookie auth carries the actual session; the URL only provides the artist info.
     var artistParam = params.get('artist');
@@ -2619,10 +2647,16 @@ function mobRemoveBootCSS() {
 
 // Sync the red unread-notification dot on both bells (dashboard top-nav + landing-authed nav).
 function mobSyncNotifDot() {
-  var has = false;
-  try { has = (window.Dv && Dv.notifications && Dv.notifications.unreadCount() > 0); } catch(_){}
+  var count = 0;
+  try { count = (window.Dv && Dv.notifications) ? Dv.notifications.unreadCount() : 0; } catch(_){}
+  var has = count > 0;
+  var label = count > 99 ? '99+' : String(count);
   ['.d-bell', '.m-ln-bell'].forEach(function(sel){
-    document.querySelectorAll(sel).forEach(function(el){ el.classList.toggle('has-notif', has); });
+    document.querySelectorAll(sel).forEach(function(el){
+      el.classList.toggle('has-notif', has);
+      var dot = el.querySelector('.d-bell-dot, .m-ln-bell-dot');
+      if (dot) dot.textContent = has ? label : '';
+    });
   });
 }
 window.mobSyncNotifDot = mobSyncNotifDot;
@@ -3709,6 +3743,10 @@ function submitMobW9() {
     mobApplySetupCompletion();
     closeMobW9Modal();
     showToast('W-9 submitted successfully');
+    try {
+      Dv.notifications.addOnce('w9_submitted', 'Tax form submitted', 'Your W-9 is on file \u2014 you\u2019re all set for year-end 1099s.', 'blue');
+      mobSyncNotifDot();
+    } catch(_){}
   })
   .catch(function() {
     if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Submit W-9'; }
@@ -4027,6 +4065,16 @@ function mobSubmitSong() {
       mobApplySetupCompletion();
       mobLoadSongs();
       showToast('Song submitted for registration', 'success');
+      try {
+        var _sid = (res.data && (res.data.id || res.data.song_id)) || Date.now();
+        Dv.notifications.addOnce(
+          'song_submitted_' + _sid,
+          'Song submitted: ' + (songData.title || 'Untitled'),
+          'Your composition is now in processing.',
+          'blue'
+        );
+        mobSyncNotifDot();
+      } catch(_){}
       mobResetAddSong();
       setTimeout(function() { releaseLock(); showDP('catalog'); }, 400);
     } else {

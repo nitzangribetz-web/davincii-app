@@ -2500,13 +2500,22 @@
       fill: none; stroke: currentColor;
       stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
     }
-    /* Unread badge dot */
+    /* Unread badge — numeric count */
     .notif-bell-badge {
-      position: absolute; top: 6px; right: 6px;
-      width: 8px; height: 8px; border-radius: 50%;
+      position: absolute; top: 2px; right: 2px;
+      min-width: 16px; height: 16px; padding: 0 4px;
+      border-radius: 8px;
       background: #3B82F6;
       border: 2px solid #030912;
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9.5px; font-weight: 700;
+      line-height: 12px;
+      display: none;
+      align-items: center; justify-content: center;
+      text-align: center;
       pointer-events: none;
+      box-sizing: content-box;
     }
     /* Notification dropdown panel */
     .notif-panel {
@@ -3073,6 +3082,27 @@
         if (_s) console.log('[LOGIN-PERF][frontend] index.DOMContentLoaded at', window.__dvPerf.tDcl, '(' + (window.__dvPerf.tDcl - _s) + 'ms since submit, ' + (window.__dvPerf.tDcl - window.__dvPerf.tScriptStart) + 'ms since script-start)');
       } catch(_){}
       if (params.get('error')) { removeBootCSS(); window.history.replaceState({}, '', '/'); return; }
+
+      // Stripe Connect return — when Stripe redirects back with
+      // ?stripe_connected=true, fire a one-shot notification so the user
+      // sees it in the bell/inbox. Handled once per calendar day; the
+      // addOnce key is derived from the date so a re-connect next day
+      // still notifies.
+      if (params.get('stripe_connected') === 'true' && window.Dv && Dv.notifications) {
+        var _day = new Date().toISOString().slice(0, 10);
+        Dv.notifications.addOnce(
+          'stripe_connected_' + _day,
+          'Payout account connected',
+          'Your Stripe account is connected and ready to receive royalties.',
+          'green'
+        );
+        try {
+          var _p = new URLSearchParams(window.location.search);
+          _p.delete('stripe_connected');
+          var _qs = _p.toString();
+          window.history.replaceState({}, '', window.location.pathname + (_qs ? '?' + _qs : ''));
+        } catch(_){}
+      }
 
       // Step 2: Artist payload in URL (arriving from POST /api/auth/login redirect or oauth-callback).
       // Auth itself lives in the HttpOnly cookie set by the backend; the URL only carries
@@ -3673,7 +3703,13 @@
   function updateBadge() {
     const badge = document.getElementById('notif-badge');
     if (badge) {
-      badge.style.display = _unreadCount > 0 ? 'block' : 'none';
+      if (_unreadCount > 0) {
+        badge.textContent = _unreadCount > 99 ? '99+' : String(_unreadCount);
+        badge.style.display = 'inline-flex';
+      } else {
+        badge.textContent = '';
+        badge.style.display = 'none';
+      }
     }
   }
 
@@ -4140,6 +4176,8 @@
       if(b)b.className='status-badge pending';if(t)t.textContent='Submitted';
       closeW9Modal();
       showToast('W-9 submitted successfully');
+      Dv.notifications.addOnce('w9_submitted', 'Tax form submitted', 'Your W-9 is on file — you\u2019re all set for year-end 1099s.', 'blue');
+      renderNotifications();
       markSetupComplete('w9');
       showDashPage('overview');
     })
@@ -4845,7 +4883,14 @@
     .then(function(res) {
       if (res.ok) {
         showToast('Song submitted for registration', 'success');
-        addNotification('Song submitted: ' + songData.title, 'Your composition is now in processing.', 'blue');
+        var _sid = (res.data && (res.data.id || res.data.song_id)) || Date.now();
+        Dv.notifications.addOnce(
+          'song_submitted_' + _sid,
+          'Song submitted: ' + songData.title,
+          'Your composition is now in processing.',
+          'blue'
+        );
+        renderNotifications();
         deskResetAddSong();
         // Stay locked until navigation happens — prevents a flicker-click re-submit.
         setTimeout(function() { releaseLock(); showDashPage('catalog'); }, 400);
