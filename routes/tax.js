@@ -153,36 +153,53 @@ async function createAnvilPacket({ formType, artist, legalName }) {
   const signerEmail = artist.email;
 
   const mutation = `
-    mutation CreateEtchPacket($data: CreateEtchPacketInput!) {
-      createEtchPacket(data: $data) {
+    mutation CreateEtchPacket(
+      $name: String,
+      $files: [EtchFile!],
+      $isDraft: Boolean,
+      $isTest: Boolean,
+      $signatureEmailSubject: String,
+      $signatureEmailBody: String,
+      $signers: [JSON!]
+    ) {
+      createEtchPacket(
+        name: $name,
+        files: $files,
+        isDraft: $isDraft,
+        isTest: $isTest,
+        signatureEmailSubject: $signatureEmailSubject,
+        signatureEmailBody: $signatureEmailBody,
+        signers: $signers
+      ) {
         eid
         detailsURL
-        documentGroup { eid }
-        signers { eid signActionURL routingOrder }
+        documentGroup {
+          eid
+          signers { eid aliasId routingOrder signActionURL }
+        }
       }
     }
   `;
   const variables = {
-    data: {
-      name: formLabel + ' — ' + signerName,
-      isDraft: false,
-      isTest: process.env.NODE_ENV !== 'production',
-      signatureEmailSubject: formLabel + ' for Davincii',
-      signatureEmailBody: 'Please sign your ' + formLabel + ' to complete Davincii payout setup.',
-      files: [{ id: 'taxForm', castEid: templateEid }],
-      signers: [{
-        id: 'artist',
-        name: signerName,
-        email: signerEmail,
-        signerType: 'embedded',
-        routingOrder: 1,
-        fields: [],
-      }],
-    },
+    name: formLabel + ' — ' + signerName,
+    isDraft: false,
+    isTest: process.env.NODE_ENV !== 'production',
+    signatureEmailSubject: formLabel + ' for Davincii',
+    signatureEmailBody: 'Please sign your ' + formLabel + ' to complete Davincii payout setup.',
+    files: [{ id: 'taxForm', castEid: templateEid }],
+    signers: [{
+      id: 'artist',
+      name: signerName,
+      email: signerEmail,
+      signerType: 'embedded',
+      routingOrder: 1,
+      fields: [],
+    }],
   };
   const data = await anvilGraphQL(mutation, variables);
   const packet = data.createEtchPacket;
-  const signer = (packet.signers || [])[0];
+  const signers = (packet.documentGroup && packet.documentGroup.signers) || [];
+  const signer = signers[0];
   return {
     eid: packet.eid,
     signUrl: signer && signer.signActionURL,
