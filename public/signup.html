@@ -257,12 +257,12 @@ body { font-family:'DM Sans', system-ui, sans-serif; background:#fff; }
 
 <script>
 (function() {
-  // If user has a valid session, redirect to dashboard
-  if (savedToken) {
-    fetch('/api/auth/me', { headers: {} })
+  // If a session cookie is still valid, skip signup and bounce to dashboard.
+  if (localStorage.getItem('dv_artist')) {
+    fetch('/api/auth/me', { credentials: 'include' })
       .then(function(r) { if (r.ok) return r.json(); throw new Error('expired'); })
       .then(function() { window.location.replace('/dashboard'); })
-      .catch(function() { localStorage.removeItem('dv_token'); localStorage.removeItem('dv_artist'); });
+      .catch(function() { localStorage.removeItem('dv_artist'); });
   }
 
   var params = new URLSearchParams(window.location.search);
