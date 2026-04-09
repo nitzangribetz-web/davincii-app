@@ -32,7 +32,7 @@ app.use(helmet({
       objectSrc: ["'none'"],
       baseUri: ["'self'"],
       formAction: ["'self'"],
-      frameAncestors: ["'none'"],
+      frameAncestors: ["'self'"],
       upgradeInsecureRequests: [],
     },
   },
