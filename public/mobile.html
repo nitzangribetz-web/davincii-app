@@ -1082,7 +1082,7 @@ footer.m-footer{
 .d-setup-row:last-child{border-bottom:none}
 .d-setup-row.completed .d-setup-lbl{text-decoration:line-through;color:#64748B}
 .d-setup-row.completed .d-setup-cta{display:none}
-.d-alert.completed{opacity:0.7;border-left-color:#3B82F6}
+.d-alert.completed{opacity:0.7;border-left-color:#10B981}
 .d-alert.completed .d-alert-title,.d-alert.completed .d-alert-body{text-decoration:line-through;color:#6B7280}
 .d-alert.completed .d-alert-btn,.d-alert.completed button{display:none}
 .d-setup-lbl{font-family:var(--sans);font-size:13px;font-weight:400;color:var(--slate)}
@@ -1524,9 +1524,9 @@ footer.m-footer{
       <button class="btn-nav-ghost-m guest-only" onclick="go('login')">Login</button>
       <button class="btn-nav-solid-m guest-only" onclick="go('signup')">Get started</button>
       <div class="nav-authed-m">
-        <button class="m-ln-bell" aria-label="Notifications" onclick="try{Dv.notifications.markAllRead();}catch(_){}mobEnterDashboard('notifications')">
+        <button class="m-ln-bell" aria-label="Notifications" onclick="mobEnterDashboard('notifications')">
           <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-          <span class="m-ln-bell-dot">0</span>
+          <span class="m-ln-bell-dot"></span>
         </button>
         <button class="m-ln-av" aria-label="Account" onclick="mobEnterDashboard('overview')">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
@@ -1910,14 +1910,14 @@ footer.m-footer{
       <div class="notif-dropdown-wrap" id="notif-drop-wrap">
         <button class="d-bell" aria-label="Notifications" onclick="toggleNotifPanel(event)">
           <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-          <span class="d-bell-dot" id="d-bell-dot">0</span>
+          <span class="d-bell-dot" id="d-bell-dot"></span>
         </button>
         <div class="notif-panel" id="notif-panel">
           <div class="notif-panel-hd">
             <span class="notif-panel-title">Notifications</span>
-            <button class="notif-panel-mark">Mark all read</button>
+            <button class="notif-panel-mark" onclick="mobMarkAllRead(event)">Mark all read</button>
           </div>
-          <div class="notif-panel-body">
+          <div class="notif-panel-body" id="mob-notif-panel-body">
             <div class="notif-panel-empty-t">You're all caught up.</div>
             <div class="notif-panel-empty-s">We'll let you know the moment royalties, registrations, or payouts move.</div>
           </div>
@@ -1940,7 +1940,7 @@ footer.m-footer{
           </div>
           <div class="d-dd-sec">
             <button class="d-dd-btn" onclick="showDP('profile');closeDMenu()"><span class="d-dd-icon">◎</span>Artist Profile</button>
-            <button class="d-dd-btn" onclick="showDP('statements');closeDMenu()"><span class="d-dd-icon">▤</span>Statements</button>
+            <button class="d-dd-btn" onclick="showDP('statements');closeDMenu()"><span class="d-dd-icon">≡</span>Statements</button>
             <button class="d-dd-btn" onclick="showDP('payouts');closeDMenu()"><span class="d-dd-icon">⬆</span>Payouts</button>
           </div>
           <div class="d-dd-sec">
@@ -2001,6 +2001,14 @@ footer.m-footer{
         <button class="d-alert-btn" onclick="showDP('profile')">Complete →</button>
       </div>
     </div>
+    <div class="d-alert" id="mob-alert-w9" style="margin-bottom:16px">
+      <div class="d-alert-icon" style="font-size:11px;font-weight:700">$</div>
+      <div style="flex:1;min-width:0">
+        <div class="d-alert-title">Set up payouts (2 min)</div>
+        <div class="d-alert-sub">Davincii uses Stripe to pay artists worldwide. You'll create a free Stripe account and complete your tax info in one step — no separate W-9 form needed.</div>
+        <button class="d-alert-btn" onclick="showDP('payouts')">Set up payouts →</button>
+      </div>
+    </div>
     <div class="d-bal">
       <div class="d-bal-lbl">Available Balance</div>
       <div class="d-bal-amt"><span class="d-cs">$</span>0.00</div>
@@ -2018,6 +2026,7 @@ footer.m-footer{
     <div class="d-sbox" id="mob-get-started-box">
       <div class="d-sbox-hd"><div><div class="d-sbox-title">Get started</div><div class="d-sbox-sub">Complete your setup</div></div></div>
       <div class="d-setup-row" id="mob-setup-row-profile"><span class="d-setup-lbl">Complete artist profile</span><button class="d-setup-cta" onclick="showDP('profile')">Complete →</button></div>
+      <div class="d-setup-row" id="mob-setup-row-w9"><span class="d-setup-lbl">Set up payouts &amp; tax info</span><button class="d-setup-cta" onclick="showDP('payouts')">Set up →</button></div>
       <div class="d-setup-row" id="mob-setup-row-song"><span class="d-setup-lbl">Register first composition</span><button class="d-setup-cta" onclick="showDP('add-song')">Register →</button></div>
     </div>
   </div>
@@ -2203,8 +2212,8 @@ footer.m-footer{
     <div class="d-sbox" style="margin-bottom:12px">
       <div class="d-sbox-hd"><div><div class="d-sbox-title">Select Payout Method</div><div class="d-sbox-sub">Choose how to receive royalties</div></div></div>
       <div style="padding:14px 16px">
-        <label class="d-pay-card" id="d-stripe" onclick="dPayout('stripe')">
-          <input type="radio" name="d-pm" value="stripe">
+        <label class="d-pay-card selected" id="d-stripe" onclick="dPayout('stripe')">
+          <input type="radio" name="d-pm" value="stripe" checked>
           <svg width="34" height="34" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0"><rect width="32" height="32" rx="7" fill="#635BFF"/><path fill="#fff" fill-rule="evenodd" d="M14.68 12.19c0-.76.63-1.06 1.66-1.06 1.49 0 3.36.45 4.85 1.25V8.52C19.73 7.98 18.24 7.76 16.34 7.76c-3.34 0-5.57 1.75-5.57 4.67 0 4.54 6.25 3.82 6.25 5.78 0 .9-.78 1.19-1.88 1.19-1.62 0-3.7-.67-5.35-1.57v3.95c1.82.78 3.65 1.11 5.35 1.11 3.42 0 5.78-1.69 5.78-4.64-.01-4.91-6.24-4.04-6.24-5.07z"/></svg>
           <span style="font-family:-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;font-size:19px;font-weight:700;color:#635BFF;letter-spacing:-0.5px">stripe</span>
           <div style="margin-left:auto;text-align:right"><div style="font-family:var(--sans);font-size:12px;font-weight:600;color:var(--black)">Stripe</div><div style="font-family:var(--sans);font-size:11px;font-weight:300;color:var(--muted)">ACH · 2–5 days</div></div>
@@ -2219,6 +2228,10 @@ footer.m-footer{
     <div class="d-sbox" style="margin-bottom:12px">
       <div class="d-sbox-hd"><div><div class="d-sbox-title">Tax Information</div><div class="d-sbox-sub">Required for 1099 issuance</div></div><span class="d-pill error" id="mob-tax-status-badge"><span class="d-pill-dot"></span><span id="mob-tax-status-text">Not Started</span></span></div>
       <div style="padding:14px 16px"><div id="mob-tax-card-title" style="font-family:var(--sans);font-size:13.5px;font-weight:500;color:var(--black);margin-bottom:4px">Complete your tax form (1 min)</div><div id="mob-tax-card-desc" style="font-family:var(--sans);font-size:12.5px;font-weight:300;color:var(--muted);line-height:1.6;margin-bottom:14px">U.S. persons complete a W-9. Non-U.S. persons complete a W-8BEN. Separate from how you choose to receive payouts.</div><button class="btn-s" style="max-width:190px" id="mob-tax-card-action" onclick="mobStartTaxForm()">Complete Tax Form</button></div>
+    </div>
+    <div class="d-sbox" style="margin-bottom:12px">
+      <div class="d-sbox-hd"><div><div class="d-sbox-title">Payout Method</div><div class="d-sbox-sub">Choose how you receive royalties</div></div></div>
+      <div id="mob-payout-method-list" style="padding:14px 16px;display:grid;gap:10px"></div>
     </div>
     <div class="d-sbox"><div class="d-sbox-hd"><div><div class="d-sbox-title">Payout History</div></div></div><div class="d-empty"><div class="d-empty-title">No payouts yet.</div><div class="d-empty-sub">Payouts are issued each quarter after royalties are collected and distributed. Your history will appear here after your first payment.</div></div></div>
   </div>
@@ -2654,12 +2667,16 @@ function mobRemoveBootCSS() {
 
 // Sync the red unread-notification dot on both bells (dashboard top-nav + landing-authed nav).
 function mobSyncNotifDot() {
-  try { Dv.notifications.syncBadges(); } catch(_) {}
-  // Also toggle has-notif class for the bell shake/pop animations.
-  var has = false;
-  try { has = Dv.notifications.unreadCount() > 0; } catch(_) {}
+  var count = 0;
+  try { count = (window.Dv && Dv.notifications) ? Dv.notifications.unreadCount() : 0; } catch(_){}
+  var has = count > 0;
+  var label = count > 99 ? '99+' : String(count);
   ['.d-bell', '.m-ln-bell'].forEach(function(sel){
-    document.querySelectorAll(sel).forEach(function(el){ el.classList.toggle('has-notif', has); });
+    document.querySelectorAll(sel).forEach(function(el){
+      el.classList.toggle('has-notif', has);
+      var dot = el.querySelector('.d-bell-dot, .m-ln-bell-dot');
+      if (dot) dot.textContent = has ? label : '';
+    });
   });
 }
 // Cosmetic cue: shake the bell + pop the badge briefly when a new
@@ -2681,6 +2698,44 @@ function mobPlayBellShake() {
 }
 window.mobPlayBellShake = mobPlayBellShake;
 window.mobSyncNotifDot = mobSyncNotifDot;
+
+// Render the mobile bell dropdown panel body from the shared store so
+// "Mark all read" visibly updates items in place instead of wiping them.
+function mobRenderNotifPanel() {
+  var body = document.getElementById('mob-notif-panel-body');
+  if (!body) return;
+  var list = [];
+  try { list = (window.Dv && Dv.notifications) ? Dv.notifications.load() : []; } catch(_){}
+  var fmt = (window.Dv && Dv.format) || {};
+  var esc = fmt.escapeHtml || function(s){ return String(s||''); };
+  var ago = fmt.timeAgo || function(){ return ''; };
+  if (!list.length) {
+    body.innerHTML = '<div class="notif-panel-empty-t">You\'re all caught up.</div>' +
+      '<div class="notif-panel-empty-s">We\'ll let you know the moment royalties, registrations, or payouts move.</div>';
+    return;
+  }
+  body.style.padding = '6px 0';
+  body.style.textAlign = 'left';
+  body.innerHTML = list.slice(0, 6).map(function(n){
+    return '<div class="mob-notif-row' + (n.read ? ' read' : '') + '" style="display:flex;gap:10px;padding:12px 16px;border-bottom:1px solid #F1F5F9;opacity:' + (n.read ? '0.62' : '1') + '">' +
+      '<div style="width:6px;height:6px;border-radius:999px;margin-top:7px;background:' + (n.read ? '#CBD5E1' : '#3B82F6') + ';flex-shrink:0"></div>' +
+      '<div style="flex:1;min-width:0">' +
+        '<div style="font-family:var(--sans);font-size:12.5px;font-weight:' + (n.read ? '500' : '600') + ';color:var(--black)">' + esc(n.title) + '</div>' +
+        (n.body ? '<div style="font-family:var(--sans);font-size:11.5px;font-weight:300;color:#64748B;margin-top:2px">' + esc(n.body) + '</div>' : '') +
+        '<div style="font-family:var(--sans);font-size:10.5px;color:#94A3B8;margin-top:4px">' + esc(ago(n.ts)) + '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function mobMarkAllRead(e) {
+  if (e) { e.stopPropagation(); e.preventDefault(); }
+  try { (window.Dv && Dv.notifications) && Dv.notifications.markAllRead(); } catch(_){}
+  mobRenderNotifPanel();
+  mobSyncNotifDot();
+}
+window.mobRenderNotifPanel = mobRenderNotifPanel;
+window.mobMarkAllRead = mobMarkAllRead;
 
 // Enter the mobile dashboard from the landing page (when already authed).
 // Falls back to login if no cached artist exists.
@@ -2739,7 +2794,7 @@ function mobActivateDashboard(artist) {
 //   - profile: artist.stage_name + artist.pro present (or dv_setup_profile flag)
 //   - w9     : dv_setup_w9 flag (set after a successful W-9 submit on either device)
 //   - song   : songs count > 0 from /api/songs (or dv_setup_song flag)
-var MOB_SETUP_HIDE_MS = 24 * 60 * 60 * 1000; // 1 day
+var MOB_SETUP_HIDE_MS = 2 * 24 * 60 * 60 * 1000; // 2 days
 function mobMarkSetupComplete(kind) {
   try { localStorage.setItem('dv_setup_' + kind, '1'); } catch(_){}
   try {
@@ -2821,13 +2876,25 @@ function mobLoadSongs() {
 
 // W-9 completion is derived from Stripe Connect status (details_submitted).
 // The legacy /api/payouts/w9 endpoint is intentionally a 410.
-// Tax status is now displayed inside the Payouts page card only — it's no
-// longer part of the dashboard Get Started flow. This just paints the payouts
-// card if it's mounted.
 function mobLoadW9Status() {
   if (!window.Dv || !Dv.tax) return;
   Dv.tax.fetchStatus()
-    .then(function(d) { try { mobRenderTaxStatus(d); } catch(_){} })
+    .then(function(d) {
+      var vm = Dv.tax.describeState(d);
+      // Also paint the payouts-page card if it's mounted.
+      try { mobRenderTaxStatus(d); } catch(_){}
+      if (vm.isComplete) {
+        try { localStorage.setItem('dv_setup_w9', '1'); } catch(_){}
+        mobMarkSetupComplete('w9');
+      } else {
+        try { localStorage.removeItem('dv_setup_w9'); } catch(_){}
+        try { localStorage.removeItem('dv_setup_w9_at'); } catch(_){}
+        var alertEl = document.getElementById('mob-alert-w9');
+        if (alertEl) { alertEl.classList.remove('completed'); alertEl.style.display = ''; }
+        var rowEl = document.getElementById('mob-setup-row-w9');
+        if (rowEl) { rowEl.classList.remove('completed'); rowEl.style.display = ''; }
+      }
+    })
     .catch(function(){});
 }
 
@@ -2938,7 +3005,7 @@ function showDP(page, skipPush){
     window.history.pushState({ screen:'dashboard', page: page }, '', url);
   }
   if(page === 'signups') mobLoadSignups();
-  if(page === 'payouts') { try { mobLoadW9Status(); } catch(e) {} try { mobLoadTaxStatus(); } catch(e) {} try { mobLoadPayPalStatus(); } catch(e) {} }
+  if(page === 'payouts') { try { mobLoadStripeStatus(); } catch(e) {} try { mobLoadW9Status(); } catch(e) {} try { mobLoadTaxStatus(); } catch(e) {} try { mobLoadPayoutMethods(); } catch(e) {} try { mobLoadPayPalStatus(); } catch(e) {} }
   if(page === 'add-song') mobResetAddSong();
   if(page === 'overview') {
     try { mobApplySetupCompletion(); } catch(e) {}
@@ -3069,9 +3136,7 @@ function mobGoogleBack() {
 function mobRenderStripeStatus(d){
   var box = document.getElementById('m-stripe-status-box');
   if(!box) return;
-  // Only reveal when the artist actually picked Stripe. dPayout('stripe')
-  // flips the selection flag before calling mobLoadStripeStatus().
-  if (window.mobSelectedPayout === 'stripe') box.style.display = 'block';
+  box.style.display = 'block';
   var vm = Dv.stripe.describeState(d);
 
   var badge = document.getElementById('m-stripe-status-badge');
@@ -3107,7 +3172,7 @@ function mobRenderStripeStatus(d){
 function mobLoadStripeStatus(){
   var box = document.getElementById('m-stripe-status-box');
   if(!box) return;
-  // Caller (dPayout('stripe')) is responsible for revealing the box.
+  box.style.display = 'block';
   var lbl = document.getElementById('m-stripe-status-label');
   if(lbl) lbl.textContent = 'Loading';
   Dv.stripe.fetchStatus().then(mobRenderStripeStatus);
@@ -3156,17 +3221,13 @@ function mobStartTaxForm(){
   Dv.tax.start({}).then(function(res){
     if (res && res.url) {
       window.location.href = res.url;
-    } else if (res && res.error) {
-      showToast('Tax form: ' + res.error, 'error');
-      if (btn) { btn.disabled = false; btn.textContent = 'Complete Tax Form'; }
     } else {
       showToast('Tax-form provider isn\u2019t connected yet. Saved as pending.', 'success');
       if (btn) { btn.disabled = false; btn.textContent = 'Resume'; }
       mobLoadTaxStatus();
     }
-  }).catch(function(err){
-    var msg = (err && err.data && (err.data.detail || err.data.error)) || (err && err.message) || 'Please try again.';
-    showToast('Could not start tax form: ' + msg, 'error');
+  }).catch(function(){
+    showToast('Could not start the tax form. Please try again.', 'error');
     if (btn) { btn.disabled = false; btn.textContent = 'Complete Tax Form'; }
   });
 }
@@ -3231,14 +3292,7 @@ function dPayout(m){
   ['stripe','paypal'].forEach(p=>document.getElementById('d-'+p)?.classList.remove('selected'));
   document.getElementById('d-'+m)?.classList.add('selected');
   window.mobSelectedPayout = m;
-  var stripeBox = document.getElementById('m-stripe-status-box');
-  if (m === 'stripe') {
-    if (stripeBox) stripeBox.style.display = 'block';
-    try { mobLoadStripeStatus(); } catch(e) {}
-  } else {
-    if (stripeBox) stripeBox.style.display = 'none';
-    if (m === 'paypal' && !window.mobPaypalConnected) openMobPayPalModal();
-  }
+  if (m === 'paypal' && !window.mobPaypalConnected) openMobPayPalModal();
 }
 function mobLoadPayPalStatus(){
   fetch('/api/paypal/status').then(r=>r.json()).then(function(d){
@@ -3446,22 +3500,6 @@ function confirmMobWithdraw(){
     errEl.style.display = 'block';
     return;
   }
-  // Gate on tax-form completion — no money moves until the W-9/W-8BEN is on file.
-  if (window.Dv && Dv.tax) {
-    Dv.tax.fetchStatus().then(function(d){
-      var vm = Dv.tax.describeState(d);
-      if (!vm.isComplete) {
-        errEl.innerHTML = 'Please complete your ' + (vm.formLabel || 'tax form') + ' before withdrawing. <a href="#" onclick="closeMobWithdraw();showDP(\'payouts\');return false;" style="color:var(--blue);text-decoration:underline">Go to Payouts →</a>';
-        errEl.style.display = 'block';
-        return;
-      }
-      _mobDoConfirmWithdraw(amount, errEl, sucEl, btn);
-    }).catch(function(){ _mobDoConfirmWithdraw(amount, errEl, sucEl, btn); });
-    return;
-  }
-  _mobDoConfirmWithdraw(amount, errEl, sucEl, btn);
-}
-function _mobDoConfirmWithdraw(amount, errEl, sucEl, btn){
   btn.disabled = true;
   btn.textContent = 'PROCESSING...';
   var method = window.mobSelectedPayout || 'stripe';
@@ -3604,12 +3642,8 @@ function toggleNotifPanel(e) {
   const p = document.getElementById('notif-panel');
   // Close avatar menu if open
   document.getElementById('d-av-wrap')?.classList.remove('open');
-  var willOpen = !p.classList.contains('open');
+  try { mobRenderNotifPanel(); } catch(_){}
   p.classList.toggle('open');
-  if (willOpen) {
-    try { Dv.notifications.markAllRead(); } catch(_) {}
-    try { mobSyncNotifDot(); } catch(_) {}
-  }
 }
 function closeNotifPanel() {
   document.getElementById('notif-panel')?.classList.remove('open');
