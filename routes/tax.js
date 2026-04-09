@@ -309,21 +309,7 @@ router.post('/start', auth, async (req, res) => {
       }
     }
 
-    // Fallback to Anvil if DocuSign isn't configured or failed
-    if (!signResult && process.env.ANVIL_API_KEY) {
-      try {
-        stage = 'anvil';
-        const anvil = await createAnvilPacket({ artist, legalName, taxData: body.taxData });
-        if (anvil) {
-          signResult = { signUrl: anvil.signUrl, envelopeId: anvil.eid };
-          provider = 'anvil';
-          providerFormId = anvil.eid;
-        }
-      } catch (err) {
-        signError = signError || err.message;
-        console.error('[tax/start] Anvil error:', err && err.stack || err);
-      }
-    }
+    // Anvil fallback disabled — using DocuSign only
 
     stage = 'db-read';
     const existing = await getActiveTaxForm(req.artist.id);
