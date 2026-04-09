@@ -197,15 +197,15 @@ async function createAnvilPacket({ formType, artist, legalName }) {
       signerType: 'embedded',
       routingOrder: 1,
       fields: [
+        { fileId: 'taxForm', fieldId: 'nameOfEntityIndividual' },
+        { fileId: 'taxForm', fieldId: 'businessName' },
+        { fileId: 'taxForm', fieldId: 'address' },
+        { fileId: 'taxForm', fieldId: 'accountNumbers' },
+        { fileId: 'taxForm', fieldId: 'ssn' },
+        { fileId: 'taxForm', fieldId: 'ein' },
         { fileId: 'taxForm', fieldId: 'taxpayerSignature' },
-        { kind: 'form', payloadMaps: [{ fileId: 'taxForm', fieldId: 'nameOfEntityIndividual' }] },
-        { kind: 'form', payloadMaps: [{ fileId: 'taxForm', fieldId: 'federalTaxClassification' }] },
-        { kind: 'form', payloadMaps: [{ fileId: 'taxForm', fieldId: 'businessName' }] },
-        { kind: 'form', payloadMaps: [{ fileId: 'taxForm', fieldId: 'addressStreet' }] },
-        { kind: 'form', payloadMaps: [{ fileId: 'taxForm', fieldId: 'cityStateZip' }] },
-        { kind: 'form', payloadMaps: [{ fileId: 'taxForm', fieldId: 'ssn' }] },
-        { kind: 'form', payloadMaps: [{ fileId: 'taxForm', fieldId: 'ein' }] },
-      ],
+        { fileId: 'taxForm', fieldId: 'signatureDate' },
+      ],,
     }],
   };
   const data = await anvilGraphQL(mutation, variables);
