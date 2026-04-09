@@ -120,21 +120,19 @@ async function getActiveTaxForm(artistId) {
 
 // ── Anvil GraphQL helper ────────────────────────────────────────────────────
 async function anvilGraphQL(query, variables) {
-  if (!process.env.ANVIL_API_KEY) {
-    throw new Error('ANVIL_API_KEY not set');
-  }
+  if (!process.env.ANVIL_API_KEY) throw new Error('ANVIL_API_KEY not set');
   const authHeader = 'Basic ' + Buffer.from(process.env.ANVIL_API_KEY + ':').toString('base64');
   const resp = await fetch(ANVIL_GRAPHQL_URL, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': authHeader,
-    },
+    headers: { 'Content-Type': 'application/json', Authorization: authHeader },
     body: JSON.stringify({ query, variables }),
   });
-  const json = await resp.json();
-  if (json.errors) {
-    throw new Error('Anvil GraphQL: ' + JSON.stringify(json.errors));
+  const text = await resp.text();
+  let json;
+  try { json = JSON.parse(text); }
+  catch (err) { throw new Error(`Anvil non-JSON response (${resp.status}): ${text}`); }
+  if (!resp.ok || json.errors) {
+    throw new Error(`Anvil GraphQL HTTP ${resp.status}: ${JSON.stringify(json.errors || json)}`);
   }
   return json.data;
 }
@@ -184,8 +182,8 @@ async function createAnvilPacket({ formType, artist, legalName }) {
   `;
   const variables = {
     name: formLabel + ' — ' + signerName,
-    isDraft: false,
-    isTest: process.env.NODE_ENV !== 'production',
+    isDraft: true,
+    isTest: true,
     allowUpdates: false,
     signatureEmailSubject: formLabel + ' for Davincii',
     signatureEmailBody: 'Please sign your ' + formLabel + ' to complete Davincii payout setup.',
@@ -198,7 +196,6 @@ async function createAnvilPacket({ formType, artist, legalName }) {
       routingOrder: 1,
       fields: [
         { fileId: 'taxForm', fieldId: 'taxpayerSignature' },
-        { fileId: 'taxForm', fieldId: 'signatureDate' },
       ],
     }],
   };
