@@ -383,14 +383,14 @@ router.get('/docusign-jwt-test', async (req, res) => {
 // DocuSign redirects here after the signer finishes (or cancels).
 router.get('/docusign-return', async (req, res) => {
   const event = req.query.event; // signing_complete, cancel, decline, etc.
-  console.log('[docusign-return] event=' + event);
-  if (event === 'signing_complete') {
-    // Find the pending form by provider and mark completed
+  const envelopeId = req.query.envelopeId;
+  console.log('[docusign-return] event=' + event, 'envelopeId=' + envelopeId);
+  if (event === 'signing_complete' && envelopeId) {
     try {
       await pool.query(
-        `UPDATE tax_forms SET status = 'completed', updated_at = NOW()
-         WHERE provider = 'docusign' AND status = 'pending'
-         ORDER BY updated_at DESC LIMIT 1`
+        `UPDATE tax_forms SET status = 'completed', completed_at = NOW(), updated_at = NOW()
+         WHERE provider = 'docusign' AND provider_form_id = $1 AND status = 'pending'`,
+        [envelopeId]
       );
     } catch (err) {
       console.error('[docusign-return] DB error:', err);
