@@ -207,15 +207,6 @@ async function createAnvilPacket({ formType, artist, legalName }) {
     signatureEmailSubject: `${formLabel} for Davincii`,
     signatureEmailBody: `Please sign your ${formLabel} to complete Davincii payout setup.`,
     files: [{ id: 'taxForm', castEid: templateEid }],
-    data: {
-      payloads: {
-        taxForm: {
-          data: {
-            nameOfEntityIndividual: legalName || signerName,
-          },
-        },
-      },
-    },
     signers: [{
       id: 'artist',
       name: signerName,
@@ -223,7 +214,6 @@ async function createAnvilPacket({ formType, artist, legalName }) {
       signerType: 'embedded',
       fields: [
         { fileId: 'taxForm', fieldId: 'taxpayerSignature' },
-        { fileId: 'taxForm', fieldId: 'signatureDate' },
       ],
     }],
   };
