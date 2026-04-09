@@ -203,19 +203,10 @@ async function createAnvilPacket({ formType, artist, legalName }) {
     name: `${formLabel} — ${signerName}`,
     isDraft: false,
     isTest: process.env.NODE_ENV !== 'production',
-    allowUpdates: false,
+    allowUpdates: true,
     signatureEmailSubject: `${formLabel} for Davincii`,
     signatureEmailBody: `Please sign your ${formLabel} to complete Davincii payout setup.`,
     files: [{ id: 'taxForm', castEid: templateEid }],
-    data: {
-      payloads: {
-        taxForm: {
-          data: {
-            nameOfEntityIndividual: legalName || signerName,
-          },
-        },
-      },
-    },
     signers: [{
       id: 'artist',
       name: signerName,
@@ -224,6 +215,20 @@ async function createAnvilPacket({ formType, artist, legalName }) {
       fields: [
         { fileId: 'taxForm', fieldId: 'taxpayerSignature' },
         { fileId: 'taxForm', fieldId: 'signatureDate' },
+        { kind: 'form', payloadMaps: [{ fileId: 'taxForm', fieldId: 'nameOfEntityIndividual' }] },
+        { kind: 'form', payloadMaps: [{ fileId: 'taxForm', fieldId: 'businessName' }] },
+        { kind: 'form', payloadMaps: [{ fileId: 'taxForm', fieldId: 'taxClassIndividual' }] },
+        { kind: 'form', payloadMaps: [{ fileId: 'taxForm', fieldId: 'taxClassCCorp' }] },
+        { kind: 'form', payloadMaps: [{ fileId: 'taxForm', fieldId: 'taxClassSCorp' }] },
+        { kind: 'form', payloadMaps: [{ fileId: 'taxForm', fieldId: 'taxClassPartnership' }] },
+        { kind: 'form', payloadMaps: [{ fileId: 'taxForm', fieldId: 'taxClassTrustEstate' }] },
+        { kind: 'form', payloadMaps: [{ fileId: 'taxForm', fieldId: 'taxClassLLC' }] },
+        { kind: 'form', payloadMaps: [{ fileId: 'taxForm', fieldId: 'taxClassOther' }] },
+        { kind: 'form', payloadMaps: [{ fileId: 'taxForm', fieldId: 'llcTaxClass' }] },
+        { kind: 'form', payloadMaps: [{ fileId: 'taxForm', fieldId: 'addressStreet' }] },
+        { kind: 'form', payloadMaps: [{ fileId: 'taxForm', fieldId: 'addressCityStateZip' }] },
+        { kind: 'form', payloadMaps: [{ fileId: 'taxForm', fieldId: 'ssn' }] },
+        { kind: 'form', payloadMaps: [{ fileId: 'taxForm', fieldId: 'ein' }] },
       ],
     }],
   };
