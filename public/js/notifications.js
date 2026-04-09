@@ -71,6 +71,23 @@
     return load().filter(function (n) { return !n.read; }).length;
   }
 
+  // Sync every bell badge across desktop + mobile, landing + dashboard.
+  // Shows the unread count; hides the badge entirely when zero (industry standard).
+  function syncBadges() {
+    var n = unreadCount();
+    var selectors = ['.nav-bell-dot', '#notif-badge', '.m-ln-bell-dot', '.d-bell-dot'];
+    selectors.forEach(function (sel) {
+      document.querySelectorAll(sel).forEach(function (el) {
+        if (n > 0) {
+          el.textContent = n > 99 ? '99+' : String(n);
+          el.style.display = '';
+        } else {
+          el.style.display = 'none';
+        }
+      });
+    });
+  }
+
   function render(container) {
     if (!container) return;
     var list = load();
@@ -97,6 +114,7 @@
     addOnce: addOnce,
     markAllRead: markAllRead,
     unreadCount: unreadCount,
+    syncBadges: syncBadges,
     render: render,
     TTL_MS: TTL_MS
   };
