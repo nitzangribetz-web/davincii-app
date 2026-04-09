@@ -205,7 +205,7 @@ async function createAnvilPacket({ formType, artist, legalName }) {
         { fileId: 'taxForm', fieldId: 'ein' },
         { fileId: 'taxForm', fieldId: 'taxpayerSignature' },
         { fileId: 'taxForm', fieldId: 'signatureDate' },
-      ],,
+      ],
     }],
   };
   const data = await anvilGraphQL(mutation, variables);
