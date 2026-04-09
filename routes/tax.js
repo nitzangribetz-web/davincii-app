@@ -299,15 +299,15 @@ router.post('/start', auth, async (req, res) => {
     let providerFormId = null;
 
     console.log('[tax/start] env check:', {
-      hasDocuSignKey: !!process.env.DOCUSIGN_INTEGRATION_KEY,
-      hasDocuSignUserId: !!process.env.DOCUSIGN_USER_ID,
-      hasDocuSignAccountId: !!process.env.DOCUSIGN_ACCOUNT_ID,
-      hasDocuSignRsaKey: !!process.env.DOCUSIGN_RSA_KEY,
-      hasDocuSignBaseUri: !!process.env.DOCUSIGN_BASE_URI,
-      docuSignKeyValue: process.env.DOCUSIGN_INTEGRATION_KEY || 'MISSING',
+      hasDocuSignKey: !!process.env.DS_INTEGRATION_KEY,
+      hasDocuSignUserId: !!process.env.DS_USER_ID,
+      hasDocuSignAccountId: !!process.env.DS_ACCOUNT_ID,
+      hasDocuSignRsaKey: !!process.env.DS_RSA_KEY,
+      hasDocuSignBaseUri: !!process.env.DS_BASE_URI,
+      docuSignKeyValue: process.env.DS_INTEGRATION_KEY || 'MISSING',
     });
 
-    if (process.env.DOCUSIGN_INTEGRATION_KEY) {
+    if (process.env.DS_INTEGRATION_KEY) {
       console.log('[tax/start] entering DocuSign block');
       try {
         signResult = await createDocuSignEnvelope({ artist, legalName, taxData: body.taxData });
