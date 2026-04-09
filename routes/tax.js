@@ -385,8 +385,15 @@ router.get('/docusign-return', async (req, res) => {
       console.error('[docusign-return] DB error:', err);
     }
   }
-  // Redirect back to the payouts page
-  res.redirect((process.env.APP_URL || 'https://davincii.app') + '/?page=payouts&tax=' + (event || 'unknown'));
+  // Return a small HTML page that tells the parent frame signing is done
+  const status = event === 'signing_complete' ? 'completed' : (event || 'unknown');
+  res.send(`<!DOCTYPE html><html><body><script>
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({ type: 'docusign-done', status: '${status}' }, '*');
+    } else {
+      window.location.href = '${process.env.APP_URL || 'https://davincii.app'}/?page=payouts&tax=${status}';
+    }
+  </script></body></html>`);
 });
 
 // ── POST /api/tax/manual-complete ───────────────────────────────────────────

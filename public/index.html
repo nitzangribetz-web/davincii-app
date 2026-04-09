@@ -4355,7 +4355,16 @@
     if (btn) { btn.disabled = true; btn.textContent = 'Submitting\u2026'; }
     Dv.tax.start({ taxData: taxData }).then(function(res){
       if (res && res.url) {
-        window.location.href = res.url;
+        // Show DocuSign signing in iframe instead of redirecting
+        var modal = document.getElementById('w9-modal');
+        var modalContent = modal.querySelector('div');
+        modalContent.innerHTML =
+          '<button onclick="closeW9Modal()" style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:22px;cursor:pointer;color:#64748b">&times;</button>' +
+          '<div style="font-family:\'DM Sans\',sans-serif;font-size:18px;font-weight:700;color:#0A0A0A;margin-bottom:12px">Sign Your W-9</div>' +
+          '<iframe src="' + res.url + '" style="width:100%;height:calc(90vh - 80px);border:none;border-radius:8px"></iframe>';
+        modalContent.style.maxWidth = '900px';
+        modalContent.style.padding = '16px';
+        modalContent.style.height = '90vh';
       } else if (res && res.error) {
         showToast('Tax form: ' + res.error, 'error');
         if (btn) { btn.disabled = false; btn.textContent = 'Submit & Sign'; }
@@ -4370,6 +4379,17 @@
       if (btn) { btn.disabled = false; btn.textContent = 'Submit & Sign'; }
     });
   }
+  window.addEventListener('message', function(e) {
+    if (e.data && e.data.type === 'docusign-done') {
+      closeW9Modal();
+      if (e.data.status === 'completed') {
+        showToast('W-9 signed successfully!', 'success');
+      } else {
+        showToast('Signing ' + e.data.status + '.', 'error');
+      }
+      loadTaxStatus();
+    }
+  });
   window.startTaxForm = startTaxForm;
   window.loadTaxStatus = loadTaxStatus;
 
