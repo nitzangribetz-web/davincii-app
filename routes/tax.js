@@ -291,14 +291,24 @@ router.post('/start', auth, async (req, res) => {
     }
     const legalName = (body.legal_name || artist.name || artist.stage_name || '').trim() || null;
 
-    // Try DocuSign first, fall back to Anvil, then manual.
+    // Try DocuSign
     stage = 'docusign';
     let signResult = null;
     let signError = null;
     let provider = 'manual';
     let providerFormId = null;
 
+    console.log('[tax/start] env check:', {
+      hasDocuSignKey: !!process.env.DOCUSIGN_INTEGRATION_KEY,
+      hasDocuSignUserId: !!process.env.DOCUSIGN_USER_ID,
+      hasDocuSignAccountId: !!process.env.DOCUSIGN_ACCOUNT_ID,
+      hasDocuSignRsaKey: !!process.env.DOCUSIGN_RSA_KEY,
+      hasDocuSignBaseUri: !!process.env.DOCUSIGN_BASE_URI,
+      docuSignKeyValue: process.env.DOCUSIGN_INTEGRATION_KEY || 'MISSING',
+    });
+
     if (process.env.DOCUSIGN_INTEGRATION_KEY) {
+      console.log('[tax/start] entering DocuSign block');
       try {
         signResult = await createDocuSignEnvelope({ artist, legalName, taxData: body.taxData });
         provider = 'docusign';
