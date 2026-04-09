@@ -21,6 +21,7 @@ const pool = require('../db/pool');
 const auth = require('../middleware/auth');
 const { Resend } = require('resend');
 
+const { createDocuSignEnvelope } = require('../lib/docusign');
 const ADMIN_NOTIFY_EMAIL = process.env.ADMIN_NOTIFY_EMAIL || 'info@davincii.co';
 const ANVIL_GRAPHQL_URL = 'https://graphql.useanvil.com';
 
@@ -290,20 +291,39 @@ router.post('/start', auth, async (req, res) => {
     }
     const legalName = (body.legal_name || artist.name || artist.stage_name || '').trim() || null;
 
-    // Try Anvil. If it fails (or isn't configured), fall back to manual stub
-    // so the site keeps working while we debug.
-    stage = 'anvil';
-    let anvil = null;
-    let anvilError = null;
-    try {
-      anvil = await createAnvilPacket({ artist, legalName, taxData: body.taxData });
-    } catch (err) {
-      anvilError = err.message;
-      console.error('[tax/start] Anvil error:', err && err.stack || err);
+    // Try DocuSign first, fall back to Anvil, then manual.
+    stage = 'docusign';
+    let signResult = null;
+    let signError = null;
+    let provider = 'manual';
+    let providerFormId = null;
+
+    if (process.env.DOCUSIGN_INTEGRATION_KEY) {
+      try {
+        signResult = await createDocuSignEnvelope({ artist, legalName, taxData: body.taxData });
+        provider = 'docusign';
+        providerFormId = signResult.envelopeId;
+      } catch (err) {
+        signError = err.message;
+        console.error('[tax/start] DocuSign error:', err && err.stack || err);
+      }
     }
 
-    const provider = anvil ? 'anvil' : 'manual';
-    const providerFormId = anvil ? anvil.eid : null;
+    // Fallback to Anvil if DocuSign isn't configured or failed
+    if (!signResult && process.env.ANVIL_API_KEY) {
+      try {
+        stage = 'anvil';
+        const anvil = await createAnvilPacket({ artist, legalName, taxData: body.taxData });
+        if (anvil) {
+          signResult = { signUrl: anvil.signUrl, envelopeId: anvil.eid };
+          provider = 'anvil';
+          providerFormId = anvil.eid;
+        }
+      } catch (err) {
+        signError = signError || err.message;
+        console.error('[tax/start] Anvil error:', err && err.stack || err);
+      }
+    }
 
     stage = 'db-read';
     const existing = await getActiveTaxForm(req.artist.id);
@@ -339,13 +359,34 @@ router.post('/start', auth, async (req, res) => {
     res.json({
       ...summarize(row),
       provider,
-      url: anvil ? anvil.signUrl : null,
-      error: anvilError || undefined,
+      url: signResult ? signResult.signUrl : null,
+      error: signError || undefined,
     });
   } catch (err) {
     console.error('[tax/start] stage=' + stage, err && err.stack || err);
     res.status(500).json({ error: 'Unable to start tax form.', stage, detail: err && err.message });
   }
+});
+
+// ── GET /api/tax/docusign-return ────────────────────────────────────────────
+// DocuSign redirects here after the signer finishes (or cancels).
+router.get('/docusign-return', async (req, res) => {
+  const event = req.query.event; // signing_complete, cancel, decline, etc.
+  console.log('[docusign-return] event=' + event);
+  if (event === 'signing_complete') {
+    // Find the pending form by provider and mark completed
+    try {
+      await pool.query(
+        `UPDATE tax_forms SET status = 'completed', updated_at = NOW()
+         WHERE provider = 'docusign' AND status = 'pending'
+         ORDER BY updated_at DESC LIMIT 1`
+      );
+    } catch (err) {
+      console.error('[docusign-return] DB error:', err);
+    }
+  }
+  // Redirect back to the payouts page
+  res.redirect((process.env.APP_URL || 'https://davincii.app') + '/?page=payouts&tax=' + (event || 'unknown'));
 });
 
 // ── POST /api/tax/manual-complete ───────────────────────────────────────────
