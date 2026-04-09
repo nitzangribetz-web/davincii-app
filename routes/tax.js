@@ -158,6 +158,7 @@ async function createAnvilPacket({ formType, artist, legalName }) {
       $files: [EtchFile!],
       $isDraft: Boolean,
       $isTest: Boolean,
+      $allowUpdates: Boolean,
       $signatureEmailSubject: String,
       $signatureEmailBody: String,
       $signers: [JSON!]
@@ -167,6 +168,7 @@ async function createAnvilPacket({ formType, artist, legalName }) {
         files: $files,
         isDraft: $isDraft,
         isTest: $isTest,
+        allowUpdates: $allowUpdates,
         signatureEmailSubject: $signatureEmailSubject,
         signatureEmailBody: $signatureEmailBody,
         signers: $signers
@@ -184,6 +186,7 @@ async function createAnvilPacket({ formType, artist, legalName }) {
     name: formLabel + ' — ' + signerName,
     isDraft: false,
     isTest: process.env.NODE_ENV !== 'production',
+    allowUpdates: true,
     signatureEmailSubject: formLabel + ' for Davincii',
     signatureEmailBody: 'Please sign your ' + formLabel + ' to complete Davincii payout setup.',
     files: [{ id: 'taxForm', castEid: templateEid }],
@@ -194,7 +197,13 @@ async function createAnvilPacket({ formType, artist, legalName }) {
       signerType: 'embedded',
       routingOrder: 1,
       fields: [
-        { fileId: 'taxForm', fieldId: 'taxpayerSignature' },
+        { fileId: 'taxForm', fieldId: 'taxpayerSignature', kind: 'signer' },
+        { kind: 'form', payloadMaps: [{ fileId: 'taxForm', fieldId: 'nameOfEntityIndividual' }] },
+        { kind: 'form', payloadMaps: [{ fileId: 'taxForm', fieldId: 'businessName' }] },
+        { kind: 'form', payloadMaps: [{ fileId: 'taxForm', fieldId: 'addressStreet' }] },
+        { kind: 'form', payloadMaps: [{ fileId: 'taxForm', fieldId: 'cityStateZip' }] },
+        { kind: 'form', payloadMaps: [{ fileId: 'taxForm', fieldId: 'ssn' }] },
+        { kind: 'form', payloadMaps: [{ fileId: 'taxForm', fieldId: 'ein' }] },
       ],
     }],
   };
