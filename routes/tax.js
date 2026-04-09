@@ -199,6 +199,7 @@ async function createAnvilPacket({ formType, artist, legalName }) {
       fields: [
         { fileId: 'taxForm', fieldId: 'taxpayerSignature' },
         { kind: 'form', payloadMaps: [{ fileId: 'taxForm', fieldId: 'nameOfEntityIndividual' }] },
+        { kind: 'form', payloadMaps: [{ fileId: 'taxForm', fieldId: 'federalTaxClassification' }] },
         { kind: 'form', payloadMaps: [{ fileId: 'taxForm', fieldId: 'businessName' }] },
         { kind: 'form', payloadMaps: [{ fileId: 'taxForm', fieldId: 'addressStreet' }] },
         { kind: 'form', payloadMaps: [{ fileId: 'taxForm', fieldId: 'cityStateZip' }] },
