@@ -203,7 +203,7 @@ async function createAnvilPacket({ formType, artist, legalName }) {
     name: `${formLabel} — ${signerName}`,
     isDraft: false,
     isTest: process.env.NODE_ENV !== 'production',
-    allowUpdates: true,
+    allowUpdates: false,
     signatureEmailSubject: `${formLabel} for Davincii`,
     signatureEmailBody: `Please sign your ${formLabel} to complete Davincii payout setup.`,
     files: [{ id: 'taxForm', castEid: templateEid }],
