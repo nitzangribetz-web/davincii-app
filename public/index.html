@@ -3219,7 +3219,15 @@
     var bell = document.getElementById('ln-bell-wrap');
     var av = document.getElementById('ln-av-wrap');
     if (av) av.classList.remove('open');
-    if (bell) bell.classList.toggle('open');
+    if (bell) {
+      var willOpen = !bell.classList.contains('open');
+      bell.classList.toggle('open');
+      if (willOpen) {
+        try { Dv.notifications.markAllRead(); } catch(_) {}
+        try { renderNotifications(); } catch(_) {}
+        try { Dv.notifications.syncBadges(); } catch(_) {}
+      }
+    }
   }
   function toggleLnAvatar(e) {
     if (e) e.stopPropagation();
@@ -3675,10 +3683,7 @@
   let _unreadCount = 0;
 
   function updateBadge() {
-    const badge = document.getElementById('notif-badge');
-    if (badge) {
-      badge.style.display = _unreadCount > 0 ? 'block' : 'none';
-    }
+    try { Dv.notifications.syncBadges(); } catch(_) {}
   }
 
   // Shared helpers from /js/notifications.js + /js/format.js
@@ -3847,6 +3852,9 @@
       wrap.classList.remove('open');
     } else {
       wrap.classList.add('open');
+      // Opening the panel = user has seen the notifications → mark all read.
+      try { Dv.notifications.markAllRead(); } catch(_) {}
+      renderNotifications();
     }
   }
 
@@ -5109,7 +5117,7 @@
           </div>
           <div class="avatar-dropdown-section">
             <button class="avatar-menu-item" onclick="showDashPage('profile');closeAvatarMenu()"><span class="avatar-menu-icon">◎</span>Artist Profile</button>
-            <button class="avatar-menu-item" onclick="showDashPage('statements');closeAvatarMenu()"><span class="avatar-menu-icon">≡</span>Statements</button>
+            <button class="avatar-menu-item" onclick="showDashPage('statements');closeAvatarMenu()"><span class="avatar-menu-icon">▤</span>Statements</button>
             <button class="avatar-menu-item" onclick="showDashPage('payouts');closeAvatarMenu()"><span class="avatar-menu-icon">⬆</span>Payouts</button>
           </div>
           <div class="avatar-dropdown-section">
@@ -5139,8 +5147,8 @@
       </div>
       <div class="sb-section">
         <span class="sb-label">Earnings</span>
-        <button class="nav-lnk" id="nl-royalties" onclick="showDashPage('royalties')"><span class="nav-icon">$</span>Royalties</button>
-        <button class="nav-lnk" id="nl-statements" onclick="showDashPage('statements')"><span class="nav-icon">≡</span>Statements</button>
+        <button class="nav-lnk" id="nl-royalties" onclick="showDashPage('royalties')"><span class="nav-icon">◐</span>Royalties</button>
+        <button class="nav-lnk" id="nl-statements" onclick="showDashPage('statements')"><span class="nav-icon">▤</span>Statements</button>
         <button class="nav-lnk" id="nl-payouts" onclick="showDashPage('payouts')"><span class="nav-icon">⬆</span>Payouts</button>
       </div>
       <div class="sb-section">

@@ -1497,7 +1497,7 @@ footer.m-footer{
       <button class="btn-nav-ghost-m guest-only" onclick="go('login')">Login</button>
       <button class="btn-nav-solid-m guest-only" onclick="go('signup')">Get started</button>
       <div class="nav-authed-m">
-        <button class="m-ln-bell" aria-label="Notifications" onclick="mobEnterDashboard('notifications')">
+        <button class="m-ln-bell" aria-label="Notifications" onclick="try{Dv.notifications.markAllRead();}catch(_){}mobEnterDashboard('notifications')">
           <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
           <span class="m-ln-bell-dot">0</span>
         </button>
@@ -1913,7 +1913,7 @@ footer.m-footer{
           </div>
           <div class="d-dd-sec">
             <button class="d-dd-btn" onclick="showDP('profile');closeDMenu()"><span class="d-dd-icon">◎</span>Artist Profile</button>
-            <button class="d-dd-btn" onclick="showDP('statements');closeDMenu()"><span class="d-dd-icon">≡</span>Statements</button>
+            <button class="d-dd-btn" onclick="showDP('statements');closeDMenu()"><span class="d-dd-icon">▤</span>Statements</button>
             <button class="d-dd-btn" onclick="showDP('payouts');closeDMenu()"><span class="d-dd-icon">⬆</span>Payouts</button>
           </div>
           <div class="d-dd-sec">
@@ -2609,11 +2609,7 @@ function mobRemoveBootCSS() {
 
 // Sync the red unread-notification dot on both bells (dashboard top-nav + landing-authed nav).
 function mobSyncNotifDot() {
-  var has = false;
-  try { has = (window.Dv && Dv.notifications && Dv.notifications.unreadCount() > 0); } catch(_){}
-  ['.d-bell', '.m-ln-bell'].forEach(function(sel){
-    document.querySelectorAll(sel).forEach(function(el){ el.classList.toggle('has-notif', has); });
-  });
+  try { Dv.notifications.syncBadges(); } catch(_) {}
 }
 window.mobSyncNotifDot = mobSyncNotifDot;
 
@@ -3504,7 +3500,12 @@ function toggleNotifPanel(e) {
   const p = document.getElementById('notif-panel');
   // Close avatar menu if open
   document.getElementById('d-av-wrap')?.classList.remove('open');
+  var willOpen = !p.classList.contains('open');
   p.classList.toggle('open');
+  if (willOpen) {
+    try { Dv.notifications.markAllRead(); } catch(_) {}
+    try { mobSyncNotifDot(); } catch(_) {}
+  }
 }
 function closeNotifPanel() {
   document.getElementById('notif-panel')?.classList.remove('open');
