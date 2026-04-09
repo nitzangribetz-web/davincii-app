@@ -21,7 +21,7 @@ const pool = require('../db/pool');
 const auth = require('../middleware/auth');
 const { Resend } = require('resend');
 
-const { createDocuSignEnvelope } = require('../lib/docusign');
+const { createDocuSignEnvelope, getDocuSignClient } = require('../lib/docusign');
 const ADMIN_NOTIFY_EMAIL = process.env.ADMIN_NOTIFY_EMAIL || 'info@davincii.co';
 const ANVIL_GRAPHQL_URL = 'https://graphql.useanvil.com';
 
@@ -361,6 +361,32 @@ router.post('/start', auth, async (req, res) => {
   } catch (err) {
     console.error('[tax/start] stage=' + stage, err && err.stack || err);
     res.status(500).json({ error: 'Unable to start tax form.', stage, detail: err && err.message });
+  }
+});
+
+// ── GET /api/tax/docusign-jwt-test ─────────────────────────────────────────
+// Standalone JWT auth test — hit this endpoint to diagnose auth issues.
+router.get('/docusign-jwt-test', async (req, res) => {
+  try {
+    const apiClient = await getDocuSignClient();
+    // If we get here, JWT auth succeeded — try to get user info
+    const userInfo = await apiClient.getUserInfo(apiClient.getUserInfo ? undefined : undefined);
+    res.json({
+      success: true,
+      message: 'JWT auth succeeded',
+      basePath: apiClient.basePath,
+    });
+  } catch (err) {
+    const errBody = err.response ? (err.response.body || err.response.data) : null;
+    console.error('[docusign-jwt-test] FAILED:', errBody ? JSON.stringify(errBody) : err.message);
+    res.status(500).json({
+      success: false,
+      error: err.message,
+      docusignError: errBody || null,
+      hint: errBody && errBody.error === 'invalid_grant' && errBody.error_description === 'user_not_found'
+        ? 'The DS_USER_ID does not match any user in this DocuSign account. Verify the User ID in the sandbox admin (apps-d.docusign.com → Users → your profile → User ID). Also ensure consent was granted at: https://account-d.docusign.com/oauth/auth?response_type=code&scope=signature%20impersonation&client_id=' + (process.env.DS_INTEGRATION_KEY || '') + '&redirect_uri=YOUR_REDIRECT_URI'
+        : null,
+    });
   }
 });
 
