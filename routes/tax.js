@@ -402,7 +402,7 @@ router.get('/docusign-return', async (req, res) => {
     if (window.parent && window.parent !== window) {
       window.parent.postMessage({ type: 'docusign-done', status: '${status}' }, '*');
     } else {
-      window.location.href = '${process.env.APP_URL || 'https://davincii.app'}/?page=payouts&tax=${status}';
+      window.location.href = '${process.env.APP_URL || 'https://davincii.co'}/?page=payouts&tax=${status}';
     }
   </script></body></html>`);
 });
