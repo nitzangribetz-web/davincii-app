@@ -214,6 +214,7 @@ async function createAnvilPacket({ formType, artist, legalName }) {
       signerType: 'embedded',
       fields: [
         { fileId: 'taxForm', fieldId: 'taxpayerSignature' },
+        { fileId: 'taxForm', fieldId: 'signatureDate' },
       ],
     }],
   };
