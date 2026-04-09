@@ -28,7 +28,7 @@ app.use(helmet({
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
       imgSrc: ["'self'", "https://davincii.co", "data:"],
       connectSrc: ["'self'", "https://www.googleapis.com", "https://accounts.google.com"],
-      frameSrc: ["https://accounts.google.com", "https://demo.docusign.net", "https://na4.docusign.net"],
+      frameSrc: ["https://accounts.google.com", "https://demo.docusign.net", "https://na4.docusign.net", "https://account-d.docusign.com", "https://account.docusign.com", "https://*.docusign.net", "https://*.docusign.com"],
       objectSrc: ["'none'"],
       baseUri: ["'self'"],
       formAction: ["'self'"],
