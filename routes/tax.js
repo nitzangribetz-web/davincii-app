@@ -150,6 +150,10 @@ async function createAnvilPacket({ formType, artist, legalName }) {
   const signerName = legalName || artist.name || artist.stage_name || artist.email || 'Artist';
   const signerEmail = artist.email;
 
+  if (!signerEmail) {
+    throw new Error('Cannot create Anvil signer without artist email.');
+  }
+
   const mutation = `
     mutation CreateEtchPacket(
       $name: String,
@@ -172,28 +176,40 @@ async function createAnvilPacket({ formType, artist, legalName }) {
         signers: $signers
       ) {
         eid
+        name
+        status
         detailsURL
         documentGroup {
           eid
-          signers { eid aliasId routingOrder status signActionType }
+          status
+          currentRoutingStep
+          signers {
+            eid
+            aliasId
+            status
+            signActionType
+            name
+            email
+            clientUserId
+            routingOrder
+          }
         }
       }
     }
   `;
   const variables = {
-    name: formLabel + ' — ' + signerName,
-    isDraft: true,
-    isTest: true,
+    name: `${formLabel} — ${signerName}`,
+    isDraft: false,
+    isTest: process.env.NODE_ENV !== 'production',
     allowUpdates: false,
-    signatureEmailSubject: formLabel + ' for Davincii',
-    signatureEmailBody: 'Please sign your ' + formLabel + ' to complete Davincii payout setup.',
+    signatureEmailSubject: `${formLabel} for Davincii`,
+    signatureEmailBody: `Please sign your ${formLabel} to complete Davincii payout setup.`,
     files: [{ id: 'taxForm', castEid: templateEid }],
     signers: [{
       id: 'artist',
       name: signerName,
       email: signerEmail,
       signerType: 'embedded',
-      routingOrder: 1,
       fields: [
         { fileId: 'taxForm', fieldId: 'taxpayerSignature' },
       ],
@@ -201,10 +217,21 @@ async function createAnvilPacket({ formType, artist, legalName }) {
   };
   const data = await anvilGraphQL(mutation, variables);
   const packet = data.createEtchPacket;
-  const signers = (packet.documentGroup && packet.documentGroup.signers) || [];
-  const signer = signers[0];
-  if (!signer || !signer.eid) {
-    throw new Error('Anvil packet created but no signer eid returned.');
+
+  console.log('ANVIL PACKET RESPONSE:', JSON.stringify(packet, null, 2));
+
+  const signer = packet?.documentGroup?.signers?.[0];
+
+  if (!packet?.documentGroup) {
+    throw new Error(
+      `Anvil packet created but no documentGroup returned. Packet status=${packet?.status || 'unknown'}`
+    );
+  }
+
+  if (!signer?.eid) {
+    throw new Error(
+      `Anvil packet created but no signer eid returned. documentGroup.status=${packet.documentGroup.status}; signers=${JSON.stringify(packet.documentGroup.signers || [])}`
+    );
   }
   // Second hop: generate the embedded sign URL for this signer.
   const urlMutation = `
