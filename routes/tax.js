@@ -140,7 +140,7 @@ async function anvilGraphQL(query, variables) {
 // Create an Etch e-sign packet for the given tax form and return the signer's
 // embedded signing URL. Returns null if Anvil isn't configured so the caller
 // can fall back to manual mode.
-async function createAnvilPacket({ formType, artist, legalName }) {
+async function createAnvilPacket({ artist, legalName, taxData }) {
   const templateEid = process.env.ANVIL_W9_TEMPLATE_ID;
   if (!process.env.ANVIL_API_KEY) throw new Error('ANVIL_API_KEY missing');
   if (!templateEid) throw new Error('ANVIL_W9_TEMPLATE_ID missing');
@@ -150,13 +150,32 @@ async function createAnvilPacket({ formType, artist, legalName }) {
   const signerEmail = artist.email;
   if (!signerEmail) throw new Error('Artist email missing');
 
+  // Build prefill payload from frontend form data
+  const td = taxData || {};
+  const fillData = {
+    nameOfEntityIndividual: td.name || signerName,
+    businessName: td.businessName || '',
+    taxClassIndividual: td.taxClass === 'individual',
+    taxClassCCorp: td.taxClass === 'cCorp',
+    taxClassSCorp: td.taxClass === 'sCorp',
+    taxClassPartnership: td.taxClass === 'partnership',
+    taxClassTrustEstate: td.taxClass === 'trustEstate',
+    taxClassLLC: td.taxClass === 'llc',
+    taxClassOther: td.taxClass === 'other',
+    llcTaxClass: td.llcTaxClass || '',
+    addressStreet: td.addressStreet || '',
+    addressCityStateZip: td.addressCityStateZip || '',
+    ssn: td.ssn || '',
+    ein: td.ein || '',
+  };
+
   const mutation = `
     mutation CreateEtchPacket(
       $name: String,
       $files: [EtchFile!],
       $isDraft: Boolean,
       $isTest: Boolean,
-      $allowUpdates: Boolean,
+      $data: JSON,
       $signers: [JSON!]
     ) {
       createEtchPacket(
@@ -164,7 +183,7 @@ async function createAnvilPacket({ formType, artist, legalName }) {
         files: $files,
         isDraft: $isDraft,
         isTest: $isTest,
-        allowUpdates: $allowUpdates,
+        data: $data,
         signers: $signers
       ) {
         eid
@@ -183,8 +202,12 @@ async function createAnvilPacket({ formType, artist, legalName }) {
     name: `W-9 — ${signerName}`,
     isDraft: false,
     isTest: process.env.NODE_ENV !== 'production',
-    allowUpdates: true,
     files: [{ id: 'taxForm', castEid: templateEid }],
+    data: {
+      payloads: {
+        taxForm: { data: fillData },
+      },
+    },
     signers: [{
       id: 'artist',
       name: signerName,
@@ -193,25 +216,6 @@ async function createAnvilPacket({ formType, artist, legalName }) {
       fields: [
         { fileId: 'taxForm', fieldId: 'taxpayerSignature' },
         { fileId: 'taxForm', fieldId: 'signatureDate' },
-        {
-          kind: 'form',
-          payloadMaps: [
-            { fileId: 'taxForm', fieldId: 'nameOfEntityIndividual' },
-            { fileId: 'taxForm', fieldId: 'businessName' },
-            { fileId: 'taxForm', fieldId: 'taxClassIndividual' },
-            { fileId: 'taxForm', fieldId: 'taxClassCCorp' },
-            { fileId: 'taxForm', fieldId: 'taxClassSCorp' },
-            { fileId: 'taxForm', fieldId: 'taxClassPartnership' },
-            { fileId: 'taxForm', fieldId: 'taxClassTrustEstate' },
-            { fileId: 'taxForm', fieldId: 'taxClassLLC' },
-            { fileId: 'taxForm', fieldId: 'taxClassOther' },
-            { fileId: 'taxForm', fieldId: 'llcTaxClass' },
-            { fileId: 'taxForm', fieldId: 'addressStreet' },
-            { fileId: 'taxForm', fieldId: 'addressCityStateZip' },
-            { fileId: 'taxForm', fieldId: 'ssn' },
-            { fileId: 'taxForm', fieldId: 'ein' },
-          ],
-        },
       ],
     }],
   };
@@ -292,7 +296,7 @@ router.post('/start', auth, async (req, res) => {
     let anvil = null;
     let anvilError = null;
     try {
-      anvil = await createAnvilPacket({ formType, artist, legalName });
+      anvil = await createAnvilPacket({ artist, legalName, taxData: body.taxData });
     } catch (err) {
       anvilError = err.message;
       console.error('[tax/start] Anvil error:', err && err.stack || err);
