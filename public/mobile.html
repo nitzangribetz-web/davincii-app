@@ -1915,9 +1915,9 @@ footer.m-footer{
         <div class="notif-panel" id="notif-panel">
           <div class="notif-panel-hd">
             <span class="notif-panel-title">Notifications</span>
-            <button class="notif-panel-mark">Mark all read</button>
+            <button class="notif-panel-mark" onclick="mobMarkAllRead(event)">Mark all read</button>
           </div>
-          <div class="notif-panel-body">
+          <div class="notif-panel-body" id="mob-notif-panel-body">
             <div class="notif-panel-empty-t">You're all caught up.</div>
             <div class="notif-panel-empty-s">We'll let you know the moment royalties, registrations, or payouts move.</div>
           </div>
@@ -2698,6 +2698,44 @@ function mobPlayBellShake() {
 }
 window.mobPlayBellShake = mobPlayBellShake;
 window.mobSyncNotifDot = mobSyncNotifDot;
+
+// Render the mobile bell dropdown panel body from the shared store so
+// "Mark all read" visibly updates items in place instead of wiping them.
+function mobRenderNotifPanel() {
+  var body = document.getElementById('mob-notif-panel-body');
+  if (!body) return;
+  var list = [];
+  try { list = (window.Dv && Dv.notifications) ? Dv.notifications.load() : []; } catch(_){}
+  var fmt = (window.Dv && Dv.format) || {};
+  var esc = fmt.escapeHtml || function(s){ return String(s||''); };
+  var ago = fmt.timeAgo || function(){ return ''; };
+  if (!list.length) {
+    body.innerHTML = '<div class="notif-panel-empty-t">You\'re all caught up.</div>' +
+      '<div class="notif-panel-empty-s">We\'ll let you know the moment royalties, registrations, or payouts move.</div>';
+    return;
+  }
+  body.style.padding = '6px 0';
+  body.style.textAlign = 'left';
+  body.innerHTML = list.slice(0, 6).map(function(n){
+    return '<div class="mob-notif-row' + (n.read ? ' read' : '') + '" style="display:flex;gap:10px;padding:12px 16px;border-bottom:1px solid #F1F5F9;opacity:' + (n.read ? '0.62' : '1') + '">' +
+      '<div style="width:6px;height:6px;border-radius:999px;margin-top:7px;background:' + (n.read ? '#CBD5E1' : '#3B82F6') + ';flex-shrink:0"></div>' +
+      '<div style="flex:1;min-width:0">' +
+        '<div style="font-family:var(--sans);font-size:12.5px;font-weight:' + (n.read ? '500' : '600') + ';color:var(--black)">' + esc(n.title) + '</div>' +
+        (n.body ? '<div style="font-family:var(--sans);font-size:11.5px;font-weight:300;color:#64748B;margin-top:2px">' + esc(n.body) + '</div>' : '') +
+        '<div style="font-family:var(--sans);font-size:10.5px;color:#94A3B8;margin-top:4px">' + esc(ago(n.ts)) + '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function mobMarkAllRead(e) {
+  if (e) { e.stopPropagation(); e.preventDefault(); }
+  try { (window.Dv && Dv.notifications) && Dv.notifications.markAllRead(); } catch(_){}
+  mobRenderNotifPanel();
+  mobSyncNotifDot();
+}
+window.mobRenderNotifPanel = mobRenderNotifPanel;
+window.mobMarkAllRead = mobMarkAllRead;
 
 // Enter the mobile dashboard from the landing page (when already authed).
 // Falls back to login if no cached artist exists.
@@ -3604,6 +3642,7 @@ function toggleNotifPanel(e) {
   const p = document.getElementById('notif-panel');
   // Close avatar menu if open
   document.getElementById('d-av-wrap')?.classList.remove('open');
+  try { mobRenderNotifPanel(); } catch(_){}
   p.classList.toggle('open');
 }
 function closeNotifPanel() {
