@@ -387,11 +387,15 @@ router.get('/docusign-return', async (req, res) => {
   console.log('[docusign-return] event=' + event, 'envelopeId=' + envelopeId);
   if (event === 'signing_complete' && envelopeId) {
     try {
-      await pool.query(
+      const { rows } = await pool.query(
         `UPDATE tax_forms SET status = 'completed', completed_at = NOW(), updated_at = NOW()
-         WHERE provider = 'docusign' AND provider_form_id = $1 AND status = 'pending'`,
+         WHERE provider = 'docusign' AND provider_form_id = $1 AND status = 'pending'
+         RETURNING *`,
         [envelopeId]
       );
+      if (rows[0]) {
+        notifyAdminTaxCompleted(rows[0].artist_id, rows[0]).catch(() => {});
+      }
     } catch (err) {
       console.error('[docusign-return] DB error:', err);
     }
