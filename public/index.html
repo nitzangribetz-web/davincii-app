@@ -4643,7 +4643,7 @@
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // PROFILE SAVE
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  var SETUP_HIDE_MS = 1 * 24 * 60 * 60 * 1000; // 1 day
+  var SETUP_HIDE_MS = 2 * 24 * 60 * 60 * 1000; // 2 days
   function markSetupComplete(kind) {
     try { localStorage.setItem('dv_setup_' + kind, '1'); } catch(e) {}
     try {
@@ -4651,21 +4651,18 @@
         localStorage.setItem('dv_setup_' + kind + '_at', String(Date.now()));
       }
     } catch(e) {}
-    // Check if this item was completed more than 1 day ago — if so, hide it
-    var completedAt = 0;
-    try { completedAt = parseInt(localStorage.getItem('dv_setup_' + kind + '_at') || '0', 10); } catch(_){}
-    var expired = completedAt > 0 && (Date.now() - completedAt) > SETUP_HIDE_MS;
+    // Keep the row/alert crossed-out but visible — we no longer auto-hide
+    // individual items after a grace period. The whole Get Started box is
+    // hidden once every item is complete (see applySetupCompletion).
     var alertEl = document.getElementById('setup-alert-' + kind);
     if (alertEl) {
       alertEl.classList.add('completed');
-      if (expired) alertEl.style.display = 'none';
       var btnA = alertEl.querySelector('.setup-alert-btn');
       if (btnA) btnA.disabled = true;
     }
     var row = document.getElementById('setup-row-' + kind);
     if (row) {
       row.classList.add('completed');
-      if (expired) row.style.display = 'none';
       var btnR = row.querySelector('.setup-action');
       if (btnR) btnR.disabled = true;
     }
