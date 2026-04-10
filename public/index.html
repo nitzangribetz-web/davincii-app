@@ -174,7 +174,7 @@
     .nav-bell-dot {
       position:absolute; top:-3px; right:-3px;
       min-width:14px; height:14px; padding:0 4px;
-      border-radius:7px; background:#EF4444;
+      border-radius:7px; background:#3B82F6;
       border:2px solid #050C1A;
       box-shadow:none;
       font-family:'Inter',sans-serif; font-size:9px; font-weight:700;
@@ -1546,7 +1546,7 @@
     }
     .setup-row.completed .setup-row-label::before {
       content: '✓ ';
-      color: #10B981;
+      color: #3B82F6;
       font-weight: 700;
       text-decoration: none;
       display: inline-block;
@@ -1853,14 +1853,14 @@
     .setup-alert-btn:hover { background: #DC2626; transform: translateY(-1px); }
     .setup-alert.completed {
       border-color: #D1D5DB;
-      border-left-color: #10B981;
+      border-left-color: #3B82F6;
       box-shadow: none;
       opacity: 0.72;
     }
     .setup-alert.completed .setup-alert-icon {
-      background: #ECFDF5;
-      border-color: #A7F3D0;
-      color: #10B981;
+      background: #EFF6FF;
+      border-color: #BFDBFE;
+      color: #3B82F6;
     }
     .setup-alert.completed .setup-alert-title,
     .setup-alert.completed .setup-alert-body {
@@ -3266,7 +3266,15 @@
     var bell = document.getElementById('ln-bell-wrap');
     var av = document.getElementById('ln-av-wrap');
     if (av) av.classList.remove('open');
-    if (bell) bell.classList.toggle('open');
+    if (bell) {
+      var willOpen = !bell.classList.contains('open');
+      bell.classList.toggle('open');
+      if (willOpen) {
+        try { Dv.notifications.markAllRead(); } catch(_) {}
+        try { renderNotifications(); } catch(_) {}
+        try { Dv.notifications.syncBadges(); } catch(_) {}
+      }
+    }
   }
   function toggleLnAvatar(e) {
     if (e) e.stopPropagation();
@@ -3638,7 +3646,7 @@
       window.history.pushState({ screen:'dashboard', page: page }, '', url);
     }
     if(page === 'signups') loadSignups();
-    if(page === 'payouts') { try { loadStripeStatus(); } catch(e) {} try { loadPayPalStatus(); } catch(e) {} try { loadTaxStatus(); } catch(e) {} try { loadPayoutMethods(); } catch(e) {} }
+    if(page === 'payouts') { try { loadPayPalStatus(); } catch(e) {} try { loadTaxStatus(); } catch(e) {} }
     if(page === 'add-song') deskResetAddSong();
     if(page === 'overview') { try { applySetupCompletion(); } catch(e) {} }
     if(page === 'catalog') { try { loadCatalog(); } catch(e) {} }
@@ -3722,16 +3730,7 @@
   let _unreadCount = 0;
 
   function updateBadge() {
-    const badge = document.getElementById('notif-badge');
-    if (badge) {
-      if (_unreadCount > 0) {
-        badge.textContent = _unreadCount > 99 ? '99+' : String(_unreadCount);
-        badge.style.display = 'inline-flex';
-      } else {
-        badge.textContent = '';
-        badge.style.display = 'none';
-      }
-    }
+    try { Dv.notifications.syncBadges(); } catch(_) {}
   }
 
   // Shared helpers from /js/notifications.js + /js/format.js
@@ -3922,6 +3921,9 @@
       wrap.classList.remove('open');
     } else {
       wrap.classList.add('open');
+      // Opening the panel = user has seen the notifications → mark all read.
+      try { Dv.notifications.markAllRead(); } catch(_) {}
+      renderNotifications();
     }
   }
 
@@ -4236,7 +4238,10 @@
   function renderStripeStatus(d){
     var box = document.getElementById('stripe-status-box');
     if(!box) return;
-    box.style.display = 'block';
+    // Only reveal the Stripe onboarding card when the artist has actually
+    // picked Stripe as their payout method. selectPayout('stripe') is what
+    // flips this visible; we don't force-show from the renderer.
+    if (window.selectedPayoutMethod === 'stripe') box.style.display = 'block';
     var vm = Dv.stripe.describeState(d);
 
     var badge = document.getElementById('stripe-status-badge');
@@ -4274,7 +4279,7 @@
   function loadStripeStatus(){
     var box = document.getElementById('stripe-status-box');
     if(!box) return;
-    box.style.display = 'block';
+    // Callers (selectPayout('stripe')) are responsible for revealing the box.
     document.getElementById('stripe-status-label').textContent = 'Loading';
     Dv.stripe.fetchStatus().then(renderStripeStatus);
   }
@@ -4317,25 +4322,76 @@
     Dv.tax.fetchStatus().then(renderTaxStatus);
   }
   function startTaxForm(){
-    if (!window.Dv || !Dv.tax) return;
-    var btn = document.getElementById('tax-card-action');
-    if (btn) { btn.disabled = true; btn.textContent = 'Opening\u2026'; }
-    Dv.tax.start({}).then(function(res){
+    var modal = document.getElementById('w9-modal');
+    if (modal) modal.style.display = 'flex';
+  }
+  function closeW9Modal(){
+    var modal = document.getElementById('w9-modal');
+    if (modal) modal.style.display = 'none';
+  }
+  function submitW9Form(e){
+    if (e) e.preventDefault();
+    var f = document.getElementById('w9-form');
+    if (!f) return;
+    var taxClass = '';
+    var radios = f.querySelectorAll('input[name="taxClass"]');
+    radios.forEach(function(r){ if (r.checked) taxClass = r.value; });
+    var taxData = {
+      name: f.querySelector('[name="w9Name"]').value.trim(),
+      businessName: f.querySelector('[name="w9Business"]').value.trim(),
+      taxClass: taxClass,
+      llcTaxClass: f.querySelector('[name="w9LlcClass"]').value.trim(),
+      addressStreet: f.querySelector('[name="w9Street"]').value.trim(),
+      addressCityStateZip: f.querySelector('[name="w9CityStateZip"]').value.trim(),
+      ssn: f.querySelector('[name="w9Ssn"]').value.replace(/\D/g,''),
+      ein: f.querySelector('[name="w9Ein"]').value.replace(/\D/g,''),
+    };
+    if (!taxData.name) { showToast('Name is required.','error'); return; }
+    if (!taxData.addressStreet) { showToast('Address is required.','error'); return; }
+    if (!taxData.addressCityStateZip) { showToast('City/State/ZIP is required.','error'); return; }
+    if (!taxData.ssn && !taxData.ein) { showToast('SSN or EIN is required.','error'); return; }
+    if (!taxClass) { showToast('Select a tax classification.','error'); return; }
+    var btn = document.getElementById('w9-submit');
+    if (btn) { btn.disabled = true; btn.textContent = 'Submitting\u2026'; }
+    Dv.tax.start({ taxData: taxData }).then(function(res){
       if (res && res.url) {
-        window.location.href = res.url;
+        // Replace the form modal with a full-viewport signing overlay
+        var modal = document.getElementById('w9-modal');
+        modal.innerHTML =
+          '<div style="position:relative;width:100%;height:100%;display:flex;flex-direction:column">' +
+            '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:#0A0A0A;flex-shrink:0">' +
+              '<div style="font-family:\'DM Sans\',sans-serif;font-size:16px;font-weight:700;color:#fff">Sign Your W-9</div>' +
+              '<button onclick="closeW9Modal()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#94a3b8;line-height:1">&times;</button>' +
+            '</div>' +
+            '<iframe src="' + res.url + '" style="flex:1;width:100%;border:none" allow="camera;microphone"></iframe>' +
+          '</div>';
+        modal.style.padding = '0';
+        modal.style.background = '#0A0A0A';
+      } else if (res && res.error) {
+        showToast('Tax form: ' + res.error, 'error');
+        if (btn) { btn.disabled = false; btn.textContent = 'Submit & Sign'; }
       } else {
-        // No real provider wired up yet — show an explanation toast and
-        // leave the row in 'pending' state. When Anvil is integrated, the
-        // backend will return { url } and we'll redirect.
-        showToast('Tax-form provider isn\u2019t connected yet. The form is saved as pending.', 'success');
-        if (btn) { btn.disabled = false; btn.textContent = 'Resume'; }
+        showToast('Tax form saved as pending.', 'success');
+        closeW9Modal();
         loadTaxStatus();
       }
-    }).catch(function(){
-      showToast('Could not start the tax form. Please try again.', 'error');
-      if (btn) { btn.disabled = false; btn.textContent = 'Complete Tax Form'; }
+    }).catch(function(err){
+      var msg = (err && err.data && (err.data.detail || err.data.error)) || (err && err.message) || 'Please try again.';
+      showToast('Could not start tax form: ' + msg, 'error');
+      if (btn) { btn.disabled = false; btn.textContent = 'Submit & Sign'; }
     });
   }
+  window.addEventListener('message', function(e) {
+    if (e.data && e.data.type === 'docusign-done') {
+      closeW9Modal();
+      if (e.data.status === 'completed') {
+        showToast('W-9 signed successfully!', 'success');
+      } else {
+        showToast('Signing ' + e.data.status + '.', 'error');
+      }
+      loadTaxStatus();
+    }
+  });
   window.startTaxForm = startTaxForm;
   window.loadTaxStatus = loadTaxStatus;
 
@@ -4398,8 +4454,18 @@
     document.querySelectorAll('.payout-option').forEach(e=>e.classList.remove('selected'));
     const s=document.getElementById(m+'-option');if(s)s.classList.add('selected');
     window.selectedPayoutMethod = m;
-    if (m === 'paypal' && !window.paypalConnected) {
-      openPayPalModal();
+    var stripeBox = document.getElementById('stripe-status-box');
+    if (m === 'stripe') {
+      // Only now do we reveal the Stripe Connect onboarding card and load its
+      // state. Before the artist picks Stripe we deliberately hide it so the
+      // payouts page stays uncluttered.
+      if (stripeBox) stripeBox.style.display = 'block';
+      try { loadStripeStatus(); } catch(e) {}
+    } else {
+      if (stripeBox) stripeBox.style.display = 'none';
+      if (m === 'paypal' && !window.paypalConnected) {
+        openPayPalModal();
+      }
     }
   }
 
@@ -4524,6 +4590,25 @@
       errEl.style.display = 'block';
       return;
     }
+    // Tax form must be on file before any money moves. Block here and send
+    // the artist to the Payouts page where the tax card lives.
+    if (window.Dv && Dv.tax) {
+      Dv.tax.fetchStatus().then(function(d){
+        var vm = Dv.tax.describeState(d);
+        if (!vm.isComplete) {
+          errEl.innerHTML = 'Please complete your ' + (vm.formLabel || 'tax form') + ' before withdrawing. <a href="#" onclick="closeWithdrawModal();showDashPage(\'payouts\');return false;" style="color:#3B82F6;text-decoration:underline">Go to Payouts →</a>';
+          errEl.style.display = 'block';
+          return;
+        }
+        _doConfirmWithdraw(amount, errEl, sucEl, btn);
+      }).catch(function(){
+        _doConfirmWithdraw(amount, errEl, sucEl, btn);
+      });
+      return;
+    }
+    _doConfirmWithdraw(amount, errEl, sucEl, btn);
+  }
+  function _doConfirmWithdraw(amount, errEl, sucEl, btn){
     btn.disabled = true;
     btn.textContent = 'Processing...';
     var method = window.selectedPayoutMethod || 'stripe';
@@ -4643,7 +4728,7 @@
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // PROFILE SAVE
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  var SETUP_HIDE_MS = 2 * 24 * 60 * 60 * 1000; // 2 days
+  var SETUP_HIDE_MS = 24 * 60 * 60 * 1000; // 1 day
   function markSetupComplete(kind) {
     try { localStorage.setItem('dv_setup_' + kind, '1'); } catch(e) {}
     try {
@@ -4693,32 +4778,13 @@
       // Hide the entire Get Started box only when every setup item is
       // actually complete. Individual rows stay visible (crossed-out) until
       // then, so finishing one step doesn't cause the whole box to vanish.
+      // W-9 is intentionally NOT part of Get Started — it's handled inside
+      // the Payouts section instead.
       var pDone = localStorage.getItem('dv_setup_profile') === '1';
-      var wDone = localStorage.getItem('dv_setup_w9') === '1';
       var sDone = localStorage.getItem('dv_setup_song') === '1';
-      if (pDone && wDone && sDone) {
+      if (pDone && sDone) {
         var box = document.getElementById('get-started-box');
         if (box) box.style.display = 'none';
-      }
-      // Tax-form completion is derived ONLY from /api/tax/status (the
-      // platform's own record), not from any payout provider. This decouples
-      // W-9 / W-8BEN collection from Stripe / PayPal so artists can pick any
-      // payout rail without re-doing tax info.
-      if (window.Dv && Dv.tax) {
-        Dv.tax.fetchStatus().then(function(d) {
-          var vm = Dv.tax.describeState(d);
-          if (vm.isComplete) {
-            try { localStorage.setItem('dv_setup_w9', '1'); } catch(_){}
-            markSetupComplete('w9');
-          } else {
-            try { localStorage.removeItem('dv_setup_w9'); } catch(_){}
-            try { localStorage.removeItem('dv_setup_w9_at'); } catch(_){}
-            var alertEl = document.getElementById('setup-alert-w9');
-            if (alertEl) { alertEl.classList.remove('completed'); alertEl.style.display = ''; }
-            var rowEl = document.getElementById('setup-row-w9');
-            if (rowEl) { rowEl.classList.remove('completed'); rowEl.style.display = ''; }
-          }
-        }).catch(function(){});
       }
     } catch(e) {}
   }
@@ -5152,7 +5218,7 @@
       <div class="notif-bell-wrap" id="notif-bell-wrap">
         <button class="notif-bell" onclick="toggleNotifPanel()" aria-label="Notifications">
           <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-          <span class="notif-bell-badge" id="notif-badge"></span>
+          <span class="notif-bell-badge" id="notif-badge">0</span>
         </button>
         <!-- Dropdown panel -->
         <div class="notif-panel" id="notif-panel">
@@ -5185,7 +5251,7 @@
           </div>
           <div class="avatar-dropdown-section">
             <button class="avatar-menu-item" onclick="showDashPage('profile');closeAvatarMenu()"><span class="avatar-menu-icon">◎</span>Artist Profile</button>
-            <button class="avatar-menu-item" onclick="showDashPage('statements');closeAvatarMenu()"><span class="avatar-menu-icon">≡</span>Statements</button>
+            <button class="avatar-menu-item" onclick="showDashPage('statements');closeAvatarMenu()"><span class="avatar-menu-icon">▤</span>Statements</button>
             <button class="avatar-menu-item" onclick="showDashPage('payouts');closeAvatarMenu()"><span class="avatar-menu-icon">⬆</span>Payouts</button>
           </div>
           <div class="avatar-dropdown-section">
@@ -5217,7 +5283,7 @@
         <span class="sb-label">Earnings</span>
         <button class="nav-lnk" id="nl-payouts" onclick="showDashPage('payouts')"><span class="nav-icon">$</span>Payouts</button>
         <button class="nav-lnk" id="nl-royalties" onclick="showDashPage('royalties')"><span class="nav-icon">◐</span>Royalties</button>
-        <button class="nav-lnk" id="nl-statements" onclick="showDashPage('statements')"><span class="nav-icon">❏</span>Statements</button>
+        <button class="nav-lnk" id="nl-statements" onclick="showDashPage('statements')"><span class="nav-icon">▤</span>Statements</button>
       </div>
       <div class="sb-section">
         <span class="sb-label">Licensing</span>
@@ -5252,15 +5318,6 @@
           </div>
           <button class="setup-alert-btn" onclick="showDashPage('profile')">Complete Profile →</button>
         </div>
-        <div class="setup-alert" id="setup-alert-w9">
-          <div class="setup-alert-icon" style="font-size:10px;font-weight:700;letter-spacing:0.04em">$</div>
-          <div class="setup-alert-content">
-            <div class="setup-alert-title">Set up payouts (2 min)</div>
-            <div class="setup-alert-body">Davincii uses Stripe to pay artists worldwide. You'll create a free Stripe account and complete your tax info in one step — no separate W-9 form needed.</div>
-          </div>
-          <button class="setup-alert-btn" onclick="openW9Modal()">Set up payouts →</button>
-        </div>
-
         <div class="bal-card" style="display:flex;align-items:flex-end;justify-content:space-between;">
           <div style="position:relative;z-index:1">
             <div class="bal-label">Available Balance</div>
@@ -5304,10 +5361,6 @@
             <div class="setup-row" id="setup-row-profile">
               <span class="setup-row-label">Complete your artist profile</span>
               <button class="setup-action" onclick="showDashPage('profile')">Complete →</button>
-            </div>
-            <div class="setup-row" id="setup-row-w9">
-              <span class="setup-row-label">Set up payouts &amp; tax info</span>
-              <button class="setup-action" onclick="showDashPage('payouts')">Set up →</button>
             </div>
             <div class="setup-row" id="setup-row-song" style="border-bottom:none">
               <span class="setup-row-label">Register your first composition</span>
@@ -5890,14 +5943,8 @@
           </div>
 
         </div>
-        <div class="sbox" style="margin-bottom:20px">
-          <div class="sbox-head"><div class="sbox-title">Payout History</div></div>
-          <div class="sbox-body">
-            <div class="empty-state"><div class="empty-state-title">No payouts yet.</div><div class="empty-state-sub">Payouts are issued each quarter after royalties are collected and distributed. Your history will appear here once your first payment is processed.</div></div>
-          </div>
-        </div>
         <!-- Tax Information (decoupled from payout method) -->
-        <div class="sbox">
+        <div class="sbox" style="margin-bottom:22px">
           <div class="sbox-head">
             <div><div class="sbox-title">Tax Information</div><div class="sbox-sub">Required so we can pay you and issue a 1099 at year-end</div></div>
             <div class="status-badge error" id="tax-status-badge">
@@ -5916,17 +5963,10 @@
           </div>
         </div>
 
-        <!-- Payout Method (Stripe / PayPal picker) -->
-        <div class="sbox">
-          <div class="sbox-head">
-            <div><div class="sbox-title">Payout Method</div><div class="sbox-sub">Choose how you'd like to receive your royalties</div></div>
-            <div class="status-badge error" id="w9-status-badge">
-              <span class="status-dot"></span>
-              <span id="w9-status-text">Not Set Up</span>
-            </div>
-          </div>
-          <div class="sbox-body" style="padding:24px">
-            <div id="payout-method-list" style="display:grid;gap:12px"></div>
+        <div class="sbox" style="margin-bottom:20px">
+          <div class="sbox-head"><div class="sbox-title">Payout History</div></div>
+          <div class="sbox-body">
+            <div class="empty-state"><div class="empty-state-title">No payouts yet.</div><div class="empty-state-sub">Payouts are issued each quarter after royalties are collected and distributed. Your history will appear here once your first payment is processed.</div></div>
           </div>
         </div>
       </div>
@@ -6550,6 +6590,49 @@
         <div class="legal-contact-line">davincii.co &nbsp;·&nbsp; New York, NY</div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- W-9 Data Collection Modal -->
+<div id="w9-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.55);align-items:center;justify-content:center;padding:20px">
+  <div style="background:#fff;border-radius:14px;max-width:520px;width:100%;max-height:90vh;overflow-y:auto;padding:32px;position:relative">
+    <button onclick="closeW9Modal()" style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:22px;cursor:pointer;color:#64748b">&times;</button>
+    <div style="font-family:'DM Sans',sans-serif;font-size:20px;font-weight:700;color:#0A0A0A;margin-bottom:4px">W-9 Tax Information</div>
+    <div style="font-family:'DM Sans',sans-serif;font-size:13px;color:#64748b;margin-bottom:24px">Fill out your info below. You'll sign electronically on the next screen.</div>
+    <form id="w9-form" onsubmit="submitW9Form(event);return false" style="font-family:'DM Sans',sans-serif">
+      <label style="display:block;font-size:13px;font-weight:600;color:#1e293b;margin-bottom:5px">Name (as shown on your income tax return) *</label>
+      <input name="w9Name" type="text" required style="width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;margin-bottom:16px;box-sizing:border-box">
+      <label style="display:block;font-size:13px;font-weight:600;color:#1e293b;margin-bottom:5px">Business name (if different)</label>
+      <input name="w9Business" type="text" style="width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;margin-bottom:16px;box-sizing:border-box">
+      <label style="display:block;font-size:13px;font-weight:600;color:#1e293b;margin-bottom:8px">Federal tax classification *</label>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px;font-size:13.5px;color:#334155">
+        <label><input type="radio" name="taxClass" value="individual"> Individual / Sole proprietor</label>
+        <label><input type="radio" name="taxClass" value="cCorp"> C Corporation</label>
+        <label><input type="radio" name="taxClass" value="sCorp"> S Corporation</label>
+        <label><input type="radio" name="taxClass" value="partnership"> Partnership</label>
+        <label><input type="radio" name="taxClass" value="trustEstate"> Trust / Estate</label>
+        <label><input type="radio" name="taxClass" value="llc"> LLC</label>
+        <label><input type="radio" name="taxClass" value="other"> Other</label>
+      </div>
+      <label style="display:block;font-size:13px;font-weight:600;color:#1e293b;margin-bottom:5px">LLC tax classification (if LLC)</label>
+      <input name="w9LlcClass" type="text" placeholder="C, S, or P" maxlength="1" style="width:80px;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;margin-bottom:16px;box-sizing:border-box">
+      <label style="display:block;font-size:13px;font-weight:600;color:#1e293b;margin-bottom:5px">Street address *</label>
+      <input name="w9Street" type="text" required style="width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;margin-bottom:16px;box-sizing:border-box">
+      <label style="display:block;font-size:13px;font-weight:600;color:#1e293b;margin-bottom:5px">City, state, and ZIP code *</label>
+      <input name="w9CityStateZip" type="text" required placeholder="Los Angeles, CA 90001" style="width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;margin-bottom:16px;box-sizing:border-box">
+      <div style="display:flex;gap:16px;margin-bottom:20px">
+        <div style="flex:1">
+          <label style="display:block;font-size:13px;font-weight:600;color:#1e293b;margin-bottom:5px">SSN</label>
+          <input name="w9Ssn" type="text" placeholder="XXX-XX-XXXX" maxlength="11" style="width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;box-sizing:border-box">
+        </div>
+        <div style="flex:1">
+          <label style="display:block;font-size:13px;font-weight:600;color:#1e293b;margin-bottom:5px">EIN</label>
+          <input name="w9Ein" type="text" placeholder="XX-XXXXXXX" maxlength="10" style="width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;box-sizing:border-box">
+        </div>
+      </div>
+      <div style="font-size:12px;color:#94a3b8;margin-bottom:20px">SSN or EIN required. This is encrypted and sent securely via DocuSign for your W-9.</div>
+      <button id="w9-submit" type="submit" style="width:100%;padding:12px;background:#0A0A0A;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">Submit & Sign</button>
+    </form>
   </div>
 </div>
 
