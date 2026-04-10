@@ -68,7 +68,7 @@
       case STATES.COMPLETED:
       default:
         vm.badgeTone = 'success';
-        vm.label = formLabel + ' On File';
+        vm.label = 'Completed';
         vm.sub = 'Your tax information is complete.';
         vm.desc = 'We have your ' + formLabel + ' on file. You can update it at any time.';
         vm.actionText = 'Update tax form';
