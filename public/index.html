@@ -2723,7 +2723,7 @@
         <div class="ln-dd" role="menu">
           <div class="ln-dd-hdr">
             <span class="ln-dd-title">Notifications</span>
-            <button class="ln-dd-mark">Mark all read</button>
+            <button class="ln-dd-mark" id="ln-mark-all" onclick="markAllRead(event)">Mark all read</button>
           </div>
           <div class="ln-dd-body">
             <div class="ln-dd-empty-t">You're all caught up.</div>
@@ -3279,9 +3279,7 @@
       var willOpen = !bell.classList.contains('open');
       bell.classList.toggle('open');
       if (willOpen) {
-        try { Dv.notifications.markAllRead(); } catch(_) {}
         try { renderNotifications(); } catch(_) {}
-        try { Dv.notifications.syncBadges(); } catch(_) {}
       }
     }
   }
@@ -3786,6 +3784,8 @@
     }
     var markBtn = document.getElementById('notif-mark-all');
     if (markBtn) markBtn.style.display = _unreadCount > 0 ? '' : 'none';
+    var lnMarkBtn = document.getElementById('ln-mark-all');
+    if (lnMarkBtn) lnMarkBtn.style.display = _unreadCount > 0 ? '' : 'none';
     updateBadge();
   }
   function addNotification(title, body, icon) {
@@ -3930,8 +3930,6 @@
       wrap.classList.remove('open');
     } else {
       wrap.classList.add('open');
-      // Opening the panel = user has seen the notifications → mark all read.
-      try { Dv.notifications.markAllRead(); } catch(_) {}
       renderNotifications();
     }
   }
@@ -3945,6 +3943,7 @@
     var notifs = _loadNotifs().map(function(n){ n.read = true; return n; });
     _saveNotifs(notifs);
     renderNotifications();
+    try { Dv.notifications.syncBadges(); } catch(_) {}
   }
 
   // Close bell panel when clicking outside

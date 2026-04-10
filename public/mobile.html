@@ -1926,7 +1926,7 @@ footer.m-footer{
         <div class="notif-panel" id="notif-panel">
           <div class="notif-panel-hd">
             <span class="notif-panel-title">Notifications</span>
-            <button class="notif-panel-mark" onclick="mobMarkAllRead(event)">Mark all read</button>
+            <button class="notif-panel-mark" id="mob-mark-all" onclick="mobMarkAllRead(event)">Mark all read</button>
           </div>
           <div class="notif-panel-body" id="mob-notif-panel-body">
             <div class="notif-panel-empty-t">You're all caught up.</div>
@@ -2857,6 +2857,9 @@ function mobRenderNotifPanel() {
       '</div>' +
     '</div>';
   }).join('');
+  var unread = list.filter(function(n){ return !n.read; }).length;
+  var markBtn = document.getElementById('mob-mark-all');
+  if (markBtn) markBtn.style.display = unread > 0 ? '' : 'none';
 }
 
 function mobMarkAllRead(e) {
@@ -3864,9 +3867,7 @@ function toggleNotifPanel(e) {
   try { mobRenderNotifPanel(); } catch(_){}
   p.classList.toggle('open');
   if (willOpen) {
-    try { Dv.notifications.markAllRead(); } catch(_){}
     try { mobRenderNotifPanel(); } catch(_){}
-    try { mobSyncNotifDot(); } catch(_){}
   }
 }
 function closeNotifPanel() {
