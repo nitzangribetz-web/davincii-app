@@ -2794,7 +2794,7 @@ function mobActivateDashboard(artist) {
 //   - profile: artist.stage_name + artist.pro present (or dv_setup_profile flag)
 //   - w9     : dv_setup_w9 flag (set after a successful W-9 submit on either device)
 //   - song   : songs count > 0 from /api/songs (or dv_setup_song flag)
-var MOB_SETUP_HIDE_MS = 2 * 24 * 60 * 60 * 1000; // 2 days
+var MOB_SETUP_HIDE_MS = 1 * 24 * 60 * 60 * 1000; // 1 day
 function mobMarkSetupComplete(kind) {
   try { localStorage.setItem('dv_setup_' + kind, '1'); } catch(_){}
   try {
@@ -2802,13 +2802,19 @@ function mobMarkSetupComplete(kind) {
       localStorage.setItem('dv_setup_' + kind + '_at', String(Date.now()));
     }
   } catch(_){}
-  // Keep the row/alert crossed-out but visible — we no longer auto-hide
-  // individual items after a grace period. The whole Get Started box is
-  // hidden once every item is complete (see mobApplySetupCompletion).
+  var completedAt = 0;
+  try { completedAt = parseInt(localStorage.getItem('dv_setup_' + kind + '_at') || '0', 10); } catch(_){}
+  var expired = completedAt > 0 && (Date.now() - completedAt) > MOB_SETUP_HIDE_MS;
   var alertEl = document.getElementById('mob-alert-' + kind);
-  if (alertEl) alertEl.classList.add('completed');
+  if (alertEl) {
+    alertEl.classList.add('completed');
+    if (expired) alertEl.style.display = 'none';
+  }
   var rowEl = document.getElementById('mob-setup-row-' + kind);
-  if (rowEl) rowEl.classList.add('completed');
+  if (rowEl) {
+    rowEl.classList.add('completed');
+    if (expired) rowEl.style.display = 'none';
+  }
 }
 function mobApplySetupCompletion() {
   var artist = {};
