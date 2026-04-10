@@ -3782,10 +3782,11 @@
         }).join('');
       }
     }
+    var hasNotifs = notifs.length > 0;
     var markBtn = document.getElementById('notif-mark-all');
-    if (markBtn) markBtn.style.display = _unreadCount > 0 ? '' : 'none';
+    if (markBtn) markBtn.style.display = hasNotifs ? '' : 'none';
     var lnMarkBtn = document.getElementById('ln-mark-all');
-    if (lnMarkBtn) lnMarkBtn.style.display = _unreadCount > 0 ? '' : 'none';
+    if (lnMarkBtn) lnMarkBtn.style.display = hasNotifs ? '' : 'none';
     updateBadge();
   }
   function addNotification(title, body, icon) {

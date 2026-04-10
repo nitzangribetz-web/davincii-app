@@ -2857,9 +2857,8 @@ function mobRenderNotifPanel() {
       '</div>' +
     '</div>';
   }).join('');
-  var unread = list.filter(function(n){ return !n.read; }).length;
   var markBtn = document.getElementById('mob-mark-all');
-  if (markBtn) markBtn.style.display = unread > 0 ? '' : 'none';
+  if (markBtn) markBtn.style.display = list.length > 0 ? '' : 'none';
 }
 
 function mobMarkAllRead(e) {
