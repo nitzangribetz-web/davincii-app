@@ -21,7 +21,7 @@ const pool = require('../db/pool');
 const auth = require('../middleware/auth');
 const { Resend } = require('resend');
 
-const { createDocuSignEnvelope, getDocuSignClient, diagnoseJwtAuth } = require('../lib/docusign');
+const { createDocuSignEnvelope, getDocuSignClient, diagnoseJwtAuth, getEnvelopeStatus } = require('../lib/docusign');
 const ADMIN_NOTIFY_EMAIL = process.env.ADMIN_NOTIFY_EMAIL || 'info@davincii.co';
 const ANVIL_GRAPHQL_URL = 'https://graphql.useanvil.com';
 
@@ -261,6 +261,23 @@ router.get('/status', auth, async (req, res) => {
         [row.id]
       );
       row.status = 'expired';
+    }
+    // Self-heal: if DB says pending but DocuSign says completed, update the DB.
+    // This catches cases where the iframe return redirect didn't fire.
+    if (row && row.status === 'pending' && row.provider === 'docusign' && row.provider_form_id) {
+      try {
+        const dsStatus = await getEnvelopeStatus(row.provider_form_id);
+        if (dsStatus === 'completed') {
+          await pool.query(
+            `UPDATE tax_forms SET status = 'completed', completed_at = NOW(), updated_at = NOW() WHERE id = $1`,
+            [row.id]
+          );
+          row.status = 'completed';
+          console.log('[tax/status] self-healed envelope', row.provider_form_id, 'to completed');
+        }
+      } catch (dsErr) {
+        console.error('[tax/status] DocuSign status check failed:', dsErr.message);
+      }
     }
     res.json(summarize(row));
   } catch (err) {
