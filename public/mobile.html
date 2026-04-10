@@ -3301,6 +3301,14 @@ window.addEventListener('message', function(e) {
     closeW9Modal();
     if (e.data.status === 'completed') {
       showToast('W-9 signed successfully!', 'success');
+      try { localStorage.setItem('dv_setup_w9', '1'); } catch(_){}
+      mobMarkSetupComplete('w9');
+      mobApplySetupCompletion();
+      try {
+        Dv.notifications.addOnce('w9_submitted', 'Tax form submitted', 'Your W-9 is on file \u2014 you\u2019re all set for year-end 1099s.', 'blue');
+        mobSyncNotifDot();
+        mobPlayBellShake();
+      } catch(_){}
     } else {
       showToast('Signing ' + e.data.status + '.', 'error');
     }
