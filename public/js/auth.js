@@ -60,7 +60,7 @@
   function logout() {
     var done = function () {
       clearStoredArtist();
-      location.replace('/login');
+      location.replace('/');
     };
     if (Dv.api) {
       Dv.api.fetch('/auth/logout', { method: 'POST', skipAuthRedirect: true })
