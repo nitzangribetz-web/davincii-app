@@ -3941,8 +3941,7 @@
 
   function markAllRead(e) {
     if (e) e.stopPropagation();
-    var notifs = _loadNotifs().map(function(n){ n.read = true; return n; });
-    _saveNotifs(notifs);
+    _saveNotifs([]);
     renderNotifications();
     try { Dv.notifications.syncBadges(); } catch(_) {}
   }

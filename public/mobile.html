@@ -2863,7 +2863,7 @@ function mobRenderNotifPanel() {
 
 function mobMarkAllRead(e) {
   if (e) { e.stopPropagation(); e.preventDefault(); }
-  try { (window.Dv && Dv.notifications) && Dv.notifications.markAllRead(); } catch(_){}
+  try { (window.Dv && Dv.notifications) && Dv.notifications.save([]); } catch(_){}
   mobRenderNotifPanel();
   mobSyncNotifDot();
 }
