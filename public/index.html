@@ -1820,6 +1820,7 @@
       padding: 14px 20px;
       margin-bottom: 10px;
       box-shadow: 0 2px 8px rgba(220,38,38,0.06);
+      position: relative;
     }
     .setup-alert-icon {
       width: 32px; height: 32px; border-radius: 50%;
@@ -1851,6 +1852,14 @@
       flex-shrink: 0;
     }
     .setup-alert-btn:hover { background: #DC2626; transform: translateY(-1px); }
+    .setup-alert-dismiss {
+      position: absolute; top: 8px; right: 10px;
+      background: none; border: none; cursor: pointer;
+      font-size: 18px; line-height: 1; color: #9CA3AF;
+      padding: 2px 6px; border-radius: 4px;
+      transition: color 0.15s, background 0.15s;
+    }
+    .setup-alert-dismiss:hover { color: #374151; background: rgba(0,0,0,0.05); }
     .setup-alert.completed {
       border-color: #D1D5DB;
       border-left-color: #3B82F6;
@@ -3385,7 +3394,7 @@
   }
 
   function updateArtistUI(artist) {
-    try { applySetupCompletion(); } catch(e) {}
+    try { applySetupCompletion(); autoHideSetupAlerts(); } catch(e) {}
     var proVal = document.getElementById('dash-pro-val');
     if (proVal) {
       var pro = artist.pro && artist.pro !== 'Other' ? artist.pro : (artist.pro_other || artist.pro || '');
@@ -4730,6 +4739,34 @@
   // PROFILE SAVE
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   var SETUP_HIDE_MS = 24 * 60 * 60 * 1000; // 1 day
+
+  // Dismiss a setup alert immediately + persist so it stays hidden
+  function dismissSetupAlert(kind) {
+    try { localStorage.setItem('dv_alert_' + kind + '_dismissed', '1'); } catch(_){}
+    var el = document.getElementById('setup-alert-' + kind);
+    if (el) el.style.display = 'none';
+  }
+
+  // Auto-hide alerts that are older than 24h or were dismissed
+  function autoHideSetupAlerts() {
+    ['profile'].forEach(function(kind) {
+      var el = document.getElementById('setup-alert-' + kind);
+      if (!el) return;
+      // Already dismissed manually
+      if (localStorage.getItem('dv_alert_' + kind + '_dismissed') === '1') {
+        el.style.display = 'none'; return;
+      }
+      // Record first-shown timestamp
+      var shownKey = 'dv_alert_' + kind + '_shown';
+      var shown = localStorage.getItem(shownKey);
+      if (!shown) {
+        localStorage.setItem(shownKey, String(Date.now()));
+      } else if (Date.now() - Number(shown) > SETUP_HIDE_MS) {
+        el.style.display = 'none';
+      }
+    });
+  }
+
   function markSetupComplete(kind) {
     try { localStorage.setItem('dv_setup_' + kind, '1'); } catch(e) {}
     try {
@@ -5318,6 +5355,7 @@
             <div class="setup-alert-body">Add your PRO affiliation, IPI number, and mailing address so we can begin registering your catalog.</div>
           </div>
           <button class="setup-alert-btn" onclick="showDashPage('profile')">Complete Profile →</button>
+          <button class="setup-alert-dismiss" onclick="dismissSetupAlert('profile')" title="Dismiss">&times;</button>
         </div>
         <div class="bal-card" style="display:flex;align-items:flex-end;justify-content:space-between;">
           <div style="position:relative;z-index:1">

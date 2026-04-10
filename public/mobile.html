@@ -961,7 +961,15 @@ footer.m-footer{
   background:#fff;border:1px solid #FECACA;
   border-left:3px solid var(--red);
   border-radius:8px;padding:12px 14px;margin-bottom:10px;
+  position:relative;
 }
+.d-alert-dismiss{
+  position:absolute;top:6px;right:8px;
+  background:none;border:none;cursor:pointer;
+  font-size:17px;line-height:1;color:#9CA3AF;
+  padding:2px 5px;border-radius:4px;
+}
+.d-alert-dismiss:active{color:#374151;background:rgba(0,0,0,0.05);}
 .d-alert-icon{
   width:28px;height:28px;border-radius:50%;
   background:#FEF2F2;border:1px solid #FCA5A5;
@@ -2015,6 +2023,7 @@ footer.m-footer{
         <div class="d-alert-sub">Add your PRO affiliation, IPI number, and mailing address so we can begin registering your catalog.</div>
         <button class="d-alert-btn" onclick="showDP('profile')">Complete Profile →</button>
       </div>
+      <button class="d-alert-dismiss" onclick="dismissMobSetupAlert('profile')" title="Dismiss">&times;</button>
     </div>
     <div class="d-bal">
       <div class="d-bal-lbl">Available Balance</div>
@@ -2906,9 +2915,35 @@ function mobActivateDashboard(artist) {
   mobUpdateArtistUI(artist);
   try { mobSyncNotifDot(); } catch(_){}
   // Reflect any setup state already completed elsewhere (desktop, prior session)
-  try { mobApplySetupCompletion(); } catch(_){}
+  try { mobApplySetupCompletion(); mobAutoHideSetupAlerts(); } catch(_){}
   try { mobLoadSongs(); } catch(_){}
   try { mobLoadW9Status(); } catch(_){}
+}
+
+// ── Setup alert auto-dismiss (24h) + manual dismiss ──
+var MOB_SETUP_HIDE_MS = 24 * 60 * 60 * 1000;
+
+function dismissMobSetupAlert(kind) {
+  try { localStorage.setItem('dv_alert_' + kind + '_dismissed', '1'); } catch(_){}
+  var el = document.getElementById('mob-alert-' + kind);
+  if (el) el.style.display = 'none';
+}
+
+function mobAutoHideSetupAlerts() {
+  ['profile'].forEach(function(kind) {
+    var el = document.getElementById('mob-alert-' + kind);
+    if (!el) return;
+    if (localStorage.getItem('dv_alert_' + kind + '_dismissed') === '1') {
+      el.style.display = 'none'; return;
+    }
+    var shownKey = 'dv_alert_' + kind + '_shown';
+    var shown = localStorage.getItem(shownKey);
+    if (!shown) {
+      localStorage.setItem(shownKey, String(Date.now()));
+    } else if (Date.now() - Number(shown) > MOB_SETUP_HIDE_MS) {
+      el.style.display = 'none';
+    }
+  });
 }
 
 // ── Setup-completion sync (mirrors desktop's applySetupCompletion) ──
