@@ -2161,15 +2161,107 @@ footer.m-footer{
     <div class="d-pg-title">Your <em>Royalties</em></div>
     <div class="d-pg-sub">All payments collected on your behalf.</div>
     <div class="d-pg-rule"></div>
-    <div class="d-sbox">
-      <div class="d-sbox-hd"><div><div class="d-sbox-title">Royalty Breakdown</div></div></div>
-      <div class="d-empty"><div class="d-empty-title">Nothing collected yet.</div><div class="d-empty-sub">Royalties appear once your compositions are registered and distributions are processed.</div></div>
+
+    <!-- Filters -->
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
+      <select class="field" style="margin-bottom:0;width:auto;min-width:110px;padding:8px 12px;font-size:13px">
+        <option>Statement</option><option>Summary</option>
+      </select>
+      <select class="field" style="margin-bottom:0;width:auto;min-width:110px;padding:8px 12px;font-size:13px">
+        <option>Overview</option><option>By Song</option><option>By Source</option>
+      </select>
+      <span style="font-family:var(--sans);font-size:12px;color:var(--muted)">for</span>
+      <select class="field" style="margin-bottom:0;width:auto;min-width:130px;padding:8px 12px;font-size:13px">
+        <option>All Client Writers</option>
+      </select>
     </div>
+
+    <!-- Donut chart — Royalties Breakdown -->
     <div class="d-sbox">
-      <div class="d-sbox-hd"><div><div class="d-sbox-title">Royalty History</div></div><div style="font-family:var(--sans);font-size:12px;color:var(--muted-lt)">$0.00</div></div>
-      <div class="d-row" style="opacity:0.28"><div><div class="d-row-title">—</div><div class="d-row-sub">—</div></div><div style="font-family:var(--serif);font-size:17px;color:var(--black)">—</div></div>
-      <div class="d-row" style="opacity:0.28"><div><div class="d-row-title">—</div><div class="d-row-sub">—</div></div><div style="font-family:var(--serif);font-size:17px;color:var(--black)">—</div></div>
+      <div class="d-sbox-hd"><div><div class="d-sbox-title">Royalties Breakdown</div></div></div>
+      <div style="padding:20px 16px;display:flex;align-items:center;justify-content:center;gap:24px;min-height:180px;">
+        <svg width="130" height="130" viewBox="0 0 160 160">
+          <circle cx="80" cy="80" r="58" fill="none" stroke="#E2E8F0" stroke-width="26"/>
+          <text x="80" y="76" text-anchor="middle" font-family="'DM Sans',sans-serif" font-size="22" font-weight="300" fill="#CBD5E1">$0</text>
+          <text x="80" y="94" text-anchor="middle" font-family="'DM Sans',sans-serif" font-size="10" fill="#CBD5E1">No data</text>
+        </svg>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:10px;height:10px;border-radius:2px;background:#1E3A6E;flex-shrink:0"></div>
+            <div><div style="font-family:var(--sans);font-size:12px;font-weight:500;color:#374151">Mechanical</div><div style="font-family:var(--sans);font-size:11px;font-weight:300;color:#CBD5E1">0%</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:10px;height:10px;border-radius:2px;background:#93C5FD;flex-shrink:0"></div>
+            <div><div style="font-family:var(--sans);font-size:12px;font-weight:500;color:#374151">Performance</div><div style="font-family:var(--sans);font-size:11px;font-weight:300;color:#CBD5E1">0%</div></div>
+          </div>
+        </div>
+      </div>
     </div>
+
+    <!-- Bar chart — Royalties by Period -->
+    <div class="d-sbox">
+      <div class="d-sbox-hd">
+        <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
+          <div><div class="d-sbox-title">Royalties by Period</div></div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <select class="field" style="margin-bottom:0;padding:5px 8px;font-size:11px;min-width:80px">
+              <option>Q4 2025</option><option>Q3 2025</option><option>Q2 2025</option><option>Q1 2025</option>
+            </select>
+            <span style="font-family:var(--sans);font-size:11px;color:var(--muted)">to</span>
+            <select class="field" style="margin-bottom:0;padding:5px 8px;font-size:11px;min-width:80px">
+              <option>Q4 2025</option><option>Q3 2025</option><option>Q2 2025</option><option>Q1 2025</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div style="padding:16px;min-height:180px;display:flex;align-items:flex-end;">
+        <svg width="100%" height="150" viewBox="0 0 360 150" preserveAspectRatio="none">
+          <text x="0" y="14" font-family="'DM Sans',sans-serif" font-size="10" fill="#CBD5E1">4000</text>
+          <text x="0" y="50" font-family="'DM Sans',sans-serif" font-size="10" fill="#CBD5E1">3000</text>
+          <text x="0" y="86" font-family="'DM Sans',sans-serif" font-size="10" fill="#CBD5E1">2000</text>
+          <text x="0" y="122" font-family="'DM Sans',sans-serif" font-size="10" fill="#CBD5E1">1000</text>
+          <line x1="32" y1="10" x2="360" y2="10" stroke="#F1F5F9" stroke-width="1"/>
+          <line x1="32" y1="46" x2="360" y2="46" stroke="#F1F5F9" stroke-width="1"/>
+          <line x1="32" y1="82" x2="360" y2="82" stroke="#F1F5F9" stroke-width="1"/>
+          <line x1="32" y1="118" x2="360" y2="118" stroke="#F1F5F9" stroke-width="1"/>
+          <line x1="32" y1="138" x2="360" y2="138" stroke="#E2E8F0" stroke-width="1"/>
+          <text x="156" y="148" text-anchor="middle" font-family="'DM Sans',sans-serif" font-size="10" fill="#64748B">Q4 2025</text>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Royalties table -->
+    <div class="d-sbox" style="overflow-x:auto">
+      <div style="padding:0;min-width:320px">
+        <div style="display:grid;grid-template-columns:1fr 1fr 100px;padding:10px 16px;border-bottom:1px solid #F1F5F9;background:#F8FAFC;">
+          <div style="font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:#475569">Royalty Type</div>
+          <div style="font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:#475569">Percentage</div>
+          <div style="font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:#475569;text-align:right">Total</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 100px;padding:14px 16px;border-bottom:1px solid #F8FAFC;align-items:center;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:10px;height:10px;border-radius:2px;background:#1E3A6E;flex-shrink:0"></div>
+            <span style="font-family:var(--sans);font-size:13px;color:#374151">Mechanical</span>
+          </div>
+          <div style="font-family:var(--sans);font-size:13px;font-weight:300;color:#CBD5E1">— %</div>
+          <div style="font-family:var(--sans);font-size:13px;font-weight:300;color:#CBD5E1;text-align:right">—</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 100px;padding:14px 16px;border-bottom:1px solid #F1F5F9;align-items:center;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:10px;height:10px;border-radius:2px;background:#93C5FD;flex-shrink:0"></div>
+            <span style="font-family:var(--sans);font-size:13px;color:#374151">Performance</span>
+          </div>
+          <div style="font-family:var(--sans);font-size:13px;font-weight:300;color:#CBD5E1">— %</div>
+          <div style="font-family:var(--sans);font-size:13px;font-weight:300;color:#CBD5E1;text-align:right">—</div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:flex-end;gap:12px;padding:14px 16px;background:#F8FAFC;">
+          <span style="font-family:var(--sans);font-size:12px;font-weight:600;color:#374151;letter-spacing:0.02em">Grand Total</span>
+          <span style="font-family:var(--sans);font-size:18px;font-weight:300;color:#CBD5E1">$0.00</span>
+        </div>
+      </div>
+    </div>
+
+    <p style="font-family:var(--sans);font-size:11px;font-weight:300;color:#CBD5E1;margin-top:14px;line-height:1.6">Sample data shown for illustration. Your actual royalties will appear here once collections begin processing.</p>
   </div>
 
   <!-- ── REGISTRATION STATUS ── -->
@@ -2178,9 +2270,12 @@ footer.m-footer{
     <div class="d-pg-sub">Track where each composition is registered.</div>
     <div class="d-pg-rule"></div>
     <div class="d-sbox">
-      <div class="d-sbox-hd"><div><div class="d-sbox-title">All Compositions</div><div class="d-sbox-sub">0 songs registered</div></div></div>
-      <div class="d-empty"><div class="d-empty-title">No compositions registered yet.</div><div class="d-empty-sub">Register your first song to track its status across ASCAP, SoundExchange, the MLC, and all collection societies.</div><button class="btn-p" style="max-width:240px;margin:0 auto" onclick="showDP('add-song')">Register a Composition →</button></div>
+      <div class="d-sbox-hd"><div><div class="d-sbox-title">All Compositions</div><div class="d-sbox-sub" id="mob-reg-status-count">0 songs registered</div></div></div>
+      <div id="mob-reg-status-body">
+        <div class="d-empty"><div class="d-empty-title">No compositions registered yet.</div><div class="d-empty-sub">Register your first song to track its status across ASCAP, SoundExchange, the MLC, and all collection societies.</div><button class="btn-p" style="max-width:240px;margin:0 auto" onclick="showDP('add-song')">Register a Composition →</button></div>
+      </div>
     </div>
+    <p style="font-family:var(--sans);font-size:11px;font-weight:300;color:#CBD5E1;margin-top:14px;line-height:1.6">Sample data shown for illustration. Your actual registration statuses will appear here once processing begins.</p>
   </div>
 
   <!-- ── STATEMENTS ── -->
@@ -2194,7 +2289,7 @@ footer.m-footer{
     </div>
     <div class="d-sbox">
       <div class="d-sbox-hd"><div><div class="d-sbox-title">About Statements</div></div></div>
-      <div style="padding:14px 16px"><p style="font-family:var(--sans);font-size:13px;font-weight:300;color:var(--slate);line-height:1.78">Statements detail every royalty collected on your behalf, broken down by source and territory, with your net payment clearly itemized — suitable for accountants, managers, and legal counsel.</p></div>
+      <div style="padding:14px 16px"><p style="font-family:var(--sans);font-size:13px;font-weight:300;color:var(--slate);line-height:1.78">Statements detail every royalty collected on your behalf, broken down by source and territory, with your net payment clearly itemized — suitable for accountants, managers, and legal counsel.</p><p style="font-family:var(--sans);font-size:13px;font-weight:300;color:var(--slate);line-height:1.78;margin-top:12px">Quarterly statements are generated within 15 business days of each quarter close. Use them for visa applications, grant submissions, financial institution requests, and tax preparation.</p></div>
     </div>
   </div>
 
@@ -2264,7 +2359,22 @@ footer.m-footer{
     <div class="d-pg-title">Sync <em>Licensing</em></div>
     <div class="d-pg-sub">License your music for film, TV, advertising, and games.</div>
     <div class="d-pg-rule"></div>
-    <div class="d-sbox"><div class="d-cs-wrap"><div class="d-cs-badge">Coming Soon</div><div class="d-cs-title">Sync licensing is<br><em>on its way.</em></div><div class="d-cs-sub">We're building a direct pipeline to music supervisors. Pitch your catalog for film, TV, ads, and games.</div><label class="field-label" style="text-align:left">Notify me when it launches</label><input class="field" type="email" placeholder="your@email.com" style="margin-bottom:10px"><button class="btn-p">Notify me</button></div></div>
+    <div class="d-sbox"><div class="d-cs-wrap"><div class="d-cs-badge">Coming Soon</div><div class="d-cs-title">Sync licensing is<br><em>on its way.</em></div><div class="d-cs-sub">We're building a direct pipeline to music supervisors. Pitch your catalog for film, TV, ads, and games.</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:20px 0;text-align:center">
+        <div>
+          <div style="font-family:var(--sans);font-size:14px;font-weight:600;color:var(--black);margin-bottom:4px">Film & TV</div>
+          <div style="font-family:var(--sans);font-size:11px;font-weight:300;color:var(--muted);line-height:1.5">Place your music in shows, films, and documentaries.</div>
+        </div>
+        <div style="border-left:1px solid #E2E8F0;border-right:1px solid #E2E8F0;padding:0 8px">
+          <div style="font-family:var(--sans);font-size:14px;font-weight:600;color:var(--black);margin-bottom:4px">Advertising</div>
+          <div style="font-family:var(--sans);font-size:11px;font-weight:300;color:var(--muted);line-height:1.5">License tracks for commercials and brand campaigns.</div>
+        </div>
+        <div>
+          <div style="font-family:var(--sans);font-size:14px;font-weight:600;color:var(--black);margin-bottom:4px">Games</div>
+          <div style="font-family:var(--sans);font-size:11px;font-weight:300;color:var(--muted);line-height:1.5">Get featured in video games and interactive media.</div>
+        </div>
+      </div>
+      <label class="field-label" style="text-align:left">Notify me when it launches</label><input class="field" type="email" placeholder="your@email.com" style="margin-bottom:10px"><button class="btn-p">Notify me</button></div></div>
   </div>
 
   <!-- ── ARTIST PROFILE ── -->
@@ -2274,6 +2384,8 @@ footer.m-footer{
     <div class="d-pg-rule"></div>
     <form id="mob-profile-form" novalidate>
     <div class="d-form-card">
+      <label class="field-label">Artist / Stage Name *</label>
+      <input class="field" type="text" placeholder="Your performing name" id="mob-pf-stage-name" data-required="true" style="max-width:320px">
       <label class="field-label">PRO Affiliation *</label>
       <select class="field" style="-webkit-appearance:none" id="d-pro" data-required="true" onchange="dTogglePro(this.value)">
         <option value="" disabled selected>Select your PRO</option>
@@ -2302,8 +2414,12 @@ footer.m-footer{
         <option>United States</option><option>United Kingdom</option><option>Canada</option>
         <option>Australia</option><option>Germany</option><option>France</option>
         <option>Netherlands</option><option>Sweden</option><option>Norway</option>
+        <option>Denmark</option><option>Spain</option><option>Italy</option>
         <option>Israel</option><option>Japan</option><option>Brazil</option>
-        <option>South Korea</option><option>Mexico</option><option>Other</option>
+        <option>South Korea</option><option>Mexico</option><option>South Africa</option>
+        <option>Nigeria</option><option>New Zealand</option><option>Ireland</option>
+        <option>Belgium</option><option>Switzerland</option><option>Austria</option>
+        <option>Portugal</option><option>Poland</option><option>Other</option>
       </select>
       <label class="field-label">Address Line 1 *</label><input class="field" type="text" placeholder="Street address" id="mob-pf-addr1" data-required="true">
       <label class="field-label">Address Line 2 <span style="font-weight:300;font-size:10px;text-transform:none;letter-spacing:0;color:var(--muted-lt)">(optional)</span></label><input class="field" type="text" placeholder="Apt, suite, floor…" id="mob-pf-addr2">
@@ -4031,7 +4147,7 @@ function mobSaveProfile() {
 
   var storedArtist = JSON.parse(localStorage.getItem('dv_artist') || '{}');
   var data = {
-    stage_name: storedArtist.stage_name || storedArtist.name || '',
+    stage_name: (document.getElementById('mob-pf-stage-name').value || '').trim() || storedArtist.stage_name || storedArtist.name || '',
     dob: document.getElementById('mob-pf-dob').value,
     pro: document.getElementById('d-pro').value,
     ipi: document.getElementById('mob-pf-ipi').value.trim(),
