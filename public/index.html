@@ -4242,8 +4242,10 @@
     // Auto-hide the payout account card once it's been "ready" for > 1 day
     if (vm.state === 'ready' || vm.state === 'complete' || vm.isReady) {
       try {
-        if (!localStorage.getItem('dv_stripe_ready_at')) {
-          localStorage.setItem('dv_stripe_ready_at', String(Date.now()));
+        var stripeTs = localStorage.getItem('dv_stripe_ready_at');
+        if (!stripeTs || (Date.now() - Number(stripeTs)) < 120000) {
+          // Backdate — Stripe was likely ready before this code was deployed
+          localStorage.setItem('dv_stripe_ready_at', String(Date.now() - SETUP_HIDE_MS - 1));
         }
         var readyAt = Number(localStorage.getItem('dv_stripe_ready_at'));
         if (readyAt && (Date.now() - readyAt) > SETUP_HIDE_MS) {
@@ -4748,10 +4750,13 @@
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   var SETUP_HIDE_MS = 24 * 60 * 60 * 1000; // 1 day
   function markSetupComplete(kind) {
+    var alreadyDone = localStorage.getItem('dv_setup_' + kind) === '1';
     try { localStorage.setItem('dv_setup_' + kind, '1'); } catch(e) {}
     try {
       if (!localStorage.getItem('dv_setup_' + kind + '_at')) {
-        localStorage.setItem('dv_setup_' + kind + '_at', String(Date.now()));
+        // If it was already complete before we started tracking, backdate so it hides immediately
+        var ts = alreadyDone ? String(Date.now() - SETUP_HIDE_MS - 1) : String(Date.now());
+        localStorage.setItem('dv_setup_' + kind + '_at', ts);
       }
     } catch(e) {}
     // Cross out the alert when complete; auto-hide after 1 day
@@ -4779,7 +4784,13 @@
       // the profile is considered complete regardless of which device set it.
       var artist = {};
       try { artist = JSON.parse(localStorage.getItem('dv_artist') || '{}'); } catch(_){}
-      if ((artist && artist.stage_name && artist.pro) || localStorage.getItem('dv_setup_profile') === '1') {
+      var profileDone = (artist && artist.stage_name && artist.pro) || localStorage.getItem('dv_setup_profile') === '1';
+      // If profile is already done, ensure the timestamp is backdated so it hides
+      if (profileDone) {
+        var existingTs = localStorage.getItem('dv_setup_profile_at');
+        if (!existingTs || (Date.now() - Number(existingTs)) < 120000) {
+          try { localStorage.setItem('dv_setup_profile_at', String(Date.now() - SETUP_HIDE_MS - 1)); } catch(_){}
+        }
         markSetupComplete('profile');
       }
       // Note: we intentionally do NOT trust dv_setup_w9 from localStorage as a

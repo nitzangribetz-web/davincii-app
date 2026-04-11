@@ -2819,10 +2819,13 @@ function mobActivateDashboard(artist) {
 //   - song   : songs count > 0 from /api/songs (or dv_setup_song flag)
 var MOB_SETUP_HIDE_MS = 24 * 60 * 60 * 1000; // 1 day
 function mobMarkSetupComplete(kind) {
+  var alreadyDone = localStorage.getItem('dv_setup_' + kind) === '1';
   try { localStorage.setItem('dv_setup_' + kind, '1'); } catch(_){}
   try {
     if (!localStorage.getItem('dv_setup_' + kind + '_at')) {
-      localStorage.setItem('dv_setup_' + kind + '_at', String(Date.now()));
+      // If it was already complete before we started tracking, backdate so it hides immediately
+      var ts = alreadyDone ? String(Date.now() - MOB_SETUP_HIDE_MS - 1) : String(Date.now());
+      localStorage.setItem('dv_setup_' + kind + '_at', ts);
     }
   } catch(_){}
   // Cross out the alert when complete; auto-hide after 1 day
@@ -2849,7 +2852,15 @@ function mobApplySetupCompletion() {
   try { artist = JSON.parse(localStorage.getItem('dv_artist') || '{}'); } catch(_){}
   var profileDone = (artist && artist.stage_name && artist.pro)
     || localStorage.getItem('dv_setup_profile') === '1';
-  if (profileDone) mobMarkSetupComplete('profile');
+  // If profile is already done, ensure the timestamp is backdated so it hides
+  if (profileDone) {
+    var existingTs = localStorage.getItem('dv_setup_profile_at');
+    // If no timestamp, or timestamp is very recent (< 2 min = set by prior deploy), backdate it
+    if (!existingTs || (Date.now() - Number(existingTs)) < 120000) {
+      try { localStorage.setItem('dv_setup_profile_at', String(Date.now() - MOB_SETUP_HIDE_MS - 1)); } catch(_){}
+    }
+    mobMarkSetupComplete('profile');
+  }
   // Stripe is the only source of truth for W-9 / payouts — see mobLoadW9Status.
   if (localStorage.getItem('dv_setup_song') === '1') mobMarkSetupComplete('song');
   // Hide the entire Get Started box only when every setup item is
@@ -3173,8 +3184,10 @@ function mobRenderStripeStatus(d){
   // Auto-hide the payout account card once it's been "ready" for > 1 day
   if (vm.state === 'ready' || vm.state === 'complete' || vm.isReady) {
     try {
-      if (!localStorage.getItem('dv_stripe_ready_at')) {
-        localStorage.setItem('dv_stripe_ready_at', String(Date.now()));
+      var stripeTs = localStorage.getItem('dv_stripe_ready_at');
+      if (!stripeTs || (Date.now() - Number(stripeTs)) < 120000) {
+        // Backdate — Stripe was ready before this code was deployed
+        localStorage.setItem('dv_stripe_ready_at', String(Date.now() - MOB_SETUP_HIDE_MS - 1));
       }
       var readyAt = Number(localStorage.getItem('dv_stripe_ready_at'));
       if (readyAt && (Date.now() - readyAt) > MOB_SETUP_HIDE_MS) {
