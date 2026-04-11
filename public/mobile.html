@@ -2856,7 +2856,7 @@ function mobApplySetupCompletion() {
   if (profileDone) {
     var existingTs = localStorage.getItem('dv_setup_profile_at');
     // If no timestamp, or timestamp is very recent (< 2 min = set by prior deploy), backdate it
-    if (!existingTs || (Date.now() - Number(existingTs)) < 120000) {
+    if (!existingTs || (Date.now() - Number(existingTs)) < MOB_SETUP_HIDE_MS) {
       try { localStorage.setItem('dv_setup_profile_at', String(Date.now() - MOB_SETUP_HIDE_MS - 1)); } catch(_){}
     }
     mobMarkSetupComplete('profile');
@@ -3185,7 +3185,7 @@ function mobRenderStripeStatus(d){
   if (vm.state === 'ready' || vm.state === 'complete' || vm.isReady) {
     try {
       var stripeTs = localStorage.getItem('dv_stripe_ready_at');
-      if (!stripeTs || (Date.now() - Number(stripeTs)) < 120000) {
+      if (!stripeTs || (Date.now() - Number(stripeTs)) < MOB_SETUP_HIDE_MS) {
         // Backdate — Stripe was ready before this code was deployed
         localStorage.setItem('dv_stripe_ready_at', String(Date.now() - MOB_SETUP_HIDE_MS - 1));
       }
