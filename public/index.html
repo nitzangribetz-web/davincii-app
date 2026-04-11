@@ -4243,7 +4243,7 @@
     if (vm.state === 'ready' || vm.state === 'complete' || vm.isReady) {
       try {
         var stripeTs = localStorage.getItem('dv_stripe_ready_at');
-        if (!stripeTs || (Date.now() - Number(stripeTs)) < 120000) {
+        if (!stripeTs || (Date.now() - Number(stripeTs)) < SETUP_HIDE_MS) {
           // Backdate — Stripe was likely ready before this code was deployed
           localStorage.setItem('dv_stripe_ready_at', String(Date.now() - SETUP_HIDE_MS - 1));
         }
@@ -4788,7 +4788,7 @@
       // If profile is already done, ensure the timestamp is backdated so it hides
       if (profileDone) {
         var existingTs = localStorage.getItem('dv_setup_profile_at');
-        if (!existingTs || (Date.now() - Number(existingTs)) < 120000) {
+        if (!existingTs || (Date.now() - Number(existingTs)) < SETUP_HIDE_MS) {
           try { localStorage.setItem('dv_setup_profile_at', String(Date.now() - SETUP_HIDE_MS - 1)); } catch(_){}
         }
         markSetupComplete('profile');
