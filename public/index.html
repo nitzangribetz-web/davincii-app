@@ -4238,11 +4238,24 @@
   function renderStripeStatus(d){
     var box = document.getElementById('stripe-status-box');
     if(!box) return;
+    var vm = Dv.stripe.describeState(d);
+    // Auto-hide the payout account card once it's been "ready" for > 1 day
+    if (vm.state === 'ready' || vm.state === 'complete' || vm.isReady) {
+      try {
+        if (!localStorage.getItem('dv_stripe_ready_at')) {
+          localStorage.setItem('dv_stripe_ready_at', String(Date.now()));
+        }
+        var readyAt = Number(localStorage.getItem('dv_stripe_ready_at'));
+        if (readyAt && (Date.now() - readyAt) > SETUP_HIDE_MS) {
+          box.style.display = 'none';
+          return;
+        }
+      } catch(_){}
+    }
     // Only reveal the Stripe onboarding card when the artist has actually
     // picked Stripe as their payout method. selectPayout('stripe') is what
     // flips this visible; we don't force-show from the renderer.
     if (window.selectedPayoutMethod === 'stripe') box.style.display = 'block';
-    var vm = Dv.stripe.describeState(d);
 
     var badge = document.getElementById('stripe-status-badge');
     var label = document.getElementById('stripe-status-label');
@@ -4741,14 +4754,17 @@
         localStorage.setItem('dv_setup_' + kind + '_at', String(Date.now()));
       }
     } catch(e) {}
-    // Keep the row/alert crossed-out but visible — we no longer auto-hide
-    // individual items after a grace period. The whole Get Started box is
-    // hidden once every item is complete (see applySetupCompletion).
+    // Cross out the alert when complete; auto-hide after 1 day
     var alertEl = document.getElementById('setup-alert-' + kind);
     if (alertEl) {
-      alertEl.classList.add('completed');
-      var btnA = alertEl.querySelector('.setup-alert-btn');
-      if (btnA) btnA.disabled = true;
+      var completedAt = localStorage.getItem('dv_setup_' + kind + '_at');
+      if (completedAt && (Date.now() - Number(completedAt)) > SETUP_HIDE_MS) {
+        alertEl.style.display = 'none';
+      } else {
+        alertEl.classList.add('completed');
+        var btnA = alertEl.querySelector('.setup-alert-btn');
+        if (btnA) btnA.disabled = true;
+      }
     }
     var row = document.getElementById('setup-row-' + kind);
     if (row) {
@@ -5314,6 +5330,16 @@
         <div class="page-sub">Here's your publishing overview.</div>
         <div class="page-rule"></div>
 
+        <!-- Setup alert — crossed out when complete, auto-hidden after 1 day -->
+        <div class="setup-alert" id="setup-alert-profile">
+          <div class="setup-alert-icon">!</div>
+          <div class="setup-alert-content">
+            <div class="setup-alert-title">Complete your artist profile</div>
+            <div class="setup-alert-body">Add your PRO affiliation, IPI number, and mailing address so we can begin registering your catalog.</div>
+          </div>
+          <button class="setup-alert-btn" onclick="showDashPage('profile')">Complete Profile →</button>
+        </div>
+
         <div class="bal-card" style="display:flex;align-items:flex-end;justify-content:space-between;">
           <div style="position:relative;z-index:1">
             <div class="bal-label">Available Balance</div>
@@ -5866,6 +5892,27 @@
             <button class="btn-withdraw" onclick="openWithdrawModal()">
               Withdraw →
             </button>
+          </div>
+        </div>
+
+        <!-- ── STRIPE CONNECT STATUS CARD ── -->
+        <div class="sbox" id="stripe-status-box" style="margin-bottom:22px;display:none">
+          <div class="sbox-head">
+            <div>
+              <div class="sbox-title">Payout Account</div>
+              <div class="sbox-sub" id="stripe-status-sub">Checking your payout account status…</div>
+            </div>
+            <div class="status-badge pending" id="stripe-status-badge">
+              <span class="status-dot"></span>
+              <span id="stripe-status-label">Loading</span>
+            </div>
+          </div>
+          <div class="sbox-body" style="padding:22px 24px">
+            <div style="font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:300;color:#475569;line-height:1.6;margin-bottom:16px" id="stripe-status-desc">
+              Connect a payout account to receive your royalties via direct deposit.
+            </div>
+            <div id="stripe-status-reqs" style="display:none;font-family:'DM Sans',sans-serif;font-size:12.5px;color:#475569;margin-bottom:14px"></div>
+            <button id="stripe-status-action" style="display:none;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.10em;text-transform:uppercase;padding:10px 22px;background:#635BFF;color:#fff;border:none;border-radius:8px;cursor:pointer;box-shadow:0 0 22px rgba(99,91,255,0.32);transition:background 0.2s, box-shadow 0.2s" onmouseover="this.style.background='#5148d8';this.style.boxShadow='0 0 28px rgba(99,91,255,0.42)'" onmouseout="this.style.background='#635BFF';this.style.boxShadow='0 0 22px rgba(99,91,255,0.32)'" onclick="stripeConnectStart()">Manage payout account</button>
           </div>
         </div>
 
