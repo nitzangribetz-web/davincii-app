@@ -1041,13 +1041,16 @@ footer.m-footer{
   border-radius:10px;padding:14px;
   box-shadow:0 1px 4px rgba(0,0,0,0.04);
 }
-.d-stat-num{
-  font-family:var(--serif);font-weight:300;font-size:24px;
-  letter-spacing:-0.02em;color:var(--black);line-height:1;margin-bottom:3px;
-}
 .d-stat-lbl{
   font-family:var(--sans);font-size:9px;font-weight:600;
-  letter-spacing:0.10em;text-transform:uppercase;color:var(--muted-lt);
+  letter-spacing:0.10em;text-transform:uppercase;color:var(--muted-lt);margin-bottom:10px;
+}
+.d-stat-num{
+  font-family:var(--serif);font-weight:300;font-size:24px;
+  letter-spacing:-0.02em;color:var(--black);line-height:1;
+}
+.d-stat-sub{
+  font-family:var(--sans);font-size:10px;color:var(--muted-lt);margin-top:5px;
 }
 
 /* sbox */
@@ -2010,37 +2013,46 @@ footer.m-footer{
       <div class="d-alert-icon">!</div>
       <div style="flex:1;min-width:0">
         <div class="d-alert-title">Complete your artist profile</div>
-        <div class="d-alert-sub">Add your PRO affiliation and IPI number to begin registering.</div>
-        <button class="d-alert-btn" onclick="showDP('profile')">Complete →</button>
+        <div class="d-alert-sub">Add your PRO affiliation, IPI number, and mailing address so we can begin registering your catalog.</div>
+        <button class="d-alert-btn" onclick="showDP('profile')">Complete Profile →</button>
       </div>
     </div>
-    <div class="d-alert" id="mob-alert-w9" style="margin-bottom:16px">
-      <div class="d-alert-icon" style="font-size:11px;font-weight:700">$</div>
-      <div style="flex:1;min-width:0">
-        <div class="d-alert-title">Set up payouts (2 min)</div>
-        <div class="d-alert-sub">Davincii uses Stripe to pay artists worldwide. You'll create a free Stripe account and complete your tax info in one step — no separate W-9 form needed.</div>
-        <button class="d-alert-btn" onclick="showDP('payouts')">Set up payouts →</button>
+    <div class="d-bal" style="display:flex;align-items:flex-end;justify-content:space-between;">
+      <div>
+        <div class="d-bal-lbl">Available Balance</div>
+        <div style="display:flex;align-items:baseline;gap:12px">
+          <div class="d-bal-amt"><span class="d-cs">$</span>0.00</div>
+          <div class="d-bal-pending">+ <span style="font-family:var(--sans);font-weight:400;">$</span>0.00 pending</div>
+        </div>
+        <div class="d-bal-note">Next distribution: Q2 2025</div>
       </div>
-    </div>
-    <div class="d-bal">
-      <div class="d-bal-lbl">Available Balance</div>
-      <div class="d-bal-amt"><span class="d-cs">$</span>0.00</div>
-      <div class="d-bal-note">Next distribution: Q2 2025</div>
-      <div class="d-bal-row">
-        <span class="d-bal-pending">+ $0.00 pending</span>
+      <div style="flex-shrink:0">
         <button class="d-withdraw" onclick="showDP('payouts')">Withdraw →</button>
       </div>
     </div>
     <div class="d-stats">
-      <div class="d-stat"><div class="d-stat-num" id="mob-stat-songs">0</div><div class="d-stat-lbl">Songs</div></div>
-      <div class="d-stat"><div class="d-stat-num"><span class="d-cs">$</span>0</div><div class="d-stat-lbl">Collected</div></div>
-      <div class="d-stat"><div class="d-stat-num" id="mob-stat-pro">—</div><div class="d-stat-lbl">PRO</div></div>
+      <div class="d-stat">
+        <div class="d-stat-lbl">Songs Registered</div>
+        <div class="d-stat-num" id="mob-stat-songs">0</div>
+        <div class="d-stat-sub">Across all major platforms</div>
+      </div>
+      <div class="d-stat">
+        <div class="d-stat-lbl">Total Collected</div>
+        <div class="d-stat-num"><span class="d-cs">$</span>0</div>
+        <div class="d-stat-sub">Performance + mechanicals</div>
+      </div>
+      <div class="d-stat">
+        <div class="d-stat-lbl">PRO Affiliation</div>
+        <div class="d-stat-num" id="mob-stat-pro" style="font-size:22px;color:#64748B">—</div>
+        <div class="d-stat-sub">Set in profile</div>
+      </div>
     </div>
     <div class="d-sbox" id="mob-get-started-box">
-      <div class="d-sbox-hd"><div><div class="d-sbox-title">Get started</div><div class="d-sbox-sub">Complete your setup</div></div></div>
-      <div class="d-setup-row" id="mob-setup-row-profile"><span class="d-setup-lbl">Complete artist profile</span><button class="d-setup-cta" onclick="showDP('profile')">Complete →</button></div>
-      <div class="d-setup-row" id="mob-setup-row-w9"><span class="d-setup-lbl">Set up payouts &amp; tax info</span><button class="d-setup-cta" onclick="showDP('payouts')">Set up →</button></div>
-      <div class="d-setup-row" id="mob-setup-row-song"><span class="d-setup-lbl">Register first composition</span><button class="d-setup-cta" onclick="showDP('add-song')">Register →</button></div>
+      <div class="d-sbox-hd"><div><div class="d-sbox-title">Get started</div><div class="d-sbox-sub">Complete your setup to start collecting</div></div></div>
+      <div style="padding:4px 16px 8px">
+        <div class="d-setup-row" id="mob-setup-row-profile"><span class="d-setup-lbl">Complete your artist profile</span><button class="d-setup-cta" onclick="showDP('profile')">Complete →</button></div>
+        <div class="d-setup-row" id="mob-setup-row-song" style="border-bottom:none"><span class="d-setup-lbl">Register your first composition</span><button class="d-setup-cta" onclick="showDP('add-song')">Register →</button></div>
+      </div>
     </div>
   </div>
 
@@ -2199,10 +2211,10 @@ footer.m-footer{
   <!-- ── PAYOUTS ── -->
   <div class="dash-page d-content" id="dp-payouts" style="display:none">
     <div class="d-pg-title">Payments &amp; <em>Payouts</em></div>
-    <div class="d-pg-sub">Withdraw royalties and manage tax information.</div>
+    <div class="d-pg-sub">Withdraw your royalties and manage your tax information.</div>
     <div class="d-pg-rule"></div>
     <div class="d-bal" style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:14px">
-      <div><div class="d-bal-lbl">Available Balance</div><div class="d-bal-amt"><span class="d-cs">$</span>0.00</div><div class="d-bal-note">Min. withdrawal: $50</div></div>
+      <div><div class="d-bal-lbl">Available Balance</div><div class="d-bal-amt"><span class="d-cs">$</span>0.00</div><div class="d-bal-note">Next distribution: Q2 2025 · Min. withdrawal: <span class="d-cs">$</span>50</div></div>
       <button class="d-withdraw" onclick="openMobWithdraw()">Withdraw →</button>
     </div>
 
@@ -2223,7 +2235,7 @@ footer.m-footer{
     </div>
 
     <div class="d-sbox" style="margin-bottom:12px">
-      <div class="d-sbox-hd"><div><div class="d-sbox-title">Select Payout Method</div><div class="d-sbox-sub">Choose how to receive royalties</div></div></div>
+      <div class="d-sbox-hd"><div><div class="d-sbox-title">Select Payout Method</div><div class="d-sbox-sub">Choose how you'd like to receive your royalties</div></div></div>
       <div style="padding:14px 16px">
         <label class="d-pay-card selected" id="d-stripe" onclick="dPayout('stripe')">
           <input type="radio" name="d-pm" value="stripe" checked>
@@ -2239,12 +2251,8 @@ footer.m-footer{
       </div>
     </div>
     <div class="d-sbox" style="margin-bottom:12px">
-      <div class="d-sbox-hd"><div><div class="d-sbox-title">Tax Information</div><div class="d-sbox-sub">Required for 1099 issuance</div></div><span class="d-pill error" id="mob-tax-status-badge"><span class="d-pill-dot"></span><span id="mob-tax-status-text">Not Started</span></span></div>
-      <div style="padding:14px 16px"><div id="mob-tax-card-title" style="font-family:var(--sans);font-size:13.5px;font-weight:500;color:var(--black);margin-bottom:4px">Complete your tax form (1 min)</div><div id="mob-tax-card-desc" style="font-family:var(--sans);font-size:12.5px;font-weight:300;color:var(--muted);line-height:1.6;margin-bottom:14px">U.S. persons complete a W-9. Non-U.S. persons complete a W-8BEN. Separate from how you choose to receive payouts.</div><button class="btn-s" style="max-width:190px" id="mob-tax-card-action" onclick="mobStartTaxForm()">Complete Tax Form</button></div>
-    </div>
-    <div class="d-sbox" style="margin-bottom:12px">
-      <div class="d-sbox-hd"><div><div class="d-sbox-title">Payout Method</div><div class="d-sbox-sub">Choose how you receive royalties</div></div></div>
-      <div id="mob-payout-method-list" style="padding:14px 16px;display:grid;gap:10px"></div>
+      <div class="d-sbox-hd"><div><div class="d-sbox-title">Tax Information</div><div class="d-sbox-sub">Required so we can pay you and issue a 1099 at year-end</div></div><span class="d-pill error" id="mob-tax-status-badge"><span class="d-pill-dot"></span><span id="mob-tax-status-text">Not Started</span></span></div>
+      <div style="padding:14px 16px"><div id="mob-tax-card-title" style="font-family:var(--sans);font-size:13.5px;font-weight:600;color:var(--black);margin-bottom:4px;letter-spacing:-0.01em">Complete your tax form (1 min)</div><div id="mob-tax-card-desc" style="font-family:var(--sans);font-size:12.5px;font-weight:300;color:var(--muted);line-height:1.6;margin-bottom:14px">U.S. persons complete a W-9. Non-U.S. persons complete a W-8BEN. Davincii uses your tax form to issue a 1099 at year-end — separate from how you choose to receive payouts.</div><button class="btn-s" style="max-width:190px" id="mob-tax-card-action" onclick="mobStartTaxForm()">Complete Tax Form</button></div>
     </div>
     <div class="d-sbox"><div class="d-sbox-hd"><div><div class="d-sbox-title">Payout History</div></div></div><div class="d-empty"><div class="d-empty-title">No payouts yet.</div><div class="d-empty-sub">Payouts are issued each quarter after royalties are collected and distributed. Your history will appear here after your first payment.</div></div></div>
   </div>
