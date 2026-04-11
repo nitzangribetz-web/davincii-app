@@ -2009,6 +2009,15 @@ footer.m-footer{
     <div class="d-pg-title" id="mob-dash-greeting">Good morning, <em id="mob-greeting-name">—</em></div>
     <div class="d-pg-sub">Here's your publishing overview.</div>
     <div class="d-pg-rule"></div>
+    <!-- Setup alert — crossed out when complete, auto-hidden after 1 day -->
+    <div class="d-alert" id="mob-alert-profile">
+      <div class="d-alert-icon">!</div>
+      <div style="flex:1;min-width:0">
+        <div class="d-alert-title">Complete your artist profile</div>
+        <div class="d-alert-sub">Add your PRO affiliation, IPI number, and mailing address so we can begin registering your catalog.</div>
+        <button class="d-alert-btn" onclick="showDP('profile')">Complete Profile →</button>
+      </div>
+    </div>
     <div class="d-bal" style="display:flex;align-items:flex-end;justify-content:space-between;">
       <div>
         <div class="d-bal-lbl">Available Balance</div>
@@ -2211,7 +2220,23 @@ footer.m-footer{
     </div>
 
       <div style="padding:14px 16px">
-      <div class="d-sbox" style="margin-bottom:12px">
+      <!-- ── STRIPE CONNECT STATUS ── -->
+    <div class="d-sbox" id="m-stripe-status-box" style="margin-bottom:12px;display:none">
+      <div class="d-sbox-hd">
+        <div>
+          <div class="d-sbox-title">Payout Account</div>
+          <div class="d-sbox-sub" id="m-stripe-status-sub">Checking status…</div>
+        </div>
+        <span class="d-pill pending" id="m-stripe-status-badge"><span class="d-pill-dot"></span><span id="m-stripe-status-label">Loading</span></span>
+      </div>
+      <div style="padding:14px 16px">
+        <div id="m-stripe-status-desc" style="font-family:var(--sans);font-size:12.5px;font-weight:300;color:var(--muted);line-height:1.65;margin-bottom:12px">Connect a payout account to receive your royalties.</div>
+        <div id="m-stripe-status-reqs" style="display:none;font-family:var(--sans);font-size:11.5px;color:var(--muted);margin-bottom:12px"></div>
+        <button id="m-stripe-status-action" style="display:none;max-width:220px;width:100%;font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:12px 20px;background:#635BFF;color:#fff;border:none;border-radius:10px;cursor:pointer;box-shadow:0 4px 18px rgba(99,91,255,0.28)" onclick="mobStripeConnectStart()">Manage payout account</button>
+      </div>
+    </div>
+
+    <div class="d-sbox" style="margin-bottom:12px">
       <div class="d-sbox-hd"><div><div class="d-sbox-title">Select Payout Method</div><div class="d-sbox-sub">Choose how you'd like to receive your royalties</div></div></div>
       <div style="padding:14px 16px">
         <label class="d-pay-card selected" id="d-stripe" onclick="dPayout('stripe')">
@@ -2800,14 +2825,17 @@ function mobMarkSetupComplete(kind) {
       localStorage.setItem('dv_setup_' + kind + '_at', String(Date.now()));
     }
   } catch(_){}
-  // Keep the row/alert crossed-out but visible — we no longer auto-hide
-  // individual items after a grace period. The whole Get Started box is
-  // hidden once every item is complete (see applySetupCompletion).
+  // Cross out the alert when complete; auto-hide after 1 day
   var alertEl = document.getElementById('mob-alert-' + kind);
   if (alertEl) {
-    alertEl.classList.add('completed');
-    var btnA = alertEl.querySelector('.d-alert-btn, button');
-    if (btnA) btnA.disabled = true;
+    var completedAt = localStorage.getItem('dv_setup_' + kind + '_at');
+    if (completedAt && (Date.now() - Number(completedAt)) > MOB_SETUP_HIDE_MS) {
+      alertEl.style.display = 'none';
+    } else {
+      alertEl.classList.add('completed');
+      var btnA = alertEl.querySelector('.d-alert-btn, button');
+      if (btnA) btnA.disabled = true;
+    }
   }
   var rowEl = document.getElementById('mob-setup-row-' + kind);
   if (rowEl) {
@@ -3141,8 +3169,21 @@ function mobGoogleBack() {
 function mobRenderStripeStatus(d){
   var box = document.getElementById('m-stripe-status-box');
   if(!box) return;
-  box.style.display = 'block';
   var vm = Dv.stripe.describeState(d);
+  // Auto-hide the payout account card once it's been "ready" for > 1 day
+  if (vm.state === 'ready' || vm.state === 'complete' || vm.isReady) {
+    try {
+      if (!localStorage.getItem('dv_stripe_ready_at')) {
+        localStorage.setItem('dv_stripe_ready_at', String(Date.now()));
+      }
+      var readyAt = Number(localStorage.getItem('dv_stripe_ready_at'));
+      if (readyAt && (Date.now() - readyAt) > MOB_SETUP_HIDE_MS) {
+        box.style.display = 'none';
+        return;
+      }
+    } catch(_){}
+  }
+  box.style.display = 'block';
 
   var badge = document.getElementById('m-stripe-status-badge');
   var label = document.getElementById('m-stripe-status-label');
