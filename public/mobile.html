@@ -1115,6 +1115,8 @@ footer.m-footer{
 .d-pill.active{background:rgba(22,163,74,0.10);color:var(--green)}
 .d-pill.pending{background:rgba(245,158,11,0.10);color:#D97706}
 .d-pill.processing{background:rgba(34,96,204,0.10);color:var(--blue)}
+.d-pill.success{background:rgba(22,163,74,0.10);color:var(--green)}
+.d-pill.error{background:rgba(239,68,68,0.10);color:#DC2626}
 
 /* Toggle */
 .d-toggle{position:relative;width:40px;height:22px;flex-shrink:0}
@@ -3231,6 +3233,12 @@ function mobRenderStripeStatus(d){
 function mobLoadStripeStatus(){
   var box = document.getElementById('m-stripe-status-box');
   if(!box) return;
+  // If already marked ready and timestamp is old enough, skip entirely
+  var stripeTs = localStorage.getItem('dv_stripe_ready_at');
+  if (stripeTs && (Date.now() - Number(stripeTs)) > MOB_SETUP_HIDE_MS) {
+    box.style.display = 'none';
+    return;
+  }
   box.style.display = 'block';
   var lbl = document.getElementById('m-stripe-status-label');
   if(lbl) lbl.textContent = 'Loading';
@@ -3267,7 +3275,17 @@ function mobRenderTaxStatus(d){
   if (text)  text.textContent = vm.label;
   if (title) title.textContent = vm.isComplete ? (vm.formLabel + ' on file') : 'Complete your tax form (1 min)';
   if (desc)  desc.textContent  = vm.desc;
-  if (btn)   btn.textContent   = vm.actionText;
+  if (btn) {
+    btn.textContent = vm.actionText;
+    if (vm.isComplete) {
+      btn.className = 'btn-s btn-s-outline';
+    } else {
+      btn.className = 'btn-s';
+    }
+  }
+  // Update sub text based on state
+  var sub = document.querySelector('#mob-tax-status-badge')?.closest('.d-sbox-hd')?.querySelector('.d-sbox-sub');
+  if (sub) sub.textContent = vm.sub;
 }
 function mobLoadTaxStatus(){
   if (!window.Dv || !Dv.tax) return;
