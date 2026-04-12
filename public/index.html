@@ -4243,20 +4243,10 @@
     var box = document.getElementById('stripe-status-box');
     if(!box) return;
     var vm = Dv.stripe.describeState(d);
-    // Auto-hide the payout account card once it's been "ready" for > 1 day
+    // Hide the payout account card once Stripe is fully ready
     if (vm.state === 'ready' || vm.state === 'complete' || vm.isReady) {
-      try {
-        var stripeTs = localStorage.getItem('dv_stripe_ready_at');
-        if (!stripeTs || (Date.now() - Number(stripeTs)) < SETUP_HIDE_MS) {
-          // Backdate — Stripe was likely ready before this code was deployed
-          localStorage.setItem('dv_stripe_ready_at', String(Date.now() - SETUP_HIDE_MS - 1));
-        }
-        var readyAt = Number(localStorage.getItem('dv_stripe_ready_at'));
-        if (readyAt && (Date.now() - readyAt) > SETUP_HIDE_MS) {
-          box.style.display = 'none';
-          return;
-        }
-      } catch(_){}
+      box.style.display = 'none';
+      return;
     }
     // Only reveal the Stripe onboarding card when the artist has actually
     // picked Stripe as their payout method. selectPayout('stripe') is what
@@ -4298,12 +4288,6 @@
   function loadStripeStatus(){
     var box = document.getElementById('stripe-status-box');
     if(!box) return;
-    // If already marked ready and timestamp is old enough, skip entirely
-    var stripeTs = localStorage.getItem('dv_stripe_ready_at');
-    if (stripeTs && (Date.now() - Number(stripeTs)) > SETUP_HIDE_MS) {
-      box.style.display = 'none';
-      return;
-    }
     // Callers (selectPayout('stripe')) are responsible for revealing the box.
     document.getElementById('stripe-status-label').textContent = 'Loading';
     Dv.stripe.fetchStatus().then(renderStripeStatus);
