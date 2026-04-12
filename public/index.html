@@ -1570,6 +1570,10 @@
       background: rgba(220,38,38,0.08);
       color: #DC2626; border: 1px solid rgba(220,38,38,0.20);
     }
+    .status-badge.success {
+      background: rgba(22,163,74,0.08);
+      color: #16A34A; border: 1px solid rgba(22,163,74,0.20);
+    }
     .status-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
 
     /* Profile form */
@@ -4294,6 +4298,12 @@
   function loadStripeStatus(){
     var box = document.getElementById('stripe-status-box');
     if(!box) return;
+    // If already marked ready and timestamp is old enough, skip entirely
+    var stripeTs = localStorage.getItem('dv_stripe_ready_at');
+    if (stripeTs && (Date.now() - Number(stripeTs)) > SETUP_HIDE_MS) {
+      box.style.display = 'none';
+      return;
+    }
     // Callers (selectPayout('stripe')) are responsible for revealing the box.
     document.getElementById('stripe-status-label').textContent = 'Loading';
     Dv.stripe.fetchStatus().then(renderStripeStatus);
@@ -4330,7 +4340,19 @@
     if (text)  text.textContent = vm.label;
     if (title) title.textContent = vm.isComplete ? (vm.formLabel + ' on file') : 'Complete your tax form (1 min)';
     if (desc)  desc.textContent  = vm.desc;
-    if (btn)   btn.textContent   = vm.actionText;
+    if (btn) {
+      btn.textContent = vm.actionText;
+      if (vm.isComplete) {
+        btn.className = 'btn-ghost-dark';
+        btn.style.opacity = '0.7';
+      } else {
+        btn.className = 'btn-ghost-dark';
+        btn.style.opacity = '1';
+      }
+    }
+    // Update sub text based on state
+    var sub = badge ? badge.closest('.sbox-head').querySelector('.sbox-sub') : null;
+    if (sub) sub.textContent = vm.sub;
   }
   function loadTaxStatus(){
     if (!window.Dv || !Dv.tax) return;
