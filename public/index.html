@@ -4827,9 +4827,12 @@
     } catch(e) {}
   }
 
+  var _profileSaving = false;
   function saveProfile() {
     var form = document.getElementById('profile-form');
     if (!validateFields(form)) return;
+    if (_profileSaving) return;
+    _profileSaving = true;
 
     var data = {
       stage_name: document.getElementById('pf-stage-name').value.trim(),
@@ -4854,6 +4857,7 @@
     })
     .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
     .then(function(res) {
+      _profileSaving = false;
       if (res.ok) {
         // Update stored artist with new stage_name
         var stored = JSON.parse(localStorage.getItem('dv_artist') || '{}');
@@ -4869,7 +4873,7 @@
         showToast(res.data.error || 'Failed to save profile', 'error');
       }
     })
-    .catch(function() { showToast('Network error — please try again', 'error'); });
+    .catch(function() { _profileSaving = false; showToast('Network error — please try again', 'error'); });
   }
 
   function discardProfile() {

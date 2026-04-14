@@ -4072,9 +4072,12 @@ document.addEventListener('change', function(e) {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // PROFILE SAVE
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+var _mobProfileSaving = false;
 function mobSaveProfile() {
   var form = document.getElementById('mob-profile-form');
   if (!mobValidateFields(form)) return;
+  if (_mobProfileSaving) return;
+  _mobProfileSaving = true;
 
   var storedArtist = JSON.parse(localStorage.getItem('dv_artist') || '{}');
   var data = {
@@ -4100,6 +4103,7 @@ function mobSaveProfile() {
   })
   .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
   .then(function(res) {
+    _mobProfileSaving = false;
     if (res.ok) {
       // Update cached artist so the setup-completion check picks it up
       try {
@@ -4117,7 +4121,7 @@ function mobSaveProfile() {
       showToast(res.data.error || 'Failed to save profile', 'error');
     }
   })
-  .catch(function() { showToast('Network error — please try again', 'error'); });
+  .catch(function() { _mobProfileSaving = false; showToast('Network error — please try again', 'error'); });
 }
 
 function mobDiscardProfile() {
