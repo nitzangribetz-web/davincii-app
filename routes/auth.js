@@ -540,6 +540,22 @@ router.get('/me', require('../middleware/auth'), async (req, res) => {
   }
 });
 
+// Dedup guard: prevent duplicate profile-update emails within a short window
+const _profileEmailSent = new Map();
+function shouldSendProfileEmail(artistId) {
+  const now = Date.now();
+  const last = _profileEmailSent.get(artistId);
+  if (last && now - last < 30000) return false; // 30s cooldown
+  _profileEmailSent.set(artistId, now);
+  // Cleanup old entries every 100 inserts
+  if (_profileEmailSent.size > 200) {
+    for (const [k, v] of _profileEmailSent) {
+      if (now - v > 60000) _profileEmailSent.delete(k);
+    }
+  }
+  return true;
+}
+
 // POST /api/auth/profile — save artist profile from dashboard
 router.post('/profile', require('../middleware/auth'), async (req, res) => {
   const isFormSubmit = req.is('application/x-www-form-urlencoded');
@@ -573,8 +589,8 @@ router.post('/profile', require('../middleware/auth'), async (req, res) => {
        addressStreet || null, city || null, state || null, postal || null, country || null, req.artist.id]
     );
 
-    // Send profile update notification to admin
-    try {
+    // Send profile update notification to admin (deduped — skip if already sent recently)
+    if (shouldSendProfileEmail(req.artist.id)) try {
       const resend = new Resend(process.env.RESEND_API_KEY);
       const artist = (await pool.query('SELECT name, email FROM artists WHERE id = $1', [req.artist.id])).rows[0];
       await resend.emails.send({

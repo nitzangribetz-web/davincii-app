@@ -364,8 +364,10 @@ select.field:invalid { color: #94A3B8; }
 
   // Form submission with Authorization header
   var form = document.getElementById('details-form');
+  var _detailsSaving = false;
   form.addEventListener('submit', function(e) {
     e.preventDefault();
+    if (_detailsSaving) return;
 
     // If "Other" PRO is selected, use the typed value
     if (proSelect.value === 'Other' && proOtherInput.value.trim()) {
@@ -391,11 +393,15 @@ select.field:invalid { color: #94A3B8; }
 
     var data = new URLSearchParams(formData);
 
+    _detailsSaving = true;
+    var submitBtn = form.querySelector('button[type="submit"]');
+    if (submitBtn) submitBtn.disabled = true;
+
     fetch('/api/auth/profile', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        
+
       },
       body: data.toString()
     })
@@ -411,6 +417,8 @@ select.field:invalid { color: #94A3B8; }
         var el = document.getElementById('details-error');
         el.textContent = data.error;
         el.classList.add('visible');
+        _detailsSaving = false;
+        if (submitBtn) submitBtn.disabled = false;
       } else if (data && data.success) {
         var artistStr = localStorage.getItem('dv_artist');
         var qs = '?token=' + encodeURIComponent(token);
@@ -422,6 +430,8 @@ select.field:invalid { color: #94A3B8; }
       var el = document.getElementById('details-error');
       el.textContent = 'Connection error. Please try again.';
       el.classList.add('visible');
+      _detailsSaving = false;
+      if (submitBtn) submitBtn.disabled = false;
     });
   });
 })();
