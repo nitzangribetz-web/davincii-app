@@ -28,18 +28,20 @@ PROMPT_HASH=$(echo -n "$DESCRIPTION" | shasum -a 256 | cut -d' ' -f1)
 
 # --- Check local cache ---
 if [[ -f "$CACHE_FILE" ]]; then
-  CACHED=$(cat "$CACHE_FILE" | python3 -c "
-import sys, json
+  CACHED=$(python3 <<PYEOF
+import json
 try:
-    cache = json.load(sys.stdin)
-    entry = cache.get('$PROMPT_HASH')
-    if entry and entry.get('approved'):
-        print('hit')
+    with open("${CACHE_FILE}", "r") as f:
+        cache = json.load(f)
+    entry = cache.get("${PROMPT_HASH}")
+    if entry and entry.get("approved"):
+        print("hit")
     else:
-        print('miss')
+        print("miss")
 except:
-    print('miss')
-" 2>/dev/null || echo "miss")
+    print("miss")
+PYEOF
+)
 
   if [[ "$CACHED" == "hit" ]]; then
     echo "Auto-approved from cache"
@@ -50,19 +52,28 @@ fi
 # --- Create approval request via edge function ---
 echo "Requesting approval: $DESCRIPTION"
 
+BODY=$(python3 <<PYEOF
+import json, os
+desc = """${DESCRIPTION}"""
+ctx_raw = """${CONTEXT}"""
+try:
+    ctx = json.loads(ctx_raw)
+except:
+    ctx = {}
+print(json.dumps({
+    "description": desc,
+    "context": ctx,
+    "prompt_hash": "${PROMPT_HASH}",
+    "source": "${APPROVAL_SOURCE:-claude-code}"
+}))
+PYEOF
+)
+
 RESPONSE=$(curl -s -X POST \
   "${SUPABASE_FUNCTION_URL}/create-approval-request" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
-  -d "$(python3 -c "
-import json, sys
-print(json.dumps({
-    'description': $(python3 -c "import json; print(json.dumps('$DESCRIPTION'))"),
-    'context': $CONTEXT,
-    'prompt_hash': '$PROMPT_HASH',
-    'source': '${APPROVAL_SOURCE:-claude-code}'
-}))
-")")
+  -d "$BODY")
 
 REQUEST_ID=$(echo "$RESPONSE" | python3 -c "import sys,json; print(json.load(sys.stdin).get('id',''))" 2>/dev/null)
 
@@ -99,26 +110,20 @@ except:
 
     # Cache the approval
     mkdir -p "$(dirname "$CACHE_FILE")"
-    if [[ -f "$CACHE_FILE" ]]; then
-      python3 -c "
-import json
+    python3 <<PYEOF
+import json, os
+cache_file = "${CACHE_FILE}"
+prompt_hash = "${PROMPT_HASH}"
+desc = """${DESCRIPTION}"""
 try:
-    with open('$CACHE_FILE', 'r') as f:
+    with open(cache_file, 'r') as f:
         cache = json.load(f)
 except:
     cache = {}
-cache['$PROMPT_HASH'] = {'approved': True, 'description': $(python3 -c "import json; print(json.dumps('$DESCRIPTION'))")}
-with open('$CACHE_FILE', 'w') as f:
+cache[prompt_hash] = {"approved": True, "description": desc}
+with open(cache_file, 'w') as f:
     json.dump(cache, f, indent=2)
-"
-    else
-      python3 -c "
-import json
-cache = {'$PROMPT_HASH': {'approved': True, 'description': $(python3 -c "import json; print(json.dumps('$DESCRIPTION'))")}}
-with open('$CACHE_FILE', 'w') as f:
-    json.dump(cache, f, indent=2)
-"
-    fi
+PYEOF
 
     exit 0
   elif [[ "$STATUS" == "denied" ]]; then
