@@ -1,0 +1,6 @@
+# Approval Gate Environment — copy to ~/.claude/approval-env and fill in values
+# This file is sourced by approval-gate.sh
+
+SUPABASE_URL=https://oyftfwbwtnnyyhudpbve.supabase.co
+SUPABASE_ANON_KEY=your-supabase-anon-key-here
+SUPABASE_FUNCTION_URL=https://oyftfwbwtnnyyhudpbve.supabase.co/functions/v1

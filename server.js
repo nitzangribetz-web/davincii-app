@@ -106,6 +106,7 @@ app.use('/api/tax', require('./routes/tax'));
 app.use('/api/payout-methods', require('./routes/payout-methods'));
 app.use('/api/passkeys', passkeyRoutes);
 app.use('/api/admin', require('./routes/admin'));
+app.use('/api/approvals', require('./routes/approvals'));
 
 // Serve standalone auth pages for clean URLs
 // Mobile gets SPA (mobile.html), desktop gets standalone pages (Safari credential autofill)
