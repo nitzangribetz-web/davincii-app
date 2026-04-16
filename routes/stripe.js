@@ -4,9 +4,10 @@ const router = express.Router();
 const pool = require('../db/pool');
 const auth = require('../middleware/auth');
 
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const stripeKey = process.env.STRIPE_SECRET_KEY;
+const stripe = stripeKey && stripeKey.startsWith('sk_') ? require('stripe')(stripeKey) : null;
 const { Resend } = require('resend');
-const APP_URL = process.env.APP_URL || 'https://davincii-app-production-89cc.up.railway.app';
+const APP_URL = process.env.APP_URL || 'https://davincii-app.onrender.com';
 const ADMIN_NOTIFY_EMAIL = process.env.ADMIN_NOTIFY_EMAIL || 'info@davincii.co';
 
 // Fire-and-forget admin email when an artist completes Stripe Connect
